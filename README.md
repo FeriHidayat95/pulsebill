@@ -3,8 +3,9 @@
 # PulseBill
 ### Autonomous Telecom Billing Engine, Mikrotik RouterOS Automation & Multi-Gateway Payment Orchestrator
 
+[![Live Demo](https://img.shields.io/badge/Live_Demo-Interactive_Preview-059669?style=for-the-badge&logo=google-chrome&logoColor=white)](https://ferihidayat95.github.io/pulsebill/)
 [![CI Pipeline](https://img.shields.io/badge/CI-Passing-brightgreen?style=for-the-badge&logo=githubactions&logoColor=white)](#)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](LICENSE)
+[![License: Portfolio-Only](https://img.shields.io/badge/License-Portfolio--Only-red?style=for-the-badge)](LICENSE)
 [![Docker Ready](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)](#)
 [![Node.js 20](https://img.shields.io/badge/Node.js-20.x-339933?style=for-the-badge&logo=node.js&logoColor=white)](#)
 [![RouterOS API](https://img.shields.io/badge/Mikrotik-RouterOS_v7-red?style=for-the-badge&logo=mikrotik&logoColor=white)](#)
