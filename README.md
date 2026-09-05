@@ -229,6 +229,40 @@ npm run dev
 
 ---
 
+## Engineering Decisions and Architecture Trade-offs
+
+### 1. Webhook Idempotency and Exactly-Once Execution
+- **Challenge:** Payment gateway webhooks (Stripe, Midtrans, Xendit) use retry protocols that can dispatch duplicate webhook POST requests during network latency or packet drops.
+- **Solution:** Every inbound webhook payload is hashed alongside its transaction ID and evaluated against a Redis key store with a 24-hour TTL (`SET key value NX EX 86400`). If an event hash already exists, the engine immediately responds with `200 OK` while halting downstream ledger writes and router dispatching, ensuring zero duplicate invoices or double-crediting.
+
+### 2. RouterOS API Sockets vs. SSH vs. SNMP
+- **Trade-off Analysis:** While SSH requires spawning a new child process for every router transaction (high CPU load under concurrency) and SNMP v2/v3 write is deprecated in modern RouterOS v7, the native RouterOS binary API protocol (`port 8728`) maintains persistent, duplex socket connections.
+- **Implementation:** PulseBill implements a connection pool with exponential backoff and jitter. Commands are serialized into byte arrays (`/ppp/secret/set =numbers=...`), allowing sub-15ms execution time for subscriber reactivation.
+
+### 3. Dual-Driver Database Architecture
+- **Flexibility:** PulseBill supports two distinct database drivers:
+  - **MySQL 8.0:** Production-grade partitioned relational store optimized for high-concurrency ledger writes.
+  - **SQLite 3:** Lightweight, zero-dependency embedded database allowing instant local trials, unit testing, and edge deployments without spinning up external database daemons.
+
+---
+
+## Automated Testing Suite
+
+PulseBill includes a native unit test suite testing critical financial and networking routines:
+
+```bash
+# Execute unit tests via Node.js native test runner
+npm test
+```
+
+The test runner covers:
+- Webhook signature hashing (HMAC SHA-256) and replay attack rejection.
+- Bandwidth rate-limit tokenization and RouterOS command generation.
+- TR-069 optical power threshold classification.
+
+---
+
 ## License
 
 Distributed under the MIT License. See [LICENSE](LICENSE) for details.
+
