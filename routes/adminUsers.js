@@ -1,9 +1,8 @@
-﻿const express = require('express');
+const express = require('express');
 const router = express.Router();
-const { adminAuth, onlyAdmin } = require('./adminAuth'); // Pagar Sultan tetap wajib
+const { adminAuth, onlyAdmin } = require('./adminAuth');
 const { getSetting } = require('../config/settingsManager');
 const userManager = require('../config/adminUserManager'); // ?? INI DIA JALUR SATU PINTUNYA
-
 // [READ] Halaman Daftar User
 router.get('/', adminAuth, onlyAdmin, async (req, res) => {
     try {
@@ -25,7 +24,6 @@ router.get('/', adminAuth, onlyAdmin, async (req, res) => {
         res.status(500).send('Database Error');
     }
 });
-
 // [CREATE] Tangkap Form Tambah User
 router.post('/add', adminAuth, onlyAdmin, async (req, res) => {
     try {
@@ -37,7 +35,6 @@ router.post('/add', adminAuth, onlyAdmin, async (req, res) => {
         res.status(500).send('Gagal Menyimpan Akun');
     }
 });
-
 // [UPDATE] Tangkap Form Edit User
 router.post('/edit', adminAuth, onlyAdmin, async (req, res) => {
     try {
@@ -48,13 +45,12 @@ router.post('/edit', adminAuth, onlyAdmin, async (req, res) => {
         res.status(500).send('Gagal Update Akun');
     }
 });
-
 // [DELETE] Tangkap Perintah Hapus
 router.get('/delete/:id', adminAuth, onlyAdmin, async (req, res) => {
     try {
         // Validasi lapis pertama di router
         if (req.params.id == 1) {
-            return res.send("<script>alert('SULTAN UTAMA tidak boleh dihapus!'); window.location.href='/admin/users';</script>");
+            return res.send("<script>alert('Primary administrator account cannot be deleted.'); window.location.href='/admin/users';</script>");
         }
         await userManager.deleteUser(req.params.id);
         res.redirect('/admin/users');
@@ -63,5 +59,4 @@ router.get('/delete/:id', adminAuth, onlyAdmin, async (req, res) => {
         res.status(500).send('Gagal Hapus Akun');
     }
 });
-
 module.exports = router;

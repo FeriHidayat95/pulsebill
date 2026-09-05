@@ -1,8 +1,6 @@
 const pool = require('./database'); 
 const { getDevices } = require('./genieacs'); 
-
 class DashboardManager {
-    // Fungsi Asli Bos
     formatBytes(bytes) {
         const b = Number(bytes) || 0; 
         if (b === 0) return '0 MB';
@@ -11,12 +9,9 @@ class DashboardManager {
         const i = Math.floor(Math.log(b) / Math.log(k));
         return parseFloat((b / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     }
-
-    // Fungsi Asli Bos
     formatCurrency(amount) {
         return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
     }
-
     async getDashboardStats() {
         try {
             // Semua proses berjalan serentak tanpa antre
@@ -28,7 +23,6 @@ class DashboardManager {
                     new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 3000))
                 ]).catch(() => []), 
                 
-                // 2. Kueri Raksasa Asli Bos
                 pool.query(`
                     SELECT 
                         (SELECT COUNT(*) FROM customers WHERE pppoe_username IS NOT NULL AND pppoe_username != '') as pppoe_total,
@@ -57,7 +51,6 @@ class DashboardManager {
                 // 5. Ambil Top User
                 pool.query(`SELECT username, SUM(acctinputoctets + acctoutputoctets) as total_bytes FROM radacct WHERE acctstarttime >= CURDATE() GROUP BY username ORDER BY total_bytes DESC LIMIT 5`)
             ]);
-
             // Olah Data GenieACS
             let genieacsTotal = 0, genieacsOnline = 0, genieacsOffline = 0;
             if (Array.isArray(genieDevices) && genieDevices.length > 0) {
@@ -66,12 +59,9 @@ class DashboardManager {
                 genieacsOnline = genieDevices.filter(dev => dev._lastInform && (now - new Date(dev._lastInform).getTime()) < 3600*1000).length;
                 genieacsOffline = genieacsTotal - genieacsOnline;
             }
-
             // Ekstrak Data SQL
             const stats = dbStatsResult[0][0] || {};
             const hotspotOffline = (stats.hotspot_total || 0) - (stats.hotspot_active || 0);
-
-            // Return Data Sesuai Permintaan EJS Bos
             return {
                 genieacsTotal, 
                 genieacsOnline, 
@@ -114,5 +104,4 @@ class DashboardManager {
         }
     }
 }
-
 module.exports = new DashboardManager();

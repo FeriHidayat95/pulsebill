@@ -1,7 +1,6 @@
 <%- include('partials/header') %>
 <%- include('partials/admin-header') %>
 <%- include('partials/admin-sidebar', { page: 'nas' }) %>
-
 <main class="p-4 sm:ml-64 pt-20 bg-gray-900 min-h-screen text-gray-300">
     
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 border-b border-gray-800 pb-4">
@@ -14,7 +13,6 @@
             <i class="bi bi-plus-circle me-2 text-lg"></i> TAMBAH ROUTER
         </button>
     </div>
-
     <div class="bg-gray-800 rounded-3xl shadow-2xl overflow-hidden border border-gray-700">
         <div class="p-4 bg-gray-900/50 border-b border-gray-700 flex justify-between items-center">
             <h5 class="font-black text-white text-xs uppercase tracking-widest flex items-center">
@@ -86,7 +84,6 @@
         </div>
     </div>
 </main>
-
 <div id="modalTambahNas" tabindex="-1" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
     <div class="bg-gray-800 w-full max-w-md rounded-3xl border border-gray-700 shadow-2xl overflow-hidden">
         <div class="p-5 bg-gray-900 border-b border-gray-800 flex justify-between items-center">
@@ -120,7 +117,6 @@
         </form>
     </div>
 </div>
-
 <div id="modalEditNas" tabindex="-1" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
     <div class="bg-gray-800 w-full max-w-md rounded-3xl border border-gray-700 shadow-2xl overflow-hidden">
         <div class="p-5 bg-gray-900 border-b border-gray-800 flex justify-between items-center text-yellow-500">
@@ -148,14 +144,11 @@
         </form>
     </div>
 </div>
-
 <%- include('partials/footer') %>
-
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
     function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-
     $(document).ready(function() {
         // Toggle Modal Flowbite Manual
         $('[data-modal-toggle]').click(function() {
@@ -166,7 +159,6 @@
             const id = $(this).data('modal-hide');
             closeModal(id);
         });
-
         // Edit Logic
         $('.btn-edit').on('click', function() {
             const btn = $(this);
@@ -178,14 +170,12 @@
             $('#edit_api_port').val(btn.data('port'));
             openModal('modalEditNas');
         });
-
-        // Check Status API (Tetap Pakai Logic Bos yang Sudah Jalan)
+    // Synchronize subscriber account state
         <% if (locals.nasList && nasList.length > 0) { %>
             <% nasList.forEach(nas => { %>
                 checkStatus('<%= nas.id %>');
             <% }) %>
         <% } %>
-
         function checkStatus(id) {
             const el = $(`#status-${id}`);
             $.get(`/admin/nas/check-status/${id}`)

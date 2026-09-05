@@ -4,9 +4,9 @@ const { getSetting } = require('./settingsManager');
 
 // Format pesan dengan header dan footer
 function formatWithHeaderFooter(message) {
-    const COMPANY_HEADER = getSetting('company_header', "📱INETKU NETWORK 📱\n\n");
+    const COMPANY_HEADER = getSetting('company_header', "📱PULSEBILL NETWORKS 📱\n\n");
     const FOOTER_SEPARATOR = "\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n";
-    const FOOTER_INFO = FOOTER_SEPARATOR + getSetting('footer_info', "Powered by Inetku Digital Network");
+    const FOOTER_INFO = FOOTER_SEPARATOR + getSetting('footer_info', "Powered by PULSEBILL NETWORKS");
     
     return `${COMPANY_HEADER}${message}${FOOTER_INFO}`;
 }

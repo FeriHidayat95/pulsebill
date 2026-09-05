@@ -1,9 +1,7 @@
 <%- include('../../partials/header') %>
 <body class="bg-[#0f172a] text-slate-300 font-sans antialiased selection:bg-rose-500 selection:text-white">
-
 <%- include('../../partials/admin-header') %>
 <%- include('../../partials/billing-sidebar', { page: 'customer-nunggak', settings: settings }) %>
-
 <main class="p-4 sm:ml-64 pt-24 min-h-screen">
     <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
         <div>
@@ -19,7 +17,6 @@
             </button>
         </div>
     </div>
-
     <div class="bg-[#1e293b] border border-slate-700/60 rounded-3xl shadow-2xl overflow-hidden mb-10">
         <div class="px-6 py-5 border-b border-slate-700 bg-[#111827]/50 flex flex-col md:flex-row justify-between items-center gap-4">
             <h3 class="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2">
@@ -27,7 +24,6 @@
             </h3>
             <div id="dt-buttons-container" class="flex gap-2"></div>
         </div>
-
         <div class="p-4 overflow-x-auto">
             <table id="nunggakTable" class="w-full text-left text-slate-400">
                 <thead class="text-xs text-slate-500 uppercase bg-[#111827]/30 border-b border-slate-700">
@@ -84,12 +80,10 @@
         </div>
     </div>
 </main>
-
 <%- include('../../partials/footer') %>
-
 <style>
     /* ============================================================== */
-    /* STYLING BAWAAN DATATABLES AGAR NYATU DENGAN TEMA SULTAN (DARK) */
+    // Schema definition
     /* ============================================================== */
     
     /* Teks Label "Search:" / Pencarian */
@@ -104,7 +98,6 @@
         gap: 0.5rem;
         margin-bottom: 1rem;
     }
-
     /* Kolom Input Pencarian */
     .dataTables_wrapper .dataTables_filter input {
         background-color: #111827 !important; /* Warna gelap sama dengan header tabel */
@@ -116,13 +109,11 @@
         font-weight: 700;
         transition: all 0.3s ease;
     }
-
     /* Efek saat Kolom Pencarian diklik (Glow warna merah rose) */
     .dataTables_wrapper .dataTables_filter input:focus {
         border-color: #f43f5e !important; 
         box-shadow: 0 0 0 2px rgba(244, 63, 94, 0.2) !important;
     }
-
     /* Hilangkan border bawaan DataTables yang bikin berantakan */
     table.dataTable { border-collapse: collapse !important; border-bottom: 1px solid #334155 !important; }
     
@@ -155,14 +146,12 @@
     }
     .paginate_button.disabled { opacity: 0.3 !important; cursor: not-allowed !important; }
 </style>
-
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
-
 <script>
     $(document).ready(function() {
         var table = $('#nunggakTable').DataTable({
@@ -211,27 +200,22 @@
             ]
         });
         table.buttons().container().appendTo('#dt-buttons-container');
-
         $('#checkAll').on('click', function() {
             $('.checkItem').prop('checked', this.checked);
             toggleBtnHapus();
         });
-
         $('.checkItem').on('change', function() { toggleBtnHapus(); });
-
         function toggleBtnHapus() {
             if ($('.checkItem:checked').length > 0) $('#btnHapusMassal').removeClass('hidden');
             else $('#btnHapusMassal').addClass('hidden');
         }
     });
-
     function hapusPelanggan(id) {
         if(confirm('Hapus data pelanggan ini?')) {
             fetch(`/admin/billing/customers/${id}`, { method: 'DELETE' })
             .then(r => r.json()).then(res => { location.reload(); });
         }
     }
-
     function hapusMassal() {
         const ids = $('.checkItem:checked').map(function() { return $(this).val(); }).get();
         if(confirm(`Hapus ${ids.length} pelanggan?`)) {

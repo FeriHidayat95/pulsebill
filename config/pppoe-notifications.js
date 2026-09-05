@@ -293,7 +293,7 @@ async function validateWhatsAppNumber(number) {
 
 // Send notification to admin and technician numbers
 async function sendNotification(message) {
-    logger.info('PPPoE technical notification blocked by Bos instruction');
+    logger.info('PPPoE technical notification suppressed by configuration');
     return false;
     
     if (!sock) {

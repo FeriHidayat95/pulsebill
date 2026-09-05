@@ -1,13 +1,10 @@
 <%- include('../../partials/header') %>
 <body class="bg-[#0f172a] text-slate-300 font-sans antialiased selection:bg-blue-500 selection:text-white">
-
 <div class="no-print">
     <%- include('../../partials/admin-header') %>
     <%- include('../../partials/billing-sidebar', { page: 'invoices', settings: settings }) %>
 </div>
-
 <main class="p-4 sm:ml-64 pt-20 min-h-screen transition-all duration-300">
-
     <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
         <div>
             <h1 class="text-3xl font-black text-white tracking-tighter uppercase leading-none">
@@ -20,7 +17,6 @@
             <i class="bi bi-plus-lg text-lg me-2"></i> Buat Tagihan
         </button>
     </div>
-
     <div class="bg-[#1e293b] border border-slate-700/60 rounded-3xl shadow-2xl overflow-hidden mb-10">
         
         <div class="px-6 py-5 border-b border-slate-700 bg-[#111827]/50 flex flex-col md:flex-row justify-between items-center gap-4">
@@ -35,7 +31,6 @@
                 <input type="text" id="customSearch" class="block w-full p-2.5 pl-10 text-xs font-bold text-white border border-slate-700 rounded-xl bg-[#1e293b] focus:ring-blue-500 focus:border-blue-500 placeholder-slate-600 uppercase tracking-wider" placeholder="Cari No. Tagihan atau Nama...">
             </div>
         </div>
-
         <div class="overflow-x-auto">
             <table id="invoicesTable" class="w-full text-left text-slate-400">
                 <thead class="text-[10px] text-slate-500 uppercase bg-[#111827]/30 border-b border-slate-700">
@@ -55,9 +50,7 @@
         </div>
     </div>
 </main>
-
 <%- include('../../partials/footer') %>
-
 <div id="addInvoiceModal" tabindex="-1" class="fixed inset-0 z-50 hidden justify-center items-center bg-black/80 backdrop-blur-sm p-4">
     <div class="relative w-full max-w-lg bg-[#1e293b] rounded-2xl shadow-2xl border border-slate-700">
         <div class="flex items-center justify-between p-5 border-b border-slate-700 bg-[#111827] rounded-t-2xl">
@@ -67,7 +60,7 @@
         <form id="addInvoiceForm" class="p-6 space-y-4">
             <div>
                 <label class="block mb-2 text-[10px] font-black text-slate-500 uppercase tracking-widest">Pilih Pelanggan</label>
-                <select name="customer_id" id="customer_id" required class="select2-sultan w-full bg-[#0f172a] border border-slate-700 text-white text-sm rounded-xl p-3 font-bold">
+                <select name="customer_id" id="customer_id" required class="select2-custom w-full bg-[#0f172a] border border-slate-700 text-white text-sm rounded-xl p-3 font-bold">
                     <option value="">-- Cari Nama atau Username --</option>
                     <% customers.forEach(function(c) { %><option value="<%= c.id %>" data-package="<%= c.package_id %>"><%= c.name %> (<%= c.username %>)</option><% }); %>
                 </select>
@@ -96,7 +89,6 @@
         </form>
     </div>
 </div>
-
 <div id="editInvoiceModal" tabindex="-1" class="fixed inset-0 z-50 hidden justify-center items-center bg-black/80 backdrop-blur-sm p-4">
     <div class="relative w-full max-w-lg bg-[#1e293b] rounded-2xl shadow-2xl border border-slate-700">
         <div class="flex items-center justify-between p-5 border-b border-slate-700 bg-[#111827] rounded-t-2xl">
@@ -139,7 +131,6 @@
         </form>
     </div>
 </div>
-
 <div id="paymentChoiceModal" tabindex="-1" class="fixed inset-0 z-50 hidden justify-center items-center bg-black/80 backdrop-blur-sm p-4">
     <div class="relative w-full max-w-sm bg-[#1e293b] rounded-2xl shadow-2xl border border-slate-700 p-8 text-center">
         <input type="hidden" id="target_inv_id">
@@ -155,16 +146,13 @@
         <button onclick="closeModal('paymentChoiceModal')" class="mt-6 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Batal</button>
     </div>
 </div>
-
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
 <style>
-    /* STYLING SULTAN UNTUK DATATABLES */
+    // Schema definition
     .dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_length { display: none; }
     
     .dataTables_info { 
@@ -211,12 +199,9 @@
         opacity: 0.3 !important;
         cursor: not-allowed !important;
     }
-
     table.dataTable { border-collapse: collapse !important; margin-top: 0 !important; margin-bottom: 0 !important; }
     table.dataTable tbody tr { border-bottom: 1px solid rgba(51, 65, 81, 0.5); }
     table.dataTable tbody tr:last-child { border-bottom: none; }
-
-    /* STYLING SELECT2 SULTAN DARK MODE */
     .select2-container--default .select2-selection--single {
         background-color: #0f172a !important; 
         border: 1px solid #334151 !important;
@@ -259,7 +244,6 @@
         color: white !important;
     }
 </style>
-
 <script>
     $(document).ready(function() {
         
@@ -367,13 +351,11 @@
                                 <a href="/admin/billing/invoices/${row.id}/print" target="_blank" class="p-2 rounded-xl text-blue-400 bg-blue-500/5 hover:bg-blue-500 hover:text-white transition-all border border-transparent hover:border-blue-400/50" title="Cetak"><i class="bi bi-printer-fill text-lg"></i></a>
                                 <button onclick="editInvoice('${row.id}', '${row.customer_id}', '${row.invoice_number}', '${row.amount}', '${rawDueDate}', '${row.status}', '${safeNotes}')" class="p-2 rounded-xl text-amber-400 bg-amber-500/5 hover:bg-amber-500 hover:text-white transition-all border border-transparent hover:border-amber-400/50" title="Edit"><i class="bi bi-pencil-square text-lg"></i></button>
                         `;
-
                         if (row.status === 'unpaid') {
                             buttons += `<button onclick="openPaymentModal('${row.id}', '${row.customer_name}')" class="p-2 rounded-xl text-cyan-400 bg-cyan-500/5 hover:bg-cyan-500 hover:text-white transition-all border border-transparent hover:border-cyan-400/50" title="Bayar"><i class="bi bi-wallet2 text-lg"></i></button>`;
                         } else {
                             buttons += `<button onclick="refundInvoice('${row.id}')" class="p-2 rounded-xl text-rose-500 bg-rose-500/5 hover:bg-rose-500 hover:text-white transition-all border border-transparent hover:border-rose-400/50" title="Batal Bayar (Refund)"><i class="bi bi-arrow-counterclockwise text-lg font-black"></i></button>`;
                         }
-
                         buttons += `
                                 <button onclick="deleteInvoice('${row.id}')" class="p-2 rounded-xl text-red-400 bg-red-500/5 hover:bg-red-500 hover:text-white transition-all border border-transparent hover:border-red-400/50" title="Hapus"><i class="bi bi-trash3-fill text-lg"></i></button>
                             </div>
@@ -386,22 +368,17 @@
                 $(row).addClass('hover:bg-slate-800/50 transition-colors group');
             }
         });
-
         // Hubungkan Input Kolom Custom Pencarian
         $('#customSearch').on('keyup', function() { 
             table.search(this.value).draw(); 
         });
-
         // ==============================================================
-
-        // INISIALISASI SELECT2 SULTAN
         $('#customer_id').select2({
             placeholder: "-- Ketik Nama atau Username --",
             allowClear: true,
             width: '100%',
             dropdownParent: $('#addInvoiceModal') // Mencegah dropdown sembunyi di balik modal
         });
-
         $('#customer_id').change(function() {
             let pkgId = $(this).find(':selected').data('package');
             if(pkgId) $('#package_id').val(pkgId).trigger('change');
@@ -411,7 +388,6 @@
             let price = $(this).find(':selected').data('price');
             if(price) $('#amount').val(price);
         });
-
         $('#addInvoiceForm').submit(function(e) {
             e.preventDefault();
             $.post('/admin/billing/invoices/create', $(this).serialize()).done((res) => {
@@ -419,7 +395,6 @@
                 else Swal.fire('Gagal', res.message, 'warning');
             });
         });
-
         $('#editInvoiceForm').submit(function(e) {
             e.preventDefault();
             $.post('/admin/billing/invoices/update', $(this).serialize()).done((res) => {
@@ -428,10 +403,8 @@
             });
         });
     });
-
     function openModal(id) { $('#' + id).removeClass('hidden').addClass('flex'); }
     function closeModal(id) { $('#' + id).addClass('hidden').removeClass('flex'); }
-
     function editInvoice(id, customer_id, number, amount, date, status, notes) {
         $('#edit_inv_id_asli').val(id);
         $('#edit_inv_customer_id').val(customer_id);
@@ -442,17 +415,14 @@
         $('#edit_inv_notes').val(notes);
         openModal('editInvoiceModal');
     }
-
     function viewInvoice(id) {
         window.location.href = '/admin/billing/invoices/' + id;
     }
-
     function openPaymentModal(id, name) {
         $('#target_inv_id').val(id);
         $('#target_name').text(name);
         openModal('paymentChoiceModal');
     }
-
     function payManual() {
         const invId = $('#target_inv_id').val();
         
@@ -480,7 +450,6 @@
             Swal.fire({ icon: 'error', title: 'SERVER ERROR', text: 'Gagal lapor ke database. Cek rute /payment/manual-process!', background: '#1e293b', color: '#fff' });
         });
     }
-
     async function generateLinkManual(btn) {
         const invId = $('#target_inv_id').val();
         const response = await fetch(`/admin/billing/invoices/${invId}/generate-tripay`, { method: 'POST' });
@@ -488,14 +457,12 @@
         if (res.success && res.pay_url) window.open(res.pay_url, '_blank');
         else Swal.fire('Gagal', res.message, 'error');
     }
-
     function resendWA(id, name) {
         $.post(`/admin/billing/invoices/${id}/resend-wa`).done(function(res) {
             if (res.success) Swal.fire('Terkirim!', res.message, 'success');
             else Swal.fire('Gagal!', res.message, 'error');
         });
     }
-
     function deleteInvoice(id) {
         Swal.fire({
             title: 'Hapus?', text: "Data hilang selamanya!", icon: 'warning',
@@ -537,6 +504,5 @@
         });
     }
 </script>
-
 </body>
 </html>

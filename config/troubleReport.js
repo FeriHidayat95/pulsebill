@@ -5,7 +5,6 @@ const { getSetting } = require('./settingsManager');
 const { sendMessage, setSock } = require('./sendMessage');
 // Tambahkan import whatsapp manager yang benar
 const whatsappNotifications = require('./whatsapp-notifications'); 
-
 // Helper function untuk format tanggal Indonesia yang benar
 function formatIndonesianDateTime(date = new Date()) {
   try {
@@ -46,9 +45,7 @@ function formatIndonesianDateTime(date = new Date()) {
     return `${day}/${month}/${year} ${hour}:${minute}:${second}`;
   }
 }
-
 const troubleReportPath = path.join(__dirname, '../logs/trouble_reports.json');
-
 function ensureTroubleReportFile() {
   try {
     if (!fs.existsSync(path.dirname(troubleReportPath))) {
@@ -63,7 +60,6 @@ function ensureTroubleReportFile() {
     logger.error(`Gagal membuat file laporan gangguan: ${error.message}`);
   }
 }
-
 function getAllTroubleReports() {
   ensureTroubleReportFile();
   try {
@@ -74,17 +70,14 @@ function getAllTroubleReports() {
     return [];
   }
 }
-
 function getTroubleReportById(id) {
   const reports = getAllTroubleReports();
   return reports.find(report => report.id === id);
 }
-
 function getTroubleReportsByPhone(phone) {
   const reports = getAllTroubleReports();
   return reports.filter(report => report.phone === phone);
 }
-
 function createTroubleReport(reportData) {
   try {
     const reports = getAllTroubleReports();
@@ -104,10 +97,7 @@ function createTroubleReport(reportData) {
     // --- PENAMBAHAN FUNGSI WA OTOMATIS (JALUR TERMINAL PROVEN) ---
     setImmediate(async () => {
         try {
-            // SULTAN STRIKE: Kita pakai fungsi sendTechnicianMessage 
-            // yang terbukti sukses jalan di Terminal Bos (Baris log paling bawah)
             const { sendTechnicianMessage } = require('./sendMessage');
-
             const pesanAdmin = `?? *TIKET GANGGUAN BARU* ??\n\n` +
                                `?? *ID Tiket*: ${newReport.id}\n` +
                                `?? *Nama*: ${newReport.name || 'Pelanggan'}\n` +
@@ -115,12 +105,10 @@ function createTroubleReport(reportData) {
                                `?? *Kategori*: ${newReport.category}\n` +
                                `?? *Keluhan*: ${newReport.description}\n\n` +
                                `_Cek Dashboard Admin sekarang!_`;
-
             // Tembak langsung ke semua nomor teknisi/admin yang ada di settings.json!
             const success = await sendTechnicianMessage(pesanAdmin, 'high');
-
             if (success) {
-                logger.info(`[WA-REPORT] Tembakan Sultan Berhasil Meluncur!`);
+                logger.info(`[WA-REPORT] Tembakan Operation successful Meluncur!`);
             } else {
                 logger.warn(`[WA-REPORT] Tembakan gagal, cek koneksi WA.`);
             }
@@ -135,7 +123,6 @@ function createTroubleReport(reportData) {
     return null;
   }
 }
-
 function updateTroubleReportStatus(id, status, notes, sendNotification = true) {
   try {
     const reports = getAllTroubleReports();
@@ -170,7 +157,6 @@ function updateTroubleReportStatus(id, status, notes, sendNotification = true) {
     return null;
   }
 }
-
 async function sendNotificationToTechnicians(report) {
   try {
     logger.info(`?? Mencoba mengirim notifikasi laporan gangguan ${report.id} ke teknisi dan admin`);
@@ -179,23 +165,17 @@ async function sendNotificationToTechnicians(report) {
     const companyHeader = getSetting('company_header', 'ALIJAYA DIGITAL NETWORK');
     
     const message = `?? *LAPORAN GANGGUAN BARU*
-
 *${companyHeader}*
-
 ?? *ID Tiket*: ${report.id}
 ?? *Pelanggan*: ${report.name || 'N/A'}
 ?? *No. HP*: ${report.phone || 'N/A'}
 ?? *Lokasi*: ${report.location || 'N/A'}
 ?? *Kategori*: ${report.category || 'N/A'}
 ?? *Waktu Laporan*: ${formatIndonesianDateTime(new Date(report.createdAt))}
-
 ?? *Deskripsi Masalah*:
 ${report.description || 'Tidak ada deskripsi'}
-
 ?? *Status*: ${report.status.toUpperCase()}
-
 ?? *PRIORITAS TINGGI* - Silakan segera ditindaklanjuti!`;
-
     let sentSuccessfully = false;
     
     if (technicianGroupId && technicianGroupId !== '') {
@@ -269,7 +249,6 @@ ${report.description || 'Tidak ada deskripsi'}
     return false;
   }
 }
-
 async function sendStatusUpdateToCustomer(report) {
   try {
     if (!report.phone) return false;
@@ -291,14 +270,11 @@ async function sendStatusUpdateToCustomer(report) {
     let message = `?? *UPDATE LAPORAN GANGGUAN*
     
 *${companyHeader}*
-
 ?? *ID Tiket*: ${report.id}
 ?? *Update Pada*: ${formatIndonesianDateTime(new Date(report.updatedAt))}
 ?? *Status Baru*: ${statusMap[report.status] || report.status.toUpperCase()}
-
 ${latestNote ? `?? *Catatan Teknisi*:
 ${latestNote}
-
 ` : ''}`;
     
     if (report.status === 'open') {
@@ -312,7 +288,6 @@ ${latestNote}
     }
     
     message += `\n\nJika ada pertanyaan, silakan hubungi kami.`;
-
     const result = await sendMessage(waJid, message);
     return !!result;
   } catch (error) {
@@ -320,19 +295,15 @@ ${latestNote}
     return false;
   }
 }
-
 ensureTroubleReportFile();
-
 function setSockInstance(sockInstance) {
   setSock(sockInstance);
 }
-
 function deleteTroubleReport(id) {
   try {
     const reports = getAllTroubleReports();
     const exists = reports.find(r => r.id === id);
     if (!exists) return false;
-
     const newReports = reports.filter(report => report.id !== id);
     fs.writeFileSync(troubleReportPath, JSON.stringify(newReports, null, 2), 'utf8');
     
@@ -343,7 +314,6 @@ function deleteTroubleReport(id) {
     return false;
   }
 }
-
 module.exports = {
   getAllTroubleReports,
   getTroubleReportById,

@@ -1,16 +1,14 @@
-﻿const { getSetting } = require('./settingsManager');
+const { getSetting } = require('./settingsManager');
 const billingManager = require('./billing');
 const logger = require('./logger');
 const fs = require('fs');
 const path = require('path');
-
 class WhatsAppNotificationManager {
     constructor() {
         this.sock = null;
         this.templatesFile = path.join(__dirname, '../data/whatsapp-templates.json');
         this.templates = this.loadTemplates() || this.getDefaultTemplates();
     }
-
     // Default template (hanya dipakai jika file JSON hilang)
     getDefaultTemplates() {
         return {
@@ -24,13 +22,10 @@ class WhatsAppNotificationManager {
             welcome_message: { enabled: true, template: "Selamat datang {customer_name}." }
         };
     }
-
     setSock(sockInstance) {
         this.sock = sockInstance;
     }
-
     // --- HELPER FUNCTIONS (FORMATTER) ---
-
     formatPhoneNumber(number) {
         if (!number) return '';
         let cleaned = number.toString().replace(/\D/g, '');
@@ -38,12 +33,10 @@ class WhatsAppNotificationManager {
         if (!cleaned.startsWith('62')) cleaned = '62' + cleaned;
         return cleaned;
     }
-
     formatCurrency(amount) {
         if (amount == null) return 'Rp 0';
         return 'Rp ' + parseInt(amount).toLocaleString('id-ID');
     }
-
     formatDate(date) {
         if (!date) return '-';
         return new Date(date).toLocaleDateString('id-ID', {
@@ -52,7 +45,6 @@ class WhatsAppNotificationManager {
             year: 'numeric'
         });
     }
-
     formatDateTime(date) {
         if (!date) return '-';
         return new Date(date).toLocaleDateString('id-ID', {
@@ -60,7 +52,6 @@ class WhatsAppNotificationManager {
             hour: '2-digit', minute: '2-digit'
         });
     }
-
     getInvoiceImagePath() {
         const imagePaths = [
             path.resolve(__dirname, '../public/img/tagihan.jpg'),
@@ -75,7 +66,6 @@ class WhatsAppNotificationManager {
         }
         return null;
     }
-
     replaceTemplateVariables(template, data) {
         let message = template || '';
         for (const [key, value] of Object.entries(data)) {
@@ -84,12 +74,10 @@ class WhatsAppNotificationManager {
         }
         return message;
     }
-
     isTemplateEnabled(templateKey) {
         // Cek memory saat ini
         return this.templates[templateKey] && this.templates[templateKey].enabled !== false;
     }
-
     // Fungsi Wajib: Baca Ulang File JSON (Supaya Sinkron 100%)
     reloadTemplates() {
         const fresh = this.loadTemplates();
@@ -99,19 +87,15 @@ class WhatsAppNotificationManager {
         }
         return false;
     }
-
     // --- CORE SENDING FUNCTION ---
-
     async sendNotification(phoneNumber, message, options = {}) {
         try {
             if (!this.sock) {
                 console.error('[WA] WhatsApp belum terkoneksi!');
                 return { success: false, error: 'WhatsApp not connected' };
             }
-
             const formattedNumber = this.formatPhoneNumber(phoneNumber);
             const jid = `${formattedNumber}@s.whatsapp.net`;
-
             // Footer otomatis
             const companyHeader = getSetting('company_header', '');
             const footerInfo = '\n\n' + getSetting('footer_info', 'Powered by Alijaya Digital Network');
@@ -127,11 +111,9 @@ class WhatsAppNotificationManager {
                 });
                 return { success: true, withImage: true };
             }
-
             // Kirim Teks Biasa
             await this.sock.sendMessage(jid, { text: fullMessage });
             return { success: true, withImage: false };
-
         } catch (error) {
             console.error(`[WA ERROR] Gagal kirim ke ${phoneNumber}:`, error.message);
             return { success: false, error: error.message };
@@ -142,31 +124,26 @@ class WhatsAppNotificationManager {
         return await this.sendNotification(phoneNumber, message);
     }
     
-    // ?? SUNTIKAN SULTAN: FUNGSI KHUSUS UNTUK KIRIM WA KE TEKNISI (TEKS MURNI) ??
     async sendText(phoneNumber, message) {
         try {
             if (!this.sock) {
                 console.log('?? [WA-TEKNISI] Gagal: WhatsApp belum terhubung!');
                 return { success: false, error: 'WhatsApp not connected' };
             }
-
             // Normalisasi nomor ke format JID WhatsApp
             const formattedNumber = this.formatPhoneNumber(phoneNumber);
             const jid = `${formattedNumber}@s.whatsapp.net`;
-
             // Eksekusi tembak pesan TEKS MURNI
             await this.sock.sendMessage(jid, { text: message });
             
             console.log(`? [WA-TEKNISI] Alarm WA berhasil meluncur ke: ${formattedNumber}`);
             return { success: true };
-
         } catch (error) {
             console.error(`? [WA-TEKNISI] Gagal kirim ke ${phoneNumber}:`, error.message);
             return { success: false, error: error.message };
         }
     }
-
-    // 1. TAGIHAN BARU (Invoice Created) - VERSI SULTAN SINKRON
+    // Financial ledger and transaction processing
     async sendInvoiceCreatedNotification(data) {
         try {
             // Wajib reload agar perubahan di Dashboard Web langsung terasa
@@ -186,7 +163,6 @@ class WhatsAppNotificationManager {
                 // URL Pembayaran Otomatis
                 payment_url: `https://billing.pulsebill.io/payment/select/${data.invoice_number || '-'}/${data.customer_id || ''}`
             };
-
             // PROSES INJECT: Mengganti {variabel} di template dengan data di atas
             const message = this.replaceTemplateVariables(this.templates.invoice_created.template, templateData);
             
@@ -196,36 +172,30 @@ class WhatsAppNotificationManager {
             const res = await this.sendNotification(data.phone, message, { imagePath });
             
             if(res.success) {
-                console.log(`[WA] ? Invoice Sultan Terkirim ke: ${templateData.customer_name}`);
+                logger.info(`[NOTIFICATIONS] Invoice notification dispatched to: ${templateData.customer_name}`);
             }
             return res;
-
         } catch (error) {
             console.error('[WA] ? Error Invoice Notification:', error.message);
             return { success: false, error: error.message };
         }
     }
-
     // 2. PENGINGAT JATUH TEMPO (Meticulous Version)
     async sendDueDateReminder(data) {
         try {
             this.reloadTemplates(); 
             if (!this.isTemplateEnabled('due_date_reminder')) return { success: true, skipped: true };
-
             const phoneNumber = data.phone || data.customer_phone;
             if (!phoneNumber) return { success: false, error: 'No phone number' };
-
             // --- LOGIKA SINKRONISASI HARI ---
             // Kita pakai data.days_remaining dari Scheduler jika ada. 
             // Jika tidak ada (misal ditrigger manual), baru kita hitung ulang pakai logika Normalisasi.
             let daysRemaining = data.days_remaining;
-
             if (daysRemaining === undefined && data.due_date) {
                 const today = new Date(); today.setHours(0, 0, 0, 0);
                 const dueDate = new Date(data.due_date); dueDate.setHours(0, 0, 0, 0);
                 daysRemaining = Math.round((dueDate - today) / (1000 * 60 * 60 * 24));
             }
-
             // --- BAGIAN KERAMAT: PENYESUAIAN PESAN ---
             // Kita bisa sisipkan kata-kata khusus berdasarkan sisa hari agar lebih persuasif
             let peringatanTambahan = "";
@@ -234,7 +204,6 @@ class WhatsAppNotificationManager {
             } else if (daysRemaining === 3) {
                 peringatanTambahan = "\n\nMohon segera selesaikan pembayaran untuk menghindari gangguan layanan.";
             }
-
             const templateData = {
                 customer_name: data.name || data.customer_name || 'Pelanggan',
                 invoice_number: data.invoice_number || '-',
@@ -246,11 +215,9 @@ class WhatsAppNotificationManager {
                 peringatan_khusus: peringatanTambahan, // Variabel baru buat di template
                 payment_url: `https://billing.pulsebill.io/payment/select/${data.invoice_number || '-'}/${data.customer_id || ''}`
             };
-
             // Ambil template dari Database
             let rawTemplate = this.templates.due_date_reminder.template;
             
-            // Tips: Tambahkan variabel {peringatan_khusus} di dashboard template WA Bos 
             // agar pesan H-1 lebih "galak" daripada H-7.
             const message = this.replaceTemplateVariables(rawTemplate, templateData);
             
@@ -258,7 +225,6 @@ class WhatsAppNotificationManager {
             
             logger.info(`[WA] Mengirim Reminder H-${daysRemaining} ke ${templateData.customer_name}`);
             return await this.sendNotification(phoneNumber, message, { imagePath });
-
         } catch (error) {
             console.error('[WA] Error Reminder:', error.message);
             return { success: false, error: error.message };
@@ -270,10 +236,8 @@ class WhatsAppNotificationManager {
         try {
             this.reloadTemplates(); 
             if (!this.isTemplateEnabled('service_suspension')) return { success: true, skipped: true };
-
             if (!customer.phone) return { success: false, error: 'No phone number' };
             const rawTemplate = this.templates.service_suspension.template;
-
             const data = {
                 customer_name: customer.name,
                 name: customer.name,
@@ -283,7 +247,6 @@ class WhatsAppNotificationManager {
                 reason: reason || 'Tagihan jatuh tempo',
                 payment_url: `https://billing.pulsebill.io/payment/select/${customer.invoice_number || '-'}/${customer.id || ''}`
             };
-
             const message = this.replaceTemplateVariables(rawTemplate, data);
             return await this.sendNotification(customer.phone, message);
         } catch (error) {
@@ -291,13 +254,11 @@ class WhatsAppNotificationManager {
             return { success: false, error: error.message };
         }
     }
-
     // 3. PEMBAYARAN DITERIMA (Update: Tambahkan Package Info)
     async sendPaymentReceivedNotification(data) {
         try {
             this.reloadTemplates(); 
             if (!this.isTemplateEnabled('payment_received')) return { success: true, skipped: true };
-
             const templateData = {
                 customer_name: data.name || data.customer_name || 'Pelanggan',
                 invoice_number: data.invoice_number || '-',
@@ -308,20 +269,16 @@ class WhatsAppNotificationManager {
                 package_name: data.package_name || '-',
                 package_speed: data.package_speed || '-'
             };
-
             const message = this.replaceTemplateVariables(this.templates.payment_received.template, templateData);
             const imagePath = this.getInvoiceImagePath(); 
-
             const res = await this.sendNotification(data.phone, message, { imagePath });
             if(res.success) console.log(`[WA] Bukti Bayar terkirim ke ${templateData.customer_name}`);
             return res;
-
         } catch (error) {
             console.error('[WA] Error Payment Notification:', error.message);
             return { success: false, error: error.message };
         }
     }
-
     // 5. LAYANAN AKTIF KEMBALI (Update: Pastikan variabel sinkron)
     async sendServiceRestorationNotification(data, reason) {
         try {
@@ -330,7 +287,6 @@ class WhatsAppNotificationManager {
             
             const phoneNumber = data.phone || data.customer_phone;
             if (!phoneNumber) return { success: false, error: 'No phone number' };
-
             const templateData = {
                 customer_name: data.name || data.customer_name || 'Pelanggan',
                 package_name: data.package_name || '-', // Pastikan kuncinya sama dengan di JSON
@@ -338,16 +294,13 @@ class WhatsAppNotificationManager {
                 invoice_number: data.invoice_number || '-',
                 reason: reason || 'Pembayaran diterima'
             };
-
             const message = this.replaceTemplateVariables(this.templates.service_restoration.template, templateData);
             return await this.sendNotification(phoneNumber, message);
-
         } catch (error) {
             console.error('[WA] Error Restoration:', error.message);
             return { success: false, error: error.message };
         }
     }
-
     // 5. LAYANAN AKTIF KEMBALI (Hanya bagian ini yang diperbaiki)
     async sendServiceRestorationNotification(data, reason) {
         try {
@@ -357,7 +310,6 @@ class WhatsAppNotificationManager {
             // Pastikan kita punya nomor HP
             const phoneNumber = data.phone || data.customer_phone;
             if (!phoneNumber) return { success: false, error: 'No phone number' };
-
             // mapping variabel agar template {package_name} dan {package_speed} terisi
             const templateData = {
                 customer_name: data.name || data.customer_name,
@@ -365,16 +317,13 @@ class WhatsAppNotificationManager {
                 package_speed: data.package_speed || '-',
                 reason: reason || 'Pembayaran diterima'
             };
-
             const message = this.replaceTemplateVariables(this.templates.service_restoration.template, templateData);
             return await this.sendNotification(phoneNumber, message);
-
         } catch (error) {
             console.error('[WA] Error Restoration:', error.message);
             return { success: false, error: error.message };
         }
     }
-
     // 6. GANGGUAN (Broadcast)
     async sendServiceDisruptionNotification(disruptionData) {
         try {
@@ -383,14 +332,12 @@ class WhatsAppNotificationManager {
             
             const customers = await billingManager.getCustomers();
             const activeCustomers = customers.filter(c => c.status === 'active' && c.phone);
-
             const data = {
                 disruption_type: disruptionData.type || 'Gangguan Jaringan',
                 affected_area: disruptionData.area || 'Seluruh Area',
                 estimated_resolution: disruptionData.estimatedTime || 'Sedang dalam penanganan',
                 support_phone: getSetting('support_phone', '081234567890')
             };
-
             const message = this.replaceTemplateVariables(this.templates.service_disruption.template, data);
             
             let successCount = 0;
@@ -403,19 +350,15 @@ class WhatsAppNotificationManager {
             return { success: false, error: error.message };
         }
     }
-
     // 7. PENGUMUMAN (Broadcast)
     async sendServiceAnnouncement(announcementData) {
         try {
             this.reloadTemplates(); // <--- WAJIB
             if (!this.isTemplateEnabled('service_announcement')) return { success: true, skipped: true };
-
             const customers = await billingManager.getCustomers();
             const activeCustomers = customers.filter(c => c.status === 'active' && c.phone);
-
             const data = { announcement_content: announcementData.content || '-' };
             const message = this.replaceTemplateVariables(this.templates.service_announcement.template, data);
-
             let successCount = 0;
             for (const customer of activeCustomers) {
                 const res = await this.sendNotification(customer.phone, message);
@@ -433,7 +376,6 @@ class WhatsAppNotificationManager {
             this.reloadTemplates(); // <--- WAJIB
             if (!this.isTemplateEnabled('welcome_message')) return { success: true, skipped: true };
             if (!customer.phone) return { success: false, error: 'No phone number' };
-
             const data = {
                 customer_name: customer.name,
                 package_name: customer.package_name || '-',
@@ -441,16 +383,13 @@ class WhatsAppNotificationManager {
                 wifi_password: customer.wifi_password || '-',
                 support_phone: getSetting('support_phone', '081234567890')
             };
-
             const message = this.replaceTemplateVariables(this.templates.welcome_message.template, data);
             return await this.sendNotification(customer.phone, message);
         } catch (error) {
             return { success: false, error: error.message };
         }
     }
-
     // --- TEMPLATE MANAGEMENT ---
-
     loadTemplates() {
         try {
             if (fs.existsSync(this.templatesFile)) {
@@ -461,7 +400,6 @@ class WhatsAppNotificationManager {
         }
         return null;
     }
-
     saveTemplates() {
         try {
             const dataDir = path.dirname(this.templatesFile);
@@ -473,9 +411,7 @@ class WhatsAppNotificationManager {
             return false;
         }
     }
-
     getTemplates() { return this.templates; }
-
     updateTemplates(templatesData) {
         let updated = 0;
         Object.keys(templatesData).forEach(key => {
@@ -487,7 +423,6 @@ class WhatsAppNotificationManager {
         if (updated > 0) this.saveTemplates();
         return updated;
     }
-
     // Test Notification (Testing dari Web)
     async testNotification(phoneNumber, templateKey, testData = {}) {
         try {
@@ -498,7 +433,6 @@ class WhatsAppNotificationManager {
             // Format data dummy untuk testing agar terlihat real
             if(testData.amount) testData.amount = this.formatCurrency(testData.amount.replace(/\D/g,''));
             if(testData.due_date) testData.due_date = this.formatDate(testData.due_date);
-
             const message = this.replaceTemplateVariables(this.templates[templateKey].template, testData);
             return await this.sendNotification(phoneNumber, message);
         } catch (error) {
@@ -506,5 +440,4 @@ class WhatsAppNotificationManager {
         }
     }
 }
-
 module.exports = new WhatsAppNotificationManager();

@@ -1,4 +1,4 @@
-﻿const pool = require('./database'); 
+const pool = require('./database'); 
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
@@ -7,27 +7,22 @@ const logger = require('./logger');
 const whatsappManager = require('./whatsapp-notifications');
 const { getSetting } = require('./settingsManager');
 const { logActivity } = require('../utils/logger');
-
 // IMPORT SATU PINTU YANG ASLI
 const paymentGateway = require('./paymentGateway'); 
-
 class BillingManager {
     constructor() {
         // Hubungkan dengan Sistem Satu Pintu
         this.paymentGateway = paymentGateway; 
         this.initDatabase();
     }
-
     // Hot-reload payment gateway configuration
     reloadPaymentGateway() {
         try {
             // 1. Tarik settings terbaru dari cache/database
             const { getSettingsWithCache } = require('./settingsManager');
             const freshSettings = getSettingsWithCache();
-
             // 2. Masukkan settings terbaru ke dalam laci gateway sebelum di-init ulang
             this.paymentGateway.settings = freshSettings;
-
             // 3. Sekarang baru aman untuk init ulang gateway
             this.paymentGateway.initGateways();
             
@@ -38,39 +33,32 @@ class BillingManager {
             return { error: true, message: e.message };
         }
     }
-
-    // ?? Init Database (Versi MariaDB - SULTAN V2)
+    // Initialize database connection pool
     async initDatabase() {
         try {
             // Cukup tes apakah koneksi MariaDB lancar (Tabel sudah dibuat manual di MySQL)
             await pool.query("SELECT 1");
             console.log('?? [BILLING] MariaDB Connected. Selamat tinggal SQLite!');
             
-            // Jika Bos masih pakai fungsi createTables(), panggil di sini
             if (typeof this.createTables === 'function') {
                 await this.createTables();
             }
-
-            // ?? TAMBAHKAN SAKLAR INI BOS ??
             // SUNTIKAN WAJIB: Jalankan migrasi agar kolom 'username' dll tercipta
             if (typeof this.runDatabaseMigrations === 'function') {
                 await this.runDatabaseMigrations();
                 console.log('? [BILLING] Pengecekan & Migrasi Kolom Selesai.');
             }
             // ?? SAMPAI SINI AJA TAMBAHANNYA ??
-
         } catch (err) {
             console.error('? [BILLING] Error koneksi MariaDB:', err.message);
         }
     }
-
-    // ?? Update Status Customer (Versi Sultan - Melek Radius & Anti-Error)
+    // Synchronize subscriber account state and RADIUS groups
     async setCustomerStatusById(id, status) {
         try {
             // 1. Ambil data lengkap (butuh pppoe_username & pppoe_profile)
             const existing = await this.getCustomerById(id);
             if (!existing) throw new Error('Customer not found');
-
             // 2. UPDATE TABEL WEB (DENGAN PENANGANAN ERROR TANGGAL)
             try {
                 const sql = `UPDATE customers SET status = ? WHERE id = ?`;
@@ -84,22 +72,18 @@ class BillingManager {
                     );
                 } else { throw dbErr; }
             }
-
             // =============================================================
-            // ??? SULTAN SYNC: SINKRONISASI JALUR RADIUS & MIKROTIK
+            // Synchronize active session with RADIUS policy
             // =============================================================
             if (existing.pppoe_username) {
                 const username = existing.pppoe_username;
-
                 // Tentukan Profile: Jika suspended, lempar ke isolir. Jika active, balik ke profil asli.
-                const isolirProfile = 'pool-inetku-isolir'; // Sesuaikan nama profil di Mikrotik Bos
+                const isolirProfile = 'pool-pulsebill-isolir';
                 const packageProfile = existing.pppoe_profile || 'default';
                 const finalGroup = (status === 'suspended') ? isolirProfile : packageProfile;
-
                 // A. UPDATE GROUP DI RADIUS
                 await pool.execute("DELETE FROM radusergroup WHERE username = ?", [username]);
                 await pool.execute("INSERT INTO radusergroup (username, groupname, priority) VALUES (?, ?, '1')", [username, finalGroup]);
-
                 // B. KELOLA ATRIBUT EXPIRATION
                 if (status === 'suspended') {
                     // Cabut gembok expired agar Mikrotik fokus ke pool isolir
@@ -109,7 +93,6 @@ class BillingManager {
                     const formattedExp = this.formatRadiusDate(new Date(existing.expired_date));
                     await pool.execute("INSERT INTO radcheck (username, attribute, op, value) VALUES (?, 'Expiration', ':=', ?)", [username, formattedExp]);
                 }
-
                 // C. EKSEKUSI TENDANG (KICK) - WAJIB AGAR IP BERUBAH DETIK INI JUGA
                 setImmediate(() => {
                     if (typeof this.kickUserRadius === 'function') {
@@ -120,7 +103,6 @@ class BillingManager {
                 });
             }
             // =============================================================
-
             try {
                 logger.info(`[BILLING] setCustomerStatusById: id=${id}, from=${existing.status} -> to=${status}`);
             } catch (_) {}
@@ -139,9 +121,7 @@ class BillingManager {
             
             const oldCustomer = await this.getCustomerById(id);
             if (!oldCustomer) throw new Error('Customer not found');
-
             const normBillingDay = Math.min(Math.max(parseInt(billing_day !== undefined ? billing_day : (oldCustomer?.billing_day ?? 15), 10) || 15, 1), 28);
-
             const sql = `UPDATE customers SET 
                 name = ?, username = ?, pppoe_username = ?, email = ?, 
                 address = ?, package_id = ?, pppoe_profile = ?, 
@@ -161,7 +141,6 @@ class BillingManager {
                 normBillingDay,
                 id
             ]);
-
             return { username: oldCustomer.username, id, ...customerData };
         } catch (error) {
             throw error;
@@ -185,7 +164,6 @@ class BillingManager {
                 is_for_agent BOOLEAN DEFAULT 0,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`,
-
             // 2. Tabel pelanggan
             `CREATE TABLE IF NOT EXISTS customers (
                 id INT PRIMARY KEY AUTO_INCREMENT,
@@ -206,7 +184,6 @@ class BillingManager {
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (package_id) REFERENCES packages (id) ON DELETE SET NULL
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`,
-
             // 3. Tabel tagihan
             `CREATE TABLE IF NOT EXISTS invoices (
                 id INT PRIMARY KEY AUTO_INCREMENT,
@@ -231,7 +208,6 @@ class BillingManager {
                 FOREIGN KEY (customer_id) REFERENCES customers (id) ON DELETE CASCADE,
                 FOREIGN KEY (package_id) REFERENCES packages (id) ON DELETE SET NULL
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`,
-
             // 4. Tabel pembayaran
             `CREATE TABLE IF NOT EXISTS payments (
                 id INT PRIMARY KEY AUTO_INCREMENT,
@@ -243,7 +219,6 @@ class BillingManager {
                 notes TEXT,
                 FOREIGN KEY (invoice_id) REFERENCES invoices (id) ON DELETE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`,
-
             // 5. Tabel transaksi payment gateway
             `CREATE TABLE IF NOT EXISTS payment_gateway_transactions (
                 id INT PRIMARY KEY AUTO_INCREMENT,
@@ -272,7 +247,6 @@ class BillingManager {
                 commission_amount DECIMAL(10,2) DEFAULT 0,
                 payment_date DATETIME DEFAULT CURRENT_TIMESTAMP
             ) ENGINE=InnoDB;`,
-
             // 7. Tabel Agen (Reseller)
             `CREATE TABLE IF NOT EXISTS agents (
                 id INT PRIMARY KEY AUTO_INCREMENT,
@@ -285,7 +259,6 @@ class BillingManager {
                 status VARCHAR(50) DEFAULT 'active',
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`,
-
             // 8. Tabel Permintaan Topup Agen
             `CREATE TABLE IF NOT EXISTS agent_topup_requests (
                 id INT PRIMARY KEY AUTO_INCREMENT,
@@ -296,7 +269,6 @@ class BillingManager {
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (agent_id) REFERENCES agents(id) ON DELETE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`,
-
             // 9. Tabel Mediator / Sales (Makelar)
             `CREATE TABLE IF NOT EXISTS mediators (
                 id INT PRIMARY KEY AUTO_INCREMENT,
@@ -307,7 +279,6 @@ class BillingManager {
                 status VARCHAR(50) DEFAULT 'active',
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`,
-
             // 10. Tabel Log Voucher Agen
             `CREATE TABLE IF NOT EXISTS agent_vouchers_logs (
                 id INT PRIMARY KEY AUTO_INCREMENT,
@@ -319,7 +290,6 @@ class BillingManager {
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (agent_id) REFERENCES agents(id) ON DELETE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`,
-
             // 11. Tabel Pendaftaran Calon Pelanggan (Pending Registrations)
             `CREATE TABLE IF NOT EXISTS pending_registrations (
                 id INT PRIMARY KEY AUTO_INCREMENT,
@@ -337,7 +307,6 @@ class BillingManager {
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`,
             
-            // --- SULTAN PATCH 5: TABEL TEKNISI ---
             `CREATE TABLE IF NOT EXISTS technicians (
                 id INT PRIMARY KEY AUTO_INCREMENT,
                 name VARCHAR(255) NOT NULL,
@@ -347,7 +316,6 @@ class BillingManager {
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`,
             
-            // --- SULTAN PATCH 6: TABEL LOG AKTIVITAS (AUDIT TRAIL) ---
             `CREATE TABLE IF NOT EXISTS activity_logs (
                 id INT PRIMARY KEY AUTO_INCREMENT,
                 user_id VARCHAR(50) NOT NULL,
@@ -368,7 +336,6 @@ class BillingManager {
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`
         ];
-
         // Eksekusi semua query pembuatan tabel
         for (const sql of tables) {
             try {
@@ -392,7 +359,6 @@ class BillingManager {
             // =========================================================
             "CREATE TABLE IF NOT EXISTS app_settings (setting_key VARCHAR(100) PRIMARY KEY, value TEXT)",
             "CREATE TABLE IF NOT EXISTS settings (id INT AUTO_INCREMENT PRIMARY KEY, \`key\` VARCHAR(100) UNIQUE, value TEXT)",
-
             // =========================================================
             // TABEL: CUSTOMERS (19 Kolom)
             // =========================================================
@@ -415,7 +381,6 @@ class BillingManager {
             "ALTER TABLE customers ADD COLUMN IF NOT EXISTS password VARCHAR(255) DEFAULT '123456'",
             "ALTER TABLE customers ADD COLUMN IF NOT EXISTS nas_ip VARCHAR(100) NULL",
             "ALTER TABLE customers ADD COLUMN IF NOT EXISTS installation_date DATE DEFAULT NULL AFTER join_date",
-
             // =========================================================
             // TABEL: INVOICES (19 Kolom + 1 Gembok Keamanan)
             // =========================================================
@@ -438,7 +403,6 @@ class BillingManager {
             "ALTER TABLE invoices ADD COLUMN IF NOT EXISTS created_at DATETIME DEFAULT CURRENT_TIMESTAMP",
             "ALTER TABLE invoices ADD COLUMN IF NOT EXISTS paid_at DATETIME NULL",
             "CREATE UNIQUE INDEX IF NOT EXISTS unique_monthly_cycle ON invoices (customer_id, month, year)",
-
             // =========================================================
             // TABEL: PACKAGES (13 Kolom)
             // =========================================================
@@ -454,7 +418,6 @@ class BillingManager {
             "ALTER TABLE packages ADD COLUMN IF NOT EXISTS is_for_agent TINYINT(1) DEFAULT 0",
             "ALTER TABLE packages ADD COLUMN IF NOT EXISTS billing_type VARCHAR(50) DEFAULT 'fixed'",
             "ALTER TABLE packages ADD COLUMN IF NOT EXISTS active_period INT(11) DEFAULT 30",
-
             // =========================================================
             // TABEL: FINANCE_REPORTS (16 Kolom) - OBAT RP 0 LUNAS
             // =========================================================
@@ -474,7 +437,6 @@ class BillingManager {
             "ALTER TABLE finance_reports ADD COLUMN IF NOT EXISTS agent_id INT(11) NULL",
             "ALTER TABLE finance_reports MODIFY COLUMN IF EXISTS amount DECIMAL(10,2) DEFAULT 0.00",
             "ALTER TABLE finance_reports MODIFY COLUMN IF EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
-
             // =========================================================
             // TABEL: AGENTS (11 Kolom)
             // =========================================================
@@ -488,7 +450,6 @@ class BillingManager {
             "ALTER TABLE agents ADD COLUMN IF NOT EXISTS balance DECIMAL(10,2) DEFAULT 0.00",
             "ALTER TABLE agents ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'active'",
             "ALTER TABLE agents ADD COLUMN IF NOT EXISTS created_at DATETIME DEFAULT CURRENT_TIMESTAMP",
-
             // =========================================================
             // TABEL: AGENT_VOUCHERS_LOGS (8 Kolom)
             // =========================================================
@@ -499,7 +460,6 @@ class BillingManager {
             "ALTER TABLE agent_vouchers_logs ADD COLUMN IF NOT EXISTS price_sell DECIMAL(10,2) NULL",
             "ALTER TABLE agent_vouchers_logs ADD COLUMN IF NOT EXISTS price_cost DECIMAL(10,2) NULL",
             "ALTER TABLE agent_vouchers_logs ADD COLUMN IF NOT EXISTS created_at DATETIME DEFAULT CURRENT_TIMESTAMP",
-
             // =========================================================
             // TABEL: TECHNICIANS (7 Kolom)
             // =========================================================
@@ -509,7 +469,6 @@ class BillingManager {
             "ALTER TABLE technicians ADD COLUMN IF NOT EXISTS address TEXT NULL",
             "ALTER TABLE technicians ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'active'",
             "ALTER TABLE technicians ADD COLUMN IF NOT EXISTS created_at DATETIME DEFAULT CURRENT_TIMESTAMP",
-
             // =========================================================
             // TABEL: PENDING_REGISTRATIONS (20 Kolom) - SOLUSI TEKNISI
             // =========================================================
@@ -539,7 +498,6 @@ class BillingManager {
             "ALTER TABLE nas ADD COLUMN IF NOT EXISTS api_port VARCHAR(10) DEFAULT '8728'",
             "ALTER TABLE nas ADD COLUMN IF NOT EXISTS mikrotik_version VARCHAR(10) DEFAULT 'v6'",
             
-            // ?? TAMBAHAN SULTAN: Wadah untuk menyimpan nama Admin / Kasir
             "ALTER TABLE payments ADD COLUMN IF NOT EXISTS admin_name VARCHAR(100) DEFAULT 'SYSTEM'"
         ];
         
@@ -554,7 +512,6 @@ class BillingManager {
             }
         }
         
-        // ?? Fix Username Kosong (SOP SULTAN: Username disamakan dengan Nama Asli)
         try {
             await pool.query(`
                 UPDATE customers 
@@ -567,7 +524,7 @@ class BillingManager {
     }
     
     // =========================================================
-    // ?? PACKAGE MANAGEMENT (VERSI MARIADB / SULTAN)
+    // Initialize database connection pool
     // =========================================================
     async createPackage(packageData) {
         try {
@@ -596,7 +553,6 @@ class BillingManager {
             throw error;
         }
     }
-
     async getPackageById(id) {
         try {
             const sql = `SELECT * FROM packages WHERE id = ?`;
@@ -606,7 +562,6 @@ class BillingManager {
             throw error;
         }
     }
-
     // ? Tambahkan parameter adminName (default 'admin')
     async updatePackage(id, packageData, adminName = 'admin') {
         try {
@@ -614,7 +569,6 @@ class BillingManager {
             
             // 1. Anti-Nol Beranak: Amankan Harga (Hanya angka murni)
             const cleanPrice = price ? String(price).replace(/[^0-9]/g, '') : 0;
-
             const sql = `
                 UPDATE packages SET 
                     name = ?, 
@@ -637,20 +591,16 @@ class BillingManager {
                 active_period || 30,
                 id
             ]);
-
-            // 2. CCTV SULTAN: Rekam jejak perubahan paket
             setImmediate(() => {
                 // ? Gunakan variabel adminName biar jujur nyatat nama pelakunya
                 logActivity(adminName, 'UPDATE_PACKAGE', `Mengubah Paket: ${name} (Harga: Rp ${cleanPrice})`).catch(() => {});
             });
-
             return { id, ...packageData, price: cleanPrice };
         } catch (error) {
             console.error('?? [BILLING] Update Package Error:', error.message);
             throw error;
         }
     }
-
     async deletePackage(id) {
         try {
             // Gunakan soft delete agar data invoice lama tidak rusak
@@ -661,9 +611,8 @@ class BillingManager {
             throw error;
         }
     }
-
     // =========================================================
-    // ??? CUSTOMER MANAGEMENT (MURNI MARIADB + LOGIKA HOTSPOT - SULTAN SYNC)
+    // Initialize database connection pool
     // =========================================================
     async createCustomer(customerData) {
         // MENGGUNAKAN TRANSACTION AGAR WEB & RADIUS SINKRON 100%
@@ -680,20 +629,15 @@ class BillingManager {
             const finalPassword = password || '123456'; // Default password portal web
             const autoPPPoEUsername = pppoe_username || this.generatePPPoEUsername(phone);
             const autoPPPoEPassword = pppoe_password || '123456'; // Default password mikrotik
-
-            // --- LOGIKA OTOMATISASI TANGGAL SULTAN ---
             // A. Gunakan installation_date dari web, jika tidak ada pakai hari ini (YYYY-MM-DD)
             const todayStr = new Date().toISOString().split('T')[0];
             const finalInstallationDate = installation_date || todayStr;
-
             // B & C. Ambil Billing Day Asli (Tanpa Pemangkasan Paksa 28)
             const instDateObj = new Date(finalInstallationDate);
             const normBillingDay = billing_day ? parseInt(billing_day) : instDateObj.getDate();
             
             // D. Join Date
             const finalJoinDate = join_date || new Date().toISOString().slice(0, 19).replace('T', ' ');
-
-            // --- LOGIKA KRUSIAL SULTAN FIX (ANTI LONCAT) ---
             // 1. Arahkan ke tanggal 1 bulan depan dulu agar aman
             const expDate = new Date(instDateObj.getFullYear(), instDateObj.getMonth() + 1, 1);
             
@@ -706,7 +650,6 @@ class BillingManager {
             
             // Format untuk SQL MariaDB (YYYY-MM-DD HH:mm:ss)
             const sqlExpiredDate = expDate.toISOString().slice(0, 19).replace('T', ' ');
-
             // 2. Simpan ke Database Utama (MariaDB - Web)
             // Menambahkan kolom installation_date dan expired_date (Total 16 kolom)
             const sql = `
@@ -725,20 +668,16 @@ class BillingManager {
                 normBillingDay, finalJoinDate, finalInstallationDate,
                 sqlExpiredDate // <--- [FIX] Sekarang tersimpan di DB, agar EJS bisa menampilkan EXP
             ]);
-
             const newCustomerId = result.insertId;
-
             // 3. ?? AUTO-SINKRON RADIUS (MIKROTIK)
             // Pelanggan baru langsung didaftarkan ke server Radius agar bisa langsung konek!
             if (autoPPPoEUsername) {
                 const radiusProfile = pppoe_profile || 'default';
                 
                 const formattedExp = typeof this.formatRadiusDate === 'function' ? this.formatRadiusDate(expDate) : '01 Jan 2030 23:59:59';
-
                 // Bersihkan barangkali ada sisa sampah dengan username yang sama
                 await conn.execute("DELETE FROM radcheck WHERE username = ?", [autoPPPoEUsername]);
                 await conn.execute("DELETE FROM radusergroup WHERE username = ?", [autoPPPoEUsername]);
-
                 // Tanamkan Password & Gembok Expired
                 await conn.execute("INSERT INTO radcheck (username, attribute, op, value) VALUES (?, 'Cleartext-Password', ':=', ?)", [autoPPPoEUsername, autoPPPoEPassword]);
                 await conn.execute("INSERT INTO radcheck (username, attribute, op, value) VALUES (?, 'Expiration', ':=', ?)", [autoPPPoEUsername, formattedExp]);
@@ -772,7 +711,6 @@ class BillingManager {
             };
         });
     }
-
     async getCustomerByUsername(username) {
         try {
             const sql = `
@@ -787,7 +725,6 @@ class BillingManager {
             throw error;
         }
     }
-
     async getCustomerById(id) {
         try {
             const sql = `
@@ -827,12 +764,10 @@ class BillingManager {
             throw error;
         }
     }
-
     async getCustomerByNameOrPhone(searchTerm) {
         try {
             const cleanPhone = searchTerm.replace(/\D/g, '');
             const likeTerm = `%${searchTerm}%`;
-
             const sql = `
                 SELECT c.*, p.name as package_name, p.price as package_price, p.speed as package_speed,
                        CASE 
@@ -854,24 +789,20 @@ class BillingManager {
                     END
                 LIMIT 1
             `;
-
             const params = [
                 cleanPhone, likeTerm, likeTerm, // Untuk WHERE
                 cleanPhone, searchTerm, `${searchTerm}%`, likeTerm // Untuk ORDER BY
             ];
-
             const [rows] = await pool.query(sql, params);
             return rows[0] || null;
         } catch (error) {
             throw error;
         }
     }
-
     async findCustomersByNameOrPhone(searchTerm) {
         try {
             const cleanPhone = searchTerm.replace(/\D/g, '');
             const likeTerm = `%${searchTerm}%`;
-
             const sql = `
                 SELECT c.*, p.name as package_name, p.price as package_price, p.speed as package_speed,
                        CASE 
@@ -893,12 +824,10 @@ class BillingManager {
                     END
                 LIMIT 5
             `;
-
             const params = [
                 cleanPhone, likeTerm, likeTerm, // Untuk WHERE
                 cleanPhone, searchTerm, `${searchTerm}%`, likeTerm // Untuk ORDER BY
             ];
-
             const [rows] = await pool.query(sql, params);
             return rows || [];
         } catch (error) {
@@ -913,7 +842,6 @@ class BillingManager {
     async updateCustomer(phone, customerData) {
         return this.updateCustomerByPhone(phone, customerData);
     }
-
     async updateCustomerByPhone(oldPhone, customerData) {
         try {
             const { name, username, phone, pppoe_username, email, address, package_id, pppoe_profile, status, auto_suspension, billing_day } = customerData;
@@ -932,7 +860,6 @@ class BillingManager {
                 auto_suspension !== undefined ? auto_suspension : oldCustomer.auto_suspension, 
                 normBillingDay, oldCustomer.id
             ]);
-
             // Background Task: Update tag di GenieACS (Tanpa bikin loading muter)
             setImmediate(async () => {
                 const newPhone = phone || oldPhone;
@@ -962,40 +889,31 @@ class BillingManager {
             throw error;
         }
     }
-
     async deleteCustomer(phone) {
-        // SULTAN SAPU JAGAT: Hapus sampai ke akar biar DB nggak bengkak!
         const conn = await pool.getConnection();
         try {
             const customer = await this.getCustomerByPhone(phone);
             if (!customer) throw new Error('Pelanggan tidak ditemukan');
-
             const customerId = customer.id;
             const activeUser = customer.pppoe_username || customer.username;
-
             await conn.beginTransaction();
             // Matikan gembok relasi sebentar biar bisa hapus massal
             await conn.query("SET FOREIGN_KEY_CHECKS = 0");
-
             // 1. Bersihkan Radius
             if (activeUser) {
                 await conn.execute("DELETE FROM radcheck WHERE username = ?", [activeUser]);
                 await conn.execute("DELETE FROM radusergroup WHERE username = ?", [activeUser]);
                 await conn.execute("DELETE FROM radreply WHERE username = ?", [activeUser]);
             }
-
             // 2. Bersihkan Transaksi & Invoice
             await conn.execute("DELETE FROM payments WHERE invoice_id IN (SELECT id FROM invoices WHERE customer_id = ?)", [customerId]);
             await conn.execute("DELETE FROM payment_gateway_transactions WHERE invoice_id IN (SELECT id FROM invoices WHERE customer_id = ?)", [customerId]);
             await conn.execute("DELETE FROM invoices WHERE customer_id = ?", [customerId]);
-
             // 3. Hapus Data Utama
             await conn.execute("DELETE FROM customers WHERE id = ?", [customerId]);
-
             // Kunci lagi relasinya
             await conn.query("SET FOREIGN_KEY_CHECKS = 1");
             await conn.commit();
-
             // Background Task: Bersihkan GenieACS & Tendang dari Mikrotik
             setImmediate(async () => {
                 if (customer.phone) {
@@ -1016,7 +934,6 @@ class BillingManager {
                             JOIN nas n ON r.nasipaddress = n.nasname 
                             WHERE r.username = ? AND r.acctstoptime IS NULL LIMIT 1
                         `, [activeUser]);
-
                         if (nas.length > 0) {
                             const { nasipaddress, secret, framedipaddress, callingstationid } = nas[0];
                             
@@ -1034,7 +951,6 @@ class BillingManager {
                     }
                 }
             });
-
             return { username: customer.username, deleted: true, message: "Data dihapus bersih sampai ke Radius" };
         } catch (error) {
             await conn.rollback();
@@ -1044,8 +960,7 @@ class BillingManager {
             conn.release();
         }
     }
-
-    // ?? INVOICE MANAGEMENT (MARIADB) - FINAL SULTAN V5 (FULL ENGINE)
+    // Initialize database connection pool
     // =========================================================
     async createInvoice(invoiceData) {
         try {
@@ -1054,14 +969,12 @@ class BillingManager {
             
             // 2. Standarisasi Tanggal Jatuh Tempo
             const finalDueDate = due_date || new Date().toISOString().slice(0, 10);
-
             // 3. KUNCI PREFIX INVOICE (ANTI NGACO)
             // Mengambil bulan/tahun persis dari jadwal target, bukan jam server!
             const targetYear = year || new Date(finalDueDate).getFullYear();
             const targetMonth = String(month || (new Date(finalDueDate).getMonth() + 1)).padStart(2, '0');
-            const randomSuffix = Math.floor(1000 + Math.random() * 9000); // Format 4 Digit seperti di gambar Bos
+            const randomSuffix = Math.floor(1000 + Math.random() * 9000);
             const invoice_number = `INV-${targetYear}${targetMonth}-${randomSuffix}`;
-
             // =================================================================
             // 2. RADAR V5: KUNCI MATI BULANAN VIA ENGINE DATABASE
             // =================================================================
@@ -1069,7 +982,7 @@ class BillingManager {
             const isExpense = !package_id || (notes && notes.toLowerCase().includes('pln'));
             
             if (!isExpense) {
-                // SULTAN FIX: Gunakan MONTH(?) & YEAR(?) langsung dari MariaDB.
+    // Initialize database connection pool
                 const [existingMonth] = await pool.query(
                     `SELECT id FROM invoices 
                      WHERE customer_id = ? 
@@ -1078,13 +991,11 @@ class BillingManager {
                        AND status != 'cancelled' LIMIT 1`,
                     [customer_id, finalDueDate, finalDueDate]
                 );
-
                 if (existingMonth.length > 0) {
-                    console.log(`[ALGOJO] Melewati ID ${customer_id}: Tagihan bulan untuk ${finalDueDate} sudah terdata.`);
+                    console.log(`[SUSPENSION-ENGINE] Melewati ID ${customer_id}: Tagihan bulan untuk ${finalDueDate} sudah terdata.`);
                     return { skipped: true, message: "Tagihan sudah ada di bulan ini" };
                 }
             }
-
             // =================================================================
             // 3. EKSEKUSI SIMPAN: NILAI MONTH/YEAR DIHITUNG OTOMATIS OLEH DB
             // =================================================================
@@ -1104,13 +1015,11 @@ class BillingManager {
                 finalDueDate, // Parameter untuk YEAR(?) database
                 notes || ''
             ]);
-
             // Jika Gembok UNIQUE INDEX (Tanggal Persis Sama) menolak data
             if (result.affectedRows === 0) {
-                 console.log(`[ALGOJO] Ditolak Gembok Baja MariaDB (Unique Tanggal) untuk ID ${customer_id}`);
+                 console.log(`[SUSPENSION-ENGINE] Ditolak Gembok Baja MariaDB (Unique Tanggal) untuk ID ${customer_id}`);
                  return { skipped: true, message: "Ditolak oleh Unique Constraint Database" };
             }
-
             return { id: result.insertId, invoice_number, ...invoiceData };
         } catch (error) {
             console.error("? Eror Fatal createInvoice:", error.message);
@@ -1142,7 +1051,6 @@ class BillingManager {
             throw error;
         }
     }
-
     async getInvoicesByCustomer(customerId) {
         try {
             const sql = `
@@ -1162,7 +1070,6 @@ class BillingManager {
             throw error;
         }
     }
-
     async getCustomersByPackage(packageId) {
         try {
             const sql = `
@@ -1194,7 +1101,6 @@ class BillingManager {
             throw error;
         }
     }
-
     async updateInvoice(id, invoiceData) {
         try {
             const { customer_id, package_id, amount, due_date, notes } = invoiceData;
@@ -1205,12 +1111,10 @@ class BillingManager {
             throw error;
         }
     }
-
     async deleteInvoice(id) {
         return this.withTransaction(async (conn) => {
             const invoice = await this.getInvoiceById(id);
             if (!invoice) throw new Error('Invoice tidak ditemukan');
-
             // Hapus riwayat pembayaran & transaksi gateway yang menempel di invoice ini
             await conn.execute("DELETE FROM payments WHERE invoice_id = ?", [id]);
             await conn.execute("DELETE FROM payment_gateway_transactions WHERE invoice_id = ?", [id]);
@@ -1221,9 +1125,7 @@ class BillingManager {
             return invoice;
         });
     }
-
     // =========================================================
-    // ?? BAJAKAN FUNGSI JADUL (DIARAHKAN PAKSA KE JANTUNG SULTAN)
     // =========================================================
     async recordPayment(paymentData) {
         try {
@@ -1234,26 +1136,20 @@ class BillingManager {
                 console.error("? [RECORD-PAYMENT ERROR] invoice_id tidak ditemukan!");
                 return { success: false, message: 'Gagal: ID Invoice tidak terbaca dari sistem.' };
             }
-
             // 2. Buat nomor referensi otomatis (Agar kolom Referensi tidak nol/strip)
             const refGenerate = paymentData.reference_number || `CASH-${Date.now().toString().slice(-6)}`;
-
-            // 3. Panggil Jantung Sultan
             const result = await this.sultanManualPayment(targetInvoiceId, null, {
                 payment_method: paymentData.payment_method || 'Cash/Manual',
                 reference_number: refGenerate,
                 notes: paymentData.notes || 'Pelunasan via Tombol Dompet'
             });
-
             // 4. JURUS KUNCI: Kirim jawaban yang PASTI memicu centang hijau di EJS
-            // Kita return ulang hasil dari sultanManualPayment yang sudah punya success: true
             return { 
                 success: true, 
                 message: result.message || 'Pembayaran Berhasil Diverifikasi!',
                 id: targetInvoiceId,
                 ...result 
             };
-
         } catch (error) {
             console.error('?? [RECORD-PAYMENT CRITICAL ERROR]:', error.message);
             // JANGAN PAKAI 'throw error', tapi kirim JSON success: false agar EJS tidak crash
@@ -1263,7 +1159,6 @@ class BillingManager {
             };
         }
     }
-
     async getPayments(invoiceId = null) {
         try {
             let sql = `
@@ -1285,7 +1180,6 @@ class BillingManager {
             throw error;
         }
     }
-
     async getPaymentById(id) {
         try {
             const sql = `
@@ -1316,7 +1210,6 @@ class BillingManager {
             throw error;
         }
     }
-
     async deletePayment(id) {
         try {
             const payment = await this.getPaymentById(id);
@@ -1329,7 +1222,6 @@ class BillingManager {
             throw error;
         }
     }
-
     // =========================================================
     // ?? UTILITY FUNCTIONS (GENERATE OTOMATIS)
     // =========================================================
@@ -1340,11 +1232,9 @@ class BillingManager {
         const random = Math.floor(1000 + Math.random() * 9000).toString();
         return `INV-${year}${month}-${random}`;
     }
-
     generateUsername(phone) {
         return phone || '';
     }
-
     generatePPPoEUsername(phone) {
         return phone || '';
     }
@@ -1360,7 +1250,6 @@ class BillingManager {
         const sec = String(dateObj.getSeconds()).padStart(2, '0');
         return `${d} ${m} ${y} ${h}:${min}:${sec}`;
     }
-
     // =========================================================
     // ?? DASHBOARD STATS & OVERDUE (MARIADB MURNI)
     // =========================================================
@@ -1384,7 +1273,6 @@ class BillingManager {
             throw error;
         }
     }
-
     async getOverdueInvoices() {
         try {
             // Gunakan CURDATE() bawaan MariaDB, dan LEFT JOIN ke packages
@@ -1403,7 +1291,6 @@ class BillingManager {
             throw error;
         }
     }
-
     // Tutup koneksi (Hanya dipanggil kalau server mati/restart)
     async close() {
         try {
@@ -1413,7 +1300,6 @@ class BillingManager {
             console.error('? [BILLING] Error closing MariaDB:', error);
         }
     }
-
     // =========================================================
     // ?? ONLINE PAYMENT GATEWAY (TRIPAY/MIDTRANS) + CCTV
     // =========================================================
@@ -1429,13 +1315,11 @@ class BillingManager {
             const [invRows] = await conn.query(sqlInv, [invoiceId]);
             if (invRows.length === 0) throw new Error('Invoice tidak ditemukan');
             const invoice = invRows[0];
-
             // 2. Ambil detail Pelanggan
             const sqlCust = `SELECT * FROM customers WHERE id = ?`;
             const [custRows] = await conn.query(sqlCust, [invoice.customer_id]);
             if (custRows.length === 0) throw new Error('Pelanggan tidak ditemukan');
             const customer = custRows[0];
-
             // 3. Susun Data untuk Gateway
             const paymentData = {
                 id: invoice.id,
@@ -1447,13 +1331,11 @@ class BillingManager {
                 package_name: invoice.package_name || 'Paket Internet',
                 package_id: invoice.package_id
             };
-
             // 4. Proses ke Gateway (Tripay/Midtrans)
             const paymentManager = this.getPaymentGateway();
             if (!paymentManager) throw new Error('Modul Payment Gateway belum siap');
             
             const paymentResult = await paymentManager.createPayment(paymentData, gateway);
-
             // 5. Simpan transaksi pending ke Database
             const sqlTx = `
                 INSERT INTO payment_gateway_transactions 
@@ -1464,7 +1346,6 @@ class BillingManager {
                 invoiceId, paymentResult.gateway, paymentResult.order_id, 
                 paymentResult.payment_url, paymentResult.token, invoice.amount
             ]);
-
             // 6. Update URL dan Token di Tabel Invoice Utama
             const sqlUpdateInv = `
                 UPDATE invoices 
@@ -1485,7 +1366,6 @@ class BillingManager {
                     await logActivity('PELANGGAN', 'GATEWAY_INIT', logMsg, req); 
                 });
             }
-
             return paymentResult;
         });
     }
@@ -1496,10 +1376,8 @@ class BillingManager {
         return this.withTransaction(async (conn) => {
             const invoice = await this.getInvoiceById(invoiceId);
             if (!invoice) throw new Error('Invoice tidak ditemukan');
-
             const customer = await this.getCustomerById(invoice.customer_id);
             if (!customer) throw new Error('Pelanggan tidak ditemukan');
-
             const paymentData = {
                 id: invoice.id,
                 invoice_number: invoice.invoice_number,
@@ -1511,22 +1389,17 @@ class BillingManager {
                 package_id: invoice.package_id,
                 payment_method: method
             };
-
             const pg = this.getPaymentGateway();
             if (!pg) throw new Error('Modul Payment Gateway belum siap');
             
             const paymentResult = await pg.createPaymentWithMethod(paymentData, gateway, method);
-
             // Simpan Transaksi Gateway via MariaDB (conn.execute)
             const sqlTx = `INSERT INTO payment_gateway_transactions (invoice_id, gateway, order_id, payment_url, token, amount, status, payment_type) VALUES (?, ?, ?, ?, ?, ?, 'pending', ?)`;
             await conn.execute(sqlTx, [invoiceId, paymentResult.gateway, paymentResult.order_id, paymentResult.payment_url, paymentResult.token, invoice.amount, method || 'all']);
-
             // Update Invoice via MariaDB (conn.execute)
             const sqlInv = `UPDATE invoices SET payment_gateway = ?, payment_token = ?, payment_url = ?, payment_status = 'pending' WHERE id = ?`;
             await conn.execute(sqlInv, [paymentResult.gateway, paymentResult.token, paymentResult.payment_url, invoiceId]);
-
             // =========================================================
-            // ?? CCTV SULTAN (REKAM JEJAK PRESISI - SESUAI TERMINAL)
             // =========================================================
             if (typeof logActivity === 'function') {
                 setImmediate(async () => {
@@ -1543,7 +1416,6 @@ class BillingManager {
     }
     
     // =========================================================
-    // ?? WEBHOOK HANDLER (TERKONEKSI KE SULTAN ENGINE)
     // =========================================================
     async handlePaymentWebhook(payload, gateway) {
         try {
@@ -1556,7 +1428,6 @@ class BillingManager {
             // Pencarian transaksi pakai pool.query (MariaDB)
             let [txRows] = await pool.query(`SELECT * FROM payment_gateway_transactions WHERE order_id = ? AND gateway = ?`, [result.order_id, gateway]);
             let transaction = txRows[0];
-
             // Jika transaksi tidak ada (fallback pakai nomor invoice)
             if (!transaction) {
                 const invNum = (result.order_id || '').replace('INV-', ''); 
@@ -1564,7 +1435,6 @@ class BillingManager {
                 if (invRows.length === 0) throw new Error('Transaksi dan Invoice tidak ditemukan');
                 transaction = { id: null, invoice_id: invRows[0].id };
             }
-
             // Update status transaksi di database (pool.execute)
             if (transaction.id) {
                 await pool.execute(
@@ -1572,16 +1442,12 @@ class BillingManager {
                     [result.status, result.payment_type || null, result.fraud_status || null, transaction.id]
                 );
             }
-
-            // ?? CCTV SULTAN (Rekam Proses Webhook)
             setImmediate(() => {
                 // ? Ubah 'system' jadi nama robot yang lebih gagah dan spesifik
                 const namaRobot = `SISTEM (${gateway.toUpperCase()})`; 
                 
                 logActivity(namaRobot, 'WEBHOOK_PROCESSED', `Update status gateway: ${result.order_id} -> ${result.status}`).catch(e => {});
             });
-
-            // ?? JIKA LUNAS -> OPER KE MESIN SULTAN! (Otomatis urus Radius, Mikrotik, Log)
             if (result.status === 'success' || result.status === 'PAID') {
                 console.log(`[WEBHOOK] LUNAS! Mengeksekusi Auto-Restore untuk Invoice ID: ${transaction.invoice_id}`);
                 await this.sultanManualPayment(transaction.invoice_id, null, { 
@@ -1590,14 +1456,12 @@ class BillingManager {
                     adminId: 'TRIPAY OTOMATIS'
                 });
             }
-
             return { success: true, message: 'Webhook sukses diproses', invoice_id: transaction.invoice_id };
         } catch (error) {
             console.error(`[WEBHOOK ERROR]`, error.message);
             throw error;
         }
     }
-
     async getPaymentTransactions(invoiceId = null) {
         let sql = `SELECT pgt.*, i.invoice_number, c.name as customer_name FROM payment_gateway_transactions pgt JOIN invoices i ON pgt.invoice_id = i.id JOIN customers c ON i.customer_id = c.id`;
         const params = [];
@@ -1610,9 +1474,7 @@ class BillingManager {
         const [rows] = await pool.query(sql, params);
         return rows;
     }
-
     // =========================================================
-    // ?? OTOT STATUS: CEK GATEWAY AKTIF (SULTAN V2 SAFE MODE)
     // =========================================================
     async getGatewayStatus() {
         try {
@@ -1632,7 +1494,6 @@ class BillingManager {
             return { active: false, error: e.message };
         }
     }
-
     // =========================================================
     // ?? WHATSAPP NOTIFICATION (SINKRON TEMPLATE WEB)
     // =========================================================
@@ -1654,7 +1515,7 @@ class BillingManager {
         }
     }
     
-     // --- OTOT 1: LOGIKA PROSES TRIPAY (Pindahan dari payment.js) ---
+    // Financial ledger and transaction processing
      async processTripaySelection(invoice_number, method, hostname) {
         // 1. [BILLING JS] Yang berhak kueri ke database
         const [invRows] = await pool.query(`
@@ -1663,22 +1524,18 @@ class BillingManager {
             JOIN customers c ON i.customer_id = c.id 
             WHERE i.invoice_number = ?
         `, [invoice_number]);
-
         if (invRows.length === 0) throw new Error("Invoice tidak ditemukan.");
         const inv = invRows[0];
-
         // 2. [BILLING JS] Yang berhak ambil setting
         const [setRows] = await pool.query("SELECT value FROM app_settings WHERE setting_key = 'payment_gateway_config'");
         if (setRows.length === 0) throw new Error("Config Payment belum diatur.");
         
         const tripayConfig = JSON.parse(setRows[0].value).tripay;
         const amount = Math.floor(inv.amount);
-
         // 3. [BILLING JS] Yang urus keamanan (Crypto)
         const signature = crypto.createHmac('sha256', tripayConfig.privateKey.trim())
             .update(tripayConfig.merchantCode.trim() + invoice_number + amount)
             .digest('hex');
-
         // 4. [BILLING JS] Yang tembak API Tripay (Axios)
         const response = await axios.post('https://tripay.co.id/api/transaction/create', {
             'method': method,
@@ -1694,7 +1551,6 @@ class BillingManager {
         }, {
             headers: { 'Authorization': 'Bearer ' + tripayConfig.apiKey.trim() }
         });
-
         if (response.data.success) {
             // Update URL ke database
             await pool.query("UPDATE invoices SET tripay_url = ? WHERE id = ?", [response.data.data.checkout_url, inv.id]);
@@ -1704,27 +1560,22 @@ class BillingManager {
         }
     }
     
-    // --- OTOT 2: VALIDASI & INISIASI PEMBAYARAN ONLINE ---
     async initiateOnlinePayment(invoice_id, gateway) {
         if (!invoice_id) throw new Error('Invoice ID wajib diisi');
-
         // 1. Cek Invoice (Database Power)
         const invoice = await this.getInvoiceById(invoice_id);
         if (!invoice) throw new Error('Invoice tidak ditemukan');
-
         // 2. Cek Validasi Nominal (Business Logic Power)
         const status = await this.getGatewayStatus();
         const activeGateway = gateway || status?.active;
-
         if (activeGateway === 'tripay' && Number(invoice.amount) < 10000) {
             throw new Error('Gagal: Minimal pembayaran via Tripay adalah Rp 10.000');
         }
-
         // 3. Eksekusi proses pembayaran yang sudah ada
         return await this.createOnlinePayment(invoice_id, gateway);
     }
         
-    // --- OTOT TAMBAHAN: AMBIL DETAIL INVOICE BY ID ---
+    // Financial ledger and transaction processing
     async getInvoiceById(id) {
         try {
             const sql = `
@@ -1743,14 +1594,12 @@ class BillingManager {
         }
     }
     
-    // --- OTOT 5: WEBHOOK TRIPAY HYBRID (Pindahan dari payment.js) ---
+    // Financial ledger and transaction processing
     async handleTripayWebhookHybrid(payload) {
         const { status, merchant_ref } = payload;
         console.log(`[TRIPAY Webhook] Ref: ${merchant_ref} - Status: ${status}`);
-
         // 1. Jika belum lunas, abaikan tapi kasih respon sukses ke Tripay
         if (status !== 'PAID') return { success: true };
-
         // -------------------------------------------------------
         // LOGIKA A: JIKA INI ADALAH TOPUP SALDO AGEN
         // -------------------------------------------------------
@@ -1760,7 +1609,6 @@ class BillingManager {
                     "SELECT id, agent_id, amount FROM agent_topup_requests WHERE proof_img LIKE ? AND status = 'pending' FOR UPDATE",
                     [`%${merchant_ref}%`]
                 );
-
                 if (topupRows.length > 0) {
                     const topup = topupRows[0];
                     // Update Saldo Agents
@@ -1774,24 +1622,21 @@ class BillingManager {
                 return { success: true, message: 'Topup sudah pernah diproses' };
             });
         }
-
         // -------------------------------------------------------
         // LOGIKA B: JIKA INI ADALAH PEMBAYARAN BILLING PELANGGAN
         // -------------------------------------------------------
         const [inv] = await pool.query("SELECT id FROM invoices WHERE invoice_number = ?", [merchant_ref]);
         
         if (inv.length > 0) {
-            // Kita gunakan Jantung Sultan (sultanManualPayment) agar Radius, WA, dan MikroTik sinkron otomatis
             return await this.sultanManualPayment(inv[0].id, null, { 
                 payment_method: 'Tripay', 
                 notes: `Otomatis via Webhook Tripay` 
             });
         }
-
         throw new Error('Referensi Transaksi tidak ditemukan di sistem');
     }
     
-    // --- OTOT 6: PENCARIAN INVOICE UNTUK HALAMAN PEMBAYARAN (FINAL) ---
+    // Financial ledger and transaction processing
     async getInvoiceForSelectionPage(invNumber, custId) {
         let sql = `
             SELECT i.*, p.name as package_name, c.name 
@@ -1801,7 +1646,6 @@ class BillingManager {
             WHERE `;
         
         let params = [];
-
         // Logika Pintar: Jika invNumber dikosongkan '-', cari tagihan terbaru milik Cust ID tersebut
         if (invNumber === '-' && custId) {
             sql += `i.customer_id = ? AND i.status = 'unpaid' ORDER BY i.id DESC LIMIT 1`;
@@ -1811,12 +1655,10 @@ class BillingManager {
             sql += `i.invoice_number = ? AND i.status = 'unpaid'`;
             params = [invNumber];
         }
-
         const [rows] = await pool.query(sql, params);
         return rows[0] || null;
     }
     
-    // --- OTOT 8: STATISTIK DASHBOARD LENGKAP ---
     async getDashboardStats() {
         const sql = `
             SELECT 
@@ -1831,8 +1673,7 @@ class BillingManager {
         const [rows] = await pool.query(sql);
         return rows[0];
     }
-
-    // --- OTOT 9: UPDATE CUSTOMER & RADIUS SINKRON (SULTAN VERSION) ---
+    // Update subscriber record
     async updateCustomerFull(id, data) {
         return this.withTransaction(async (conn) => {
             const { name, phone, address, package_id, pppoe_username, pppoe_password, billing_day, status, expired_date } = data;
@@ -1840,15 +1681,12 @@ class BillingManager {
             // 1. Ambil Profile dari Paket
             const [pkg] = await conn.query("SELECT pppoe_profile FROM packages WHERE id = ?", [package_id]);
             const profile = pkg[0]?.pppoe_profile || 'default';
-
-            // 2. Olah Tanggal (Logika Kalender Bos)
             let finalExpDate = expired_date ? `${expired_date} 23:59:59` : null;
             let bDay = billing_day;
             
             if (expired_date) {
                 bDay = parseInt(expired_date.split('-')[2]);
             }
-
             // 3. Update DB Utama
             await conn.execute(`
                 UPDATE customers SET 
@@ -1858,13 +1696,11 @@ class BillingManager {
                 WHERE id = ?`, 
                 [name, phone, address, package_id, status, pppoe_username, pppoe_password, finalExpDate, bDay, profile, id]
             );
-
             // 4. Update Radius
             if (pppoe_username) {
                 const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
                 const d = new Date(finalExpDate);
                 const radDate = `${String(d.getDate()).padStart(2, '0')} ${months[d.getMonth()]} ${d.getFullYear()} 23:59:59`;
-
                 await conn.execute("DELETE FROM radcheck WHERE username = ?", [pppoe_username]);
                 await conn.execute("DELETE FROM radusergroup WHERE username = ?", [pppoe_username]);
                 await conn.execute("INSERT INTO radcheck (username, attribute, op, value) VALUES (?, 'Cleartext-Password', ':=', ?)", [pppoe_username, pppoe_password]);
@@ -1874,8 +1710,7 @@ class BillingManager {
             return { success: true };
         });
     }
-
-    // --- OTOT 10: SINKRON RADIUS MANUAL (SYNC USER) ---
+    // RouterOS and RADIUS policy synchronization
     async syncUserToRadius(customerId) {
         const data = await this.getCustomerById(customerId);
         if (!data || !data.pppoe_username) throw new Error("Data user tidak lengkap");
@@ -1883,7 +1718,6 @@ class BillingManager {
         return this.updateCustomerFull(customerId, data);
     }
     
-    // --- OTOT 11: AMBIL RIWAYAT PEMBAYARAN LENGKAP ---
     async getPaymentHistory() {
         const sql = `
             SELECT 
@@ -1898,8 +1732,7 @@ class BillingManager {
         const [rows] = await pool.query(sql);
         return rows;
     }
-
-    // --- OTOT 12: AMBIL DAFTAR TAGIHAN UNPAID ---
+    // Financial ledger and transaction processing
     async getUnpaidInvoices() {
         const sql = `
             SELECT i.id, i.invoice_number, c.name, i.amount 
@@ -1912,7 +1745,6 @@ class BillingManager {
         return rows;
     }
     
-    // --- OTOT 13: DATA DASHBOARD KOMPLIT (STATS + LISTS) ---
     async getSultanDashboardData() {
         // Kita jalankan 3 kueri sekaligus secara paralel (Promise.all) biar ngebut!
         const [stats, recent, overdue] = await Promise.all([
@@ -1926,7 +1758,6 @@ class BillingManager {
                     (SELECT COALESCE(SUM(amount), 0) FROM payments WHERE amount > 0 AND MONTH(payment_date) = MONTH(CURRENT_DATE()) AND YEAR(payment_date) = YEAR(CURRENT_DATE())) as total_revenue,
                     (SELECT COALESCE(SUM(ABS(amount)), 0) FROM payments WHERE amount < 0 AND MONTH(payment_date) = MONTH(CURRENT_DATE()) AND YEAR(payment_date) = YEAR(CURRENT_DATE())) as total_expense,
                     (SELECT COALESCE(SUM(amount), 0) FROM payments WHERE MONTH(payment_date) = MONTH(CURRENT_DATE()) AND YEAR(payment_date) = YEAR(CURRENT_DATE())) as net_profit,
-
                     (SELECT COUNT(*) FROM invoices WHERE status='paid' AND MONTH(created_at) = MONTH(CURRENT_DATE()) AND YEAR(created_at) = YEAR(CURRENT_DATE())) as paid_invoices,
                     (SELECT COALESCE(SUM(amount), 0) FROM invoices WHERE status='unpaid') as total_unpaid,
                     (SELECT COUNT(*) FROM invoices WHERE status='unpaid') as unpaid_invoices,
@@ -1949,7 +1780,6 @@ class BillingManager {
                 ORDER BY i.due_date ASC LIMIT 5
             `)
         ]);
-
         return {
             stats: stats[0][0],
             recentInvoices: recent[0],
@@ -1957,7 +1787,7 @@ class BillingManager {
         };
     }
     
-    // --- OTOT 14: AMBIL SEMUA PELANGGAN + NAMA PAKET (SULTAN SYNC) ---
+            // Synchronize active session with RADIUS policy
     async getAllCustomers() {
         const sql = `
             SELECT c.*, p.name AS package_name 
@@ -1970,7 +1800,6 @@ class BillingManager {
         return rows;
     }
     
-    // --- OTOT 15: AMBIL PAKET PPPoE (BUKAN UNTUK AGEN) ---
     async getAvailablePackages() {
         const sql = `
             SELECT * FROM packages 
@@ -1981,37 +1810,31 @@ class BillingManager {
         const [rows] = await pool.query(sql);
         return rows;
     }
-
-    // --- OTOT 16: AMBIL DAFTAR NAS (MIKROTIK) ---
+    // RouterOS and RADIUS policy synchronization
     async getNasList() {
         const [rows] = await pool.query("SELECT nasname, shortname FROM nas");
         return rows;
     }
     
-    // --- OTOT 17: DETAIL PELANGGAN FULL (INFO + PAKET + INVOICE) ---
+    // Synchronize subscriber account state
     async getCustomerFullDetail(phone) {
         try {
             // 1. Cari Orangnya Dulu (Fondasi Utama)
             const [custRows] = await pool.query("SELECT * FROM customers WHERE phone = ? LIMIT 1", [phone]);
             
-            if (custRows.length === 0) return null; // Jika ghoib, langsung balik kanan
-
+            if (custRows.length === 0) return null;
             const customer = custRows[0];
-
             // 2. Ambil Data Pendukung secara PARALEL (Ngebut!)
             // Kita tarik daftar paket & riwayat invoice secara bersamaan
             const [packages, invoices] = await Promise.all([
                 pool.query("SELECT * FROM packages ORDER BY price ASC"),
                 pool.query("SELECT * FROM invoices WHERE customer_id = ? ORDER BY id DESC", [customer.id])
             ]);
-
-            // 3. Rakit Jadi Satu Paket Sultan
             return {
                 customer: customer,
                 packages: packages[0] || [],
                 invoices: invoices[0] || []
             };
-
         } catch (error) {
             console.error(`? [BILLING] Error getCustomerFullDetail:`, error.message);
             throw error;
@@ -2024,11 +1847,11 @@ class BillingManager {
                 i.*, 
                 c.name as customer_name, 
                 c.username as customer_username, 
-                -- JURUS SULTAN: Ambil nama dari tabel paket, kalau kosong baru nanya Radius
+                -- Package name resolution with fallback
                 COALESCE(p.name, rg.groupname, 'CUSTOM') as package_name 
             FROM invoices i 
             LEFT JOIN customers c ON i.customer_id = c.id 
-            -- JOIN WAJIB: Biar sinkron sama hasil SELECT MariaDB Bos tadi
+            -- Join with packages table
             LEFT JOIN packages p ON c.package_id = p.id 
             LEFT JOIN radusergroup rg ON c.username = rg.username 
             ORDER BY i.id DESC
@@ -2036,15 +1859,14 @@ class BillingManager {
         const [rows] = await pool.query(sql);
         return rows;
     }
-
-    // --- OTOT 19: AMBIL LIST PELANGGAN (UNTUK DROPDOWN) ---
+    // Synchronize subscriber account state
     async getCustomerListForDropdown() {
         // ?? JUBAH GAIB AKTIF
         const [rows] = await pool.query("SELECT id, name FROM customers WHERE username != 'trx_umum' ORDER BY name ASC");
         return rows;
     }
         
-    // --- OTOT 22: DATA LENGKAP UNTUK FORM EDIT INVOICE ---
+    // Financial ledger and transaction processing
     async getInvoiceEditData(id) {
         try {
             // Kita tarik 3 data sekaligus secara paralel (Ngebut!)
@@ -2061,9 +1883,7 @@ class BillingManager {
                 // C. Daftar Semua Paket (Dropdown)
                 pool.query("SELECT id, name, price FROM packages ORDER BY price ASC")
             ]);
-
             if (invoiceRows[0].length === 0) return null;
-
             return {
                 invoice: invoiceRows[0][0],
                 customers: customerRows[0],
@@ -2075,31 +1895,25 @@ class BillingManager {
         }
     }
     
-    // --- OTOT 23: UPDATE INVOICE & SINKRON RADIUS TOTAL ---
+    // Synchronize subscriber account state
     async syncInvoiceAndUpdateRadius(data) {
         return this.withTransaction(async (conn) => {
             const { id, customer_id, amount, due_date, status, notes } = data;
-
             // 1. UPDATE TABEL INVOICE
             await conn.query(
                 `UPDATE invoices SET amount = ?, due_date = ?, status = ?, notes = ? WHERE id = ?`,
                 [amount, due_date, status, notes, id]
             );
-
             if (customer_id) {
-                // 2. TEKNIK STRING SULTAN (Anti-Meleset)
                 const [y, m, d] = due_date.split('-');
                 const dbDateString = `${y}-${m}-${d} 23:59:59`;
                 
                 const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
                 const radiusString = `${months[parseInt(m) - 1]} ${d} ${y} 23:59:59`;
-
-                // 3. UPDATE TABEL CUSTOMERS (SULTAN FIX: DILARANG KERAS MENYENTUH JANGKAR BILLING_DAY)
                 await conn.query(
                     "UPDATE customers SET expired_date = ? WHERE id = ?",
                     [dbDateString, customer_id]
                 );
-
                 // 4. UPDATE RADIUS (SINKRON MIKROTIK)
                 const [cust] = await conn.query("SELECT pppoe_username FROM customers WHERE id = ?", [customer_id]);
                 
@@ -2120,36 +1934,28 @@ class BillingManager {
         });
     }
     
-    // --- OTOT 24: SOP RESTORE LAYANAN (BAYAR MANUAL & AKTIFKAN) ---
     async restoreServiceSOP(invoiceId) {
         try {
-            console.log(`?? [AUTO-HIJACK] Mengambil alih restoreServiceSOP untuk Inv ID: ${invoiceId} ke Mesin Sultan!`);
+            logger.info([SERVICE-RESTORE] Processing restoration for invoice: );
             
-            // TENDANG PAKSA KE MESIN SULTAN KITA!
-            // Biarkan Jantung Sultan yang mengurus Laci Keuangan, Radius, dan WA dengan rapi.
             const result = await this.sultanManualPayment(invoiceId, null, {
                 payment_method: 'Cash/Manual',
                 notes: 'Pelunasan via Konfirmasi Lunas (Tombol Hijau)'
             });
-
             if (!result.success) {
                 throw new Error(result.message || 'Gagal memproses pembayaran');
             }
-
-            // Kembalikan format data yang persis seperti diminta kodingan lama
             return { 
                 success: true, 
                 customer_name: 'Pelanggan', 
                 pppoe_username: result.username 
             };
-
         } catch (error) {
             console.error('?? [RESTORE-SOP ERROR]:', error.message);
             throw error;
         }
     }
     
-    // --- OTOT 25: AMBIL DATA PEMBAYARAN UNTUK LAPORAN EXCEL ---
     async getPaymentReportData() {
         try {
             const sql = `
@@ -2170,7 +1976,6 @@ class BillingManager {
         }
     }
     
-    // --- OTOT 26: DATA LENGKAP HALAMAN SERVICE SUSPENSION ---
     async getSuspensionPageData() {
         try {
             // Kita jalankan 4 kueri besar secara PARALEL (Ngebut!)
@@ -2194,11 +1999,9 @@ class BillingManager {
                 // 4. Daftar Profil Radius
                 pool.query("SELECT DISTINCT groupname FROM radgroupreply ORDER BY groupname ASC")
             ]);
-
             // Olah settings jadi objek key-value
             const freshSettings = {};
             settings[0].forEach(row => { freshSettings[row.setting_key] = row.value; });
-
             return {
                 settings: freshSettings,
                 stats: stats[0][0],
@@ -2211,7 +2014,6 @@ class BillingManager {
         }
     }
     
-    // --- OTOT 27: AMBIL DATA LENGKAP KELOLA PAKET ---
     async getPackagesPageData() {
         try {
             // Jalankan 3 kueri sekaligus (Paralel)
@@ -2222,7 +2024,6 @@ class BillingManager {
                 // 2. Ambil ID Paket yang dipakai customer (untuk proteksi hapus)
                 pool.query("SELECT DISTINCT package_id FROM customers"),
                 
-                // 3. Ambil Profile Radius (Filter Cerdas Ala Sultan)
                 pool.query(`
                     SELECT DISTINCT groupname 
                     FROM radgroupreply 
@@ -2236,7 +2037,6 @@ class BillingManager {
                     ORDER BY groupname ASC
                 `)
             ]);
-
             return {
                 packages: packageRows[0],
                 usedPackageIds: customerRows[0].map(c => c.package_id),
@@ -2248,16 +2048,14 @@ class BillingManager {
         }
     }
     
-    // --- OTOT 28: SIMPAN ATAU UPDATE PAKET (SULTAN VERSION) ---
    // ? Tambahkan parameter adminName di sini (default 'admin' kalau kosong)
    async savePackage(data, id = null, adminName = 'admin') {
         const { name, speed, price, description, pppoe_profile, billing_type, active_period } = data;
         
         // Anti-Nol Beranak: Buang karakter non-angka
         const cleanPrice = price ? String(price).replace(/[^0-9]/g, '') : 0;
-
         if (id) {
-            // Update jika ID ada (Sinkron dengan otot 28)
+    // Synchronize subscriber account state
             await pool.execute(
                 `UPDATE packages SET name=?, speed=?, price=?, description=?, pppoe_profile=?, billing_type=?, active_period=? WHERE id=?`,
                 [name, speed, cleanPrice, description, pppoe_profile, billing_type || 'fixed', active_period || 30, id]
@@ -2269,37 +2067,28 @@ class BillingManager {
                 [name, speed, cleanPrice, description, pppoe_profile, billing_type || 'fixed', active_period || 30]
             );
         }
-
-        // CCTV SULTAN
         setImmediate(() => {
             const action = id ? 'UPDATE_PACKAGE' : 'CREATE_PACKAGE';
             // ? Ganti 'admin' dengan variabel adminName agar jujur mencatat Kasir
             logActivity(adminName, action, `Action pada paket ${name} (Harga: Rp ${cleanPrice})`).catch(() => {});
         });
-
         return { success: true };
     }
-
-    // --- OTOT 29: HAPUS PAKET DENGAN PROTEKSI ---
     async deletePackage(id) {
         // 1. Cek apakah ada pelanggan yang masih pakai paket ini
         const [cek] = await pool.query("SELECT id FROM customers WHERE package_id = ? LIMIT 1", [id]);
         if (cek.length > 0) {
             throw new Error('Paket tidak bisa dihapus karena masih digunakan oleh pelanggan!');
         }
-
         // 2. Eksekusi Hapus
         await pool.execute("DELETE FROM packages WHERE id = ?", [id]);
         return { success: true };
     }
-
-    // --- OTOT 30: AMBIL DATA SATU PAKET (API) ---
     async getPackageById(id) {
         const [rows] = await pool.query("SELECT * FROM packages WHERE id = ?", [id]);
         return rows[0] || null;
     }
     
-    // --- OTOT 31: PEMBERSIH SAMPAH GATEWAY (MAINTENANCE) ---
     async cleanupOldTransactions() {
         try {
             // Hapus log transaksi pending yang sudah lebih dari 7 hari
@@ -2311,7 +2100,7 @@ class BillingManager {
         }
     }
     
-     // --- OTOT 32: DATA KOMPLIT PUSAT KOMANDO AUTO-INVOICE ---
+    // Financial ledger and transaction processing
     async getAutoInvoiceStatusData() {
         try {
             // 1. Ambil 4 Data Sekaligus Secara Paralel
@@ -2320,16 +2109,12 @@ class BillingManager {
                 pool.query("SELECT COUNT(*) as count FROM customers WHERE status = 'active'"),
                 pool.query("SELECT COUNT(*) as count FROM invoices WHERE month = MONTH(CURRENT_DATE()) AND year = YEAR(CURRENT_DATE())")
             ]);
-
             // 2. Olah Settings (Auto-Invoice Enabled & Gen Date)
             const sets = {};
             settings[0].forEach(row => { sets[row.setting_key] = row.value; });
-
             const rawValue = String(sets.auto_invoice_enabled || '0').trim().toLowerCase();
             const isEnabled = (rawValue === '1' || rawValue === 'true' || rawValue === 'on');
             const invoiceDay = parseInt(sets.invoice_generation_date) || 1;
-
-            // 3. Hitung Estimasi Eksekusi Berikutnya (Logika Sultan - Anti Loncat)
             const now = new Date();
             let nextRun = new Date(now.getFullYear(), now.getMonth(), invoiceDay);
             
@@ -2341,7 +2126,6 @@ class BillingManager {
                 // Kunci tanggal tampilannya agar tidak meleset
                 nextRun.setDate(Math.min(invoiceDay, maxDays));
             }
-
             return {
                 autoInvoiceEnabled: isEnabled,
                 invoiceDay: invoiceDay,
@@ -2356,7 +2140,6 @@ class BillingManager {
         }
     }
     
-    // --- OTOT 33: SENSOR STATISTIK CEPAT (UNTUK API) ---
     async getQuickStats() {
         try {
             const sql = `
@@ -2372,7 +2155,6 @@ class BillingManager {
         }
     }
     
-    // --- OTOT 34: RANGKUMAN HARIAN (UNTUK LAPORAN WA) ---
     async getDailySultanReport() {
         try {
             const sql = `
@@ -2384,18 +2166,16 @@ class BillingManager {
             `;
             const [rows] = await pool.query(sql);
             const data = rows[0];
-
             // Rakit pesan teksnya di sini agar skejul.js tinggal kirim
             const tanggal = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
             
-            let message = `*?? LAPORAN HARIAN SULTAN* \n`;
+            let message = `*??*DAILY OPERATIONAL SUMMARY* \n`;
             message += `_Tanggal: ${tanggal}_\n\n`;
             message += `?? *Pemasukan:* Rp ${Number(data.income_today).toLocaleString('id-ID')}\n`;
             message += `?? *Transaksi:* ${data.transaction_count} sukses\n`;
             message += `?? *Pelanggan Baru:* ${data.new_customers} orang\n`;
             message += `? *Total Aktif:* ${data.total_active} user\n\n`;
-            message += `_Laporan ini dikirim otomatis oleh Sultan Engine V2._`;
-
+            message += `_Automated report generated by PulseBill Telecom Engine._`;
             return message;
         } catch (error) {
             console.error("? Gagal merakit laporan harian:", error.message);
@@ -2403,7 +2183,7 @@ class BillingManager {
         }
     }
     
-    // --- OTOT 35: API DETAIL INVOICE LENGKAP ---
+    // Financial ledger and transaction processing
     async getInvoiceDetailById(id) {
         try {
             const sql = `
@@ -2421,13 +2201,11 @@ class BillingManager {
         }
     }
     
-    // --- OTOT 35: JEMBATAN GATEWAY (SUDAH DIPERBAIKI SULTAN) ---
     getPaymentGateway() {
         // Kembalikan objek class aslinya agar bisa mengeksekusi createPayment, dll
         return this.paymentGateway; 
     }
-
-    // --- OTOT 36: MANAGER KONFIGURASI PAYMENT GATEWAY (Mode JSON) ---
+    // Financial ledger and transaction processing
     async getPaymentGatewayConfig() {
         let config = { 
             active: 'tripay', 
@@ -2435,7 +2213,6 @@ class BillingManager {
             xendit: { enabled: false, api_key: '' }, 
             tripay: { enabled: false, api_key: '', private_key: '', merchant_code: '', base_url: '' } 
         };
-
         try {
             // Mengambil config dari tabel app_settings yang baru saja dibuat di migrasi nomor 0
             const [rows] = await pool.query("SELECT value FROM app_settings WHERE setting_key = 'payment_gateway_config'");
@@ -2455,12 +2232,9 @@ class BillingManager {
         }
     }
     
-    // --- OTOT 37: SIMPAN KONFIGURASI GATEWAY (SULTAN VERSION) ---
     async savePaymentGatewayConfig(targetGateway, formData) {
         try {
-            // 1. Ambil config lama (Gunakan Otot 36 yang sudah kita buat tadi)
             const config = await this.getPaymentGatewayConfig();
-
             // 2. Olah data berdasarkan Gateway
             if (targetGateway === 'tripay') {
                 config.tripay = {
@@ -2479,10 +2253,8 @@ class BillingManager {
                     enabled: formData.enabled === 'on' || formData.enabled === true
                 };
             }
-
             // 3. Update gateway aktif jika dipilih
             if (formData.active_gateway) config.active = formData.active_gateway;
-
             // 4. Simpan kembali ke MariaDB (Gunakan ON DUPLICATE KEY)
             const jsonString = JSON.stringify(config);
             const sql = `
@@ -2497,7 +2269,6 @@ class BillingManager {
             if (typeof this.reloadPaymentGateway === 'function') {
                 this.reloadPaymentGateway();
             }
-
             return { success: true, gateway: targetGateway };
         } catch (error) {
             console.error("? Gagal Simpan Config:", error.message);
@@ -2505,7 +2276,6 @@ class BillingManager {
         }
     }
     
-    // --- OTOT 38: GENERATOR LINK PEMILIHAN PEMBAYARAN (SULTAN V2) ---
     async generatePaymentSelectionLink(id, hostname) {
         try {
             // 1. Ambil data Invoice & Customer (Paralel)
@@ -2514,21 +2284,16 @@ class BillingManager {
                 [id]
             );
             
-            if (rows.length === 0) throw new Error("Tagihan tidak ditemukan, Bos!");
+            if (rows.length === 0) throw new Error("Invoice not found");
             const inv = rows[0];
-
             // 2. Validasi Link Lama (Cek apakah domain & ID masih valid)
             if (inv.tripay_url && inv.tripay_url.includes(inv.customer_id) && inv.tripay_url.includes(hostname)) {
                 return inv.tripay_url;
             }
-
-            // 3. Rakit Link Baru (Format Sultan: /payment/select/NOMOR/ID)
             // Kita gunakan https secara otomatis biar Elit
             const localPayUrl = `https://${hostname}/payment/select/${inv.invoice_number}/${inv.customer_id}`;
-
             // 4. Update Permanen ke Database MariaDB
             await pool.execute("UPDATE invoices SET tripay_url = ? WHERE id = ?", [localPayUrl, id]);
-
             return localPayUrl;
         } catch (error) {
             console.error("? Link Generator Error:", error.message);
@@ -2536,7 +2301,7 @@ class BillingManager {
         }
     }
     
-    // --- OTOT 39: PENGIRIM PENGINGAT TAGIHAN (WHATSAPP REMINDER) ---
+    // Financial ledger and transaction processing
     async sendInvoiceReminder(id) {
         try {
             // 1. Ambil Data Lengkap (Invoice + Customer + Package)
@@ -2551,7 +2316,6 @@ class BillingManager {
             
             if (rows.length === 0) return null;
             const inv = rows[0];
-
             // 2. Jalankan Pengiriman di Background (setImmediate)
             // Agar rute tidak menunggu proses API WhatsApp yang mungkin lambat
             setImmediate(async () => {
@@ -2563,7 +2327,6 @@ class BillingManager {
                     console.error(`? [WA-REMINDER ERR] Gagal kirim ke ${inv.name}:`, err.message);
                 }
             });
-
             return inv;
         } catch (error) {
             console.error("? Reminder Manager Error:", error.message);
@@ -2571,7 +2334,7 @@ class BillingManager {
         }
     }
     
-    // --- OTOT 40: KIRIM ULANG INVOICE (RESEND WA) ---
+    // Financial ledger and transaction processing
     async resendInvoiceWA(id) {
         try {
             // 1. Ambil data lengkap (Invoice + Customer + Package)
@@ -2586,11 +2349,9 @@ class BillingManager {
             
             if (rows.length === 0) return { success: false, message: 'Data tagihan tidak ditemukan.' };
             const inv = rows[0];
-
             // 2. Perintahkan WhatsApp Manager (Jalur Resmi Template)
             const whatsappManager = require('./whatsapp-notifications');
             const result = await whatsappManager.sendDueDateReminder(inv);
-
             // 3. Olah Hasilnya
             if (result.success) {
                 if (result.skipped) {
@@ -2600,14 +2361,12 @@ class BillingManager {
             } else {
                 return { success: false, message: result.error || 'Gagal kirim WA.' };
             }
-
         } catch (error) {
             console.error("? Resend WA Manager Error:", error.message);
             throw error;
         }
     }
     
-    // --- OTOT 41: KONTROLLER LAYANAN (ISOLIR & RESTORE GENERIC) ---
     async executeServiceAction(invoiceId, action) {
         try {
             // 1. Ambil Data Invoice & Pelanggan Sekaligus (JOIN Power)
@@ -2620,7 +2379,6 @@ class BillingManager {
             
             if (rows.length === 0) throw new Error("Data tagihan atau pelanggan tidak ditemukan!");
             const customer = rows[0];
-
             // 2. Koordinasi dengan Modul Service Suspension
             const serviceSuspension = require('./serviceSuspension'); 
             
@@ -2633,16 +2391,14 @@ class BillingManager {
                 await serviceSuspension.restoreCustomerService(customer);
                 return { success: true, name: customer.name, status: 'DIAKTIFKAN' };
             }
-
-            throw new Error("Aksi '" + action + "' tidak terdaftar di Protokol Sultan.");
-
+            throw new Error("Action '" + action + "' is not supported.");
         } catch (error) {
             console.error(`? Service Action Error [${action}]:`, error.message);
             throw error;
         }
     }
     
-    // --- OTOT 42: DATA DASHBOARD PENGATURAN AUTO-INVOICE ---
+    // Financial ledger and transaction processing
     async getAutoInvoiceSettingsDashboard() {
         try {
             // 1. Tarik Statistik secara Paralel (Ngebut!)
@@ -2650,8 +2406,6 @@ class BillingManager {
                 pool.query("SELECT COUNT(*) as total FROM customers WHERE status='active'"),
                 pool.query("SELECT COUNT(*) as total FROM invoices WHERE MONTH(created_at) = MONTH(NOW()) AND YEAR(created_at) = YEAR(NOW())")
             ]);
-
-            // 2. Hitung Tanggal Eksekusi (Logika Sultan: Tgl 1 Bulan Depan)
             const today = new Date();
             const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
             const formattedDate = nextMonth.toLocaleDateString('id-ID', { 
@@ -2659,7 +2413,6 @@ class BillingManager {
                 month: 'long', 
                 year: 'numeric' 
             });
-
             return {
                 activeCustomersCount: custStats[0][0].total,
                 thisMonthInvoicesCount: invStats[0][0].total,
@@ -2671,10 +2424,9 @@ class BillingManager {
         }
     }
     
-    // --- OTOT 43: PREVIEW PELANGGAN YANG BELUM PUNYA TAGIHAN BULAN INI ---
+    // Synchronize subscriber account state
     async getAutoInvoicePreview() {
         try {
-            // SULTAN V7 FIX: Full SQL Engine untuk menghindari jebakan zona waktu Javascript
             const sql = `
                 SELECT 
                     c.id, c.username, c.name, 
@@ -2692,7 +2444,6 @@ class BillingManager {
                 -- SENSOR 14 HARI: Tarik tepat 14 hari sebelum masa aktif habis
                 AND (c.expired_date IS NULL OR c.expired_date <= DATE_ADD(CURRENT_DATE(), INTERVAL 14 DAY))
             `;
-
             const [rows] = await pool.query(sql);
             return rows;
         } catch (error) {
@@ -2700,8 +2451,6 @@ class BillingManager {
             throw error;
         }
     }
-
-    // --- 1. OTOT 44: GENERATE INVOICE MASSAL (SULTAN BULK ENGINE - V7 FULL PROTEKSI) ---
     async bulkGenerateInvoices() {
         return this.withTransaction(async (conn) => {
             // 1. Ambil data pelanggan (Biarkan MariaDB yang mengekstrak target_month & target_year)
@@ -2721,18 +2470,14 @@ class BillingManager {
                 AND (c.expired_date IS NULL OR c.expired_date <= DATE_ADD(CURRENT_DATE(), INTERVAL 14 DAY))
             `;
             const [customers] = await conn.query(sqlSelect);
-
             if (customers.length === 0) return 0;
-
             let createdCount = 0;
-
             // 2. Proses Eksekusi Massal (Bebas dari pengaruh Javascript Date)
             for (const cust of customers) {
                 // Ambil bulan dan tahun murni hasil pancingan MariaDB
                 const year = cust.target_year;
                 const month = cust.target_month;
                 const monthStr = String(month).padStart(2, '0');
-
                 const invoiceNo = `INV-${year}${monthStr}-${cust.id}-${Math.floor(1000 + Math.random() * 9000)}`;
                 
                 // Pertahankan tanggal pelanggan (Jangkar Abadi)
@@ -2741,16 +2486,13 @@ class BillingManager {
                 const finalDay = bDay > daysInTargetMonth ? daysInTargetMonth : bDay;
                 
                 const dueStr = `${year}-${monthStr}-${String(finalDay).padStart(2, '0')}`;
-
                 // =================================================================
-                // RADAR SULTAN V7: CEK MENGGUNAKAN KOLOM MURNI (Lebih Cepat & Akurat)
                 // =================================================================
                 const [check] = await conn.execute(
                     `SELECT id FROM invoices 
                      WHERE customer_id = ? AND month = ? AND year = ? AND status != 'cancelled' LIMIT 1`,
                     [cust.id, month, year]
                 );
-
                 if (check.length === 0) {
                     const sqlInsert = `
                         INSERT INTO invoices (invoice_number, customer_id, package_id, month, year, amount, status, due_date, created_at) 
@@ -2770,23 +2512,20 @@ class BillingManager {
                      console.log(`[GENERATE MASSAL] ??? Double Invoice Dicegah! ID ${cust.id} sudah punya tagihan di bulan ${monthStr}-${year}.`);
                 }
             }
-
             return createdCount;
         });
     }
     
-    // --- OTOT 45: UPDATE SETTING AUTO-INVOICE MASSAL (TRANSACTIONAL) ---
+    // Synchronize subscriber account state
     async updateAutoInvoiceSettings(data) {
         return this.withTransaction(async (conn) => {
             const { auto_invoice_enabled, invoice_day, due_date_days } = data;
-
             // 1. Daftar update yang harus dijalankan
             const updates = [
                 { key: 'auto_invoice_enabled', val: auto_invoice_enabled },
                 { key: 'invoice_generation_date', val: invoice_day },
                 { key: 'invoice_due_days', val: due_date_days }
             ];
-
             // 2. Eksekusi satu per satu dalam satu rangkaian transaksi
             for (const item of updates) {
                 await conn.execute(
@@ -2794,7 +2533,6 @@ class BillingManager {
                     [String(item.val), item.key]
                 );
             }
-
             // 3. Normalisasi Boolean untuk kebutuhan Socket/UI
             const isEnabled = (auto_invoice_enabled === 'true' || auto_invoice_enabled === 'on' || auto_invoice_enabled === '1');
             
@@ -2802,7 +2540,6 @@ class BillingManager {
         });
     }
     
-    // --- OTOT 46: VALIDATOR KONEKSI PAYMENT GATEWAY (SULTAN V2) ---
     async testGatewayConnection(data) {
         const { gateway, mode, serverKey, clientKey, merchantCode, apiKey, privateKey } = data;
         
@@ -2814,7 +2551,6 @@ class BillingManager {
                 }
                 return { success: true, message: `Koneksi Midtrans (${mode}) Oke. Kunci sudah siap!` };
             } 
-
             // 2. Logika Test TRIPAY
             if (gateway === 'tripay') {
                 if (!apiKey || !privateKey || !merchantCode) {
@@ -2822,7 +2558,6 @@ class BillingManager {
                 }
                 return { success: true, message: `Identitas Tripay (${mode}) Terverifikasi!` };
             }
-
             // 3. Logika Test XENDIT
             if (gateway === 'xendit') {
                 if (!apiKey || apiKey.length < 10) {
@@ -2830,26 +2565,20 @@ class BillingManager {
                 }
                 return { success: true, message: "Koneksi Xendit Berhasil!" };
             }
-
-            throw new Error("Gateway '" + gateway + "' belum didukung oleh Sultan Engine.");
-
+            throw new Error("Payment gateway '" + gateway + "' is not supported.");
         } catch (error) {
             console.error(`? Gateway Test Failed:`, error.message);
             throw error;
         }
     }
     
-    // --- OTOT 47: PENYIMPAN KONFIGURASI GATEWAY TERPADU (SULTAN V2) ---
     async saveFullGatewayConfig(formData) {
         return this.withTransaction(async (conn) => {
             const { active_gateway, midtrans, tripay, xendit } = formData;
-
             // 1. Ambil Config Master yang ada sekarang
             const currentConfig = await this.getPaymentGatewayConfig();
-
             // 2. Update Gateway Aktif
             if (active_gateway) currentConfig.active = active_gateway;
-
             // 3. Sync Midtrans (Jika Ada)
             if (midtrans) {
                 currentConfig.midtrans = {
@@ -2859,7 +2588,6 @@ class BillingManager {
                     production: midtrans.production === 'on' || midtrans.production === true
                 };
             }
-
             // 4. Sync Tripay (Format Spesifik untuk payment.js)
             if (tripay) {
                 currentConfig.tripay = {
@@ -2871,7 +2599,6 @@ class BillingManager {
                     base_url: tripay.base_url || ''
                 };
             }
-
             // 5. Sync Xendit (Jika Ada)
             if (xendit) {
                 currentConfig.xendit = {
@@ -2879,7 +2606,6 @@ class BillingManager {
                     api_key: (xendit.api_key || '').trim()
                 };
             }
-
             // 6. Tanam Kembali ke Database MariaDB
             const jsonString = JSON.stringify(currentConfig);
             await conn.execute(`
@@ -2887,20 +2613,17 @@ class BillingManager {
                 VALUES ('payment_gateway_config', ?) 
                 ON DUPLICATE KEY UPDATE value = VALUES(value)
             `, [jsonString]);
-
-            // Bonus: Jika Bos punya settingan terpisah untuk 'active_payment_gateway', kita sinkronkan juga
             if (active_gateway) {
                 await conn.execute(
                     "INSERT INTO app_settings (setting_key, value) VALUES ('active_payment_gateway', ?) ON DUPLICATE KEY UPDATE value = VALUES(value)",
                     [active_gateway]
                 );
             }
-
             return { success: true, active: currentConfig.active };
         });
     }
     
-    // --- OTOT 48: INISIALISASI PONDASI DATABASE (SETTING TABLE) ---
+    // Database initialization routine
     async initializeSettingsTable() {
         try {
             // 1. Buat Tabel Jika Belum Ada
@@ -2911,8 +2634,6 @@ class BillingManager {
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
             `;
             await pool.query(createTableSql);
-
-            // 2. Daftar Kunci Default (Sesuaikan dengan Otot 47)
             const defaults = [
                 ['active_payment_gateway', 'tripay'],
                 ['payment_gateway_config', '{}'],
@@ -2922,7 +2643,6 @@ class BillingManager {
                 ['admin_phone', '6281234567890'],
                 ['whatsapp_templates', '{}']
             ];
-
             // 3. Masukkan Data Awal secara Masif (INSERT IGNORE)
             for (const [key, val] of defaults) {
                 await pool.query(
@@ -2930,7 +2650,6 @@ class BillingManager {
                     [key, val]
                 );
             }
-
             return { success: true, message: "Pondasi Berhasil Dibangun!" };
         } catch (error) {
             console.error("? Database Initialization Failed:", error.message);
@@ -2938,7 +2657,6 @@ class BillingManager {
         }
     }
     
-    // --- OTOT 49: ANALIS STATISTIK ISOLIR (SULTAN V2) ---
     async getSuspensionStats() {
         try {
             // Kita hitung 3 status krusial dalam satu tarikan napas (Single Query)
@@ -2962,7 +2680,7 @@ class BillingManager {
         }
     }
     
-    // --- OTOT 50: DATA PELANGGAN TERGEMBOK ---
+    // Synchronize subscriber account state
     async getSuspendedData() {
         const sql = `
             SELECT c.pppoe_username as username, c.name, c.phone as kontak, p.name as package_name
@@ -2973,8 +2691,7 @@ class BillingManager {
         const [rows] = await pool.query(sql);
         return rows;
     }
-
-    // --- OTOT 51: RESTORE MANUAL (RADIUS & DB SYNC) ---
+    // RouterOS and RADIUS policy synchronization
     async restoreManualByUsername(username) {
         return this.withTransaction(async (conn) => {
             // 1. Ambil Data & Profil Asli
@@ -2983,43 +2700,34 @@ class BillingManager {
                 FROM customers c 
                 LEFT JOIN packages p ON c.package_id = p.id 
                 WHERE c.pppoe_username = ?`, [username]);
-
             if (custData.length === 0) throw new Error("User ghoib, tidak ditemukan di database!");
             const customer = custData[0];
             const originalProfile = customer.pppoe_profile || 'default';
-
             // 2. Update Status Web
             await conn.execute("UPDATE customers SET status = 'active' WHERE id = ?", [customer.id]);
-
             // 3. Update Radius (Ganti Grup Isolir ke Grup Paket Asli)
             await conn.execute("DELETE FROM radusergroup WHERE username = ?", [username]);
             await conn.execute(
                 "INSERT INTO radusergroup (username, groupname, priority) VALUES (?, ?, '1')", 
                 [username, originalProfile]
             );
-
             return customer;
         });
     }
     
-    // --- OTOT 55: PENGHAPUS INVOICE PERMANEN (SULTAN SHREDDER) ---
     async deleteInvoiceById(id) {
         try {
             // 1. Cek dulu datanya & Statusnya
             const [rows] = await pool.query("SELECT invoice_number, status FROM invoices WHERE id = ?", [id]);
             
             if (rows.length === 0) throw new Error("Invoice ghoib, tidak ditemukan!");
-
             const inv = rows[0];
-
             // 2. SAFETY GUARD: Jangan hapus yang sudah lunas (Opsional, tapi direkomendasikan)
             if (inv.status === 'paid') {
-                throw new Error("Invoice sudah LUNAS tidak boleh dihapus sembarangan, Bos!");
+                throw new Error("Settled invoices cannot be deleted.");
             }
-
             // 3. Eksekusi Hapus
             await pool.execute("DELETE FROM invoices WHERE id = ?", [id]);
-
             return { success: true, number: inv.invoice_number };
         } catch (error) {
             console.error("? Shredder Error:", error.message);
@@ -3027,7 +2735,6 @@ class BillingManager {
         }
     }
     
-    // --- OTOT 56: UPDATE DATA PELANGGAN & SINKRONISASI RADIUS (VERSI SULTAN - FIX TOTAL & SELARAS) ---
     async updateCustomerFullSync(data, adminName = 'admin') {
         return this.withTransaction(async (conn) => {
             const { 
@@ -3036,29 +2743,22 @@ class BillingManager {
                 billing_day, status, expired_date,
                 installation_date 
             } = data;
-
-            if (!id) throw new Error('ID Pelanggan wajib ada, Bos!');
-
+            if (!id) throw new Error('Customer ID is required.');
             // 1. Ambil Profile, TIPE, dan NAMA Paket (Wajib untuk Sensor Kasta)
             const [rowsPkg] = await conn.query("SELECT pppoe_profile, type, name as package_name FROM packages WHERE id = ?", [package_id]);
             if (rowsPkg.length === 0) throw new Error("Paket tidak valid!");
             const radiusProfile = rowsPkg[0].pppoe_profile || 'default';
             const packageType = rowsPkg[0].type;
             const packageName = (rowsPkg[0].package_name || '').toUpperCase();
-
             // 2. Logika Tanggal (Jatuh Tempo) - PATUH PADA KEPUTUSAN EDIT
             
             // Tanya ke database: "Berapa billing_day orang ini sebelumnya?"
             const [oldData] = await conn.query("SELECT billing_day FROM customers WHERE id = ?", [id]);
             const existingBillingDay = oldData.length > 0 ? oldData[0].billing_day : 25;
-
-            // Jika Bos isi form billing_day, pakai yang baru. Jika kosong, pakai yang lama.
             const bDayFinal = billing_day ? parseInt(billing_day) : existingBillingDay;
-
             let fullTanggalSQL;
             let tanggalSQL;
             let dateObj;
-
             if (expired_date && expired_date !== "") {
                 tanggalSQL = expired_date;
                 fullTanggalSQL = `${expired_date} 23:59:59`;
@@ -3074,7 +2774,6 @@ class BillingManager {
                 tanggalSQL = `${thn}-${bln}-${tgl}`;
                 fullTanggalSQL = `${tanggalSQL} 23:59:59`;
             }
-
             // =================================================================
             // ??? SENSOR AUTO-ISOLIR: Evaluasi tanggal sebelum masuk database
             // =================================================================
@@ -3083,12 +2782,10 @@ class BillingManager {
             if (dateObj < nowTime && finalStatus === 'active') {
                 finalStatus = 'suspended'; // Paksa status jadi isolir jika tanggal di form sudah lewat
             }
-
             // 3. Update Database Utama (Pakai finalStatus yang sudah difilter)
             const finalUser = pppoe_username || phone || "";
             const finalPass = pppoe_password || '123456';
             const cleanInstallDate = (installation_date && installation_date !== "") ? installation_date : null;
-
             await conn.execute(`
                 UPDATE customers SET 
                     name = ?, username = ?, password = ?, phone = ?, address = ?, 
@@ -3103,14 +2800,12 @@ class BillingManager {
                 cleanInstallDate, 
                 id
             ]);
-
             // 4. Update Invoice Unpaid
             await conn.execute(`
                 UPDATE invoices SET due_date = ? 
                 WHERE customer_id = ? AND status = 'unpaid'
             `, [tanggalSQL, id]);
-
-            // 5. Update Jalur Radius (LOGIKA 100% SAMA DENGAN OTOT 62)
+    // Synchronize subscriber account state
             if (finalUser) {
                 // Kalkulasi Waktu
                 const formattedExp = this.formatRadiusDate(dateObj); 
@@ -3119,9 +2814,7 @@ class BillingManager {
                 
                 const isolirProfileName = await this.getActiveIsolirProfile(conn);
                 
-                // Sensor Kasta (Harus sama persis dengan Otot 62)
                 const isHotspotMember = (packageType === 'voucher' || packageName.includes('MEMBER'));
-
                 // Bersihkan Radius Lama (Termasuk radreply)
                 await conn.execute("DELETE FROM radcheck WHERE username = ?", [finalUser]);
                 await conn.execute("DELETE FROM radusergroup WHERE username = ?", [finalUser]);
@@ -3129,14 +2822,12 @@ class BillingManager {
                 
                 // Pasang Password
                 await conn.execute("INSERT INTO radcheck (username, attribute, op, value) VALUES (?, 'Cleartext-Password', ':=', ?)", [finalUser, finalPass]);
-
                 if (finalStatus === 'active') {
                     if (isHotspotMember) {
                         // --- JALUR HOTSPOT (REJECT MODE) ---
                         // Khusus di fungsi "Simpan/Update" form ini, admin mungkin sedang memperpanjang tanggal user.
                         // Jadi kita pakai selisihDetik baru, lalu HAPUS radacct agar perhitungan waktunya mulai presisi lagi dari Nol.
                         await conn.execute("DELETE FROM radacct WHERE username = ?", [finalUser]);
-
                         await conn.execute("INSERT INTO radcheck (username, attribute, op, value) VALUES (?, 'Expiration', ':=', ?)", [finalUser, formattedExp]);
                         await conn.execute("INSERT INTO radcheck (username, attribute, op, value) VALUES (?, 'Max-All-Session', ':=', ?)", [finalUser, selisihDetik]);
                         await conn.execute("INSERT INTO radreply (username, attribute, op, value) VALUES (?, 'Session-Timeout', ':=', ?)", [finalUser, selisihDetik]);
@@ -3159,7 +2850,6 @@ class BillingManager {
                 }
             
                 // =========================================================
-                // ?? FITUR KICK SULTAN (HANYA MENDENDANG PPPOE)
                 // =========================================================
                 setImmediate(() => {
                     if (typeof this.kickUserRadius === 'function') {
@@ -3175,19 +2865,16 @@ class BillingManager {
             }
             
             // =========================================================
-            // ? PASANG CCTV SULTAN (REKAM JEJAK EDIT PELANGGAN)
             // =========================================================
             setImmediate(() => {
                 if (typeof logActivity === 'function') {
                     logActivity(adminName, 'UPDATE_CUSTOMER', `Mengubah Data Pelanggan: ${name} (${finalUser}) - Status: ${finalStatus}`).catch(() => {});
                 }
             });
-
             return { username: finalUser, status: finalStatus };
         });
     }
     
-    // --- OTOT 57: DATA LENGKAP UNTUK CETAK INVOICE (SULTAN V2) ---
     async getInvoicePrintData(id) {
         try {
             // 1. Ambil Data Invoice + Customer + Package (JOIN)
@@ -3207,14 +2894,12 @@ class BillingManager {
             const [invRows] = await pool.query(sqlInv, [id]);
             
             if (invRows.length === 0) return null;
-
             // 2. Ambil Setting Perusahaan (Header, Logo, Alamat ISP, dll)
             const [settingRows] = await pool.query("SELECT setting_key, value FROM app_settings");
             let appSettings = {};
             settingRows.forEach(row => {
                 appSettings[row.setting_key] = row.value;
             });
-
             return {
                 invoice: invRows[0],
                 appSettings: appSettings
@@ -3225,7 +2910,6 @@ class BillingManager {
         }
     }
     
-    // --- OTOT 58: INSPEKTOR DETAIL INVOICE (SULTAN V2) ---
     async getInvoiceDetails(id) {
         try {
             // 1. Query dengan COALESCE (Double Join Guard)
@@ -3245,17 +2929,12 @@ class BillingManager {
                 WHERE i.id = ?
             `;
             const [rows] = await pool.query(sql, [id]);
-
             if (rows.length === 0) return null;
-
             const invoice = rows[0];
-
             // 2. Logika Link Pembayaran Otomatis
             if (!invoice.tripay_url) {
-                // Pastikan domain sudah sesuai dengan config Bos
                 invoice.tripay_url = `https://billing.pulsebill.io/payment/select/${invoice.invoice_number}/${invoice.customer_id}`;
             }
-
             return invoice;
         } catch (error) {
             console.error("? Detail Inspector Error:", error.message);
@@ -3263,28 +2942,23 @@ class BillingManager {
         }
     }
     
-    // --- OTOT 59: PENCIPTA INVOICE MANUAL (FINAL SULTAN V4 - ANTI TEMBUS) ---
     async createManualInvoice(data) {
         const { customer_id, package_id, amount, due_date, status, notes } = data;
-
         try {
             // 1. Ekstrak Waktu untuk Nomor Invoice
             const now = new Date();
             const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
             const rand = Math.floor(1000 + Math.random() * 9000);
             const invNumber = `INV-${dateStr}-${customer_id}-${rand}`;
-
             // Pembersih Nominal Anti-Error
             const cleanAmount = amount ? String(amount).replace(/[^0-9]/g, '') : 0;
-
             // 2. Ekstrak Bulan & Tahun secara MANUAL TANGGUH (Bukan pakai Date() yg rawan)
             // due_date dari form biasanya berformat "YYYY-MM-DD" (contoh: 2026-04-28)
             const dateParts = due_date.split('-'); 
             let targetMonth = parseInt(dateParts[1]);
             let targetYear = parseInt(dateParts[0]);
-
             // =================================================================
-            // 3. RADAR SULTAN V4: KUNCI MATI PAKAI FUNGSI NATIVE MARIADB
+    // Initialize database connection pool
             // =================================================================
             const isExpense = !package_id || (notes && notes.toLowerCase().includes('pln'));
             
@@ -3299,19 +2973,16 @@ class BillingManager {
                        AND status != 'cancelled'`,
                     [customer_id, targetMonth, targetYear]
                 );
-
                 if (existingMonth.length > 0) {
                     throw new Error(`GAGAL DIBUAT: Pelanggan ini sudah memiliki tagihan di bulan ${targetMonth}-${targetYear}. Aturan: 1 Pelanggan = 1 Tagihan per Bulan!`);
                 }
             }
-
             // 4. Eksekusi Simpan Komplit ke Database
             const sql = `
                 INSERT INTO invoices
                 (invoice_number, customer_id, package_id, month, year, amount, status, due_date, notes, created_at)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
             `;
-
             try {
                 await pool.execute(sql, [
                     invNumber,
@@ -3339,11 +3010,9 @@ class BillingManager {
         }
     }
     
-    // --- OTOT 60: ARSITEK TEMPLATE IMPORT EXCEL (SULTAN V2) ---
     async generateCustomerImportTemplate() {
         try {
             const xlsx = require('xlsx');
-
             // 1. Definisikan Data Contoh (Gunakan nama kolom yang ramah admin)
             const templateData = [
                 {
@@ -3353,43 +3022,35 @@ class BillingManager {
                     'Username_PPPoE': 'ahmad_user',
                     'Password_PPPoE': '123456',
                     'Email': 'ahmad@example.com',
-                    'Alamat_Lengkap': 'Jl. Sultan No. 45, Kota Semarang',
+                    'Alamat_Lengkap': '45 Enterprise Parkway, Suite 200',
                     'Tanggal_Pasang': '2026-02-28',
                     'Tgl_Tagihan_Tiap_Bulan': '15'
                 }
             ];
-
             // 2. Proses pembuatan workbook
             const ws = xlsx.utils.json_to_sheet(templateData);
             
-            // Atur lebar kolom agar cantik saat dibuka (Optional Sultan Touch)
             ws['!cols'] = [
                 { wch: 25 }, { wch: 15 }, { wch: 20 }, { wch: 20 }, 
                 { wch: 15 }, { wch: 25 }, { wch: 40 }, { wch: 15 }, { wch: 20 }
             ];
-
             const wb = xlsx.utils.book_new();
             xlsx.utils.book_append_sheet(wb, ws, "Daftar_Calon_Pelanggan");
-
             // 3. Return Buffer
             return xlsx.write(wb, { type: 'buffer', bookType: 'xlsx' });
-
         } catch (error) {
             console.error("? Template Architect Error:", error.message);
             throw error;
         }
     }
     
-    // --- OTOT 61: MESIN IMPORT PELANGGAN MASSAL (SULTAN V2) ---
     async processExcelImport(rows) {
         let sukses = 0; let gagal = 0;
         let logGagal = [];
-
         for (let row of rows) {
             try {
                 // 1. Satpam Baris Kosong
                 if (!row.fullname || !row.phonenumber) continue;
-
                 // 2. Normalisasi No HP (08...)
                 let cleanPhone = String(row.phonenumber).replace(/[^0-9]/g, '');
                 if (cleanPhone.startsWith('62')) {
@@ -3397,14 +3058,12 @@ class BillingManager {
                 } else if (cleanPhone.startsWith('8')) {
                     cleanPhone = '0' + cleanPhone;
                 }
-
                 // 3. Cari ID Paket berdasarkan Nama
                 const [pkg] = await pool.query("SELECT id FROM packages WHERE name = ?", [row.paket]);
                 if (pkg.length === 0) {
                     logGagal.push(`${row.fullname}: Paket '${row.paket}' tidak terdaftar.`);
                     gagal++; continue;
                 }
-
                 // 4. Konversi Tanggal Excel ke SQL
                 let finalJoinDate = row.join_date;
                 if (typeof finalJoinDate === 'number') {
@@ -3414,7 +3073,6 @@ class BillingManager {
                 if (!finalJoinDate || finalJoinDate === "" || finalJoinDate === "-") {
                     finalJoinDate = new Date().toISOString().split('T')[0];
                 }
-
                 // 5. Eksekusi Simpan Pelanggan (Disiplin 3 Kolom)
                 const result = await this.createCustomer({
                     name: row.fullname,
@@ -3430,7 +3088,6 @@ class BillingManager {
                     billing_day: row.billing_day ? parseInt(row.billing_day) : null,
                     skipWA: true 
                 });
-
                 if (result.success) {
                     // 6. Buat Invoice Pertama Otomatis (Gak pake delay, Manager sudah handle pool)
                     await this.createInvoice(result.id);
@@ -3439,17 +3096,14 @@ class BillingManager {
                     gagal++;
                     logGagal.push(`${row.fullname}: ${result.message}`);
                 }
-
             } catch (e) {
                 gagal++;
                 logGagal.push(`${row.fullname}: Error Sistem (${e.message})`);
             }
         }
-
         return { sukses, gagal, logGagal };
     }
     
-    // --- OTOT 62: MASTER SYNC RADIUS (SULTAN V2 - FIXED + AUTO ISOLIR + SAVE QUOTA) ---
     async syncRadiusUser(customerId) {
         return this.withTransaction(async (conn) => {
             // 1. Ambil Data Lengkap (WAJIB TAMBAH p.type dan p.name)
@@ -3459,10 +3113,8 @@ class BillingManager {
                 LEFT JOIN packages p ON c.package_id = p.id 
                 WHERE c.id = ?
             `, [customerId]);
-
             if (!rows.length) throw new Error('Pelanggan tidak ditemukan!');
             const user = rows[0];
-
             // 2. Normalisasi & Validasi (Cari Username Utama)
             const finalUser = user.pppoe_username?.trim() || user.username?.trim();
             const finalPass = user.pppoe_password?.trim() || user.password?.trim() || '123456';
@@ -3470,9 +3122,7 @@ class BillingManager {
             
             // ?? UBAH JADI 'let' BIAR BISA DIUBAH SAMA FITUR PINTAR (AUTO-ISOLIR)
             let status = user.status || 'active'; 
-
             if (!finalUser) throw new Error('Username kosong di database!');
-
             // 3. Format Tanggal Expiration & Hitung Sisa Detik
             let formattedExp = '01 Jan 2030 23:59:59';
             let selisihDetik = 0;
@@ -3483,9 +3133,7 @@ class BillingManager {
                 formattedExp = this.formatRadiusDate(expObj);
                 selisihDetik = Math.max(0, Math.floor((expObj.getTime() - Date.now()) / 1000));
                 wisprDate = expObj.toISOString().slice(0, 19).replace(' ', 'T') + '+07:00';
-
                 // =================================================================
-                // ??? FITUR PINTAR SULTAN: AUTO-ISOLIR JIKA SUDAH LEWAT JATUH TEMPO
                 // =================================================================
                 const now = new Date();
                 if (expObj < now && status === 'active') {
@@ -3496,45 +3144,36 @@ class BillingManager {
                 }
                 // =================================================================
             }
-
             // =================================================================
             // ??? FITUR SAVE QUOTA: AMBIL SISA WAKTU LAMA SEBELUM DIHAPUS (KHUSUS HOTSPOT)
             // =================================================================
             const [oldLimitRows] = await conn.query("SELECT value FROM radcheck WHERE username = ? AND attribute = 'Max-All-Session'", [finalUser]);
             const savedMaxSession = oldLimitRows.length > 0 ? oldLimitRows[0].value : null;
-
             // 4. Pembedahan Tabel Radius (Sapu Bersih Semua Dulu)
             await conn.execute("DELETE FROM radcheck WHERE username = ?", [finalUser]);
             await conn.execute("DELETE FROM radusergroup WHERE username = ?", [finalUser]);
             await conn.execute("DELETE FROM radreply WHERE username = ?", [finalUser]);
-
             // 5. INSERT PASSWORD (WAJIB)
             await conn.execute(
                 "INSERT INTO radcheck (username, attribute, op, value) VALUES (?, 'Cleartext-Password', ':=', ?)",
                 [finalUser, finalPass]
             );
-
             // =================================================================
             // 6. LOGIC GUARD: CEK STATUS & LAYANAN (ISOLIR VS AKTIF)
             // =================================================================
             
-            // SENSOR SAKTI: Pisahkan Kasta Berdasarkan Kata "MEMBER" / "VOUCHER"
             const namaPaket = (user.package_name || '').toUpperCase();
             const isHotspotMember = (user.package_type === 'voucher' || namaPaket.includes('MEMBER'));
-
             if (status === 'active') {
                 if (isHotspotMember) {
                     // =========================================================
-                    // ? JALUR HOTSPOT MEMBER (SULTAN RESET & REFRESH ENGINE) ?
                     // =========================================================
                     
                     // 1. HAPUS "DOSA" PEMAKAIAN LAMA (Wajib agar hitungan mulai dari NOL)
                     // Solusi ampuh buat ANNA1122 yang macet karena over-quota
                     await conn.execute("DELETE FROM radacct WHERE username = ?", [finalUser]);
-
                     // 2. JATAH SEGAR (Abaikan sisa kuota lama, pakai selisihDetik murni dari kalender)
                     const finalLimitDetik = selisihDetik;
-
                     await conn.execute("INSERT INTO radcheck (username, attribute, op, value) VALUES (?, 'Expiration', ':=', ?)", [finalUser, formattedExp]);
                     await conn.execute("INSERT INTO radcheck (username, attribute, op, value) VALUES (?, 'Max-All-Session', ':=', ?)", [finalUser, finalLimitDetik]);
                     
@@ -3544,13 +3183,11 @@ class BillingManager {
                     if (wisprDate) {
                         await conn.execute("INSERT INTO radcheck (username, attribute, op, value) VALUES (?, 'WISPr-Session-Terminate-Time', ':=', ?)", [finalUser, wisprDate]);
                     }
-
                     // 4. PASANG PROFIL PAKET
                     const hotProfile = (user.package_name || 'default').trim();
                     await conn.execute("INSERT INTO radusergroup (username, groupname, priority) VALUES (?, ?, '1')", [finalUser, hotProfile]);
                     
                     console.log(`[MASTER-SYNC] ${finalUser} RESET TOTAL & AKTIF (Hotspot Member - Waktu: ${finalLimitDetik}s)`);
-
                 } else {
                     // --- JALUR PPPOE PINTAR (Flexible Mode - Redirect Ready) ---
                     // KUNCI: Radius TIDAK menyuntikkan Expiration agar login selalu sukses (ACCEPT)
@@ -3561,9 +3198,7 @@ class BillingManager {
                     );
                     console.log(`[MASTER-SYNC] ${finalUser} SYNC: Active (PPPoE Flexible - Profile: ${radiusProfile})`);
                 }
-
             } else {
-                // --- JALUR ISOLIR (Sesuai Keinginan Bos) ---
                 const isolirProfileName = await this.getActiveIsolirProfile(conn);
                 await conn.execute(
                     "INSERT INTO radusergroup (username, groupname, priority) VALUES (?, ?, '1')",
@@ -3576,7 +3211,6 @@ class BillingManager {
         });
     }
     
-    // --- OTOT 63: FINALISASI PEMBAYARAN & PERPANJANG RADIUS (SULTAN V2) ---
     async finalizePaymentAndExtendRadius(invoiceId, method = 'Cash') {
         return this.withTransaction(async (conn) => {
             const [rows] = await conn.query(`
@@ -3600,22 +3234,17 @@ class BillingManager {
             let newExp = new Date(baseDate.getFullYear(), baseDate.getMonth() + 1, 1); 
             let maxDaysInNextMonth = new Date(baseDate.getFullYear(), baseDate.getMonth() + 2, 0).getDate();
             newExp.setDate(Math.min(bDay, maxDaysInNextMonth));
-
             const sqlExp = newExp.toISOString().slice(0, 19).replace('T', ' ');
-
             await conn.execute("UPDATE customers SET expired_date = ?, status = 'active' WHERE id = ?", [sqlExp, data.customer_id]);
-
             if (data.pppoe_username) {
                 const formattedRadiusDate = this.formatRadiusDate(newExp);
                 await conn.execute(`DELETE FROM radcheck WHERE username = ? AND attribute = 'Expiration'`, [data.pppoe_username]);
                 await conn.execute(`INSERT INTO radcheck (username, attribute, op, value) VALUES (?, 'Expiration', ':=', ?)`, [data.pppoe_username, formattedRadiusDate]);
             }
-
             return { username: data.pppoe_username, newExp: sqlExp };
         });
     }
     
-    // --- OTOT 64: EKSEKUTOR FINAL PEMBAYARAN (ONLINE & MANUAL) ---
     async processSuccessPayment(invoiceId, method, notes = '') {
         return this.withTransaction(async (conn) => {
             // 1. Ambil Data (Lock for Update)
@@ -3625,26 +3254,21 @@ class BillingManager {
                 JOIN customers c ON i.customer_id = c.id 
                 LEFT JOIN packages p ON i.package_id = p.id 
                 WHERE i.id = ? FOR UPDATE`, [invoiceId]);
-
             const data = rows[0];
             if (!data || data.status === 'paid') return false;
-
             // 2. Update Invoice & Customer
             await conn.execute("UPDATE invoices SET status = 'paid', paid_at = NOW(), payment_date = NOW(), payment_method = ?, notes = ? WHERE id = ?", 
                 [method, notes, invoiceId]);
             await conn.execute("UPDATE customers SET status = 'active' WHERE id = ?", [data.customer_id]);
-
             // 3. Laporan Keuangan
             await conn.execute(`
                 INSERT INTO finance_reports (username, profile_name, address, payment_method, total_price, payment_date) 
                 VALUES (?, ?, ?, ?, ?, NOW())`,
                 [data.name, data.pkg || 'Paket', data.address || '-', method, data.amount]);
-
             return data; // Kembalikan data untuk proses background (Radius/Kick)
         });
     }
     
-    // --- OTOT 65: VOID / PEMBATAL PEMBAYARAN (SULTAN V2) ---
     async voidPayment(paymentId) {
         return this.withTransaction(async (conn) => {
             // 1. Cari data pembayaran yang mau dibatalkan
@@ -3653,29 +3277,23 @@ class BillingManager {
             if (pay.length === 0) {
                 throw new Error("Data pembayaran ghoib, tidak ditemukan!");
             }
-
             const invoiceId = pay[0].invoice_id;
-
             // 2. Kembalikan tagihan jadi Unpaid (Hutang kembali hidup!)
             await conn.execute(
                 "UPDATE invoices SET status = 'unpaid', paid_at = NULL, payment_method = NULL WHERE id = ?", 
                 [invoiceId]
             );
-
             // 3. Hapus rekam jejak pembayaran di tabel payments
             await conn.execute("DELETE FROM payments WHERE id = ?", [paymentId]);
-
-            /* * CATATAN SULTAN: 
-             * Jika di rute sebelumnya Bos juga memasukkan data ke 'finance_reports', 
+            /* * NOTE: 
+             * If records were previously written to finance_reports, 
              * idealnya data di finance_reports juga dihapus di sini agar pembukuan tidak minus.
              * Contoh: await conn.execute("DELETE FROM finance_reports WHERE invoice_id = ?", [invoiceId]);
              */
-
             return { invoice_id: invoiceId };
         });
     }
     
-    // --- OTOT 66: REFUND INVOICE (BATAL BAYAR SULTAN) ---
     async refundInvoiceSOP(invoiceId) {
         return this.withTransaction(async (conn) => {
             // 1. Cek Tagihan
@@ -3683,18 +3301,15 @@ class BillingManager {
             if (invRows.length === 0) throw new Error("Tagihan ghoib, tidak ditemukan!");
             
             const inv = invRows[0];
-            if (inv.status === 'unpaid') throw new Error("Tagihan sudah berstatus belum lunas, Bos.");
-
+            if (inv.status === 'unpaid') throw new Error("Invoice is already marked as unpaid.");
             // 2. Kembalikan status tagihan jadi BELUM LUNAS
             await conn.execute(
                 "UPDATE invoices SET status = 'unpaid', paid_at = NULL, payment_date = NULL, payment_method = NULL WHERE id = ?",
                 [invoiceId]
             );
-
             // 3. SAPU BERSIH: Tarik uang kas dari tabel pembayaran & laporan keuangan (Biar pembukuan tidak selisih)
             await conn.execute("DELETE FROM payments WHERE invoice_id = ?", [invoiceId]);
             await conn.execute("DELETE FROM finance_reports WHERE invoice_id = ?", [invoiceId]);
-
             // 4. Ambil username untuk ditendang dari MikroTik
             const [custRows] = await conn.query("SELECT pppoe_username FROM customers WHERE id = ?", [inv.customer_id]);
             
@@ -3707,13 +3322,11 @@ class BillingManager {
                     }
                 });
             }
-
             return { success: true, invoice_number: inv.invoice_number };
         });
     }
     
    // =========================================================
-    // ??? OTOT TRANSAKSI (WAJIB ADA - PENGIKAT SEMUA PROSES)
     // =========================================================
     async withTransaction(callback) {
         const conn = await pool.getConnection();
@@ -3729,9 +3342,7 @@ class BillingManager {
             conn.release();
         }
     }
-
     // =========================================================
-    // ?? JANTUNG SULTAN (AKTIVASI & RESTORE OTOMATIS)
     // VERSI FINAL: PISAH JALUR (HOTSPOT vs PPPOE) + ANTI BOCOR
     // =========================================================
     async sultanManualPayment(invoiceId, reqOrAmount = null, options = {}) {
@@ -3747,21 +3358,16 @@ class BillingManager {
                 JOIN customers c ON i.customer_id = c.id 
                 LEFT JOIN packages p ON c.package_id = p.id 
                 WHERE i.id = ? FOR UPDATE`, [invoiceId]);
-
             const inv = rows[0];
             if (!inv) return { success: false, message: 'Tagihan tidak ditemukan!' };
-
             if (inv.status === 'paid' || inv.status === 'PAID') {
                 return { success: true, message: 'Tagihan ini sudah lunas!', already_paid: true };
             }
-
             // =========================================================
             // ??? DETEKTOR KASTA (MEMISAHKAN HOTSPOT vs PPPOE)
             // =========================================================
             const namaPaket = (inv.package_name || '').toUpperCase();
             const tipeDB = inv.package_type || 'pppoe';
-
-            // ATURAN SULTAN: Hotspot Member = Tipe 'voucher' ATAU Nama ada kata 'MEMBER'
             const isHotspotMember = (tipeDB === 'voucher' || namaPaket.includes('MEMBER'));
             
             // =========================================================
@@ -3771,15 +3377,12 @@ class BillingManager {
             if (inv.expired_date && new Date(inv.expired_date) > new Date()) {
                 newExp = new Date(inv.expired_date);
             }
-
             const billingType = inv.billing_type || 'fixed';
-
             if (billingType === 'dynamic') {
                 const daysToAdd = parseInt(inv.active_period) || 30;
                 newExp.setDate(newExp.getDate() + daysToAdd);
             } else {
                 // =========================================================
-                // ??? PERBAIKAN SULTAN: PATUH PADA DATA PSB (BILLING DAY)
                 // =========================================================
                 // Kita ambil bDay dari kolom 'billing_day' di database (Master Data)
                 // Jika kosong, baru fallback ke default (misal 5 atau 25)
@@ -3792,15 +3395,11 @@ class BillingManager {
                     nextMonth = 0;
                     nextYear++;
                 }
-
                 // Proteksi untuk bulan pendek (misal tagihan tgl 31, tapi bulan depan cuma sampai tgl 30 atau 28)
                 const daysInNextMonth = new Date(nextYear, nextMonth + 1, 0).getDate();
                 const finalDay = bDay > daysInNextMonth ? daysInNextMonth : bDay;
-
-                // Hasilnya: newExp akan selalu kembali ke tanggal PSB Bos (bDay)
                 newExp = new Date(nextYear, nextMonth, finalDay);
             }
-
             newExp.setHours(23, 59, 59, 0);
             const sqlExp = newExp.toISOString().slice(0, 19).replace('T', ' ');
             
@@ -3808,7 +3407,6 @@ class BillingManager {
             const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
             const radiusString = `${String(newExp.getDate()).padStart(2, '0')} ${months[newExp.getMonth()]} ${newExp.getFullYear()} 23:59:59`;
             const selisihDetik = Math.max(0, Math.floor((newExp.getTime() - Date.now()) / 1000));
-
             // =========================================================
             // ?? UPDATE DATABASE WEB (FIX CUSTOM ISSUE & NAM KASIR)
             // =========================================================
@@ -3828,12 +3426,10 @@ class BillingManager {
                 "UPDATE invoices SET status = 'paid', paid_at = NOW(), payment_date = NOW(), payment_method = ?, package_id = (SELECT package_id FROM customers WHERE id = ?) WHERE id = ?", 
                 [paymentMethod, inv.customer_id, invoiceId]
             );
-
             await conn.execute(
                 "UPDATE customers SET status = 'active', expired_date = ? WHERE id = ?", 
                 [sqlExp, inv.customer_id]
             );
-
             const refNumber = options.reference_number || `CASH-${Date.now().toString().slice(-6)}`;
             
             // ?? UPDATE FATAL: Kolom admin_name ditambahkan ke INSERT payments
@@ -3842,7 +3438,6 @@ class BillingManager {
                 VALUES (?, ?, ?, ?, NOW(), ?, ?)`, 
                 [inv.id, inv.amount, paymentMethod, refNumber, options.notes || `Pembayaran ${billingType.toUpperCase()}`, namaPelaksana]
             );
-
             // ?? SAMA DI SINI: Kolom username diisi nama Kasir/Admin
             await conn.execute(`
                 INSERT INTO finance_reports 
@@ -3850,23 +3445,18 @@ class BillingManager {
                 VALUES (?, ?, ?, ?, 'income', ?, ?, ?, ?, NOW())`, 
                 [inv.id, inv.customer_id, inv.amount, inv.amount, paymentMethod, `Tagihan ${billingType} #${inv.invoice_number}`, namaPelaksana, inv.package_name || inv.pppoe_profile]
             );
-
             // =========================================================
             // ?? SINKRONISASI RADIUS (PISAH JALUR TEGAS)
             // =========================================================
-
             if (inv.username && isHotspotMember) {
                 // ?? JALUR 1: KHUSUS HOTSPOT MEMBER (Gaya NuxBill)
                 const hotUser = inv.username;
                 const hotProfile = inv.package_name || 'default';
-
                 // ?? JURUS NUXBILL: Sapu bersih history radacct agar Max-Session kembali ke NOL
                 await conn.execute("DELETE FROM radacct WHERE username = ?", [hotUser]);
-
                 await conn.execute("DELETE FROM radcheck WHERE username = ? AND attribute IN ('Expiration', 'Max-All-Session', 'WISPr-Session-Terminate-Time')", [hotUser]);
                 await conn.execute("DELETE FROM radreply WHERE username = ? AND attribute = 'Session-Timeout'", [hotUser]);
                 await conn.execute("DELETE FROM radusergroup WHERE username = ?", [hotUser]);
-
                 // SUNTIK: Expiration, Max-Session, WISPr
                 await conn.execute("INSERT INTO radcheck (username, attribute, op, value) VALUES (?, 'Expiration', ':=', ?)", [hotUser, radiusString]);
                 await conn.execute("INSERT INTO radcheck (username, attribute, op, value) VALUES (?, 'Max-All-Session', ':=', ?)", [hotUser, selisihDetik]);
@@ -3885,18 +3475,14 @@ class BillingManager {
             if ((inv.pppoe_username || inv.username) && !isHotspotMember) {
                 const pppoeUser = inv.pppoe_username || inv.username;
                 const pppoeProfile = inv.pppoe_profile || 'default';
-
                 // 1. Bersihkan semua gembok pembatas (Sapu bersih biar gak ada sisa Expiration)
                 await conn.execute("DELETE FROM radcheck WHERE username = ? AND attribute IN ('Expiration', 'Max-All-Session', 'WISPr-Session-Terminate-Time')", [pppoeUser]);
                 await conn.execute("DELETE FROM radreply WHERE username = ? AND attribute = 'Session-Timeout'", [pppoeUser]);
                 await conn.execute("DELETE FROM radusergroup WHERE username = ?", [pppoeUser]);
-
-                // 2. JANGAN SUNTIK EXPIRATION LAGI BOS! 
                 // Cukup suntik Group saja. 
                 // Biarkan pintu login Radius selalu terbuka (Access-Accept).
                 await conn.execute("INSERT INTO radusergroup (username, groupname, priority) VALUES (?, ?, '1')", [pppoeUser, pppoeProfile]);
-
-                console.log(`? [PPPOE-SULTAN-FIX] ${pppoeUser} login dibuka total, kendali beralih ke Group Profile.`);
+                logger.info([PPPOE] Active session cleared for , profile policy active);
             }
             
             // =========================================================
@@ -3905,7 +3491,6 @@ class BillingManager {
             setImmediate(() => {
                 const validReq = (reqOrAmount && reqOrAmount.headers) ? reqOrAmount : options.req;
                 
-                // ?? LOG AKTIVITAS (DETEKTOR KASIR & SULTAN)
                 if (typeof logActivity === 'function') {
                     // Cukup panggil 'namaPelaksana' yang sudah dideklarasikan di atas tadi.
                     // JANGAN pakai const namaPelaksana = ... lagi di sini!
@@ -3928,7 +3513,6 @@ class BillingManager {
                     this.sendPaymentSuccessNotification(inv, inv).catch(e => {});
                 }
             });
-
             return { 
                 success: true, 
                 message: `LUNAS! Mode: ${billingType.toUpperCase()}, Expired: ${sqlExp}`, 
@@ -3939,9 +3523,7 @@ class BillingManager {
     }
     
     // =========================================================
-    // ??? OTOT FULL MANAGEMENT AGEN (SULTAN ONE DOOR)
     // =========================================================
-
     // 2. UPDATE DATA AGEN (Sapu Jagat)
     async updateSultanAgent(id, data) {
         const telepon = data.phone || data.contact || '';
@@ -3960,7 +3542,6 @@ class BillingManager {
             [name, telepon, username, id]
         );
     }
-
     // 2. Approve Topup dengan Proteksi Transaksi
     async approveSultanTopup(requestId) {
         return this.withTransaction(async (conn) => {
@@ -3972,7 +3553,6 @@ class BillingManager {
             return true;
         });
     }
-
     // 3. Hapus Voucher & Bersihkan Radius
     async deleteSultanVoucher(voucherCode, logId) {
         return this.withTransaction(async (conn) => {
@@ -3983,7 +3563,6 @@ class BillingManager {
             return true;
         });
     }
-
     // 4. Pengelola Paket Agen
     async manageAgentPackage(action, data) {
         const { id, name, price, agent_cost, is_for_agent } = data;
@@ -4005,7 +3584,6 @@ class BillingManager {
     }
     
     // =========================================================
-    // ??? OTOT SATU PINTU: KONTROL AGEN (SULTAN V2)
     // =========================================================
     async getSultanAgentControlData() {
         try {
@@ -4021,7 +3599,6 @@ class BillingManager {
                     JOIN agents a ON l.agent_id = a.id
                     ORDER BY l.created_at DESC LIMIT 50
                 `),
-
                 // 3. Ambil Request Topup Pending
                 pool.query(`
                     SELECT r.*, a.name as agent_name 
@@ -4029,10 +3606,8 @@ class BillingManager {
                     JOIN agents a ON r.agent_id = a.id 
                     WHERE r.status = 'pending'
                 `),
-
                 // 4. Ambil Paket Voucher
                 pool.query("SELECT * FROM packages WHERE type = 'voucher' ORDER BY price ASC"),
-
                 // 5. Ambil Profil Radius (Hotspot)
                 pool.query(`
                     SELECT DISTINCT groupname 
@@ -4042,7 +3617,6 @@ class BillingManager {
                     ORDER BY groupname ASC
                 `)
             ]);
-
             // Bungkus rapi dalam satu paket mewah
             return {
                 agents: agents[0] || [],
@@ -4057,7 +3631,6 @@ class BillingManager {
             return { agents: [], vouchers: [], topups: [], agentPackages: [], hotspotProfiles: [] };
         }
     }
-
     // 1. TAMBAH AGEN BARU (Sapu Jagat)
     async createSultanAgent(data) {
         // Tangkap dua-duanya, kalau form pakai 'phone' atau 'contact' tetap aman!
@@ -4078,29 +3651,24 @@ class BillingManager {
             throw error;
         }
     }
-
     // 2. HAPUS AGEN PERMANEN
     async deleteSultanAgent(id) {
         return await pool.execute("DELETE FROM agents WHERE id = ?", [id]);
     }
-
     // 3. UPDATE STATUS AGEN (Aktif/Nonaktif)
     async updateAgentStatus(id, status) {
         return await pool.execute("UPDATE agents SET status = ? WHERE id = ?", [status, id]);
     }
-
     // 4. TOPUP MANUAL OLEH ADMIN
     async manualTopupAgent(id, amount) {
         const cleanAmount = String(amount).replace(/[^0-9]/g, ''); // Anti karakter aneh
         return await pool.execute("UPDATE agents SET balance = balance + ? WHERE id = ?", [cleanAmount, id]);
     }
-
     // 5. HAPUS REQUEST TOPUP (Tolak)
     async deleteTopupRequest(id) {
         return await pool.execute("DELETE FROM agent_topup_requests WHERE id = ?", [id]);
     }
     
-    // Tambahkan otot ini Bos, biar header & logo EJS nggak error!
     async getSultanAppSettings() {
         try {
             const [rows] = await pool.query("SELECT * FROM app_settings");
@@ -4113,9 +3681,7 @@ class BillingManager {
     }
     
      // =========================================================
-    // ?? OTOT PORTAL AGEN (SULTAN ONE DOOR - WEB FRONTEND)
     // =========================================================
-
     // 1. Verifikasi Login Agen
     async verifyAgentLogin(username, password) {
         const bcrypt = require('bcryptjs');
@@ -4125,44 +3691,37 @@ class BillingManager {
         
         const agent = rows[0];
         const match = await bcrypt.compare(password, agent.password);
-        if (!match) throw new Error("Password Salah, Bos!");
+        if (!match) throw new Error("Invalid credentials provided.");
         
         return agent; // Kembalikan data agen jika lolos
     }
-
     // 2. Data Dashboard Agen
     async getAgentDashboard(agentId) {
         const [agent] = await pool.execute("SELECT balance, name FROM agents WHERE id = ?", [agentId]);
         const [history] = await pool.execute("SELECT * FROM agent_vouchers_logs WHERE agent_id = ? ORDER BY created_at DESC LIMIT 10", [agentId]);
         return { agent: agent[0], history };
     }
-
     // 3. Data Halaman Beli Voucher
     async getAgentBuyVoucherData(agentId) {
         const [packages] = await pool.execute("SELECT * FROM packages WHERE is_for_agent = 1 ORDER BY price ASC");
         const [agent] = await pool.execute("SELECT balance FROM agents WHERE id = ?", [agentId]);
         return { packages, balance: agent[0].balance };
     }
-
     // 4. Proses Transaksi Beli Voucher
     async processAgentBuyVoucher(agentId, packageId, qty) {
         return this.withTransaction(async (conn) => {
             // Cek Paket
             const [pkg] = await conn.execute("SELECT name, price, agent_cost FROM packages WHERE id = ?", [packageId]);
             if (pkg.length === 0) throw new Error("Paket tidak ditemukan!");
-
             const profileName = pkg[0].name;
             const hargaJual = pkg[0].price;
             const modalAgen = pkg[0].agent_cost;
             const totalBayar = modalAgen * qty;
-
             // Cek Saldo
             const [agent] = await conn.execute("SELECT balance FROM agents WHERE id = ? FOR UPDATE", [agentId]);
-            if (agent[0].balance < totalBayar) throw new Error("Saldo tidak cukup, Bos! Silakan Topup dulu.");
-
+            if (agent[0].balance < totalBayar) throw new Error("Insufficient balance. Please top up your account.");
             // Potong Saldo
             await conn.execute("UPDATE agents SET balance = balance - ? WHERE id = ?", [totalBayar, agentId]);
-
             // Generate Voucher
             let voucherList = [];
             for (let i = 0; i < qty; i++) {
@@ -4177,14 +3736,12 @@ class BillingManager {
             return voucherList;
         });
     }
-
     // 5. Data Halaman Topup
     async getAgentTopupData(agentId) {
         const [agent] = await pool.execute("SELECT * FROM agents WHERE id = ?", [agentId]);
         const [history] = await pool.execute("SELECT * FROM agent_topup_requests WHERE agent_id = ? ORDER BY created_at DESC LIMIT 10", [agentId]);
         return { agent: agent[0], history };
     }
-
     // 6. Proses Topup Tripay (Khusus Agen)
     async createAgentTripayTopup(agentId, amount, method, hostname) {
         const crypto = require('crypto');
@@ -4192,31 +3749,26 @@ class BillingManager {
         
         const [setRows] = await pool.execute("SELECT value FROM app_settings WHERE setting_key = 'payment_gateway_config'");
         if (setRows.length === 0) throw new Error("Konfigurasi Tripay tidak ditemukan.");
-
         const fullConfig = JSON.parse(setRows[0].value);
         const { apiKey, privateKey, merchantCode } = fullConfig.tripay;
         if (!privateKey) throw new Error("Private Key Tripay kosong.");
-
         const merchantRef = 'TOPUP-AGEN-' + Date.now();
         const finalAmount = parseInt(amount);
         const signature = crypto.createHmac('sha256', privateKey).update(merchantCode + merchantRef + finalAmount).digest('hex');
-
         const payload = {
             method: method || 'QRIS',
             merchant_ref: merchantRef,
             amount: finalAmount,
             customer_name: 'Agen ID ' + agentId,
-            customer_email: 'agen@inetku-network.com',
+            customer_email: 'agent@pulsebill.io',
             order_items: [{ name: 'Topup Saldo Agen', price: finalAmount, quantity: 1 }],
             return_url: `https://${hostname}/agent/dashboard`,
             callback_url: `https://${hostname}/webhook/tripay`,
             signature: signature
         };
-
         const response = await axios.post('https://tripay.co.id/api/transaction/create', payload, {
             headers: { 'Authorization': 'Bearer ' + apiKey }
         });
-
         if (response.data.success) {
             await pool.execute(
                 "INSERT INTO agent_topup_requests (agent_id, amount, proof_img, status) VALUES (?, ?, ?, 'pending')",
@@ -4227,7 +3779,6 @@ class BillingManager {
             throw new Error(response.data.message);
         }
     }
-
     // 7. Request Topup Manual
     async createManualTopupRequest(agentId, amount, bankName, senderName) {
         const proof = `Bank: ${bankName} | A.N: ${senderName}`; 
@@ -4236,7 +3787,6 @@ class BillingManager {
             [agentId, amount, proof]
         );
     }
-
     // 8. Ambil Stok Voucher Agen
     async getAgentMyVouchers(agentId) {
         const [vouchers] = await pool.execute(`
@@ -4246,7 +3796,6 @@ class BillingManager {
         `, [agentId]);
         return vouchers;
     }
-
     // 9. Laporan Keuangan Agen
     async getAgentReport(agentId) {
         const [summary] = await pool.execute(`
@@ -4255,7 +3804,6 @@ class BillingManager {
         `, [agentId]);
         return summary[0];
     }
-
     // 10. Riwayat Transaksi Campuran
     async getAgentHistory(agentId) {
         const [logs] = await pool.execute(`
@@ -4268,7 +3816,6 @@ class BillingManager {
     }
     
     // =========================================================
-    // ??? OTOT PENENDANG SULTAN (RADIUS CoA - MELEK DATA v7)
     // =========================================================
     async kickUserRadius(username) {
         try {
@@ -4285,7 +3832,6 @@ class BillingManager {
             
             if (nas.length > 0) {
                 const { nasipaddress, secret, framedipaddress, callingstationid } = nas[0];
-
                 // ?? RAKIT PELURU LENGKAP: Mikrotik v7 nggak bakal bisa nolak (ACK)
                 const attr = `User-Name=${username},Framed-IP-Address=${framedipaddress},Calling-Station-Id=${callingstationid}`;
                 
@@ -4310,7 +3856,6 @@ class BillingManager {
     
     // 1. Ambil List Paket & Statistik (Pintu Utama)
     async getPackageList() {
-        // SULTAN FIX: Menggunakan pool (Sesuai dengan sistem asli Bos di atas)
         const conn = await pool.getConnection(); 
         try {
             // Paket PPPoE + Hitung Pelanggan
@@ -4319,7 +3864,6 @@ class BillingManager {
                 (SELECT COUNT(*) FROM customers WHERE customers.package_id = packages.id) as customer_count 
                 FROM packages WHERE type = 'pppoe' ORDER BY price ASC
             `);
-
             // Profile Radius (Filter Framed-Protocol PPP & Non-Numeric)
             const [radiusProfiles] = await conn.query(`
                 SELECT DISTINCT groupname FROM radgroupreply 
@@ -4327,12 +3871,10 @@ class BillingManager {
                     SELECT groupname FROM radgroupreply WHERE attribute = 'Framed-Protocol' AND value = 'PPP'
                 ) AND groupname NOT REGEXP '^[0-9]+$' ORDER BY groupname ASC
             `);
-
             // Statistik Dashboard
             const [[totalP]] = await conn.query("SELECT COUNT(*) as total FROM packages WHERE type = 'pppoe'");
             const [[totalC]] = await conn.query("SELECT COUNT(*) as total FROM customers");
             const [[maxPrice]] = await conn.query("SELECT MAX(price) as max_price FROM packages WHERE type = 'pppoe'");
-
             return { packages, radiusProfiles, stats: {
                 total_packages: totalP.total,
                 total_customers: totalC.total,
@@ -4342,42 +3884,33 @@ class BillingManager {
             if (conn) conn.release();
         }
     }
-
     // 2. Ambil Satu Paket (Untuk Modal Edit)
     async getPackageById(id) {
-        // SULTAN FIX: Menggunakan pool
         const [rows] = await pool.query("SELECT * FROM packages WHERE id = ?", [id]);
         return rows[0] || null;
     }
-
     // 3. Simpan Paket (Tambah & Update dengan Logika 30/31 Hari)
     async savePackage(data, id = null) {
         const { name, price, speed, pppoe_profile, billing_type, description } = data;
         const active_period = (billing_type === 'dynamic') ? '30' : '31';
         const bType = billing_type || 'fixed';
-
         if (id) {
             const sql = `UPDATE packages SET name=?, price=?, speed=?, pppoe_profile=?, 
                          billing_type=?, active_period=?, description=? WHERE id=?`;
-            // SULTAN FIX: Menggunakan pool
             return await pool.execute(sql, [name, price, speed, pppoe_profile, bType, active_period, description, id]);
         } else {
             const sql = `INSERT INTO packages (name, price, speed, pppoe_profile, billing_type, active_period, description, type) 
                          VALUES (?, ?, ?, ?, ?, ?, ?, 'pppoe')`;
-            // SULTAN FIX: Menggunakan pool
             return await pool.execute(sql, [name, price, speed, pppoe_profile, bType, active_period, description]);
         }
     }
-
     // 4. Hapus Paket (Murni Hapus di Web + Proteksi)
     // ? Tambahkan parameter adminName (default 'admin' kalau kosong)
     async deletePackage(id, adminName = 'admin') { 
-        // 1. SULTAN GUARD: Cek apakah ada pelanggan yang masih pakai paket ini
         const [cek] = await pool.query("SELECT id FROM customers WHERE package_id = ? LIMIT 1", [id]);
         if (cek.length > 0) {
             throw new Error('Sistem Menolak: Paket tidak bisa dihapus karena masih menempel pada pelanggan!');
         }
-
         // 2. Eksekusi Hapus HANYA pada tabel Packages (Radius Aman 100%)
         await pool.execute("DELETE FROM packages WHERE id = ?", [id]);
         
@@ -4388,14 +3921,11 @@ class BillingManager {
                 logActivity(adminName, 'DELETE_PACKAGE', `Menghapus Paket ID: ${id}`).catch(() => {});
             }
         });
-
         return true;
     }
     
     // =========================================================
-    // ??? OTOT MANAJEMEN PENDAFTARAN & TEKNISI (SULTAN V2)
     // =========================================================
-
     // 1. Ambil Data Halaman Pendaftaran (Semua Data Sekaligus)
     async getPendaftaranDashboardData() {
         // Tarik data paralel agar EJS tidak loading lama
@@ -4411,7 +3941,6 @@ class BillingManager {
             pool.query("SELECT * FROM packages WHERE type = 'pppoe' AND (is_for_agent = 0 OR is_for_agent IS NULL) ORDER BY price ASC"),
             pool.query("SELECT COUNT(*) as total FROM customers WHERE status = 'active'")
         ]);
-
         return {
             pendingList: pendingList[0],
             technicianList: technicianList[0],
@@ -4421,46 +3950,39 @@ class BillingManager {
             totalInstalled: custData[0][0].total
         };
     }
-
     // 2. Simpan Teknisi
     async saveTechnician(data) {
         const { name, phone, password } = data;
         const [cek] = await pool.query("SELECT id FROM technicians WHERE phone = ?", [phone]);
         if (cek.length > 0) throw new Error("No HP sudah terdaftar!");
-
         await pool.query(
             "INSERT INTO technicians (name, phone, password, status) VALUES (?, ?, ?, 'active')",
             [name, phone, password] 
         );
         return true;
     }
-
     // 3. Hapus Teknisi
     async deleteTechnician(id) {
         await pool.query("DELETE FROM technicians WHERE id = ?", [id]);
         return true;
     }
-
     // 4. Cek Jumlah Pending (Untuk Alarm Lonceng)
     async getPendingCount() {
         const [rows] = await pool.query("SELECT COUNT(*) as total FROM pending_registrations WHERE status = 'pending'");
         return rows[0].total;
     }
-
     // 5. Eksekutor Tolak Pendaftaran
     async rejectRegistration(id) {
         await pool.query("UPDATE pending_registrations SET status = 'rejected' WHERE id = ?", [id]);
         return true;
     }
-
-    // 6. Validasi Pendaftaran Utama (Merakit Otot createCustomer - SULTAN SYNC FIX + ALARM TEKNISI)
+            // Synchronize active session with RADIUS policy
     async validateRegistration(regId) {
         return this.withTransaction(async (conn) => {
             // A. Ambil data calon
             const [rows] = await conn.query("SELECT * FROM pending_registrations WHERE id = ? FOR UPDATE", [regId]);
             if (rows.length === 0) throw new Error("Data pendaftaran tidak ditemukan!");
             const calon = rows[0];
-
             // B. Ambil ID Paket
             let packageId = null; 
             const [packRows] = await conn.query(
@@ -4468,12 +3990,9 @@ class BillingManager {
                 [calon.package_name, calon.package_name]
             );
             if (packRows.length > 0) packageId = packRows[0].id;
-
-            // C. Logika Tanggal (Sultan Fix - Anti Pangkas)
             const tglPasangAsli = calon.created_at;
             const instDateObj = new Date(tglPasangAsli);
             const billingDay = instDateObj.getDate(); // Ambil tanggal asli murni (Misal: 31)
-
             // Arahkan ke tanggal 1 bulan depan agar aman
             const expDate = new Date(instDateObj.getFullYear(), instDateObj.getMonth() + 1, 1);
             
@@ -4484,7 +4003,6 @@ class BillingManager {
             expDate.setDate(Math.min(billingDay, maxDaysInNextMonth));
             expDate.setHours(23, 59, 59);
             const radiusExpFormat = this.formatRadiusDate(expDate);
-
             // INSERT KE CUSTOMERS LENGKAP ANTI GAIB
             const sqlInsert = `
                 INSERT INTO customers (
@@ -4508,25 +4026,20 @@ class BillingManager {
                 expDate,        
                 tglPasangAsli,  
             ]);
-
             // D. Sinkron Radius
             await conn.query("DELETE FROM radcheck WHERE username = ?", [calon.pppoe_user]);
             await conn.query("DELETE FROM radusergroup WHERE username = ?", [calon.pppoe_user]);
             await conn.query("INSERT INTO radcheck (username, attribute, op, value) VALUES (?, 'Cleartext-Password', ':=', ?)", [calon.pppoe_user, calon.pppoe_pass]);
             await conn.query("INSERT INTO radcheck (username, attribute, op, value) VALUES (?, 'Expiration', ':=', ?)", [calon.pppoe_user, radiusExpFormat]);
             await conn.query("INSERT INTO radusergroup (username, groupname, priority) VALUES (?, ?, 1)", [calon.pppoe_user, calon.package_name]);
-
             // E. Tandai Selesai
             await conn.query("UPDATE pending_registrations SET status = 'validated' WHERE id = ?", [regId]);
-
             // F. ?? WA NOTIFICATION & ALARM TEKNISI (Background Task) ??
             setImmediate(async () => {
                 try {
                     const whatsappManager = require('./whatsapp-notifications');
                     if (!whatsappManager) return;
-
                     const namaPelanggan = calon.customer_name || calon.name;
-
                     // 1. KIRIM WA KE PELANGGAN (Welcome Message)
                     let waPhone = (calon.whatsapp_no || calon.phone || '').toString().replace(/\D/g, '');
                     waPhone = waPhone.startsWith('0') ? '62' + waPhone.slice(1) : waPhone;
@@ -4541,7 +4054,6 @@ class BillingManager {
                             wifi_password: calon.pppoe_pass
                         });
                     }
-
                     // 2. ?? KIRIM ALARM WA KE HP TEKNISI ??
                     if (calon.technician_id) {
                         // Cari nomor HP Teknisi dari database
@@ -4551,14 +4063,11 @@ class BillingManager {
                             let techPhone = techRows[0].phone.toString().replace(/\D/g, '');
                             techPhone = techPhone.startsWith('0') ? '62' + techPhone.slice(1) : techPhone;
                             const techName = techRows[0].name;
-
                             // Merakit Pesan Notifikasi untuk Teknisi
-                            const pesanTeknisi = `*?? ALARM VALIDASI SULTAN ??*\n\n` +
+                            const pesanTeknisi = `*FIELD VALIDATION COMPLETED*\n\n` +
                                 `Halo Teknisi *${techName}*,\n` +
                                 `Laporan Pemasangan Baru atas nama *${namaPelanggan}* telah *DIVALIDASI* oleh Admin dan resmi Aktif! ?\n\n` +
-                                `_Kerja bagus, Bos! Lanjutkan tugas berikutnya! ??_`;
-
-                            // Tembak pesan WA (Sesuaikan dengan fungsi send text di WA Manager Bos)
+                                `_Task recorded successfully._`;
                             if (typeof whatsappManager.sendMessage === 'function') {
                                 await whatsappManager.sendMessage(techPhone, pesanTeknisi);
                             } else if (typeof whatsappManager.sendText === 'function') {
@@ -4568,8 +4077,6 @@ class BillingManager {
                             }
                         }
                     }
-
-                    // 3. ?? SOKET ALARM WEB (Jika Bos pakai Socket.io untuk bunyi di web)
                     if (global.io) {
                         global.io.emit('alarm_teknisi', {
                             technician_id: calon.technician_id,
@@ -4577,17 +4084,14 @@ class BillingManager {
                             message: `Pelanggan ${namaPelanggan} resmi divalidasi!`
                         });
                     }
-
                 } catch (e) { 
                     console.log('? Error Background Notif & Alarm:', e.message); 
                 }
             });
-
             return true;
         });
     }
     
-    // --- OTOT KHUSUS: AMBIL HASIL TEKNISI (SULTAN FULL SYNC) ---
     async getValidatedRegistrations() {
         try {
             // Kita tarik data pendaftaran yang statusnya sudah 'validated' (Selesai Pasang)
@@ -4608,7 +4112,6 @@ class BillingManager {
         }
     }
     
-    // --- OTOT BARU: PENCARI PROFILE ISOLIR DINAMIS ---
     async getActiveIsolirProfile(conn) {
         // Cari di tabel packages, ambil pppoe_profile dari paket yang namanya 'isolir'
         const sql = "SELECT pppoe_profile FROM packages WHERE name = 'isolir' LIMIT 1";
@@ -4617,14 +4120,12 @@ class BillingManager {
         return rows.length > 0 ? rows[0].pppoe_profile : 'isolir';
     }
     
-    // --- OTOT BARU: TRANSAKSI BEBAS (PEMBUKUAN MANUAL SULTAN) ---
     async createCustomTransaction(data, adminName) {
         return this.withTransaction(async (conn) => {
             const { description, type, amount, payment_method } = data;
             const isExpense = type === 'expense';
             // Jika pengeluaran, kita jadikan angkanya minus (-) agar otomatis memotong pendapatan kotor
             const finalAmount = isExpense ? -Math.abs(amount) : Math.abs(amount);
-
             // 1. Cari atau buat akun "TRANSAKSI UMUM" agar database tidak error
             let customerId;
             const [custRows] = await conn.query("SELECT id FROM customers WHERE username = 'trx_umum' LIMIT 1");
@@ -4637,7 +4138,6 @@ class BillingManager {
                 );
                 customerId = res.insertId;
             }
-
             // 2. Buat Invoice Bayangan (Otomatis Lunas)
             const rand = Math.floor(1000 + Math.random() * 9000);
             const invNumber = `TRX-${Date.now().toString().slice(-6)}-${rand}`;
@@ -4655,7 +4155,6 @@ class BillingManager {
                  VALUES (?, ?, ?, ?, NOW(), ?, ?)`,
                 [invRes.insertId, finalAmount, payment_method, refNumber, description, adminName]
             );
-
             return { success: true };
         });
     }
@@ -4689,7 +4188,6 @@ class BillingManager {
                 'c.id'
             ];
             const orderByStr = columnsMap[orderColumnIndex] || 'c.installation_date';
-
             // 2. Filter Pencarian Cerdas
             let searchQuery = "";
             let searchParams = [];
@@ -4699,11 +4197,9 @@ class BillingManager {
                 const wildcard = `%${searchValue}%`;
                 searchParams = [wildcard, wildcard, wildcard, wildcard];
             }
-
             // 3. Hitung Total Semua Data Murni (Sembunyikan TRANSAKSI UMUM)
             const [totalRows] = await conn.query("SELECT COUNT(*) as count FROM customers WHERE name != 'TRANSAKSI UMUM'");
             const totalRecords = totalRows[0].count;
-
             // 4. Hitung Total Data Setelah Difilter Pencarian (Sembunyikan TRANSAKSI UMUM)
             const countQuery = `
                 SELECT COUNT(*) as count FROM customers c 
@@ -4712,7 +4208,6 @@ class BillingManager {
             `;
             const [filteredRows] = await conn.query(countQuery, searchParams);
             const totalFiltered = filteredRows[0].count;
-
             // 5. Tarik Data Utama (Sembunyikan TRANSAKSI UMUM)
             const dataQuery = `
                 SELECT 
@@ -4730,7 +4225,6 @@ class BillingManager {
             // Gabungkan array pencarian dengan Limit & Offset
             const dataParams = [...searchParams, length, start];
             const [customersData] = await conn.query(dataQuery, dataParams);
-
             // 6. Rapihkan Format JSON Sesuai Standar DataTables
             return {
                 draw: parseInt(draw),
@@ -4738,7 +4232,6 @@ class BillingManager {
                 recordsFiltered: totalFiltered,
                 data: customersData
             };
-
         } catch (error) {
             console.error("? [MANAGER ERROR] getCustomersDatatable:", error.message);
             throw error;
@@ -4776,7 +4269,6 @@ class BillingManager {
                 'i.id'
             ];
             const orderByStr = columnsMap[orderColumnIndex] || 'i.due_date';
-
             // 2. Filter Pencarian Pintar (Berdasarkan No. Invoice & Nama Pelanggan)
             let searchQuery = "";
             let searchParams = [];
@@ -4785,11 +4277,9 @@ class BillingManager {
                 const wildcard = `%${searchValue}%`;
                 searchParams = [wildcard, wildcard];
             }
-
             // 3. Hitung Total Tagihan Keseluruhan
             const [totalRows] = await conn.query("SELECT COUNT(*) as count FROM invoices");
             const totalRecords = totalRows[0].count;
-
             // 4. Hitung Total Tagihan Setelah Filter Pencarian
             const countQuery = `
                 SELECT COUNT(*) as count FROM invoices i 
@@ -4798,7 +4288,6 @@ class BillingManager {
             `;
             const [filteredRows] = await conn.query(countQuery, searchParams);
             const totalFiltered = filteredRows[0].count;
-
             // 5. Tarik Data Invoice Bersama Nama Customer dan Nama Paket (LIMIT & OFFSET)
             const dataQuery = `
                 SELECT 
@@ -4815,7 +4304,6 @@ class BillingManager {
             
             const dataParams = [...searchParams, length, start];
             const [invoicesData] = await conn.query(dataQuery, dataParams);
-
             // 6. Kembalikan Format JSON Spesial DataTables
             return {
                 draw: parseInt(draw),
@@ -4823,7 +4311,6 @@ class BillingManager {
                 recordsFiltered: totalFiltered,
                 data: invoicesData
             };
-
         } catch (error) {
             console.error("? [MANAGER ERROR] getInvoicesDatatable:", error.message);
             throw error;
@@ -4867,10 +4354,8 @@ class BillingManager {
                 'p.id'
             ];
             const orderByStr = columnsMap[orderColumnIndex] || 'p.payment_date';
-
             let searchQuery = "";
             let searchParams = [];
-
             // 1. Eksekusi Pencarian Pintar (Teks)
             if (searchValue) {
                 searchQuery += " AND (c.name LIKE ? OR i.invoice_number LIKE ? OR p.notes LIKE ? OR p.admin_name LIKE ?) ";
@@ -4895,11 +4380,9 @@ class BillingManager {
                 searchQuery += " AND p.payment_date <= ? ";
                 searchParams.push(`${endDate} 23:59:59`);
             }
-
             // Hitung Total Data Keseluruhan (Tanpa Filter)
             const [totalRows] = await conn.query("SELECT COUNT(*) as count FROM payments");
             const totalRecords = totalRows[0].count;
-
             // Hitung Total Data yang Ter-Filter
             const countQuery = `
                 SELECT COUNT(*) as count FROM payments p 
@@ -4909,7 +4392,6 @@ class BillingManager {
             `;
             const [filteredRows] = await conn.query(countQuery, searchParams);
             const totalFiltered = filteredRows[0].count;
-
             // Tarik Data Utama (LIMIT & OFFSET)
             const dataQuery = `
                 SELECT 
@@ -4926,7 +4408,6 @@ class BillingManager {
             
             const dataParams = [...searchParams, length, start];
             const [paymentsData] = await conn.query(dataQuery, dataParams);
-
             // Kembalikan Data ke Frontend
             return {
                 draw: parseInt(draw),
@@ -4934,7 +4415,6 @@ class BillingManager {
                 recordsFiltered: totalFiltered,
                 data: paymentsData
             };
-
         } catch (error) {
             console.error("? [MANAGER ERROR] getPaymentsDatatable:", error.message);
             throw error;
@@ -4943,7 +4423,6 @@ class BillingManager {
         }
     }
     
-    // --- OTOT 68: DATA PELANGGAN NUNGGAK (SULTAN V2) ---
     async getPelangganNunggak() {
         try {
             // Mengambil data pelanggan yang sudah melewati tanggal expired
@@ -4997,16 +4476,12 @@ class BillingManager {
         }
     }
 }
-
 // Create singleton instance
 const billingManager = new BillingManager();
-
 billingManager.getCustomers = billingManager.getAllCustomers;
-
 billingManager.injectIsolirProtection().then(() => {
     console.log("? [SYSTEM] Pengecekan keamanan profil Isolir selesai.");
 }).catch(err => {
     console.error("? [SYSTEM] Gagal menjalankan proteksi Isolir:", err.message);
 });
-
 module.exports = billingManager;

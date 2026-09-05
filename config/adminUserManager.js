@@ -1,11 +1,9 @@
-const pool = require('./database'); // Pastikan ini mengarah ke koneksi MariaDB Bos
-
+const pool = require('./database');
 // [READ] Ambil semua data user
 async function getAllUsers() {
     const [rows] = await pool.query("SELECT id, username, name, role, created_at FROM admins ORDER BY id ASC");
     return rows;
 }
-
 // [CREATE] Tambah user baru
 async function addUser(data) {
     const { username, name, password, role } = data;
@@ -14,7 +12,6 @@ async function addUser(data) {
         [username, name, password, role]
     );
 }
-
 // [UPDATE] Edit user yang sudah ada
 async function updateUser(data) {
     const { id, username, name, role, password } = data;
@@ -32,16 +29,14 @@ async function updateUser(data) {
         );
     }
 }
-
 // [DELETE] Hapus user
 async function deleteUser(id) {
     // Pengamanan Ekstra di level Database
     if (id == 1) {
-        throw new Error("Pemberontakan Ditolak: Sultan Utama tidak boleh dihapus!");
+        throw new Error("Action Prohibited: Primary administrator cannot be deleted.");
     }
     await pool.query("DELETE FROM admins WHERE id = ?", [id]);
 }
-
 // Ekspor semua fungsi agar bisa dipakai oleh Resepsionis (Router)
 module.exports = {
     getAllUsers,

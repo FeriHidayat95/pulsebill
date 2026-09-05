@@ -4,17 +4,13 @@ const performanceMonitor = require('./performanceMonitor');
 const { exec } = require('child_process');
 const dbPool = require('./database');
 const backupDir = path.join(process.cwd(), 'data', 'backup');
-
 const settingsPath = path.join(__dirname, '../settings.json')
-
 if (!fs.existsSync(backupDir)) fs.mkdirSync(backupDir, { recursive: true });
-
 // In-memory cache untuk performa
 let settingsCache = null;
 let lastModified = null;
 let cacheExpiry = null;
 const CACHE_TTL = 5000; // 5 detik cache
-
 function loadSettingsFromFile() {
   const startTime = Date.now();
   let wasCacheHit = false;
@@ -48,16 +44,13 @@ function loadSettingsFromFile() {
     return settingsCache || {};
   }
 }
-
 function getSettingsWithCache() {
   return loadSettingsFromFile();
 }
-
 function getSetting(key, defaultValue) {
   const settings = getSettingsWithCache();
   return settings[key] !== undefined ? settings[key] : defaultValue;
 }
-
 async function setSetting(key, value) {
   try {
     // 1. SIMPAN KE DATABASE MARIADB (SOP SATU PINTU & TEKNIK UPSERT)
@@ -67,7 +60,6 @@ async function setSetting(key, value) {
         ON DUPLICATE KEY UPDATE value = VALUES(value)
     `;
     await dbPool.execute(sql, [key, String(value)]);
-
     // 2. SIMPAN KE FILE JSON (Untuk Backup & Cache Kinerja)
     const settings = getSettingsWithCache();
     settings[key] = value;
@@ -84,15 +76,12 @@ async function setSetting(key, value) {
     return false;
   }
 }
-
 // Clear cache function untuk debugging/maintenance
 function clearSettingsCache() {
   settingsCache = null;
   lastModified = null;
   cacheExpiry = null;
 }
-
-// 1. OTOT LOG ACTIVITY (Anti Crash)
 async function logActivity(userId, action, description, req) {
     try {
         const ip = req?.headers?.['x-forwarded-for'] || req?.socket?.remoteAddress || 'SYSTEM_INTERNAL';
@@ -104,19 +93,15 @@ async function logActivity(userId, action, description, req) {
         console.error('Pena Log Error (Ignored):', err?.message);
     }
 }
-
-// 2. OTOT ACTIVITY LOGS
 async function getActivityLogs(limit = 50) {
     const [logs] = await dbPool.query(`SELECT * FROM activity_logs ORDER BY created_at DESC LIMIT ?`, [limit]);
     return logs;
 }
-
 async function clearOldActivityLogs(days = 30) {
     await dbPool.query(`DELETE FROM activity_logs WHERE created_at < DATE_SUB(NOW(), INTERVAL ? DAY)`, [days]);
     return true;
 }
-
-// 3. OTOT BACKUP DATABASE
+    // Database initialization routine
 async function createDatabaseBackup(adminUsername, req) {
     return new Promise((resolve, reject) => {
         try {
@@ -124,9 +109,7 @@ async function createDatabaseBackup(adminUsername, req) {
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
             const filename = `gembok_backup_${timestamp}.sql`;
             const filepath = path.join(backupDir, filename);
-
             const cmd = `mysqldump -h ${dbConfig.host} -u ${dbConfig.user} -p"${dbConfig.password}" ${dbConfig.database} > "${filepath}"`;
-
             exec(cmd, (error, stdout, stderr) => {
                 if (error) {
                     console.error(`Backup Fail: ${stderr}`);
@@ -140,18 +123,14 @@ async function createDatabaseBackup(adminUsername, req) {
         }
     });
 }
-
-// 4. OTOT RESTORE DATABASE
+    // Database initialization routine
 async function restoreDatabase(backup_file, adminUsername, req) {
     return new Promise((resolve, reject) => {
         try {
             const dbConfig = dbPool.pool.config.connectionConfig;
             const filepath = path.join(backupDir, backup_file);
-
             if (!fs.existsSync(filepath)) return reject(new Error('File fisik tidak ditemukan di server.'));
-
             const cmd = `mysql -h ${dbConfig.host} -u ${dbConfig.user} -p"${dbConfig.password}" ${dbConfig.database} < "${filepath}"`;
-
             exec(cmd, (error, stdout, stderr) => {
                 if (error) {
                     console.error(`Restore Fail: ${stderr}`);
@@ -165,8 +144,6 @@ async function restoreDatabase(backup_file, adminUsername, req) {
         }
     });
 }
-
-// 5. OTOT LIST BACKUP
 function getBackupsList() {
     if (!fs.existsSync(backupDir)) return [];
     return fs.readdirSync(backupDir)
@@ -177,10 +154,8 @@ function getBackupsList() {
         })
         .sort((a, b) => b.created - a.created);
 }
-
 // 6. UPDATE MODULE.EXPORTS (Tambahkan fungsi-fungsi baru ke daftar ekspor)
 // Ganti module.exports yang lama dengan yang baru ini:
-
 module.exports = { 
   getSettingsWithCache, 
   getSetting, 

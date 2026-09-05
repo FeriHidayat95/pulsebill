@@ -1,12 +1,8 @@
 <%- include('../../partials/header') %>
 <body class="bg-[#0f172a] text-slate-300 font-sans antialiased selection:bg-blue-500 selection:text-white">
-
 <%- include('../../partials/admin-header') %>
-
 <%- include('../../partials/billing-sidebar', { page: 'invoices', settings: settings }) %>
-
 <main class="p-4 sm:ml-64 pt-20 min-h-screen">
-
     <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
         <div>
             <h1 class="text-3xl font-black text-white tracking-tighter uppercase leading-none text-shadow-xl">
@@ -27,7 +23,6 @@
             </a>
         </div>
     </div>
-
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
         <div class="lg:col-span-8 space-y-6">
@@ -65,7 +60,6 @@
                             <h2 class="text-4xl font-black text-white font-mono tracking-tighter">Rp <%= parseFloat(invoice.amount).toLocaleString('id-ID') %></h2>
                         </div>
                     </div>
-
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div class="bg-[#111827] rounded-3xl p-6 border border-slate-700/50 group hover:border-blue-500/30 transition-all">
                             <h6 class="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-4 flex items-center gap-2">
@@ -90,7 +84,6 @@
                             </table>
                         </div>
                     </div>
-
                     <% if(invoice.notes) { %>
                         <div class="mt-8 p-4 bg-red-500/5 border border-red-500/20 rounded-2xl">
                             <p class="text-[9px] font-black text-red-500 uppercase tracking-[2px] mb-1 italic">Catatan Internal:</p>
@@ -99,7 +92,6 @@
                     <% } %>
                 </div>
             </div>
-
             <% if (invoice.status === 'unpaid') { %>
             <div class="bg-[#1e293b] border border-blue-500/30 rounded-3xl shadow-2xl overflow-hidden group">
                 <div class="px-6 py-4 border-b border-slate-700 bg-blue-600/10 flex justify-between items-center">
@@ -125,7 +117,6 @@
                             <span class="text-[11px] font-black uppercase tracking-widest text-slate-400 group-hover/btn:text-white">Tripay</span>
                         </button>
                     </div>
-
                     <div id="paymentResult" class="hidden mt-6 bg-[#111827] border border-emerald-500/30 rounded-2xl p-6 shadow-xl animate-fade-in">
                         <div class="flex items-center gap-3 mb-4">
                             <div class="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500">
@@ -142,7 +133,6 @@
                 </div>
             </div>
             <% } %>
-
             <div class="bg-[#1e293b] border border-slate-700/60 rounded-3xl shadow-2xl overflow-hidden">
                 <div class="px-6 py-4 border-b border-slate-700 bg-[#111827]/50">
                     <h3 class="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
@@ -157,7 +147,6 @@
                 </div>
             </div>
         </div>
-
         <div class="lg:col-span-4 space-y-6">
             
             <% if (invoice.status === 'unpaid') { %>
@@ -186,7 +175,6 @@
                 <p class="text-[9px] text-center text-slate-600 font-bold mt-4 uppercase italic">Gunakan ini jika pelanggan membayar langsung via admin.</p>
             </div>
             <% } %>
-
             <div class="bg-[#1e293b] border border-slate-700/60 rounded-3xl shadow-2xl p-8 group hover:border-red-500/30 transition-all">
                 <h3 class="text-xs font-black text-white uppercase tracking-widest mb-6 flex items-center gap-2">
                     <i class="bi bi-router text-red-500 text-lg"></i> Kontrol Layanan (Radius)
@@ -205,24 +193,16 @@
                     </p>
                 </div>
             </div>
-
         </div>
     </div>
-
     <div id="toast-container" class="fixed top-24 right-5 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
-
     <div id="invoiceMeta" class="hidden" data-id="<%= invoice.id %>" data-amount="<%= invoice.amount %>"></div>
-
 </main>
-
 <%- include('../../partials/footer') %>
-
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-
 <script>
     const INV_ID = $('#invoiceMeta').data('id');
     const INV_AMT = $('#invoiceMeta').data('amount');
-
     // --- Batman Toast Function ---
     function showToast(type, title, message) {
         const colors = {
@@ -255,7 +235,6 @@
             setTimeout(() => $(`#${id}`).remove(), 500);
         }, 5000);
     }
-
     // --- 1. Load Status Gateway ---
     async function loadGatewayStatus() {
         try {
@@ -272,7 +251,6 @@
             }
         } catch(e) { $('#gatewayStatus').html('<span class="text-[9px] text-slate-700">Offline</span>'); }
     }
-
     // --- 2. Load Riwayat Transaksi Online ---
     async function loadTransactions() {
         try {
@@ -307,7 +285,6 @@
             }
         } catch(e) { $('#paymentTransactions').html('<div class="text-center text-red-500 text-[10px] py-10">Gagal memuat data log.</div>'); }
     }
-
     // --- 3. Buat Link Pembayaran Online ---
     async function createPayment(gateway) {
         const btn = event.currentTarget;
@@ -342,7 +319,6 @@
         document.execCommand("copy");
         showToast('success', 'COPIED', 'Link pembayaran disalin ke clipboard.');
     }
-
     // --- 4. Pembayaran Manual (Form) - FIXED BY GEMINI ---
     $('#markAsPaidForm').submit(function(e) {
         e.preventDefault();
@@ -350,7 +326,7 @@
         const originalText = btn.text();
         btn.prop('disabled', true).text('MEMPROSES...');
     
-        // KABEL SUDAH DIPINDAH KE JALUR SULTAN (payment.js)
+    // Financial ledger and transaction processing
         $.post('/payment/manual-process', $(this).serialize())
         .done(res => {
             if(res.success) {
@@ -378,7 +354,6 @@
         if(!confirm("? AKTIFKAN kembali layanan pelanggan ini?")) return;
         callServiceAPI('restore');
     }
-
     async function callServiceAPI(action) {
         const btnId = action === 'isolir' ? '#btnIsolir' : '#btnRestore';
         const $btn = $(btnId);
@@ -405,13 +380,11 @@
             $btn.prop('disabled', false).html(originalHtml);
         }
     }
-
     $(document).ready(() => {
         loadGatewayStatus();
         loadTransactions();
     });
 </script>
-
 <style>
     @keyframes fade-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     .animate-fade-in { animation: fade-in 0.4s ease-out forwards; }
@@ -422,6 +395,5 @@
     ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
     ::-webkit-scrollbar-thumb:hover { background: #3b82f6; }
 </style>
-
 </body>
 </html>

@@ -1,12 +1,9 @@
 const { delay } = require('@whiskeysockets/baileys'); 
-
 let sock = null;
-
 // Fungsi untuk set instance sock
 function setSock(sockInstance) {
     sock = sockInstance;
 }
-
 // Helper function untuk format nomor telepon
 function formatPhoneNumber(number) {
     if (!number) return '';
@@ -26,7 +23,6 @@ function formatPhoneNumber(number) {
     
     return cleaned;
 }
-
 // Helper function untuk mendapatkan header dan footer dari settings
 function getHeaderFooter() {
     try {
@@ -34,17 +30,16 @@ function getHeaderFooter() {
         const settings = getSettingsWithCache();
         
         return {
-            header: settings.company_header || 'INETKU BOT MANAGEMENT ISP',
+            header: settings.company_header || 'PULSEBILL TELECOM',
             footer: settings.footer_info || 'Internet Tanpa Batas'
         };
     } catch (error) {
         return {
-            header: 'INETKU BOT MANAGEMENT ISP',
+            header: 'PULSEBILL TELECOM',
             footer: 'Internet Tanpa Batas'
         };
     }
 }
-
 // Helper function untuk memformat pesan dengan header dan footer
 function formatMessageWithHeaderFooter(message, includeHeader = true, includeFooter = true) {
     const { header, footer } = getHeaderFooter();
@@ -64,7 +59,6 @@ function formatMessageWithHeaderFooter(message, includeHeader = true, includeFoo
     
     return formattedMessage;
 }
-
 // Fungsi untuk mengirim pesan (Support Text & Media)
 async function sendMessage(number, message) {
     // --- KLEP PENGAMAN 1: Cek apakah socket benar-benar siap ---
@@ -72,11 +66,9 @@ async function sendMessage(number, message) {
         console.log(`[WA-SKIP] ?? WA sedang OFF/Belum Login. Pesan ke ${number} ditahan.`);
         return false;
     }
-
     try {
         let jid;
         const strNumber = String(number);
-
         // Handling JID (Group atau Personal)
         if (strNumber.endsWith('@g.us') || strNumber.endsWith('@s.whatsapp.net')) {
             jid = strNumber;
@@ -106,9 +98,7 @@ async function sendMessage(number, message) {
         
         await sock.sendMessage(jid, formattedMessage);
         return true;
-
     } catch (error) {
-        // --- PEREDAM SUARA SULTAN ---
         // Kalau errornya 408 (Time-out karena WA mati/lemot), jangan tampilkan log merah panjang!
         if (error?.output?.statusCode === 408) {
             console.log(`[WA-TIMEOUT] ? Pesan ke ${number} gagal (WA sedang offline/delay).`);
@@ -118,7 +108,6 @@ async function sendMessage(number, message) {
         return false;
     }
 }
-
 // Fungsi untuk mengirim pesan ke grup nomor (Broadcast)
 async function sendGroupMessage(numbers, message) {
     try {
@@ -127,21 +116,17 @@ async function sendGroupMessage(numbers, message) {
             console.log(`[WA-SKIP] ?? WA OFF. Broadcast massal dibatalkan sementara.`);
             return { success: false, sent: 0, failed: numbers.length || 0, results: [] };
         }
-
         const results = [];
         let sent = 0;
         let failed = 0;
-
         let numberArray = numbers;
         if (typeof numbers === 'string') {
             numberArray = numbers.split(',').map(n => n.trim());
         }
-
         if (!Array.isArray(numberArray)) {
              console.error('Invalid numbers format');
              return { success: false, sent: 0, failed: 0, results: [] };
         }
-
         for (const number of numberArray) {
             try {
                 let cleanNumber = formatPhoneNumber(number);
@@ -152,7 +137,6 @@ async function sendGroupMessage(numbers, message) {
                     results.push({ number, success: false, error: 'Invalid format' });
                     continue;
                 }
-
                 // Eksekusi (Aman karena sendMessage sudah punya peredam 408)
                 const isSent = await sendMessage(cleanNumber, message);
                 
@@ -165,25 +149,20 @@ async function sendGroupMessage(numbers, message) {
                     results.push({ number: cleanNumber, success: false, error: 'Send failed' });
                 }
                 
-                // Delay Sultan (Safe Mode Anti-Banned)
                 const randomDelay = Math.floor(Math.random() * 2000) + 1500;
                 await new Promise(resolve => setTimeout(resolve, randomDelay));
-
             } catch (error) {
                 console.error(`[WA-LOOP-ERR] Error ke ${number}:`, error.message);
                 failed++;
                 results.push({ number, success: false, error: error.message });
             }
         }
-
         return { success: sent > 0, sent, failed, results };
-
     } catch (error) {
         console.error('Error in sendGroupMessage:', error);
         return { success: false, sent: 0, failed: numbers ? numbers.length : 0, results: [] };
     }
 }
-
 // Fungsi untuk mengirim pesan ke grup teknisi
 async function sendTechnicianMessage(message, priority = 'normal') {
     try {
@@ -201,7 +180,6 @@ async function sendTechnicianMessage(message, priority = 'normal') {
         const technicianGroupId = getSetting('technician_group_id', '');
         let sentToGroup = false;
         let sentToNumbers = false;
-
         // PERBAIKAN EMOJI
         let priorityIcon = '';
         if (priority === 'high') {
@@ -210,7 +188,6 @@ async function sendTechnicianMessage(message, priority = 'normal') {
             priorityIcon = '?? *Info* ';
         }
         const priorityMessage = priorityIcon + message;
-
         // Kirim ke grup jika ada ID grupnya
         if (technicianGroupId) {
             try {
@@ -246,7 +223,6 @@ async function sendTechnicianMessage(message, priority = 'normal') {
         return false;
     }
 }
-
 module.exports = {
     setSock,
     sendMessage,

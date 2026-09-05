@@ -1,4 +1,4 @@
-﻿// Modul untuk koneksi dan operasi Mikrotik
+// Modul untuk koneksi dan operasi Mikrotik
 const { RouterOSAPI } = require('node-routeros');
 const { exec } = require('child_process');
 const logger = require('./logger');
@@ -7,41 +7,32 @@ const mysql = require('mysql2/promise');
 const fs = require('fs');
 const path = require('path');
 const pool = require('./database');
-
 let sock = null;
 let mikrotikConnection = null;
 let monitorInterval = null;
-
 // Fungsi untuk set instance sock
 function setSock(sockInstance) {
     sock = sockInstance;
 }
-
 // Fungsi untuk koneksi ke Mikrotik (VERSI CERDAS - AUTO DISCOVERY V7)
 async function connectToMikrotik(nas = null) {
     if (!nas) return null; // Wajib kirim data NAS supaya Intel jalan
-
     const host = nas.nasname;
     const port = parseInt(nas.api_port) || 8728;
     const user = nas.api_user;
     const password = nas.api_password;
-
     const conn = new RouterOSAPI({ host, port, user, password, keepalive: true, timeout: 5 });
-
     try {
         await conn.connect();
-
         // --- INTEL 1: JALUR SUKSES (CEK JEROAN) ---
         const resources = await conn.write('/system/resource/print');
         const version = resources[0]?.version || "";
-
         if (version.startsWith('7')) {
             await pool.query("UPDATE nas SET mikrotik_version = 'v7' WHERE id = ?", [nas.id]);
             nas.mikrotik_version = 'v7';
             logger.info(`? [INTEL-OK] Router ${nas.shortname} terdeteksi v7 via Resources.`);
         }
         return conn;
-
     } catch (error) {
         // --- INTEL 2: JALUR GAGAL (DETEKSI SIDIK JARI ERROR) ---
         // Jika v7 bikin library pingsan (timeout) atau nolak bahasa v6 (!empty)
@@ -54,15 +45,13 @@ async function connectToMikrotik(nas = null) {
             nas.mikrotik_version = 'v7';
             logger.warn(`?? [AUTO-DETECT] Router ${nas.shortname} ID:${nas.id} otomatis ditandai v7 karena respon bermasalah.`);
         }
-
         logger.error(`? Gagal konek ke ${nas.shortname}: ${error.message}`);
         return null;
     }
 }
-
 // Fungsi untuk mendapatkan koneksi Mikrotik
 async function getMikrotikConnection(nasData = null) {
-    // SULTAN FIX: Jika ada pesanan router spesifik (Multi-Router), langsung konek ke sana!
+    // RouterOS and RADIUS policy synchronization
     if (nasData) {
         return await connectToMikrotik(nasData);
     }
@@ -72,7 +61,6 @@ async function getMikrotikConnection(nasData = null) {
     }
     return mikrotikConnection;
 }
-
 // Fungsi untuk koneksi ke database RADIUS (MySQL)
 async function getRadiusConnection() {
     const host = getSetting('radius_host', 'localhost');
@@ -81,7 +69,6 @@ async function getRadiusConnection() {
     const database = getSetting('radius_database', 'radius');
     return await mysql.createConnection({ host, user, password, database });
 }
-
 // Fungsi untuk mendapatkan seluruh user PPPoE dari RADIUS
 async function getPPPoEUsersRadius() {
     const conn = await getRadiusConnection();
@@ -89,7 +76,6 @@ async function getPPPoEUsersRadius() {
     await conn.end();
     return rows.map(row => ({ name: row.username, password: row.password }));
 }
-
 // Fungsi untuk menambah user PPPoE ke RADIUS
 async function addPPPoEUserRadius({ username, password }) {
     const conn = await getRadiusConnection();
@@ -100,7 +86,6 @@ async function addPPPoEUserRadius({ username, password }) {
     await conn.end();
     return { success: true };
 }
-
 // Wrapper: Pilih mode autentikasi dari settings
 async function getPPPoEUsers() {
     const mode = getSetting('user_auth_mode', 'mikrotik');
@@ -127,7 +112,6 @@ async function getPPPoEUsers() {
         }));
     }
 }
-
 // Fungsi untuk edit user PPPoE (berdasarkan id)
 async function editPPPoEUser({ id, username, password, profile }) {
     try {
@@ -145,7 +129,6 @@ async function editPPPoEUser({ id, username, password, profile }) {
         throw error;
     }
 }
-
 // Fungsi untuk hapus user PPPoE (berdasarkan id)
 async function deletePPPoEUser(id) {
     try {
@@ -158,7 +141,6 @@ async function deletePPPoEUser(id) {
         throw error;
     }
 }
-
 // Fungsi untuk mendapatkan daftar koneksi PPPoE aktif
 async function getActivePPPoEConnections() {
     try {
@@ -179,7 +161,6 @@ async function getActivePPPoEConnections() {
         return { success: false, message: `Gagal ambil data PPPoE: ${error.message}`, data: [] };
     }
 }
-
 // Fungsi untuk mendapatkan daftar user PPPoE offline
 async function getOfflinePPPoEUsers() {
     try {
@@ -205,7 +186,6 @@ async function getOfflinePPPoEUsers() {
         return [];
     }
 }
-
 // Fungsi untuk mendapatkan informasi user PPPoE yang tidak aktif (untuk whatsapp.js)
 async function getInactivePPPoEUsers() {
     try {
@@ -250,7 +230,6 @@ async function getInactivePPPoEUsers() {
         };
     }
 }
-
 // Fungsi untuk mendapatkan resource router
 async function getRouterResources() {
     try {
@@ -259,10 +238,8 @@ async function getRouterResources() {
             logger.error('No Mikrotik connection available');
             return null;
         }
-
         // Dapatkan resource router
         const resources = await conn.write('/system/resource/print');
-
         // Debug: Log semua data yang dikembalikan (bisa dinonaktifkan nanti)
         // logger.info('=== DEBUG: Raw MikroTik Resource Response ===');
         // logger.info('Full response:', JSON.stringify(resources, null, 2));
@@ -272,38 +249,31 @@ async function getRouterResources() {
         //     logger.info('Available fields:', Object.keys(resources[0]));
         // }
         // logger.info('=== END DEBUG ===');
-
         return resources[0];
     } catch (error) {
         logger.error(`Error getting router resources: ${error.message}`);
         return null;
     }
 }
-
 function safeNumber(val) {
     if (val === undefined || val === null) return 0;
     const n = Number(val);
     return isNaN(n) ? 0 : n;
 }
-
 // Helper function untuk parsing memory dengan berbagai format
 function parseMemoryValue(value) {
     if (!value) return 0;
-
     // Jika sudah berupa number, return langsung
     if (typeof value === 'number') return value;
-
     // Jika berupa string yang berisi angka
     if (typeof value === 'string') {
         // Coba parse sebagai integer dulu (untuk format bytes dari MikroTik)
         const intValue = parseInt(value);
         if (!isNaN(intValue)) return intValue;
-
         // Jika gagal, coba parse dengan unit
         const str = value.toString().toLowerCase();
         const numericPart = parseFloat(str.replace(/[^0-9.]/g, ''));
         if (isNaN(numericPart)) return 0;
-
         // Check for units
         if (str.includes('kib') || str.includes('kb')) {
             return numericPart * 1024;
@@ -316,10 +286,8 @@ function parseMemoryValue(value) {
             return numericPart;
         }
     }
-
     return 0;
 }
-
 // Fungsi untuk mendapatkan informasi resource yang diformat
 async function getResourceInfo() {
     // Ambil traffic interface utama (default ether1)
@@ -328,34 +296,28 @@ async function getResourceInfo() {
     try {
         traffic = await getInterfaceTraffic(interfaceName);
     } catch (e) { traffic = { rx: 0, tx: 0 }; }
-
     try {
         const resources = await getRouterResources();
         if (!resources) {
             return { success: false, message: 'Resource router tidak ditemukan', data: null };
         }
-
         // Debug: Log raw resource data (bisa dinonaktifkan nanti)
         // logger.info('Raw MikroTik resource data:', JSON.stringify(resources, null, 2));
-
         // Parse memory berdasarkan field yang tersedia di debug
         // Berdasarkan debug: free-memory: 944705536, total-memory: 1073741824 (dalam bytes)
         const totalMem = parseMemoryValue(resources['total-memory']) || 0;
         const freeMem = parseMemoryValue(resources['free-memory']) || 0;
         const usedMem = totalMem > 0 && freeMem >= 0 ? totalMem - freeMem : 0;
-
         // Parse disk space berdasarkan field yang tersedia di debug
         // Berdasarkan debug: free-hdd-space: 438689792, total-hdd-space: 537133056 (dalam bytes)
         const totalDisk = parseMemoryValue(resources['total-hdd-space']) || 0;
         const freeDisk = parseMemoryValue(resources['free-hdd-space']) || 0;
         const usedDisk = totalDisk > 0 && freeDisk >= 0 ? totalDisk - freeDisk : 0;
-
         // Parse CPU load (bisa dalam format percentage atau decimal)
         let cpuLoad = safeNumber(resources['cpu-load']);
         if (cpuLoad > 0 && cpuLoad <= 1) {
             cpuLoad = cpuLoad * 100; // Convert dari decimal ke percentage
         }
-
         const data = {
             trafficRX: traffic && traffic.rx ? (traffic.rx / 1000000).toFixed(2) : '0.00',
             trafficTX: traffic && traffic.tx ? (traffic.tx / 1000000).toFixed(2) : '0.00',
@@ -390,7 +352,6 @@ async function getResourceInfo() {
             parsedTotalDisk: totalDisk,
             parsedFreeDisk: freeDisk
         };
-
         // Log parsed data for debugging (bisa dinonaktifkan nanti)
         // logger.info('Parsed memory data:', {
         //     totalMem: totalMem,
@@ -400,7 +361,6 @@ async function getResourceInfo() {
         //     freeMemMB: data.memoryFree,
         //     usedMemMB: data.memoryUsed
         // });
-
         return {
             success: true,
             message: 'Berhasil mengambil info resource router',
@@ -411,7 +371,6 @@ async function getResourceInfo() {
         return { success: false, message: `Gagal ambil resource router: ${error.message}`, data: null };
     }
 }
-
 // Fungsi untuk mendapatkan daftar user hotspot aktif dari RADIUS
 async function getActiveHotspotUsersRadius() {
     const conn = await getRadiusConnection();
@@ -424,7 +383,6 @@ async function getActiveHotspotUsersRadius() {
         data: rows.map(row => ({ name: row.username }))
     };
 }
-
 // Fungsi untuk menambah user hotspot ke RADIUS
 async function addHotspotUserRadius(username, password, profile) {
     const conn = await getRadiusConnection();
@@ -435,7 +393,6 @@ async function addHotspotUserRadius(username, password, profile) {
     await conn.end();
     return { success: true, message: 'User hotspot berhasil ditambahkan ke RADIUS' };
 }
-
 // Wrapper: Pilih mode autentikasi dari settings
 async function getActiveHotspotUsers() {
     const mode = getSetting('user_auth_mode', 'mikrotik');
@@ -458,7 +415,6 @@ async function getActiveHotspotUsers() {
         };
     }
 }
-
 // Fungsi untuk menambahkan user hotspot
 async function addHotspotUser(username, password, profile) {
     const mode = getSetting('user_auth_mode', 'mikrotik');
@@ -484,7 +440,6 @@ async function addHotspotUser(username, password, profile) {
         }
     }
 }
-
 // Fungsi untuk menghapus user hotspot
 async function deleteHotspotUser(username) {
     try {
@@ -510,7 +465,6 @@ async function deleteHotspotUser(username) {
         return { success: false, message: `Gagal menghapus user hotspot: ${error.message}` };
     }
 }
-
 // Fungsi untuk menambahkan secret PPPoE
 async function addPPPoESecret(username, password, profile, localAddress = '') {
     try {
@@ -537,7 +491,6 @@ async function addPPPoESecret(username, password, profile, localAddress = '') {
         return { success: false, message: `Gagal menambah secret PPPoE: ${error.message}` };
     }
 }
-
 // Fungsi untuk menghapus secret PPPoE
 async function deletePPPoESecret(username) {
     try {
@@ -563,7 +516,6 @@ async function deletePPPoESecret(username) {
         return { success: false, message: `Gagal menghapus secret PPPoE: ${error.message}` };
     }
 }
-
 // Fungsi untuk mengubah profile PPPoE
 async function setPPPoEProfile(username, profile) {
     try {
@@ -584,7 +536,6 @@ async function setPPPoEProfile(username, profile) {
             '=.id=' + secrets[0]['.id'],
             '=profile=' + profile
         ]);
-
         // Tambahan: Kick user dari sesi aktif PPPoE
         // Cari sesi aktif
         const activeSessions = await conn.write('/ppp/active/print', [
@@ -599,14 +550,12 @@ async function setPPPoEProfile(username, profile) {
             }
             logger.info(`User ${username} di-kick dari sesi aktif PPPoE setelah ganti profile`);
         }
-
         return { success: true, message: 'Profile PPPoE berhasil diubah dan user di-kick dari sesi aktif' };
     } catch (error) {
         logger.error(`Error setting PPPoE profile: ${error.message}`);
         return { success: false, message: `Gagal mengubah profile PPPoE: ${error.message}` };
     }
 }
-
 // Fungsi untuk monitoring koneksi PPPoE
 let lastActivePPPoE = [];
 async function monitorPPPoEConnections() {
@@ -716,7 +665,6 @@ async function monitorPPPoEConnections() {
         logger.error(`Error starting PPPoE monitoring: ${error.message}`);
     }
 }
-
 // Fungsi untuk mendapatkan traffic interface
 async function getInterfaceTraffic(interfaceName = 'ether1') {
     try {
@@ -737,7 +685,6 @@ async function getInterfaceTraffic(interfaceName = 'ether1') {
         return { rx: 0, tx: 0 };
     }
 }
-
 // Fungsi untuk mendapatkan daftar interface
 async function getInterfaces() {
     try {
@@ -746,7 +693,6 @@ async function getInterfaces() {
             logger.error('No Mikrotik connection available');
             return { success: false, message: 'Koneksi ke Mikrotik gagal', data: [] };
         }
-
         const interfaces = await conn.write('/interface/print');
         return {
             success: true,
@@ -758,7 +704,6 @@ async function getInterfaces() {
         return { success: false, message: `Gagal ambil data interface: ${error.message}`, data: [] };
     }
 }
-
 // Fungsi untuk mendapatkan detail interface tertentu
 async function getInterfaceDetail(interfaceName) {
     try {
@@ -767,15 +712,12 @@ async function getInterfaceDetail(interfaceName) {
             logger.error('No Mikrotik connection available');
             return { success: false, message: 'Koneksi ke Mikrotik gagal', data: null };
         }
-
         const interfaces = await conn.write('/interface/print', [
             `?name=${interfaceName}`
         ]);
-
         if (interfaces.length === 0) {
             return { success: false, message: 'Interface tidak ditemukan', data: null };
         }
-
         return {
             success: true,
             message: `Detail interface ${interfaceName}`,
@@ -786,7 +728,6 @@ async function getInterfaceDetail(interfaceName) {
         return { success: false, message: `Gagal ambil detail interface: ${error.message}`, data: null };
     }
 }
-
 // Fungsi untuk enable/disable interface
 async function setInterfaceStatus(interfaceName, enabled) {
     try {
@@ -795,22 +736,18 @@ async function setInterfaceStatus(interfaceName, enabled) {
             logger.error('No Mikrotik connection available');
             return { success: false, message: 'Koneksi ke Mikrotik gagal' };
         }
-
         // Cari interface
         const interfaces = await conn.write('/interface/print', [
             `?name=${interfaceName}`
         ]);
-
         if (interfaces.length === 0) {
             return { success: false, message: 'Interface tidak ditemukan' };
         }
-
         // Set status interface
         const action = enabled ? 'enable' : 'disable';
         await conn.write(`/interface/${action}`, [
             `=.id=${interfaces[0]['.id']}`
         ]);
-
         return {
             success: true,
             message: `Interface ${interfaceName} berhasil ${enabled ? 'diaktifkan' : 'dinonaktifkan'}`
@@ -820,7 +757,6 @@ async function setInterfaceStatus(interfaceName, enabled) {
         return { success: false, message: `Gagal mengubah status interface: ${error.message}` };
     }
 }
-
 // Fungsi untuk mendapatkan daftar IP address
 async function getIPAddresses() {
     try {
@@ -829,7 +765,6 @@ async function getIPAddresses() {
             logger.error('No Mikrotik connection available');
             return { success: false, message: 'Koneksi ke Mikrotik gagal', data: [] };
         }
-
         const addresses = await conn.write('/ip/address/print');
         return {
             success: true,
@@ -841,7 +776,6 @@ async function getIPAddresses() {
         return { success: false, message: `Gagal ambil data IP address: ${error.message}`, data: [] };
     }
 }
-
 // Fungsi untuk menambah IP address
 async function addIPAddress(interfaceName, address) {
     try {
@@ -850,19 +784,16 @@ async function addIPAddress(interfaceName, address) {
             logger.error('No Mikrotik connection available');
             return { success: false, message: 'Koneksi ke Mikrotik gagal' };
         }
-
         await conn.write('/ip/address/add', [
             `=interface=${interfaceName}`,
             `=address=${address}`
         ]);
-
         return { success: true, message: `IP address ${address} berhasil ditambahkan ke ${interfaceName}` };
     } catch (error) {
         logger.error(`Error adding IP address: ${error.message}`);
         return { success: false, message: `Gagal menambah IP address: ${error.message}` };
     }
 }
-
 // Fungsi untuk menghapus IP address
 async function deleteIPAddress(interfaceName, address) {
     try {
@@ -871,29 +802,24 @@ async function deleteIPAddress(interfaceName, address) {
             logger.error('No Mikrotik connection available');
             return { success: false, message: 'Koneksi ke Mikrotik gagal' };
         }
-
         // Cari IP address
         const addresses = await conn.write('/ip/address/print', [
             `?interface=${interfaceName}`,
             `?address=${address}`
         ]);
-
         if (addresses.length === 0) {
             return { success: false, message: 'IP address tidak ditemukan' };
         }
-
         // Hapus IP address
         await conn.write('/ip/address/remove', [
             `=.id=${addresses[0]['.id']}`
         ]);
-
         return { success: true, message: `IP address ${address} berhasil dihapus dari ${interfaceName}` };
     } catch (error) {
         logger.error(`Error deleting IP address: ${error.message}`);
         return { success: false, message: `Gagal menghapus IP address: ${error.message}` };
     }
 }
-
 // Fungsi untuk mendapatkan routing table
 async function getRoutes() {
     try {
@@ -902,7 +828,6 @@ async function getRoutes() {
             logger.error('No Mikrotik connection available');
             return { success: false, message: 'Koneksi ke Mikrotik gagal', data: [] };
         }
-
         const routes = await conn.write('/ip/route/print');
         return {
             success: true,
@@ -914,7 +839,6 @@ async function getRoutes() {
         return { success: false, message: `Gagal ambil data route: ${error.message}`, data: [] };
     }
 }
-
 // Fungsi untuk menambah route
 async function addRoute(destination, gateway, distance = '1') {
     try {
@@ -923,20 +847,17 @@ async function addRoute(destination, gateway, distance = '1') {
             logger.error('No Mikrotik connection available');
             return { success: false, message: 'Koneksi ke Mikrotik gagal' };
         }
-
         await conn.write('/ip/route/add', [
             `=dst-address=${destination}`,
             `=gateway=${gateway}`,
             `=distance=${distance}`
         ]);
-
         return { success: true, message: `Route ${destination} via ${gateway} berhasil ditambahkan` };
     } catch (error) {
         logger.error(`Error adding route: ${error.message}`);
         return { success: false, message: `Gagal menambah route: ${error.message}` };
     }
 }
-
 // Fungsi untuk menghapus route
 async function deleteRoute(destination) {
     try {
@@ -945,28 +866,23 @@ async function deleteRoute(destination) {
             logger.error('No Mikrotik connection available');
             return { success: false, message: 'Koneksi ke Mikrotik gagal' };
         }
-
         // Cari route
         const routes = await conn.write('/ip/route/print', [
             `?dst-address=${destination}`
         ]);
-
         if (routes.length === 0) {
             return { success: false, message: 'Route tidak ditemukan' };
         }
-
         // Hapus route
         await conn.write('/ip/route/remove', [
             `=.id=${routes[0]['.id']}`
         ]);
-
         return { success: true, message: `Route ${destination} berhasil dihapus` };
     } catch (error) {
         logger.error(`Error deleting route: ${error.message}`);
         return { success: false, message: `Gagal menghapus route: ${error.message}` };
     }
 }
-
 // Fungsi untuk mendapatkan DHCP leases
 async function getDHCPLeases() {
     try {
@@ -975,7 +891,6 @@ async function getDHCPLeases() {
             logger.error('No Mikrotik connection available');
             return { success: false, message: 'Koneksi ke Mikrotik gagal', data: [] };
         }
-
         const leases = await conn.write('/ip/dhcp-server/lease/print');
         return {
             success: true,
@@ -987,7 +902,6 @@ async function getDHCPLeases() {
         return { success: false, message: `Gagal ambil data DHCP lease: ${error.message}`, data: [] };
     }
 }
-
 // Fungsi untuk mendapatkan DHCP server
 async function getDHCPServers() {
     try {
@@ -996,7 +910,6 @@ async function getDHCPServers() {
             logger.error('No Mikrotik connection available');
             return { success: false, message: 'Koneksi ke Mikrotik gagal', data: [] };
         }
-
         const servers = await conn.write('/ip/dhcp-server/print');
         return {
             success: true,
@@ -1008,7 +921,6 @@ async function getDHCPServers() {
         return { success: false, message: `Gagal ambil data DHCP server: ${error.message}`, data: [] };
     }
 }
-
 // Fungsi untuk ping
 async function pingHost(host, count = '4') {
     try {
@@ -1017,12 +929,10 @@ async function pingHost(host, count = '4') {
             logger.error('No Mikrotik connection available');
             return { success: false, message: 'Koneksi ke Mikrotik gagal', data: null };
         }
-
         const result = await conn.write('/ping', [
             `=address=${host}`,
             `=count=${count}`
         ]);
-
         return {
             success: true,
             message: `Ping ke ${host} selesai`,
@@ -1033,7 +943,6 @@ async function pingHost(host, count = '4') {
         return { success: false, message: `Gagal ping ke ${host}: ${error.message}`, data: null };
     }
 }
-
 // Fungsi untuk mendapatkan system logs
 async function getSystemLogs(topics = '', count = '50') {
     try {
@@ -1042,17 +951,13 @@ async function getSystemLogs(topics = '', count = '50') {
             logger.error('No Mikrotik connection available');
             return { success: false, message: 'Koneksi ke Mikrotik gagal', data: [] };
         }
-
         const params = [];
         if (topics) {
             params.push(`?topics~${topics}`);
         }
-
         const logs = await conn.write('/log/print', params);
-
         // Batasi jumlah log yang dikembalikan
         const limitedLogs = logs.slice(0, parseInt(count));
-
         return {
             success: true,
             message: `Ditemukan ${limitedLogs.length} log entries`,
@@ -1063,7 +968,6 @@ async function getSystemLogs(topics = '', count = '50') {
         return { success: false, message: `Gagal ambil system logs: ${error.message}`, data: [] };
     }
 }
-
 // Fungsi untuk mendapatkan daftar profile PPPoE
 async function getPPPoEProfiles() {
     try {
@@ -1072,7 +976,6 @@ async function getPPPoEProfiles() {
             logger.error('No Mikrotik connection available');
             return { success: false, message: 'Koneksi ke Mikrotik gagal', data: [] };
         }
-
         const profiles = await conn.write('/ppp/profile/print');
         return {
             success: true,
@@ -1084,7 +987,6 @@ async function getPPPoEProfiles() {
         return { success: false, message: `Gagal ambil data PPPoE profile: ${error.message}`, data: [] };
     }
 }
-
 // Fungsi untuk mendapatkan detail profile PPPoE
 async function getPPPoEProfileDetail(id) {
     try {
@@ -1093,12 +995,10 @@ async function getPPPoEProfileDetail(id) {
             logger.error('No Mikrotik connection available');
             return { success: false, message: 'Koneksi ke Mikrotik gagal', data: null };
         }
-
         const profiles = await conn.write('/ppp/profile/print', [`?.id=${id}`]);
         if (profiles.length === 0) {
             return { success: false, message: 'Profile tidak ditemukan', data: null };
         }
-
         return {
             success: true,
             message: 'Detail profile berhasil diambil',
@@ -1109,7 +1009,6 @@ async function getPPPoEProfileDetail(id) {
         return { success: false, message: `Gagal ambil detail profile: ${error.message}`, data: null };
     }
 }
-
 // Fungsi untuk mendapatkan daftar profile hotspot
 async function getHotspotProfiles() {
     try {
@@ -1130,7 +1029,6 @@ async function getHotspotProfiles() {
         return { success: false, message: `Gagal ambil data profile hotspot: ${error.message}`, data: [] };
     }
 }
-
 // Fungsi untuk mendapatkan detail profile hotspot
 async function getHotspotProfileDetail(id) {
     try {
@@ -1154,7 +1052,6 @@ async function getHotspotProfileDetail(id) {
         return { success: false, message: error.message, data: null };
     }
 }
-
 // Fungsi untuk mendapatkan daftar server hotspot
 async function getHotspotServers() {
     try {
@@ -1183,11 +1080,10 @@ async function getHotspotServers() {
         return { success: false, message: error.message, data: [] };
     }
 }
-
 async function disconnectHotspotUser(username) {
     try {
         // =========================================================
-        // ??? JURUS 1: TENDANGAN RADIUS CoA (SULTAN v7 PATH)
+    // RouterOS and RADIUS policy synchronization
         // =========================================================
         // Kita cari tahu user ini di router mana, IP-nya berapa, dan MAC-nya apa
         const [session] = await dbPool.query(`
@@ -1196,11 +1092,9 @@ async function disconnectHotspotUser(username) {
             JOIN nas n ON r.nasipaddress = n.nasname 
             WHERE r.username = ? AND r.acctstoptime IS NULL LIMIT 1
         `, [username]);
-
         if (session.length > 0) {
             const { nasipaddress, secret, mikrotik_version, framedipaddress, callingstationid } = session[0];
             
-            // Rakit peluru sakti yang tadi kita tes (User + IP + MAC)
             const attr = `User-Name=${username},Framed-IP-Address=${framedipaddress},Calling-Station-Id=${callingstationid}`;
             const command = `echo "${attr}" | radclient -x ${nasipaddress}:3799 disconnect ${secret}`;
             
@@ -1213,13 +1107,11 @@ async function disconnectHotspotUser(username) {
                 "UPDATE radacct SET acctstoptime = NOW(), acctterminatecause = 'Admin-Kick' WHERE username = ? AND acctstoptime IS NULL", 
                 [username]
             );
-
             // Jika ini v7, kita cukupkan sampai sini karena CoA sudah pasti ACK
             if (mikrotik_version === 'v7') {
                 return { success: true, message: `User ${username} berhasil diputus via Radius CoA` };
             }
         }
-
         // =========================================================
         // ?? JURUS 2: JALUR API (FALLBACK UNTUK v6 ATAU NON-RADIUS)
         // =========================================================
@@ -1237,13 +1129,11 @@ async function disconnectHotspotUser(username) {
         }
         
         return { success: true, message: `User ${username} berhasil diputus` };
-
     } catch (error) {
         logger.error(`? Error disconnecting hotspot user: ${error.message}`);
         return { success: false, message: error.message };
     }
 }
-
 // Fungsi untuk menambah profile hotspot
 async function addHotspotProfile(profileData) {
     try {
@@ -1293,7 +1183,6 @@ async function addHotspotProfile(profileData) {
         return { success: false, message: `Gagal menambah profile: ${error.message}` };
     }
 }
-
 // Fungsi untuk edit profile hotspot
 async function editHotspotProfile(profileData) {
     try {
@@ -1348,7 +1237,6 @@ async function editHotspotProfile(profileData) {
         return { success: false, message: `Gagal mengupdate profile: ${error.message}` };
     }
 }
-
 // Fungsi untuk hapus profile hotspot
 async function deleteHotspotProfile(id) {
     try {
@@ -1368,7 +1256,6 @@ async function deleteHotspotProfile(id) {
         return { success: false, message: `Gagal menghapus profile: ${error.message}` };
     }
 }
-
 // Fungsi untuk mendapatkan firewall rules
 async function getFirewallRules(chain = '') {
     try {
@@ -1377,12 +1264,10 @@ async function getFirewallRules(chain = '') {
             logger.error('No Mikrotik connection available');
             return { success: false, message: 'Koneksi ke Mikrotik gagal', data: [] };
         }
-
         const params = [];
         if (chain) {
             params.push(`?chain=${chain}`);
         }
-
         const rules = await conn.write('/ip/firewall/filter/print', params);
         return {
             success: true,
@@ -1394,7 +1279,6 @@ async function getFirewallRules(chain = '') {
         return { success: false, message: `Gagal ambil data firewall rule: ${error.message}`, data: [] };
     }
 }
-
 // Fungsi untuk restart router
 async function restartRouter() {
     try {
@@ -1403,7 +1287,6 @@ async function restartRouter() {
             logger.error('No Mikrotik connection available');
             return { success: false, message: 'Koneksi ke Mikrotik gagal' };
         }
-
         await conn.write('/system/reboot');
         return { success: true, message: 'Router akan restart dalam beberapa detik' };
     } catch (error) {
@@ -1411,7 +1294,6 @@ async function restartRouter() {
         return { success: false, message: `Gagal restart router: ${error.message}` };
     }
 }
-
 // Fungsi untuk mendapatkan identity router
 async function getRouterIdentity() {
     try {
@@ -1420,7 +1302,6 @@ async function getRouterIdentity() {
             logger.error('No Mikrotik connection available');
             return { success: false, message: 'Koneksi ke Mikrotik gagal', data: null };
         }
-
         const identity = await conn.write('/system/identity/print');
         return {
             success: true,
@@ -1432,7 +1313,6 @@ async function getRouterIdentity() {
         return { success: false, message: `Gagal ambil identity router: ${error.message}`, data: null };
     }
 }
-
 // Fungsi untuk set identity router
 async function setRouterIdentity(name) {
     try {
@@ -1441,18 +1321,15 @@ async function setRouterIdentity(name) {
             logger.error('No Mikrotik connection available');
             return { success: false, message: 'Koneksi ke Mikrotik gagal' };
         }
-
         await conn.write('/system/identity/set', [
             `=name=${name}`
         ]);
-
         return { success: true, message: `Identity router berhasil diubah menjadi: ${name}` };
     } catch (error) {
         logger.error(`Error setting router identity: ${error.message}`);
         return { success: false, message: `Gagal mengubah identity router: ${error.message}` };
     }
 }
-
 // Fungsi untuk mendapatkan clock router
 async function getRouterClock() {
     try {
@@ -1461,7 +1338,6 @@ async function getRouterClock() {
             logger.error('No Mikrotik connection available');
             return { success: false, message: 'Koneksi ke Mikrotik gagal', data: null };
         }
-
         const clock = await conn.write('/system/clock/print');
         return {
             success: true,
@@ -1473,22 +1349,18 @@ async function getRouterClock() {
         return { success: false, message: `Gagal ambil clock router: ${error.message}`, data: null };
     }
 }
-
 // Fungsi untuk mendapatkan semua user (hotspot + PPPoE)
 async function getAllUsers() {
     try {
         // Ambil user hotspot
         const hotspotResult = await getActiveHotspotUsers();
         const hotspotUsers = hotspotResult.success ? hotspotResult.data : [];
-
         // Ambil user PPPoE aktif
         const pppoeResult = await getActivePPPoEConnections();
         const pppoeUsers = pppoeResult.success ? pppoeResult.data : [];
-
         // Ambil user PPPoE offline
         const offlineResult = await getInactivePPPoEUsers();
         const offlineUsers = offlineResult.success ? offlineResult.data : [];
-
         return {
             success: true,
             message: `Total: ${hotspotUsers.length} hotspot aktif, ${pppoeUsers.length} PPPoE aktif, ${offlineUsers.length} PPPoE offline`,
@@ -1505,7 +1377,6 @@ async function getAllUsers() {
         return { success: false, message: `Gagal ambil data semua user: ${error.message}`, data: null };
     }
 }
-
 // ...
 // Fungsi tambah user PPPoE (alias addPPPoESecret)
 async function addPPPoEUser({ username, password, profile }) {
@@ -1516,7 +1387,6 @@ async function addPPPoEUser({ username, password, profile }) {
         return await addPPPoESecret(username, password, profile);
     }
 }
-
 // Update user hotspot (password dan profile)
 async function updateHotspotUser(username, password, profile) {
     try {
@@ -1539,10 +1409,8 @@ async function updateHotspotUser(username, password, profile) {
         throw err;
     }
 }
-
 // Fungsi untuk generate voucher hotspot secara massal (versi lama - dihapus)
 // Fungsi ini diganti dengan fungsi generateHotspotVouchers yang lebih lengkap di bawah
-
 // Fungsi untuk menambah profile PPPoE
 async function addPPPoEProfile(profileData) {
     try {
@@ -1576,7 +1444,6 @@ async function addPPPoEProfile(profileData) {
         return { success: false, message: error.message };
     }
 }
-
 // Fungsi untuk edit profile PPPoE
 async function editPPPoEProfile(profileData) {
     try {
@@ -1611,7 +1478,6 @@ async function editPPPoEProfile(profileData) {
         return { success: false, message: error.message };
     }
 }
-
 // Fungsi untuk hapus profile PPPoE
 async function deletePPPoEProfile(id) {
     try {
@@ -1626,7 +1492,6 @@ async function deletePPPoEProfile(id) {
         return { success: false, message: error.message };
     }
 }
-
 // Fungsi untuk generate hotspot vouchers
 async function generateHotspotVouchers(count, prefix, profile, server, validUntil, price, charType = 'alphanumeric') {
     try {
@@ -1717,11 +1582,9 @@ async function generateHotspotVouchers(count, prefix, profile, server, validUnti
         };
     }
 }
-
 // --- Watcher settings.json untuk reset koneksi Mikrotik jika setting berubah ---
 const settingsPath = path.join(process.cwd(), 'settings.json');
 let lastMikrotikConfig = {};
-
 function getCurrentMikrotikConfig() {
     return {
         host: getSetting('mikrotik_host', '192.168.88.1'),
@@ -1730,7 +1593,6 @@ function getCurrentMikrotikConfig() {
         password: getSetting('mikrotik_password', 'admin')
     };
 }
-
 function mikrotikConfigChanged(newConfig, oldConfig) {
     return (
         newConfig.host !== oldConfig.host ||
@@ -1739,10 +1601,8 @@ function mikrotikConfigChanged(newConfig, oldConfig) {
         newConfig.password !== oldConfig.password
     );
 }
-
 // Inisialisasi config awal
 lastMikrotikConfig = getCurrentMikrotikConfig();
-
 fs.watchFile(settingsPath, { interval: 2000 }, (curr, prev) => {
     try {
         const newConfig = getCurrentMikrotikConfig();
@@ -1755,9 +1615,8 @@ fs.watchFile(settingsPath, { interval: 2000 }, (curr, prev) => {
         logger.error('Gagal cek perubahan konfigurasi Mikrotik:', e.message);
     }
 });
-
 // =========================================================
-// ? SULTAN-SYNC: PAKSA SEMUA ROUTER LAPOR IDENTITAS
+    // RouterOS and RADIUS policy synchronization
 // =========================================================
 async function syncAllRouterVersions() {
     try {
@@ -1777,13 +1636,11 @@ async function syncAllRouterVersions() {
         logger.error('? [SYNC-ERROR]: ' + err.message);
     }
 }
-
 // JALANKAN OTOMATIS SAAT STARTUP (Tunggu 5 detik biar sistem stabil dulu)
 setTimeout(() => {
     syncAllRouterVersions();
 }, 5000);
 // =========================================================
-
 module.exports = {
     setSock,
     getInterfaceTraffic,

@@ -12,7 +12,6 @@
     
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="/socket.io/socket.io.js"></script>
-
     <style>
         /* --- KONFIGURASI TEMA (VARIABLE) --- */
         :root {
@@ -26,7 +25,6 @@
             --shadow: rgba(0, 0, 0, 0.1);
             --glow-opacity: 0.5;
         }
-
         [data-theme="dark"] {
             --bg-body: #0f172a;        
             --bg-card: #1e293b;        
@@ -38,9 +36,7 @@
             --shadow: rgba(0, 0, 0, 0.4);
             --glow-opacity: 0.8;
         }
-
         * { box-sizing: border-box; outline: none; transition: background-color 0.3s ease, color 0.3s ease; }
-
         body {
             font-family: 'Inter', sans-serif;
             background-color: var(--bg-body);
@@ -51,14 +47,12 @@
             display: flex;
             justify-content: center;
         }
-
         .container {
             width: 100%;
             max-width: 480px;
             padding-bottom: 80px;
             position: relative;
         }
-
         .theme-toggle {
             position: absolute;
             top: 0;
@@ -75,13 +69,11 @@
             z-index: 10;
         }
         .theme-toggle i { font-size: 18px; color: var(--text-main); }
-
         .header {
             text-align: center;
             margin-bottom: 30px;
             padding-top: 20px;
         }
-
         .header .user-badge {
             background: rgba(37, 99, 235, 0.1);
             color: var(--accent);
@@ -95,7 +87,6 @@
             margin-bottom: 15px;
             border: 1px solid var(--border);
         }
-
         .header h2 {
             margin: 0;
             font-size: 24px;
@@ -104,9 +95,7 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-
         .header p { color: var(--text-muted); font-size: 13px; margin-top: 5px; }
-
         .form-card {
             background: var(--bg-card);
             padding: 25px;
@@ -116,7 +105,6 @@
             position: relative;
             overflow: hidden;
         }
-
         .form-card::before {
             content: '';
             position: absolute;
@@ -124,14 +112,11 @@
             background: linear-gradient(90deg, #3b82f6, #8b5cf6);
             opacity: var(--glow-opacity);
         }
-
         .form-group { margin-bottom: 20px; position: relative; }
-
         .form-group label {
             display: block; margin-bottom: 8px; font-size: 12px; font-weight: 700;
             color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;
         }
-
         .form-group input, .form-group select, .form-group textarea {
             width: 100%;
             background: var(--input-bg);
@@ -143,25 +128,19 @@
             font-weight: 600;
             transition: all 0.3s ease;
         }
-
         .form-group textarea { padding-left: 15px; }
-
         .form-group i {
             position: absolute; left: 15px; top: 42px;
             color: var(--text-muted); font-size: 16px; transition: 0.3s;
             z-index: 5;
         }
-
         .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
             background: var(--bg-card);
             border-color: var(--accent);
             box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
         }
-
         .form-group input:focus + i, .form-group select:focus + i { color: var(--accent); }
-
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-
         .btn-submit {
             width: 100%;
             background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
@@ -172,7 +151,6 @@
             margin-top: 10px;
         }
         .btn-submit:active { transform: scale(0.98); }
-
         .footer-actions {
             margin-top: 30px; text-align: center;
             border-top: 1px solid var(--border); padding-top: 20px;
@@ -183,7 +161,6 @@
             text-decoration: none; transition: 0.3s;
         }
         .btn-logout:hover { background: #ef4444; color: white; }
-
         .history-section { margin-top: 40px; }
         .history-title { 
             font-size: 12px; font-weight: 800; color: var(--text-muted); 
@@ -211,7 +188,6 @@
         [data-theme="dark"] .badge-pending { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
         [data-theme="dark"] .badge-validated { background: rgba(16, 185, 129, 0.2); color: #34d399; }
         [data-theme="dark"] .badge-rejected { background: rgba(239, 68, 68, 0.2); color: #f87171; }
-
         /* Style Kolom Pencarian Riwayat */
         .search-wrapper { position: relative; margin-bottom: 15px; }
         .search-wrapper input {
@@ -220,9 +196,7 @@
             font-size: 13px; font-weight: 600;
         }
         .search-wrapper i { position: absolute; left: 15px; top: 14px; color: var(--text-muted); }
-
         /* ========================================================== */
-        /* SELECT2 SULTAN STYLE (MENYATU DENGAN TEMA GELAP/TERANG)    */
         /* ========================================================== */
         .select2-container--default .select2-selection--single {
             background-color: var(--input-bg);
@@ -290,13 +264,11 @@
     <div class="theme-toggle" onclick="switchTheme()" title="Ganti Tema">
         <i id="theme-icon" class="fas fa-sun"></i>
     </div>
-
     <div class="header">
         <div class="user-badge"><i class="fas fa-user-astronaut me-2"></i> <%= teknisi.name %></div>
         <h2>PULSEBILL NETWORKS</h2>
         <p>Formulir Pendaftaran Pelanggan Baru</p>
     </div>
-
     <div class="form-card">
         <form id="formInput">
             
@@ -305,13 +277,11 @@
                 <input type="text" name="customer_name" placeholder="Contoh: Budi Santoso" required>
                 <i class="fas fa-user"></i>
             </div>
-
             <div class="form-group">
                 <label>Nomor WhatsApp</label>
                 <input type="number" name="whatsapp_no" placeholder="Contoh: 0812xxxx" required>
                 <i class="fab fa-whatsapp"></i>
             </div>
-
             <div class="grid-2">
                 <div class="form-group">
                     <label>User PPPoE</label>
@@ -324,7 +294,6 @@
                     <i class="fas fa-key"></i>
                 </div>
             </div>
-
             <div class="form-group">
                 <label>Pilih Paket Internet</label>
                 <select name="package_name" id="paketSearchable" required style="width: 100%;">
@@ -335,7 +304,6 @@
                 </select>
                 <i class="fas fa-box-open"></i>
             </div>
-
             <div class="grid-2">
                 <div class="form-group">
                     <label>Data ODP</label>
@@ -348,19 +316,15 @@
                     <i class="fas fa-door-open"></i>
                 </div>
             </div>
-
             <div class="form-group">
                 <label>Alamat Pemasangan</label>
                 <textarea name="address" rows="3" placeholder="Jalan, RT/RW, Desa, Kecamatan..." required></textarea>
             </div>
-
             <button type="submit" class="btn-submit">
                 <i class="fas fa-paper-plane" style="margin-right: 8px;"></i> KIRIM DATA
             </button>
-
         </form>
     </div>
-
     <div class="history-section">
         <div class="history-title">Riwayat Input Terakhir</div>
         
@@ -373,7 +337,6 @@
             <% if(history.length === 0) { %>
                 <div class="text-center text-muted small py-3" style="border: 1px dashed var(--border); border-radius: 12px;">Belum ada data.</div>
             <% } %>
-
             <% history.forEach(h => { %>
                 <div class="history-item status-<%= h.status %>" 
                      onclick="showDetail('<%= h.customer_name %>', '<%= h.whatsapp_no %>', '<%= h.pppoe_user %>', '<%= h.package_name %>', '<%= h.odp_data || '-' %>', '<%= h.port_data || '-' %>', '<%= h.address.replace(/\n/g, ' ') %>', '<%= h.status %>')">
@@ -388,23 +351,18 @@
             <% }) %>
         </div>
     </div>
-
     <div class="footer-actions">
         <a href="/teknisi/logout" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
         <div style="margin-top: 15px; font-size: 11px; color: var(--text-muted);">&copy; 2026 PulseBill Telecom Technologies Inc.</div>
     </div>
-
 </div>
-
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
 <script>
     // --- 1. LOGIKA GANTI TEMA ---
     const savedTheme = localStorage.getItem('teknisi-form-theme') || 'dark';
     document.body.setAttribute('data-theme', savedTheme);
     updateIcon(savedTheme);
-
     function switchTheme() {
         let theme = document.body.getAttribute('data-theme');
         let newTheme = (theme === 'dark') ? 'light' : 'dark';
@@ -412,7 +370,6 @@
         localStorage.setItem('teknisi-form-theme', newTheme);
         updateIcon(newTheme);
     }
-
     function updateIcon(theme) {
         const icon = document.getElementById('theme-icon');
         if(theme === 'dark') {
@@ -421,7 +378,6 @@
             icon.className = 'fas fa-moon';
         }
     }
-
     // --- 2. LOGIKA PENCARIAN RIWAYAT ---
     $('#historySearch').on('keyup', function() {
         const value = $(this).val().toLowerCase();
@@ -429,13 +385,11 @@
             $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
         });
     });
-
     // --- 3. LOGIKA DETAIL RIWAYAT ---
     function showDetail(nama, wa, user, paket, odp, port, alamat, status) {
         const isDark = document.body.getAttribute('data-theme') === 'dark';
         const swalBg = isDark ? '#1e293b' : '#ffffff';
         const swalColor = isDark ? '#ffffff' : '#333333';
-
         Swal.fire({
             title: '<span style="font-size:18px; font-weight:800;">DETAIL PELANGGAN</span>',
             html: `
@@ -478,7 +432,6 @@
         });
     }
     
-    // --- JURUS SULTAN: AUTO SINKRONISASI NAMA & USERNAME + SELECT2 ---
     $(document).ready(function() {
         
         // INISIALISASI PENCARIAN DROPDOWN (SELECT2)
@@ -487,18 +440,15 @@
             allowClear: true,
             width: '100%'
         });
-
         $('input[name="customer_name"]').on('input', function() {
             $('input[name="pppoe_user"]').val($(this).val());
         });
-
         $('input[name="pppoe_user"]').prop('readonly', true).css({
             'background-color': 'var(--input-bg)', 
             'cursor': 'not-allowed',
             'opacity': '0.6' 
         });
     });
-
     // --- 4. LOGIKA SUBMIT FORM ---
     $('#formInput').submit(function(e) {
         e.preventDefault();
@@ -506,7 +456,6 @@
         const isDark = document.body.getAttribute('data-theme') === 'dark';
         const swalBg = isDark ? '#1e293b' : '#ffffff';
         const swalColor = isDark ? '#ffffff' : '#333333';
-
         Swal.fire({
             title: 'Kirim Data?',
             text: "Pastikan data pelanggan & ODP sudah benar!",
@@ -548,23 +497,18 @@
             }
         });
     });
-
     // =========================================================================
-    // ?? 5. LOGIKA SOKET ALARM TEKNISI (SULTAN SYNC) - MODE BRUTAL ??
     // =========================================================================
     const socket = io();
     
-    // SULTAN FIX: Tangkap ID teknisi (Pastikan <%= teknisi.id %> adalah cara memanggil variabel ID teknisi di EJS Bos)
     let myTechIdRaw = "<%= teknisi.id %>";
     const myTechId = parseInt(myTechIdRaw) || 0; 
     
     console.log("?? RADAR AKTIF | ID Teknisi Saya:", myTechId);
-
     // Cek apakah Socket berhasil konek ke Server
     socket.on('connect', () => {
         console.log("?? BATTREY FULL: Terhubung ke Server Socket.io!");
     });
-
     // Pasang Telinga untuk Sinyal Alarm
     socket.on('alarm_teknisi', function(data) {
         console.log("?? ADA SINYAL MASUK DARI ADMIN:", data); 
@@ -585,12 +529,10 @@
                     Swal.fire({ toast: true, position: 'top-end', icon: 'warning', title: 'Klik layar agar alarm bisa bunyi!', showConfirmButton: false, timer: 3000 });
                 });
             }
-
             // B. MUNCULKAN POP-UP RAKSASA ??
             const isDark = document.body.getAttribute('data-theme') === 'dark';
             const swalBg = isDark ? '#1e293b' : '#ffffff';
             const swalColor = isDark ? '#ffffff' : '#333333';
-
             Swal.fire({
                 icon: 'success',
                 title: data.title,
@@ -612,11 +554,9 @@
         }
     });
 </script>
-
 <style>
     @keyframes fade-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     .animate-fade-in { animation: fade-in 0.4s ease-out forwards; }
 </style>
-
 </body>
 </html>

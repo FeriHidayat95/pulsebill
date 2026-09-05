@@ -1,4 +1,4 @@
-﻿const dbPool = require('../config/database');
+const dbPool = require('../config/database');
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
@@ -9,7 +9,6 @@ const { sendMessage } = require('../config/sendMessage');
 const { getSettingsWithCache, getSetting } = require('../config/settingsManager');
 const billingManager = require('../config/billing');
 const router = express.Router();
-
 // Validasi nomor pelanggan - PRIORITAS KE BILLING SYSTEM
 async function isValidCustomer(phone) {
   try {
@@ -49,10 +48,8 @@ async function isValidCustomer(phone) {
     return false;
   }
 }
-
 // Simpan OTP sementara di memory (bisa diganti redis/db)
 const otpStore = {};
-
 // parameterPaths dan getParameterWithPaths dari WhatsApp bot
 const parameterPaths = {
   rxPower: [
@@ -78,7 +75,6 @@ const parameterPaths = {
     'InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.TotalAssociations'
   ]
 };
-
 function getParameterWithPaths(device, paths) {
   for (const path of paths) {
     const parts = path.split('.');
@@ -93,7 +89,6 @@ function getParameterWithPaths(device, paths) {
         break;
       }
     }
-
     // Eksekusi Akhir: Jika ketemu, pastikan yang diambil isinya (_value), bukan bungkusnya
     if (value !== undefined && value !== null) {
       // Jika ternyata ini objek GenieACS, ambil _value nya
@@ -108,7 +103,6 @@ function getParameterWithPaths(device, paths) {
   }
   return '0'; // Jika tidak ada perangkat konek atau jalur buntu
 }
-
 // Helper: Ambil info perangkat dan user terhubung - PRIORITAS KE BILLING SYSTEM
 async function getCustomerDeviceData(phone) {
   try {
@@ -255,7 +249,6 @@ async function getCustomerDeviceData(phone) {
     };
   }
 }
-
 // Helper: Update SSID (real ke GenieACS) - Legacy
 async function updateSSID(phone, newSSID) {
   try {
@@ -322,7 +315,6 @@ async function updateSSID(phone, newSSID) {
     return false;
   }
 }
-
 // Helper: Update SSID Optimized (seperti WhatsApp command) - Fast Response
 async function updateSSIDOptimized(phone, newSSID) {
   try {
@@ -440,7 +432,6 @@ function addAdminNumber(customerData) {
   }
   return customerData;
 }
-
 // Helper: Update Password (real ke GenieACS) - Legacy
 async function updatePassword(phone, newPassword) {
   try {
@@ -496,7 +487,6 @@ async function updatePassword(phone, newPassword) {
     return false;
   }
 }
-
 // Helper: Update Password Optimized (seperti WhatsApp command) - Fast Response
 async function updatePasswordOptimized(phone, newPassword) {
   try {
@@ -595,7 +585,6 @@ async function updatePasswordOptimized(phone, newPassword) {
     return { success: false, message: error.message };
   }
 }
-
 // GET: Login page (SUDAH DILENGKAPI SATPAM SESI)
 router.get('/login', (req, res) => {
   // 1. CEK SESI: Apakah HP pelanggan masih membawa kunci login?
@@ -603,19 +592,16 @@ router.get('/login', (req, res) => {
       // 2. JIKA YA: Langsung tendang ke Dashboard, jangan tampilkan form login!
       return res.redirect('/customer/dashboard');
   }
-
   // 3. JIKA TIDAK: Baru tampilkan halaman form login seperti biasa
   const settings = getSettingsWithCache();
   res.render('login', { settings, error: null });
 });
-
 // GET: Base customer portal - redirect appropriately
 router.get('/', (req, res) => {
   const phone = req.session && req.session.phone;
   if (phone) return res.redirect('/customer/dashboard');
   return res.redirect('/customer/login');
 });
-
 // POST: Proses login - Triple Validation (User + Pass + Phone) - MODE FLEKSIBEL (08/628 OK)
 router.post('/login', async (req, res) => {
   try {
@@ -626,11 +612,9 @@ router.post('/login', async (req, res) => {
     if (!username || !password || !phone) {
       return res.status(400).json({ success: false, message: 'Username, Password, dan No WA wajib diisi!' });
     }
-
     // --- 2. PENYULAP NO HP (NORMALISASI) ---
     // Buang semua karakter non-angka
     let cleanPhone = phone.replace(/[^0-9]/g, '');
-
     // Jika diawali 628, ubah jadi 08
     if (cleanPhone.startsWith('628')) {
       cleanPhone = '0' + cleanPhone.substring(2);
@@ -639,28 +623,23 @@ router.post('/login', async (req, res) => {
     else if (cleanPhone.startsWith('8')) {
       cleanPhone = '0' + cleanPhone;
     }
-
     // 3. Validasi format setelah dinormalkan
     if (!cleanPhone.match(/^08[0-9]{8,13}$/)) {
       return res.status(400).json({ success: false, message: 'Format Nomor HP tidak dikenal (Gunakan 08 atau 628)' });
     }
-
     // --- 4. VALIDASI DATABASE (Pencarian Fleksibel) ---
     // Kita cari yang Username & Password cocok, DAN (Phone-nya 08 ATAU 628)
     const [rows] = await dbPool.query(
       "SELECT * FROM customers WHERE username = ? AND password = ? AND (phone = ? OR phone = ?)", 
       [username, password, cleanPhone, phone] 
     );
-
     if (rows.length === 0) {
       return res.status(401).json({ 
         success: false, 
         message: 'Kombinasi Username, Password, atau No WhatsApp tidak sesuai!' 
       });
     }
-
     const customer = rows[0];
-
     // 5. Logika OTP (Jika diaktifkan)
     if (settings.customerPortalOtp === true || String(settings.customerPortalOtp).toLowerCase() === 'true') {
       const otpLength = parseInt(settings.otp_length || '6', 10);
@@ -688,25 +667,20 @@ router.post('/login', async (req, res) => {
       }
       
       return res.json({ success: true, message: 'OTP dikirim', redirect: `/customer/otp?phone=${customer.phone}` });
-
     } else {
-      // 6. LOGIN LANGSUNG (VERSI SAKTI ANTI LOGOUT)
       req.session.phone = customer.phone;
       req.session.customer_username = customer.username;
       req.session.customer_phone = customer.phone;
       req.session.customerId = customer.id;
       req.session.customerName = customer.name;
-
       // SET DURASI COOKIE BERDASARKAN CHECKBOX "INGAT SAYA" DARI EJS
       if (remember === 'true' || remember === true) {
           const satuTahun = 31536000000;
           req.session.cookie.maxAge = satuTahun;
-          // TAMBAHAN SAKTI: Berikan stempel tanggal kedaluwarsa secara eksplisit!
           req.session.cookie.expires = new Date(Date.now() + satuTahun); 
       } else {
           req.session.cookie.expires = false; // Hilang saat tab ditutup
       }
-
       // SIMPAN PAKSA KE DATABASE SEBELUM MENGIRIM JAWABAN KE HP
       req.session.save((err) => {
           if (err) {
@@ -718,20 +692,17 @@ router.post('/login', async (req, res) => {
           return res.json({ success: true, message: 'Login berhasil', redirect: '/customer/dashboard' });
       });
     }
-
   } catch (error) {
     console.error('Login error:', error);
     return res.status(500).json({ success: false, message: 'Terjadi kesalahan sistem' });
   }
 });
-
 // GET: Halaman OTP
 router.get('/otp', (req, res) => {
   const { phone } = req.query;
   const settings = getSettingsWithCache();
   res.render('otp', { phone, error: null, otp_length: settings.otp_length || 6, settings });
 });
-
 // POST: Verifikasi OTP
 router.post('/otp', async (req, res) => {
   const { phone, otp } = req.body;
@@ -768,7 +739,6 @@ router.post('/otp', async (req, res) => {
   
   return res.redirect('/customer/dashboard');
 });
-
 // GET: Halaman billing pelanggan
 router.get('/billing', async (req, res) => {
   const phone = req.session && req.session.phone;
@@ -807,7 +777,6 @@ router.get('/billing', async (req, res) => {
     });
   }
 });
-
 // POST: Restart device
 router.post('/restart-device', async (req, res) => {
   // Prioritas: customer_username dari billing, fallback ke phone
@@ -1029,7 +998,6 @@ router.post('/restart-device', async (req, res) => {
     });
   }
 });
-
 // GET: Dashboard pelanggan
 router.get('/dashboard', async (req, res) => {
   const phone = req.session && req.session.phone;
@@ -1082,7 +1050,6 @@ router.get('/dashboard', async (req, res) => {
     });
   }
 });
-
 // POST: Ganti SSID (Legacy - redirect to homepage with notification)
 router.post('/change-ssid', async (req, res) => {
   const phone = req.session && req.session.phone;
@@ -1104,7 +1071,6 @@ router.post('/change-ssid', async (req, res) => {
     settings: getSettingsWithCache()
   });
 });
-
 // API: Ganti SSID (Ajax endpoint - optimized like WhatsApp)
 router.post('/api/change-ssid', async (req, res) => {
   const phone = req.session && req.session.phone;
@@ -1148,7 +1114,6 @@ router.post('/api/change-ssid', async (req, res) => {
     res.status(500).json({ success: false, message: 'Terjadi kesalahan server' });
   }
 });
-
 // POST: Ganti Password (Legacy - untuk backward compatibility)
 router.post('/change-password', async (req, res) => {
   const phone = req.session && req.session.phone;
@@ -1170,7 +1135,6 @@ router.post('/change-password', async (req, res) => {
     settings: getSettingsWithCache()
   });
 });
-
 // API: Ganti Password (Ajax endpoint - optimized like WhatsApp)
 router.post('/api/change-password', async (req, res) => {
   const phone = req.session && req.session.phone;
@@ -1213,7 +1177,6 @@ router.post('/api/change-password', async (req, res) => {
     res.status(500).json({ success: false, message: 'Terjadi kesalahan server' });
   }
 });
-
 // POST: Logout pelanggan
 // Logout route - support both GET and POST methods
 router.get('/logout', (req, res) => {
@@ -1221,15 +1184,12 @@ router.get('/logout', (req, res) => {
     res.redirect('/customer/login');
   });
 });
-
 router.post('/logout', (req, res) => {
   req.session.destroy(() => {
     res.redirect('/customer/login');
   });
 });
-
 // Import dan gunakan route laporan gangguan
 const troubleReportRouter = require('./troubleReport');
 router.use('/trouble', troubleReportRouter);
-
 module.exports = router; 

@@ -1,7 +1,6 @@
 <%- include('partials/header') %>
 <%- include('partials/admin-header') %>
 <%- include('partials/admin-sidebar', { page: 'hotspot' }) %>
-
 <style>
     .dataTables_wrapper .dataTables_length,
     .dataTables_wrapper .dataTables_filter,
@@ -22,7 +21,6 @@
         background-color: #111827 !important; border: 1px solid #374151 !important; color: #ffffff !important; border-radius: 0.5rem; padding: 5px 10px;
     }
 </style>
-
 <main class="p-4 sm:ml-64 pt-20 bg-gray-900 min-h-screen text-gray-300">
     
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 border-b border-gray-800 pb-4">
@@ -35,7 +33,6 @@
             <i class="bi bi-arrow-clockwise me-2 text-lg"></i> REFRESH DATA
         </button>
     </div>
-
     <% 
         let totalDownload = 0;
         let totalUpload = 0;
@@ -50,7 +47,6 @@
                 }
             });
         }
-
         function formatBytes(bytes) {
             if (bytes === 0) return '0 B';
             const k = 1024;
@@ -59,7 +55,6 @@
             return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
         }
     %>
-
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <div class="p-5 bg-gray-800 border border-gray-700 rounded-2xl shadow-lg flex items-center justify-between group hover:border-blue-500/50 transition-all relative overflow-hidden">
             <div class="z-10">
@@ -70,7 +65,6 @@
                 <i class="bi bi-people-fill text-2xl"></i>
             </div>
         </div>
-
         <div class="p-5 bg-gray-800 border border-gray-700 rounded-2xl shadow-lg flex items-center justify-between group hover:border-green-500/50 transition-all relative overflow-hidden">
             <div class="z-10">
                 <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest">Total Download</p>
@@ -80,7 +74,6 @@
                 <i class="bi bi-cloud-arrow-down-fill text-2xl animate-bounce"></i>
             </div>
         </div>
-
         <div class="p-5 bg-gray-800 border border-gray-700 rounded-2xl shadow-lg flex items-center justify-between group hover:border-red-500/50 transition-all relative overflow-hidden">
             <div class="z-10">
                 <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest">Total Upload</p>
@@ -90,7 +83,6 @@
                 <i class="bi bi-cloud-arrow-up-fill text-2xl"></i>
             </div>
         </div>
-
         <div class="p-5 bg-gray-800 border border-gray-700 rounded-2xl shadow-lg flex items-center justify-between group hover:border-orange-500/50 transition-all relative overflow-hidden">
             <div class="z-10">
                 <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest">Router Aktif</p>
@@ -101,7 +93,6 @@
             </div>
         </div>
     </div>
-
     <div class="bg-gray-800 border border-gray-700 rounded-2xl shadow-2xl overflow-hidden mb-10">
         <div class="p-4 bg-gray-900/50 border-b border-gray-700 flex justify-between items-center">
             <div class="flex items-center text-gray-300 font-bold text-sm tracking-widest uppercase">
@@ -172,12 +163,9 @@
         </div>
     </div>
 </main>
-
 <%- include('partials/footer') %>
-
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-
 <script>
     $(document).ready(function() {
         // Init DataTable Dark Mode
@@ -193,11 +181,8 @@
             },
             order: [[ 4, "desc" ]] // Urut berdasarkan Uptime
         });
-
         // Styling Search Input
         $('.dataTables_filter input').addClass('bg-gray-900 border border-gray-700 text-white rounded-xl text-sm px-4 py-2 focus:ring-blue-500 w-full md:w-64 outline-none');
-
-        // Logic Kick User (Tetap menggunakan Redirect seperti file asli Bos)
         $(document).on('click', '.kick-btn', function() {
             const user = $(this).data('user');
             const router = $(this).data('router');

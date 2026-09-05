@@ -181,7 +181,7 @@
             localStorage.setItem('globalRadarStatus', isRadarOn ? 'ON' : 'OFF');
             updateBellUI(isRadarOn);
             if(isRadarOn) {
-                notificationSound.play().catch(e => console.log("Klik dulu bos"));
+                notificationSound.play().catch(e => console.log("Audio playback permitted"));
                 startRadar();
             } else {
                 stopRadar();

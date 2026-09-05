@@ -1,12 +1,10 @@
 <%- include('partials/header') %>
 <%- include('partials/admin-header') %>
 <%- include('partials/admin-sidebar', { page: 'setting', settings: settings }) %>
-
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-
 <style>
     /* ========================================= */
     /* ?? BATMAN V7.2 - ACS CORE INTEGRATION ??  */
@@ -18,11 +16,9 @@
         --accent-emerald: #10b981; 
         --accent-blue: #3b82f6; 
         --accent-red: #ef4444;
-        --sidebar-w: 260px; /* SAMA DENGAN SIDEBAR BARU BOS */
+        --sidebar-w: 260px;
     }
-
     body { background-color: var(--bg-deep) !important; color: #cbd5e1 !important; font-family: 'Inter', sans-serif; font-size: 13px; }
-
     /* --- LAYOUT FIX (Main Content Minggir Kanan) --- */
     .content-wrapper, .main-content {
         margin-left: var(--sidebar-w) !important; /* Minggir 260px */
@@ -37,7 +33,6 @@
     @media (max-width: 991px) { 
         .content-wrapper, .main-content { margin-left: 0 !important; width: 100% !important; padding: 80px 20px !important; } 
     }
-
     /* --- INPUT STYLE (Fix Kotak Putih) --- */
     .form-control, .form-select, input {
         background-color: rgba(11, 17, 32, 0.8) !important;
@@ -55,7 +50,6 @@
         -webkit-box-shadow: 0 0 0px 1000px #0b1120 inset;
         transition: background-color 5000s ease-in-out 0s;
     }
-
     /* --- GRID SYSTEM --- */
     .top-grid-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px; }
     
@@ -64,13 +58,11 @@
         height: 100%; min-height: 260px; display: flex; flex-direction: column; justify-content: space-between;
         position: relative; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     }
-
     /* Border Colors */
     .b-wa { border-top: 4px solid var(--accent-emerald); }
     .b-support { border-top: 4px solid #f59e0b; }
     .b-brand { border-top: 4px solid var(--accent-blue); }
     .b-gen { border-top: 4px solid #8b5cf6; }
-
     /* UI Elements */
     .card-head { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
     
@@ -78,7 +70,6 @@
         background: rgba(16, 185, 129, 0.15); border: 1px solid var(--accent-emerald);
         padding: 12px; border-radius: 8px; color: #fff; text-align: center; font-family: monospace; font-weight: bold; margin-bottom: 10px; font-size: 14px;
     }
-
     /* Badge Status */
     .status-badge {
         display: flex; align-items: center; justify-content: center; gap: 8px;
@@ -87,18 +78,13 @@
     }
     .status-online { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
     .status-offline { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
-
     /* Parameter Grid */
     .param-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
     .param-box { background: rgba(30, 41, 59, 0.5); padding: 15px; border-radius: 10px; border: 1px solid var(--border-color); }
     .param-box label { font-size: 10px; text-transform: uppercase; color: #94a3b8; font-weight: bold; display: block; margin-bottom: 5px; }
-
     .btn-action { font-weight: bold; text-transform: uppercase; font-size: 11px; border-radius: 6px; padding: 8px 15px; }
-
     @media (max-width: 1200px) { .top-grid-row { grid-template-columns: 1fr 1fr; } }
     @media (max-width: 768px) { .top-grid-row { grid-template-columns: 1fr; } }
-
-    /* ?? POPUP QR SULTAN ?? */
     #qrPopupOverlay {
         position: fixed;
         top: 0; left: 0; right: 0; bottom: 0;
@@ -127,9 +113,7 @@
         letter-spacing: 2px;
     }
 </style>
-
 <div class="content-wrapper main-content">
-
     <div class="d-flex justify-content-between align-items-center mb-4 animate__animated animate__fadeInDown">
         <div>
             <h3 class="text-white fw-bold m-0 tracking-tight">SYSTEM CONFIG</h3>
@@ -139,7 +123,6 @@
             <i class="bi bi-arrow-clockwise me-1"></i> REFRESH
         </button>
     </div>
-
     <div class="top-grid-row">
         <div class="notif-card b-wa animate__animated animate__fadeInUp" style="animation-delay: 0.1s;">
             <div>
@@ -162,17 +145,14 @@
                 </div>
             </div>
         </div>
-
         <div class="notif-card b-support animate__animated animate__fadeInUp" style="animation-delay: 0.2s;">
-            <div class="card-head text-warning"><i class="bi bi-heart-fill"></i> Support Dev</div>
-            <div class="text-center flex-grow-1 d-flex align-items-center justify-content-center">
-                
-                <img src="/img/qr-donasi.png" style="max-height: 200px; border-radius: 8px; border: 1px solid #555; background-color: #ffffff; padding: 5px;">
-                
+            <div class="card-head text-success"><i class="bi bi-shield-check"></i> System Engine</div>
+            <div class="text-center flex-grow-1 d-flex flex-column align-items-center justify-content-center p-3">
+                <span class="badge bg-success mb-2 px-3 py-2">Operational</span>
+                <p class="text-secondary small m-0">PulseBill Engine v1.0.0 (Node 20 LTS)</p>
             </div>
-            <p class="text-center text-secondary small m-0 mt-2">Support development.</p>
+            <p class="text-center text-secondary small m-0 mt-2">Zero-leak audited.</p>
         </div>
-
         <div class="notif-card b-brand animate__animated animate__fadeInUp" style="animation-delay: 0.3s;">
             <div class="card-head text-primary"><i class="bi bi-brush-fill"></i> Branding</div>
             
@@ -184,16 +164,16 @@
                 <form id="logoUploadForm" enctype="multipart/form-data">
                     
                     <style>
-                        .file-sultan::file-selector-button {
+                        .file-custom::file-selector-button {
                             background-color: #334155; color: #fff; border: none;
                             padding: 6px 12px; border-radius: 6px; font-weight: bold;
                             font-size: 11px; cursor: pointer; margin-right: 10px; text-transform: uppercase;
                             transition: all 0.3s ease;
                         }
-                        .file-sultan::file-selector-button:hover { background-color: #475569; }
+                        .file-custom::file-selector-button:hover { background-color: #475569; }
                     </style>
                     
-                    <input type="file" name="logo" class="form-control form-control-sm mb-3 file-sultan text-secondary" style="background-color: #0b1120 !important; border: 1px solid #334155 !important; border-radius: 8px;">
+                    <input type="file" name="logo" class="form-control form-control-sm mb-3 file-custom text-secondary" style="background-color: #0b1120 !important; border: 1px solid #334155 !important; border-radius: 8px;">
                     
                     <button type="submit" class="btn w-100 text-white fw-bold btn-action" style="background-color: #3b82f6; border: none; padding: 10px; border-radius: 8px;">
                         <i class="bi bi-upload me-1"></i> UPDATE LOGO
@@ -202,7 +182,6 @@
                 </form>
             </div>
         </div>
-
         <div class="notif-card b-gen animate__animated animate__fadeInUp" style="animation-delay: 0.4s;">
             <div class="card-head text-info"><i class="bi bi-cpu-fill"></i> Tools</div>
             <div class="d-flex flex-column flex-grow-1 justify-content-end">
@@ -215,7 +194,6 @@
             </div>
         </div>
     </div>
-
     <div class="row mb-4 animate__animated animate__fadeIn" style="animation-delay: 0.5s;">
         <div class="col-12">
             <div class="notif-card h-auto p-4" style="border-top: 4px solid var(--accent-red);">
@@ -239,7 +217,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="mt-4 pt-3 border-top border-secondary">
                     <label class="text-[10px] text-slate-400 font-bold mb-2 d-block uppercase tracking-widest">Daftar File Server</label>
                     <div class="rounded border border-secondary p-2 w-100" style="max-height: 150px; overflow-y: auto; background-color: #0b1120;">
@@ -248,11 +225,9 @@
                         </table>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
-
     <div class="row animate__animated animate__fadeIn" style="animation-delay: 0.6s;">
         <div class="col-12">
             <div class="notif-card h-auto p-4" style="border-top: 4px solid var(--accent-blue);">
@@ -266,11 +241,8 @@
             </div>
         </div>
     </div>
-
 </div>
-
 <div id="notif-container" class="position-fixed top-0 end-0 p-4" style="z-index: 11000;"></div>
-
 <div id="qrPopupOverlay">
     <div id="qrPopupBox" class="animate__animated animate__zoomIn">
         <div id="qrPopupTitle"><i class="bi bi-whatsapp text-success me-2"></i>SCAN QR WHATSAPP</div>
@@ -280,7 +252,6 @@
         </div>
     </div>
 </div>
-
 <script>
 $(document).ready(function() {
     // 1. Toast Notification
@@ -292,7 +263,6 @@ $(document).ready(function() {
         $('#notif-container').append(html);
         setTimeout(() => $(`#toast-${id}`).fadeOut(() => $(`#toast-${id}`).remove()), 3000);
     }
-
     // 2. Load Settings
     function loadSettings() {
         $.get('/admin/setting/data', function(data) {
@@ -320,7 +290,6 @@ $(document).ready(function() {
         }).fail(() => $('#settingsFields').html('<div class="text-danger">Error Connection.</div>'));
     }
     loadSettings();
-
     // 3. WA Status & QR Raksasa
     let lastQrText = ''; // Simpan QR text terakhir biar ga render ulang kalau sama
     
@@ -360,7 +329,6 @@ $(document).ready(function() {
         });
     }
     loadWA(); setInterval(loadWA, 5000); // ?? Interval dipercepat jadi 5 detik biar QR cepat muncul
-
     // 4. Backup Logic (SUDAH DIPERBAIKI)
     function loadBackups() {
         $.get('/admin/setting/backups', (res) => {
@@ -375,7 +343,6 @@ $(document).ready(function() {
         });
     }
     loadBackups();
-
     // Trigger Backup
     $('#createBackupBtn').click(() => {
         const btn = $('#createBackupBtn');
@@ -386,12 +353,10 @@ $(document).ready(function() {
             btn.html('<i class="bi bi-cloud-arrow-down-fill me-2"></i> INSTANT BACKUP');
         });
     });
-
     // Deteksi Pilihan File
     $('#backupFile').change(function() { 
         $('#restoreBackupBtn').prop('disabled', !$(this).val()); 
     });
-
     // Logika Restore yang Benar (Mengirim Nama File)
     $('#restoreBackupBtn').click(() => {
         const fileName = $('#backupFile').val();
@@ -399,7 +364,6 @@ $(document).ready(function() {
             const btn = $('#restoreBackupBtn');
             btn.prop('disabled', true).html('<i class="bi bi-hourglass-split me-1"></i> Restoring...');
             
-            // FAKTA SULTAN: Kirim nama file, bukan data form setting!
             $.post('/admin/setting/restore', { filename: fileName }, function(res) {
                 notify('success', 'Restore berjalan! Server akan dimuat ulang.');
                 setTimeout(() => location.reload(), 3000);
@@ -409,13 +373,11 @@ $(document).ready(function() {
             });
         }
     });
-
     $('#settingsForm').submit(function(e) {
         e.preventDefault();
         const formData = {}; $(this).find('input').each(function() { formData[$(this).attr('name')] = $(this).val(); });
         $.post('/admin/setting/save', formData, (res) => notify('success', 'Disimpan!'));
     });
-
     $('#btnRefreshQR').click(() => {
         lastQrText = ''; // Reset histori QR
         $.post('/admin/setting/wa-refresh', () => {

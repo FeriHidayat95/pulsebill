@@ -1,12 +1,8 @@
 <%- include('../../partials/header') %>
 <body class="bg-[#0f172a] text-slate-300 font-sans antialiased selection:bg-blue-500 selection:text-white">
-
 <%- include('../../partials/admin-header') %>
-
 <%- include('../../partials/billing-sidebar', { page: 'auto-invoice', settings: settings }) %>
-
 <main class="p-4 sm:ml-64 pt-20 min-h-screen" id="main-content-area">
-
     <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
         <div>
             <h1 class="text-3xl font-black text-white tracking-tighter uppercase leading-none">
@@ -31,7 +27,6 @@
             </div>
         </div>
     </div>
-
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
         <div class="bg-[#1e293b] border border-slate-700/60 rounded-2xl p-5 shadow-lg group hover:border-blue-500/50 transition-all">
             <div class="flex justify-between items-start">
@@ -47,7 +42,6 @@
                 </div>
             </div>
         </div>
-
         <div class="bg-[#1e293b] border border-slate-700/60 rounded-2xl p-5 shadow-lg group hover:border-emerald-500/50 transition-all">
             <div class="flex justify-between items-start">
                 <div>
@@ -59,7 +53,6 @@
                 </div>
             </div>
         </div>
-
         <div class="bg-[#1e293b] border border-slate-700/60 rounded-2xl p-5 shadow-lg group hover:border-cyan-500/50 transition-all">
             <div class="flex justify-between items-start">
                 <div>
@@ -71,7 +64,6 @@
                 </div>
             </div>
         </div>
-
         <div class="bg-[#1e293b] border border-slate-700/60 rounded-2xl p-5 shadow-lg group hover:border-amber-500/50 transition-all">
             <div class="flex justify-between items-start">
                 <div>
@@ -84,7 +76,6 @@
             </div>
         </div>
     </div>
-
     <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8">
         <div class="bg-[#1e293b] border border-slate-700/60 rounded-3xl shadow-2xl overflow-hidden">
             <div class="px-6 py-5 border-b border-slate-700 bg-[#111827]/50">
@@ -112,7 +103,6 @@
                 </div>
             </div>
         </div>
-
         <div class="bg-[#1e293b] border border-slate-700/60 rounded-3xl shadow-2xl overflow-hidden">
             <div class="px-6 py-5 border-b border-slate-700 bg-[#111827]/50">
                 <h3 class="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
@@ -152,7 +142,6 @@
             </form>
         </div>
     </div>
-
     <div id="previewSection" class="hidden bg-[#1e293b] border border-slate-700/60 rounded-3xl shadow-2xl overflow-hidden mb-10 animate-fade-in">
         <div class="px-6 py-5 border-b border-slate-700 bg-[#111827]/50 flex justify-between items-center">
             <h3 class="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
@@ -179,23 +168,17 @@
             </table>
         </div>
     </div>
-
 </main>
-
 <%- include('../../partials/footer') %>
-
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="/socket.io/socket.io.js"></script>
-
 <script>
     $(document).ready(function() {
-        // --- ?? 1. INISIALISASI SOCKET SULTAN ---
         const socket = io();
-
         // Real-time Update Lampu Indikator
         socket.on('autoInvoiceStatusUpdate', (data) => {
-            console.log("?? Sinyal Sultan Diterima:", data);
+            console.log("[SOCKET] System event received:", data);
             const container = $('#status-container');
             
             if (data.enabled) {
@@ -214,7 +197,6 @@
                 showAlert('warning', 'SISTEM MATI: Tagihan otomatis dinonaktifkan.');
             }
         });
-
         // --- ??? 2. HELPER: NOTIFIKASI ---
         function showAlert(type, message) {
             Swal.fire({
@@ -229,7 +211,6 @@
                 timerProgressBar: true
             });
         }
-
         // --- ?? 3. FITUR: GENERATE INVOICES ---
         $('#generateInvoicesBtn').on('click', function() {
             Swal.fire({
@@ -273,7 +254,6 @@
                 }
             });
         });
-
         // --- ?? 4. FITUR: PREVIEW LIST ---
         $('#previewInvoicesBtn').on('click', function() {
             const btn = $(this);
@@ -297,7 +277,6 @@
                 btn.prop('disabled', false).html(originalContent);
             });
         });
-
         function displayPreview(customers) {
             const tbody = $('#previewTableBody');
             tbody.empty();
@@ -318,14 +297,12 @@
                 tbody.append(row);
             });
         }
-
         // --- ?? 5. FITUR: SAVE SETTINGS (FIXED LOGIC) ---
         $('#autoInvoiceSettingsForm').on('submit', function(e) {
             e.preventDefault();
             const btn = $(this).find('button[type="submit"]');
             const originalText = btn.html();
             btn.prop('disabled', true).html('<i class="bi bi-arrow-repeat animate-spin me-2"></i> MENYIMPAN...');
-
             // ?? PERBAIKAN DI SINI: Membaca Dropdown (bukan Checkbox)
             const statusVal = $('select[name="auto_invoice_enabled"]').val(); 
             const notifyVal = $('select[name="send_notification"]').val();
@@ -340,7 +317,6 @@
             };
             
             console.log("?? Mengirim data ke server:", data);
-
             fetch('/admin/billing/auto-invoice/settings', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -369,7 +345,6 @@
         $('#cancelPreviewBtn').on('click', () => $('#previewSection').addClass('hidden'));
     });
 </script>
-
 <style>
     @keyframes fade-in { 
         from { opacity: 0; transform: translateY(10px); } 
@@ -380,6 +355,5 @@
     .overflow-x-auto::-webkit-scrollbar-track { background: #0f172a; }
     .overflow-x-auto::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
 </style>
-
 </body>
 </html>

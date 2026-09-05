@@ -1,12 +1,8 @@
 <%- include('../../partials/header') %>
 <body class="bg-[#0f172a] text-slate-300 font-sans antialiased selection:bg-blue-500 selection:text-white">
-
 <%- include('../../partials/admin-header') %>
-
 <%- include('../../partials/billing-sidebar', { page: 'customers', settings: settings }) %>
-
 <main class="p-4 sm:ml-64 pt-24 min-h-screen">
-
     <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
         <div>
             <h1 class="text-3xl font-black text-white tracking-tighter uppercase leading-none">
@@ -24,13 +20,11 @@
                 <i class="bi bi-file-earmark-excel me-1 text-lg"></i> Import Excel
             </button>
             <input type="file" id="excelFile" class="hidden" accept=".xlsx, .xls" onchange="prosesImport(this)">
-
             <button class="px-5 py-2.5 text-xs font-black text-white bg-blue-600 rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-500/20 transition-all uppercase tracking-widest" onclick="openModalTambah()">
                 <i class="bi bi-person-plus-fill me-1 text-lg"></i> Tambah Pelanggan
             </button>
         </div>
     </div>
-
     <div class="bg-[#1e293b] border border-slate-700/60 rounded-3xl shadow-2xl overflow-hidden mb-10">
         <div class="px-6 py-5 border-b border-slate-700 bg-[#111827]/50 flex flex-col md:flex-row justify-between items-center gap-4">
             <h3 class="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2">
@@ -44,7 +38,6 @@
                 <input type="text" id="customSearch" class="block w-full p-3 pl-10 text-sm font-bold text-white border border-slate-700 rounded-xl bg-[#1e293b] focus:ring-blue-500 focus:border-blue-500 placeholder-slate-600 uppercase tracking-wider" placeholder="Cari Nama/User...">
             </div>
         </div>
-
         <div class="overflow-x-auto">
             <table id="customersTable" class="w-full text-left text-slate-400">
                 <thead class="text-xs text-slate-500 uppercase bg-[#111827]/30 border-b border-slate-700">
@@ -63,13 +56,9 @@
             </table>
         </div>
     </div>
-
     <div id="toast-container" class="fixed top-24 right-5 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
-
 </main>
-
 <%- include('../../partials/footer') %>
-
 <div id="addCustomerModal" tabindex="-1" aria-hidden="true" class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto inset-0 h-full bg-black/80 backdrop-blur-sm transition-opacity">
     <div class="relative w-full max-w-2xl max-h-full mx-auto mt-10">
         <div class="relative bg-[#1e293b] rounded-2xl shadow-2xl border border-slate-700">
@@ -108,7 +97,6 @@
                         <input type="text" id="add_billing_day_display" readonly class="bg-[#0f172a] border border-slate-700 text-blue-400 text-sm rounded-xl block w-full p-3.5 font-black cursor-not-allowed">
                         <input type="hidden" id="add_billing_day" name="billing_day">
                     </div>
-
                     <div class="col-span-1 lg:col-span-2 border-b border-slate-700 pt-2 pb-2 mt-2">
                         <p class="text-xs font-black text-amber-500 uppercase tracking-widest">Layanan & Radius</p>
                     </div>
@@ -150,7 +138,6 @@
         </div>
     </div>
 </div>
-
 <div id="editCustomerModal" tabindex="-1" aria-hidden="true" class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto inset-0 h-full bg-black/80 backdrop-blur-sm transition-opacity">
     <div class="relative w-full max-w-2xl max-h-full mx-auto mt-10">
         <div class="relative bg-[#1e293b] rounded-2xl shadow-2xl border border-slate-700">
@@ -195,7 +182,6 @@
                             <% }); } %>
                         </select>
                     </div>
-
                     <div class="col-span-1 lg:col-span-2 pt-2 border-t border-slate-700 mt-2">
                         <p class="text-xs font-black text-red-500 uppercase tracking-widest">Radius Connection</p>
                     </div>
@@ -242,7 +228,6 @@
 </div>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
-
 <style>
     /* SEMBUNYIKAN BAWAAN DATATABLES */
     .dataTables_wrapper .dataTables_filter { display: none; }
@@ -293,7 +278,6 @@
         opacity: 0.3 !important;
         cursor: not-allowed !important;
     }
-
     /* MENGHILANGKAN BORDER BAWAAN TABEL AGAR LEBIH CLEAN */
     table.dataTable { border-collapse: collapse !important; margin-top: 0 !important; margin-bottom: 0 !important; }
     table.dataTable tbody tr { border-bottom: 1px solid rgba(51, 65, 81, 0.5); }
@@ -304,12 +288,11 @@
         cursor: pointer;
     }
 </style>
-
 <script>
     $(document).ready(function() {
         
         // ==============================================================
-        // DATATABLES SERVER-SIDE (DENGAN UI SULTAN YANG SUDAH DIRAPIKAN)
+    // Schema definition
         // ==============================================================
         const table = $('#customersTable').DataTable({
             responsive: true,
@@ -391,7 +374,6 @@
                         } else {
                             badge = `<span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black bg-slate-700 text-slate-400 border border-slate-600 uppercase tracking-widest">OFF</span>`;
                         }
-
                         let expStr = '';
                         if (row.expired_date) {
                             const exp = new Date(row.expired_date).toLocaleDateString('id-ID');
@@ -432,7 +414,6 @@
                                 <a href="/admin/billing/customers/${row.phone}" class="p-2 rounded-xl text-blue-400 bg-blue-500/5 hover:bg-blue-500 hover:text-white transition-all border border-transparent hover:border-blue-400/50" title="Lihat Detail">
                                     <i class="bi bi-eye text-lg"></i>
                                 </a>
-
                                 <button onclick="editCustomer(
                                     '${row.id}', '${safeName}', '${row.phone}', 
                                     '${safeAddress}', 
@@ -442,7 +423,6 @@
                                 )" class="p-2 rounded-xl text-amber-400 bg-amber-500/5 hover:bg-amber-500 hover:text-white transition-all border border-transparent hover:border-amber-400/50" title="Edit Data">
                                     <i class="bi bi-pencil text-lg"></i>
                                 </button>
-
                                 <button onclick="deleteCustomer('${row.id}')" class="p-2 rounded-xl text-red-400 bg-red-500/5 hover:bg-red-500 hover:text-white transition-all border border-transparent hover:border-red-400/50" title="Hapus">
                                     <i class="bi bi-trash text-lg"></i>
                                 </button>
@@ -455,14 +435,11 @@
                 $(row).addClass('hover:bg-slate-800/50 transition-colors group');
             }
         });
-
         // Hubungkan Input Kolom Custom Pencarian ke DataTables AJAX
         $('#customSearch').on('keyup', function() { 
             table.search(this.value).draw(); 
         });
-
         // ==============================================================
-
         $('#createRadius').change(function() {
             if($(this).is(':checked')) {
                 $('.radius-field').slideDown();
@@ -477,7 +454,6 @@
         $('input[name="name"]').on('input', function() {
             $('input[name="pppoe_username"]').val($(this).val());
         });
-
         $('input[name="pppoe_username"]').prop('readonly', true).css({
             'background-color': '#0f172a',
             'cursor': 'not-allowed',
@@ -493,7 +469,6 @@
             'cursor': 'not-allowed',
             'opacity': '0.7'
         });
-
         $('#addCustomerForm').submit(function(e) {
             e.preventDefault();
             const btn = $(this).find('button[type="submit"]');
@@ -503,7 +478,6 @@
                 else { showToast('error', 'Gagal', res.message); btn.prop('disabled', false).text('Simpan Pelanggan'); }
             }).fail((err) => { showToast('error', 'Gagal', 'Terputus dari server'); btn.prop('disabled', false).text('Simpan Pelanggan'); });
         });
-
         $('#editCustomerForm').submit(function(e) {
             e.preventDefault();
             const btn = $(this).find('button[type="submit"]');
@@ -514,22 +488,18 @@
             }).fail(() => { showToast('error', 'Gagal', 'Server Error'); btn.prop('disabled', false).text('Perbarui Data'); });
         });
     });
-
     function openModalTambah() {
         const now = new Date();
         const year = now.getFullYear();
         const month = String(now.getMonth() + 1).padStart(2, '0');
         const day = String(now.getDate()).padStart(2, '0');
         const todayStr = `${year}-${month}-${day}`;
-
         document.getElementById('add_installation_date').value = todayStr;
         syncBillingDay(todayStr);
         openModal('addCustomerModal');
     }
-
     function openModal(id) { document.getElementById(id).classList.remove('hidden'); document.getElementById(id).classList.add('flex'); }
     function closeModal(id) { document.getElementById(id).classList.add('hidden'); document.getElementById(id).classList.remove('flex'); }
-
     function syncBillingDay(dateString) {
         if (!dateString) return;
         const date = new Date(dateString);
@@ -544,7 +514,6 @@
         if(dayNum > 28) dayNum = 28;
         document.getElementById('add_billing_day').value = dayNum;
     }
-
     function syncBillingDayEdit(dateString) {
         if (!dateString) return;
         const parts = dateString.split('-');
@@ -563,7 +532,6 @@
         document.getElementById('billing_day_picker').value = `${yStr}-${mStr}-${dStr}`;
         document.getElementById('edit_expired_date').value = `${yStr}-${mStr}-${dStr}`;
     }
-
     function updateBillingDay(dateString) {
         if (!dateString) return;
         const date = new Date(dateString);
@@ -578,7 +546,6 @@
             hiddenInput.value = dateString;
         }
     }
-
     async function prosesImport(input) {
         if (!input.files || input.files.length === 0) return;
         const formData = new FormData();
@@ -591,7 +558,6 @@
             else { alert('Gagal: ' + res.message); input.value = ''; }
         } catch (err) { showToast('error', 'Gagal', 'Koneksi error'); }
     }
-
     function syncUser(id) {
         showToast('warning', 'Sync', 'Sinkronisasi ke Mikrotik...');
         $.post(`/admin/billing/sync-user/${id}`).done((res) => {
@@ -599,7 +565,6 @@
             else showToast('error', 'Gagal', res.message);
         });
     }
-
     function editCustomer(id, name, phone, address, packageId, status, pppoeUser, pppoePass, billDay, instDate, expDate) {
         $('#editCustomerForm')[0].reset();
         $('#edit_id').val(id);
@@ -638,10 +603,8 @@
             $('#billing_day_picker').val(fallback);
             $('#edit_expired_date').val(fallback);
         }
-
         openModal('editCustomerModal');
     }
-
     function deleteCustomer(id) {
         if(confirm('Yakin hapus pelanggan ini permanen?')) {
             $.ajax({
@@ -651,7 +614,6 @@
             });
         }
     }
-
     function showToast(type, title, message) {
         const colors = { success: 'bg-emerald-600', error: 'bg-red-600', warning: 'bg-amber-600' };
         const id = 'toast-' + Math.random().toString(36).substr(2, 9);
@@ -660,6 +622,5 @@
         setTimeout(() => { $(`#${id}`).addClass('translate-x-full opacity-0'); setTimeout(() => $(`#${id}`).remove(), 500); }, 4000);
     }
 </script>
-
 </body>
 </html>

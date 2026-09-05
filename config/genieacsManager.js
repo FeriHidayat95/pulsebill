@@ -1,9 +1,8 @@
 // config/genieacsManager.js
 const axios = require('axios');
-const { getDevices } = require('./genieacs'); // Fungsi bawaan Bos
+const { getDevices } = require('./genieacs');
 const { getSetting } = require('./settingsManager');
 const billingManager = require('./billing');
-
 class GenieacsManager {
     // 1. Helper Path
     parameterPaths = {
@@ -34,13 +33,11 @@ class GenieacsManager {
             'Device.Optical.Interface.1.OpticalSignalLevel'
         ]
     };
-
     // 2. Helper Pembaca Data (ANTI [object Object])
     getParameterWithPaths(device, paths) {
         for (const path of paths) {
             const parts = path.split('.');
             let current = device;
-
             // Alur Kerja: Menelusuri rantai objek (misal: VirtualParameters.RXPower)
             for (const part of parts) {
                 if (current && typeof current === 'object' && part in current) {
@@ -50,7 +47,6 @@ class GenieacsManager {
                     break;
                 }
             }
-
             if (current !== undefined && current !== null) {
                 // VERIFIKASI: Jika data berupa objek GenieACS, ambil properti _value
                 if (typeof current === 'object' && current._value !== undefined) {
@@ -66,33 +62,26 @@ class GenieacsManager {
         }
         return '-'; // Kembali ke strip jika benar-benar tidak ditemukan
     }
-
-    // 3. [OTOT UTAMA] Ambil Semua List Device
     async getDeviceList() {
         const devicesRaw = await getDevices();
         // SOLDER: Panggil data pelanggan dari MariaDB
         const customers = await billingManager.getAllCustomers(); 
         const now = Date.now();
-
         const devices = devicesRaw.map(device => {
             const pppoeUser = this.getParameterWithPaths(device, this.parameterPaths.pppUsername);
-
             // SOLDER: Cari jodoh di MariaDB (Anti-Case Sensitive)
             const pelanggan = customers.find(c => {
                 const dbUser = String(c.pppoe_username || '').toLowerCase();
                 const acsUser = String(pppoeUser || '').toLowerCase();
                 return dbUser === acsUser && acsUser !== '-' && acsUser !== '';
             });
-
             // Ambil Tag Asli ACS
             let acsTag = (Array.isArray(device.Tags) && device.Tags.length > 0) ? device.Tags.join(', ')
                        : (typeof device.Tags === 'string' && device.Tags) ? device.Tags
                        : (Array.isArray(device._tags) && device._tags.length > 0) ? device._tags.join(', ')
                        : (typeof device._tags === 'string' && device._tags) ? device._tags : '-';
-
             // SOLDER: Jika Tag ACS kosong, paksa isi pakai No. HP dari MariaDB
             const finalTag = (acsTag === '-' && pelanggan) ? (pelanggan.phone || '-') : acsTag;
-
             // --- SOLDER BARU: Jurus Sapu Bersih User Konek ---
             let rawUserKonek = this.getParameterWithPaths(device, [
                 'InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.TotalAssociations',
@@ -105,7 +94,6 @@ class GenieacsManager {
             if (rawUserKonek === '-' || !rawUserKonek) {
                 rawUserKonek = '0';
             }
-
             return {
                 id: device._id || '-',
                 serialNumber: device.DeviceID?.SerialNumber || device._id || '-',
@@ -122,7 +110,6 @@ class GenieacsManager {
                 tag: finalTag // Data MariaDB resmi numpang di sini agar dibaca EJS
             };
         });
-
         const genieacsTotal = devicesRaw.length;
         const genieacsOnline = devicesRaw.filter(dev => dev._lastInform && (now - new Date(dev._lastInform).getTime()) < 3600 * 1000).length;
         
@@ -133,8 +120,6 @@ class GenieacsManager {
             genieacsOffline: genieacsTotal - genieacsOnline
         };
     }
-
-    // 4. [OTOT KONEKSI] Ambil Auth
     getAxiosConfig() {
         return {
             url: getSetting('genieacs_url', 'http://localhost:7557'),
@@ -144,14 +129,12 @@ class GenieacsManager {
             }
         };
     }
-
-    // 5. [OTOT] Update SSID Tercepat (Non-Blocking)
+    // Synchronize subscriber account state
     async updateSSIDOptimized(deviceId, newSSID) {
         try {
             const config = this.getAxiosConfig();
             const encodedId = encodeURIComponent(deviceId);
             const axiosOpts = { auth: config.auth, timeout: 10000 };
-
             const tasks = [
                 axios.post(`${config.url}/devices/${encodedId}/tasks`, {
                     name: "setParameterValues",
@@ -165,7 +148,6 @@ class GenieacsManager {
                     name: "refreshObject", objectName: "InternetGatewayDevice.LANDevice.1.WLANConfiguration"
                 }, axiosOpts).catch(() => null)
             ];
-
             const results = await Promise.allSettled(tasks);
             if (results[0].status === 'fulfilled') return { success: true };
             throw new Error(results[0].reason?.message || 'Gagal eksekusi task GenieACS');
@@ -174,14 +156,12 @@ class GenieacsManager {
             return { success: false, message: e.message };
         }
     }
-
-    // 6. [OTOT] Update Password Tercepat (Non-Blocking)
+    // Synchronize subscriber account state
     async updatePasswordOptimized(deviceId, newPassword) {
         try {
             const config = this.getAxiosConfig();
             const encodedId = encodeURIComponent(deviceId);
             const axiosOpts = { auth: config.auth, timeout: 10000 };
-
             const tasks = [
                 axios.post(`${config.url}/devices/${encodedId}/tasks`, {
                     name: "setParameterValues",
@@ -195,7 +175,6 @@ class GenieacsManager {
                     name: "refreshObject", objectName: "InternetGatewayDevice.LANDevice.1.WLANConfiguration"
                 }, axiosOpts).catch(() => null)
             ];
-
             const results = await Promise.allSettled(tasks);
             if (results[0].status === 'fulfilled') return { success: true };
             throw new Error(results[0].reason?.message || 'Gagal eksekusi task GenieACS');
@@ -203,13 +182,10 @@ class GenieacsManager {
             return { success: false, message: e.message };
         }
     }
-
-    // 7. [OTOT] Edit Tag (Disiplin Sapu Bersih - Sekali Tembak)
     async updateTag(deviceId, newTag) {
         try {
             const config = this.getAxiosConfig();
             const encodedId = encodeURIComponent(deviceId);
-
             // Solder: Langsung ganti seluruh array tag dengan tag yang baru. 
             // Cukup 1x request ke server .18, lebih cepat dan hardware tidak capek.
             await axios.put(`${config.url}/devices/${encodedId}`, 
@@ -223,8 +199,6 @@ class GenieacsManager {
             return { success: false, message: 'Gagal update ke ACS: ' + e.message };
         }
     }
-
-    // 8. [OTOT] Restart ONU
     async restartDevice(deviceId) {
         const config = this.getAxiosConfig();
         await axios.post(`${config.url}/devices/${encodeURIComponent(deviceId)}/tasks?connection_request`, 
@@ -234,5 +208,4 @@ class GenieacsManager {
         return { success: true };
     }
 }
-
 module.exports = new GenieacsManager();

@@ -1,11 +1,10 @@
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
-
 // --- AWAL JARING PENGAMAN ANTI-LOGOUT (TAMBAHKAN INI) ---
 process.on('uncaughtException', (err) => {
     if (err.message.includes('!empty') || err.message.includes('unknown reply')) {
-        console.log('??? [SAFETY-NET] Menangkap pesan MikroTik v7. Aplikasi tetap hidup, Bos tetap Login!');
+        // Handle transient MikroTik v7 socket events
     } else {
         console.error('?? [SYSTEM ERROR]:', err.message);
     }
@@ -16,7 +15,6 @@ const fs = require('fs');
 const session = require('express-session');
 const multer = require('multer');
 const expressLayouts = require('express-ejs-layouts');
-
 // --- CONFIG IMPORTS ---
 const logger = require('./config/logger');
 const whatsapp = require('./config/whatsapp');
@@ -27,7 +25,6 @@ const pppoeCommands = require('./config/pppoe-commands');
 const genieacsCommands = require('./config/genieacs-commands');
 const rxPowerMonitor = require('./config/rxPowerMonitor');
 const { addCustomerTag } = require('./config/customerTag');
-
 // === OTOMATISASI & CRON JOBS ===
 const cron = require('node-cron');
 // [DIHAPUS] const checkDueInvoicesAndNotify = require('./cron/reminder_job'); <- SUDAH TIDAK DIPAKAI
@@ -38,12 +35,10 @@ const { RadiusManager } = require('./config/RadiusManager'); // Pastikan path-ny
 global.RadiusManager = RadiusManager;
 const whatsappNotifications = require('./config/whatsapp-notifications');
 // ======================================
-
 // --- ROUTE IMPORTS ---
 // Admin Auth & Middleware
 const { router: adminAuthRouter, adminAuth } = require('./routes/adminAuth');
 const { blockTechnicianAccess } = require('./middleware/technicianAccessControl');
-
 // Admin Feature Routes
 const adminDashboardRouter = require('./routes/adminDashboard');
 const adminGenieacsRouter = require('./routes/adminGenieacs');
@@ -61,7 +56,6 @@ const controlPendaftaran = require('./routes/controlPendaftaran');
 const teknisiRoute = require('./routes/teknisi');
 const adminAgentRouter = require('./routes/adminAgent');
 const agentRoutes = require('./routes/agent');
-
 // Customer & Public Routes
 const paymentRouter = require('./routes/payment'); 
 const testTroubleReportRouter = require('./routes/testTroubleReport');
@@ -69,17 +63,14 @@ const troubleReportRouter = require('./routes/troubleReport');
 const apiDashboardRouter = require('./routes/apiDashboard');
 const customerPortal = require('./routes/customerPortal');
 const customerBillingRouter = require('./routes/customerBilling');
-
 // --- INISIALISASI ---
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 app.set('socketio', io);
 global.io = io;
-
 app.get('/favicon.ico', (req, res) => res.status(204).end());
 const VERSION = '1.0.0';
-
 // Global Status WhatsApp
 global.whatsappStatus = {
     connected: false,
@@ -88,21 +79,18 @@ global.whatsappStatus = {
     connectedSince: null,
     status: 'disconnected'
 };
-
 // TOMBOL TEMBAK INVOICE VIA BROWSER
-app.get('/tembak-invoice-sultan', async (req, res) => {
+app.get('/cron/trigger-invoices', async (req, res) => {
     try {
         const count = await billingManager.generateMonthlyInvoices();
         res.send(`?? DORRR! ${count} Invoice terbit & WA Terkirim!`);
     } catch (e) {
-        res.send("Gagal Bos: " + e.message);
+        res.send("Operation failed: " + e.message);
     }
 });
-
-// TOMBOL SIKAT PELANGGAN TELAT (MANUAL ALGOJO)
-app.get('/tembak-algojo-sultan', async (req, res) => {
+    // Synchronize subscriber account state
+app.get('/cron/trigger-suspensions', async (req, res) => {
     try {
-        // Pastikan path './config/serviceSuspension' ini sesuai lokasi file Bos
         // Kalau filenya ada di folder yang sama, pakai './serviceSuspension'
         const suspensionManager = require('./config/serviceSuspension'); 
         
@@ -110,17 +98,14 @@ app.get('/tembak-algojo-sultan', async (req, res) => {
         
         res.send(`?? DORRR! ${result.count} Pelanggan Telat Berhasil Di-Isolir (RTO).`);
     } catch (e) {
-        res.send("Gagal Eksekusi Algojo: " + e.message);
+        res.send("Suspension execution failed: " + e.message);
     }
 });
-
 // --- VIEW ENGINE ---
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
-
 // app.use(expressLayouts);
 // app.set('layout', 'main_layout');
-
 app.use((req, res, next) => {
     const { getSettingsWithCache } = require('./config/settingsManager'); // Sesuaikan path-nya
     const settings = getSettingsWithCache() || {};
@@ -133,16 +118,12 @@ app.use((req, res, next) => {
     res.locals.currentPath = req.path;
     next();
 });
-
 // --- MIDDLEWARE DASAR ---
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-
 // =========================================================
-// ??? SOLDER ANTI BRUTE-FORCE (RATE LIMITER SULTAN)
 // =========================================================
 const rateLimit = require('express-rate-limit');
-
 // Penjaga Khusus Pintu Login (Semua Login: Admin, Teknisi, Agen, Customer)
 const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // Waktu blokir: 15 Menit
@@ -154,35 +135,28 @@ const loginLimiter = rateLimit({
     standardHeaders: true, // Mengirim info limit di header (standar baru)
     legacyHeaders: false,  // Matikan header standar lama
 });
-
 // Penjaga Khusus Form EJS (Untuk menghindari serangan form bot massal)
 const generalLimiter = rateLimit({
     windowMs: 5 * 60 * 1000, // 5 menit
-    max: 1000, // ?? NAIKKAN JADI 1000 DULU BOS, BIAR LELUASA
-    message: "Tunggu sebentar, Bos. Sistem mendeteksi terlalu banyak klik.", // Ganti pesannya biar jelas
+    max: 1000, // Standard API rate limit threshold
+    message: "Too many requests. Please try again in a few minutes.", // Ganti pesannya biar jelas
     standardHeaders: true,
     legacyHeaders: false,
 });
-
 // Terapkan perlindungan
 app.use('/customer/login', loginLimiter);
 app.use('/admin/login', loginLimiter);
 app.use('/teknisi/login', loginLimiter); // Jika ada
 app.use('/agent/login', loginLimiter);   // Jika ada
-
 // --- STATIC FILES ---
 app.use('/public', express.static(path.join(__dirname, 'public'), { maxAge: '1h', etag: true }));
 app.use(express.static(path.join(__dirname, 'public'), { maxAge: '1h', etag: true }));
 app.use('/docs', express.static(path.join(__dirname, 'docs'), { maxAge: '1h', etag: true }));
-
 app.use('/', generalLimiter);
-
 // TAMBAHKAN BARIS INI (Wajib ada agar Node.js percaya pada jalur HTTPS)
 app.set('trust proxy', 1);
-
-// --- SESSION (VERSI SINKRON DENGAN DB POOL BOS) ---
+    // RouterOS and RADIUS policy synchronization
 const MySQLStore = require('express-mysql-session')(session);
-
 const sessionStoreOptions = {
     host: process.env.DB_HOST || getSetting('db_host', 'localhost'),
     user: process.env.DB_USER || getSetting('db_user', 'root'),       
@@ -193,12 +167,10 @@ const sessionStoreOptions = {
         tableName: 'sessions' 
     }
 };
-
 const sessionStore = new MySQLStore(sessionStoreOptions);
 const sessionSecret = getSetting('session_secret', 'rahasia-portal-anda');
-
 app.use(session({
-    key: 'inetku_session_id', 
+    key: 'pulsebill_session_id', 
     secret: sessionSecret,
     store: sessionStore,     
     resave: false,
@@ -211,38 +183,28 @@ app.use(session({
         sameSite: 'lax'
     }
 }));
-
 // --- WHATSAPP SESSION CHECK ---
 const sessionDir = getSetting('whatsapp_session_path', './whatsapp-session');
 if (!fs.existsSync(sessionDir)) {
     fs.mkdirSync(sessionDir, { recursive: true });
 }
-
-// ?? LOG KONEKSI SULTAN
 io.on('connection', (socket) => {
-    logger.info('?? [SOCKET] Sultan Terkoneksi ke Jalur Real-time');
+    logger.info('?? [SOCKET] Real-time client connected');
 });
-
 // ================= ROUTING (JALUR WEB) =================
-
 // 1. Root & Health
 app.get('/', (req, res) => res.redirect('/customer/login'));
 app.get('/health', (req, res) => res.json({ status: 'ok', version: VERSION }));
-
 app.use('/teknisi', teknisiRoute);
 app.use('/', agentRoutes);
-
 // 2. Customer & Public Routes
 app.use('/customer/billing', customerBillingRouter);
 app.use('/customer/trouble', troubleReportRouter);
 app.use('/customer', customerPortal);
-
 // 3. Payment Routes (Gateway & Callback)
 app.use('/payment', paymentRouter); 
-
 // 4. Admin Routes (Dilindungi Login)
 app.use('/admin', adminAuthRouter); 
-
 // Dashboard & Fitur Utama
 app.use('/admin', adminDashboardRouter);
 app.use('/admin/users', adminUsersRouter);
@@ -252,26 +214,20 @@ app.use('/admin', adminRadiusRouter);
 app.use('/admin', blockTechnicianAccess, adminNASRouter);
 app.use('/admin/hotspot', adminHotspotRouter);
 app.use('/adminVoucherMonitor', voucherMonitorRouter);
-
 // Menu Setting & Trouble
 app.use('/admin/setting', adminAuth, adminSettingRouter);
 app.use('/admin/logs', adminAuth, adminLogsRouter);
 app.use('/admin/trouble', adminAuth, adminTroubleReportRouter);
-
 // Menu Billing & Paket
 app.use('/admin/billing', adminAuth, adminBillingRouter); 
 app.use('/admin/packages', require('./routes/adminPackages'));
 app.use('/admin/finance', adminAuth, require('./routes/adminFinance'));
 app.use('/admin/pendaftaran', controlPendaftaran);
 app.use('/', adminAuth, adminAgentRouter);
-
 // 5. API & Testing
 app.use('/api', apiDashboardRouter);
 app.use('/test/trouble', testTroubleReportRouter);
-
-
 // ================= STARTUP SERVICES =================
-
 // Connect WhatsApp & Monitors
 (async () => {
     try {
@@ -291,9 +247,7 @@ app.use('/test/trouble', testTroubleReportRouter);
             
             const troubleReport = require('./config/troubleReport');
             troubleReport.setSockInstance(sock);
-
             logger.info('WhatsApp connected successfully');
-
             // Start Monitoring jika ada setting Mikrotik
             // if (getSetting('mikrotik_host') && getSetting('mikrotik_user')) {
             //    pppoeMonitor.initializePPPoEMonitoring().catch(err => logger.error('PPPoE Monitor Error:', err));
@@ -306,9 +260,7 @@ app.use('/test/trouble', testTroubleReportRouter);
         logger.error('Error connecting to WhatsApp:', err);
     }
 })();
-
 // ================= START SERVER =================
-
 function startServer(portToUse) {
     const port = parseInt(portToUse);
     if (isNaN(port)) {
@@ -319,7 +271,7 @@ function startServer(portToUse) {
     try {
         // ?? GANTI app.listen menjadi server.listen
         server.listen(port, () => {
-            logger.info(`?? Server Sultan Berjalan di Port: ${port}`);
+            logger.info(`?? PulseBill server listening on port ${port}`);
             logger.info(`?? Web Admin: http://localhost:${port}/admin/login`);
         }).on('error', (err) => {
             if (err.code === 'EADDRINUSE') logger.error(`? Port ${port} sudah dipakai!`);
@@ -331,8 +283,6 @@ function startServer(portToUse) {
         process.exit(1);
     }
 }
-
 const port = getSetting('server_port', 3001);
 startServer(port);
-
 module.exports = app;

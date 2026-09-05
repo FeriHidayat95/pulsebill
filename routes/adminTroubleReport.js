@@ -8,15 +8,13 @@ const {
   updateTroubleReportStatus,
   deleteTroubleReport
 } = require('../config/troubleReport');
-
 // Middleware admin auth untuk semua route
 router.use(adminAuth);
-
 // --- FUNGSI BANTUAN: AGAR MENU SIDEBAR LENGKAP ---
 function getFullSettings() {
     return {
         logo_filename: getSetting('logo_filename', 'logo.png'),
-        company_name: getSetting('company_name', 'INETKU NETWORK'),
+        company_name: getSetting('company_name', 'PULSEBILL NETWORKS'),
         
         // --- JURUS PAKSA MUNCUL (FORCE TRUE) ---
         // Kita tidak pakai getSetting, tapi langsung 'true' (boolean)
@@ -29,12 +27,11 @@ function getFullSettings() {
         enable_olt: true,
         enable_map: true,
         enable_wa: true,
-        enable_finance: true,   // <--- INI TADI KURANG BOS!
+        enable_finance: true,
         enable_log: true,       // Tambahan buat menu Log
         enable_mitra: true      // Tambahan buat menu Mitra
     };
 }
-
 // GET: Halaman daftar semua laporan gangguan
 router.get('/', (req, res) => {
     const reports = getAllTroubleReports();
@@ -49,7 +46,6 @@ router.get('/', (req, res) => {
   
     // PANGGIL SETTING LENGKAP
     const settings = getFullSettings();
-
     res.render('admin/trouble-reports', {
         reports,
         stats,
@@ -59,7 +55,6 @@ router.get('/', (req, res) => {
         page: 'trouble'
     });
 });
-
 // GET: Halaman detail laporan gangguan
 router.get('/detail/:id', (req, res) => {
     const reportId = req.params.id;
@@ -68,7 +63,6 @@ router.get('/detail/:id', (req, res) => {
     if (!report) {
         return res.redirect('/admin/trouble');
     }
-
     // PANGGIL SETTING LENGKAP
     const settings = getFullSettings();
   
@@ -80,7 +74,6 @@ router.get('/detail/:id', (req, res) => {
         page: 'trouble'
     });
 });
-
 // POST: Update status laporan gangguan
 router.post('/update-status/:id', (req, res) => {
     const reportId = req.params.id;
@@ -103,7 +96,6 @@ router.post('/update-status/:id', (req, res) => {
         report: updatedReport
     });
 });
-
 // POST: Tambah catatan pada laporan tanpa mengubah status
 router.post('/add-note/:id', (req, res) => {
     const reportId = req.params.id;
@@ -127,7 +119,6 @@ router.post('/add-note/:id', (req, res) => {
         report: updatedReport
     });
 });
-
 // GET: API untuk menghitung tiket yang masih 'open' (Untuk Alarm Dashboard)
 router.get('/api/unresolved-count', (req, res) => {
     try {
@@ -138,17 +129,14 @@ router.get('/api/unresolved-count', (req, res) => {
         res.status(500).json({ success: false, count: 0 });
     }
 });
-
 // DELETE: Hapus laporan gangguan permanen
 router.delete('/delete/:id', (req, res) => {
     const reportId = req.params.id;
     const isDeleted = deleteTroubleReport(reportId);
-
     if (isDeleted) {
         res.json({ success: true, message: 'Laporan berhasil dimusnahkan!' });
     } else {
         res.status(404).json({ success: false, message: 'Gagal menghapus (ID tidak ditemukan).' });
     }
 });
-
 module.exports = router;

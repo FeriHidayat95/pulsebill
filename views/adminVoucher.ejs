@@ -1,4 +1,4 @@
-﻿<%- include('partials/header') %>
+<%- include('partials/header') %>
 <%- include('partials/admin-header') %>
 <%- include('partials/admin-sidebar', { page: 'voucher' }) %>
 
@@ -468,7 +468,7 @@
         e.preventDefault(); const btn = $(this).find('button');
         btn.prop('disabled', true).html('<i class="animate-spin bi bi-arrow-repeat me-2"></i> REGISTERING...');
         $.post('/admin/hotspot/add-member', $(this).serialize(), function(res) { 
-            if(res.success) { alert("SULTAN SUCCESS: Member berhasil didaftarkan!"); location.reload(); } else { alert(res.message); btn.prop('disabled', false).html('<i class="bi bi-star-fill me-2"></i> Daftarkan Member Paten'); } 
+            if(res.success) { alert("Success: Member berhasil didaftarkan!"); location.reload(); } else { alert(res.message); btn.prop('disabled', false).html('<i class="bi bi-star-fill me-2"></i> Daftarkan Member Paten'); } 
         }); 
     });
 

@@ -1,9 +1,7 @@
 <%- include('../../partials/header') %>
 <body class="bg-[#05080f] text-slate-300 font-sans antialiased selection:bg-blue-500 selection:text-white no-scrollbar">
-
 <%- include('../../partials/admin-header') %>
 <%- include('../../partials/billing-sidebar', { page: 'payments', settings: typeof settings !== 'undefined' ? settings : {} }) %>
-
 <style>
     /* =========================================================
        ?? TEMA GEMBOK RADIUS (ELEGANT V4 - FIX POLOS & NUMPUK)
@@ -35,13 +33,11 @@
     
     /* Supaya Icon Kalender jadi putih dan bisa di-klik */
     ::-webkit-calendar-picker-indicator { filter: invert(1); opacity: 0.5; cursor: pointer; }
-
     /* Tabel Gembok Style */
     .gembok-table th { color: #64748b; font-size: 0.7rem; font-weight: 800; padding: 0.8rem 1rem; border-bottom: 1px solid var(--border-color); text-transform: uppercase; letter-spacing: 0.05em; }
     .gembok-table td { color: #94a3b8; font-size: 0.75rem; padding: 0.8rem 1rem; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
     .gembok-table tr:hover td { background-color: rgba(255,255,255,0.02); }
-
-    /* Override DataTables SULTAN */
+    // Schema definition
     .dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_length { display: none; }
     .dataTables_wrapper .dataTables_paginate { display: flex; gap: 4px; justify-content: flex-end; padding-top: 15px;}
     .dataTables_wrapper .dataTables_paginate .paginate_button { color: #94a3b8 !important; border: 1px solid var(--border-color) !important; padding: 4px 12px !important; margin: 0 !important; border-radius: 6px !important; font-size: 0.75rem; font-weight: bold; background: #020617 !important; cursor: pointer; }
@@ -52,9 +48,7 @@
     .dataTables_info { color: #64748b !important; font-size: 0.7rem !important; padding-top: 15px !important; font-weight: bold; text-transform: uppercase;}
     .no-scrollbar::-webkit-scrollbar { display: none; }
 </style>
-
 <main class="p-4 sm:ml-64 pt-24 min-h-screen transition-all duration-300">
-
     <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
         <div>
             <h1 class="text-2xl font-black text-white tracking-tighter uppercase">Riwayat <span class="text-blue-500">Transaksi</span></h1>
@@ -76,33 +70,28 @@
             </button>
         </div>
     </div>
-
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div class="gembok-card p-5 pl-6 relative">
             <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-blue-500"></div>
             <div class="text-blue-400 font-black text-[10px] uppercase tracking-widest mb-1.5">Total Transaksi</div>
             <div class="text-white font-black text-2xl tracking-tight leading-none"><%= payments ? payments.length : 0 %> <span class="text-xs text-slate-500 ml-1">TRX</span></div>
         </div>
-
         <div class="gembok-card p-5 pl-6 relative">
             <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-emerald-500"></div>
             <div class="text-emerald-500 font-black text-[10px] uppercase tracking-widest mb-1.5">Total Uang Masuk</div>
             <div class="text-emerald-400 font-black text-2xl tracking-tight leading-none">Rp <%= payments ? payments.reduce((sum, p) => sum + parseFloat(p.amount || 0), 0).toLocaleString('id-ID') : '0' %></div>
         </div>
-
         <div class="gembok-card p-5 pl-6 relative">
             <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-cyan-500"></div>
             <div class="text-cyan-500 font-black text-[10px] uppercase tracking-widest mb-1.5">Metode Tunai</div>
             <div class="text-white font-black text-2xl tracking-tight leading-none"><%= payments ? payments.filter(p => (p.payment_method || '').toLowerCase().includes('cash')).length : 0 %> <span class="text-xs text-slate-500 ml-1">TRX</span></div>
         </div>
-
         <div class="gembok-card p-5 pl-6 relative">
             <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-purple-500"></div>
             <div class="text-purple-400 font-black text-[10px] uppercase tracking-widest mb-1.5">Metode Digital</div>
             <div class="text-white font-black text-2xl tracking-tight leading-none"><%= payments ? payments.filter(p => !(p.payment_method || '').toLowerCase().includes('cash')).length : 0 %> <span class="text-xs text-slate-500 ml-1">TRX</span></div>
         </div>
     </div>
-
     <div class="gembok-card p-3 mb-4 flex flex-col md:flex-row justify-between items-center gap-4">
         <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
             <div class="text-slate-500 text-[10px] font-black uppercase tracking-widest me-1"><i class="bi bi-funnel-fill text-blue-500"></i> Filter:</div>
@@ -113,20 +102,17 @@
                 <span class="text-slate-600">-</span>
                 <input type="date" id="endDate" class="bg-transparent border-none text-[11px] font-bold text-slate-300 outline-none w-28 cursor-pointer">
             </div>
-
             <select id="filterMethod" class="gembok-input px-3 py-1.5 text-[11px] font-bold w-auto cursor-pointer">
                 <option value="">Semua Metode</option>
                 <option value="CASH">Tunai (Cash)</option>
                 <option value="TRANSFER">Transfer / Digital</option>
             </select>
         </div>
-
         <div class="flex items-center gembok-input px-3 py-1.5 gap-2 w-full md:w-64">
             <i class="bi bi-search text-slate-500 text-xs"></i>
             <input type="text" id="customSearch" class="bg-transparent border-none outline-none text-[11px] font-bold text-slate-300 w-full" placeholder="Cari transaksi...">
         </div>
     </div>
-
     <div class="gembok-card p-4">
         <div class="overflow-x-auto">
             <table id="paymentsTable" class="w-full text-left gembok-table">
@@ -148,7 +134,6 @@
         </div>
     </div>
 </main>
-
 <div id="modalBayar" class="fixed inset-0 z-[100] hidden bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
     <div class="gembok-card w-full max-w-md shadow-2xl overflow-hidden rounded-[2rem]">
         <div class="bg-[#020617] p-5 border-b border-[#1e293b] flex justify-between items-center">
@@ -190,17 +175,13 @@
         </form>
     </div>
 </div>
-
 <%- include('../../partials/footer') %>
-
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 <script>
     // Tangkap data role dari server EJS agar JS tahu siapa yang login
     const userRole = '<%= typeof user !== "undefined" && user.role ? user.role : "" %>';
-
     $(document).ready(function() {
         // ==============================================================
         // INISIALISASI DATATABLES SERVER-SIDE (AJAX) TRANSAKSI
@@ -328,7 +309,6 @@
                                 </button>
                             `;
                         }
-
                         // Proteksi Hapus: Hanya muncul jika BUKAN kasir
                         if (userRole !== 'kasir') {
                             buttons += `
@@ -337,36 +317,30 @@
                                 </button>
                             `;
                         }
-
                         buttons += '</div>';
                         return buttons;
                     }
                 }
             ]
         });
-
         // ==============================================================
         // LOGIKA FITUR FILTER AJAX
         // ==============================================================
         $('#customSearch').on('keyup', function() {
             table.search(this.value).draw();
         });
-
         // Trigger tabel reload ketika filter Dropdown / Tanggal diubah
         $('#filterMethod, #startDate, #endDate').on('change', function() {
             table.ajax.reload();
         });
     });
-
     function openModalBayar() { $('#modalBayar').removeClass('hidden').addClass('flex'); }
     function closeModal() { $('#modalBayar').addClass('hidden').removeClass('flex'); }
-
     $('#formProsesBayar').submit(function(e) {
         e.preventDefault();
         const btn = $(this).find('button[type="submit"]');
         const originalText = btn.text();
         btn.prop('disabled', true).text('PROCESSING...');
-
         $.post('/admin/billing/custom-transaction', $(this).serialize())
         .done(function(res) {
             if(res.success) {
@@ -381,7 +355,6 @@
             btn.prop('disabled', false).text(originalText);
         });
     });
-
     function voidTransaction(paymentId) {
         if (!paymentId) return;
         Swal.fire({

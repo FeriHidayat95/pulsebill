@@ -234,7 +234,7 @@
     
         $.post(`/admin/billing/invoices/${invoiceId}/reminder`, function(res) {
             if(res.success) {
-                showToast('success', 'Sultan Berhasil', res.message);
+                showToast('success', 'Operation successful', res.message);
             } else {
                 showToast('error', 'Gagal', res.message);
             }

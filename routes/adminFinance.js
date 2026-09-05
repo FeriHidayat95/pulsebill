@@ -1,8 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const { getSettingsWithCache } = require('../config/settingsManager'); // Pastikan path ini benar sesuai struktur folder Bos
+const { getSettingsWithCache } = require('../config/settingsManager');
 const mysql = require('mysql2/promise');
-
 // 1. DATABASE POOL CONFIGURATION
 const dbPool = mysql.createPool({
     host: process.env.DB_HOST || 'localhost', 
@@ -11,7 +10,6 @@ const dbPool = mysql.createPool({
     database: process.env.DB_NAME || 'pulsebill_db', 
     connectionLimit: 10
 });
-
 // ==================================================================
 // HALAMAN UTAMA: LAPORAN KEUANGAN & MEDIATOR
 // ==================================================================
@@ -19,12 +17,10 @@ router.get('/', async (req, res) => {
     try {
         const settings = getSettingsWithCache() || {}; 
         
-        // --- TAMBAHAN SULTAN: TANGKAP FILTER ---
         const filterMediator = req.query.mediator_id || null;
         const filterBulan = req.query.bulan || null;
         const tahunSekarang = new Date().getFullYear();
         
-        // --- PERBAIKAN SULTAN: Kueri Dinamis Berdasarkan Filter ---
         let sql = `
             SELECT 
                 f.*, 
@@ -40,13 +36,11 @@ router.get('/', async (req, res) => {
         `;
         
         let params = [];
-
         // 1. Logika Filter Mediator
         if (filterMediator && filterMediator !== "") {
             sql += ` AND f.mediator_id = ?`;
             params.push(filterMediator);
         }
-
         // 2. Logika Filter Bulan (Atau Default 2 Bulan Terakhir)
         if (filterBulan && filterBulan !== "") {
             sql += ` AND MONTH(f.payment_date) = ? AND YEAR(f.payment_date) = ?`;
@@ -54,17 +48,14 @@ router.get('/', async (req, res) => {
         } else {
             sql += ` AND f.payment_date >= DATE_SUB(CURDATE(), INTERVAL 2 MONTH)`;
         }
-
         sql += ` ORDER BY f.payment_date DESC LIMIT 1000`;
         const [laporan] = await dbPool.execute(sql, params);
         
         // 2. Ambil Data Master Mediator (Untuk Dropdown Pilihan)
         const [mediators] = await dbPool.execute("SELECT * FROM mediators ORDER BY name ASC");
-
         // 3. Hitung Statistik untuk Kartu di Atas Dashboard
         let totalKomisi = 0;
         let totalUangMasuk = 0;
-
         laporan.forEach(row => {
             // Pastikan angka tidak null/NaN
             totalKomisi += parseFloat(row.commission_amount || 0);
@@ -73,7 +64,6 @@ router.get('/', async (req, res) => {
                  totalUangMasuk += parseFloat(row.amount || row.total_price || 0);
             }
         });
-
         // 4. RENDER KE FILE EJS
         res.render('admin/billing/mediator-report', { 
             settings,           // Settingan Header/Judul ISP
@@ -85,13 +75,11 @@ router.get('/', async (req, res) => {
             filterMediator,     // Kirim ke EJS untuk set selected dropdown
             filterBulan         // Kirim ke EJS untuk set selected dropdown
         });
-
     } catch (error) {
         console.error("Error di Halaman Finance:", error);
         res.status(500).send("Terjadi kesalahan pada database: " + error.message);
     }
 });
-
 // ==================================================================
 // API 1: SIMPAN / EDIT MASTER MEDIATOR
 // ==================================================================
@@ -116,7 +104,6 @@ router.post('/api/mediator-save', async (req, res) => {
         res.json({ success: false, message: e.message }); 
     }
 });
-
 // ==================================================================
 // API 2: HAPUS MEDIATOR
 // ==================================================================
@@ -128,9 +115,8 @@ router.post('/api/mediator-delete', async (req, res) => {
         res.json({ success: false, message: e.message }); 
     }
 });
-
 // ==================================================================
-// API 3: BULK UPDATE (VERSI ASLI SULTAN - ANTI CRASH LOCK) ???
+    // Synchronize subscriber account state
 // ==================================================================
 router.post('/api/bulk-update', async (req, res) => {
     const data = req.body; 
@@ -138,28 +124,22 @@ router.post('/api/bulk-update', async (req, res) => {
     
     try {
         await conn.beginTransaction();
-
         for(let item of data) {
             // Ambil data ID mediator apa adanya dari browser
             let medId = item.mediator_id;
-
             // Jika datanya kosong, string kosong, atau angka 0, paksa jadi null objek asli database
             if (medId === "" || medId === "null" || medId === 0 || !medId) {
                 medId = null;
             } else {
                 medId = parseInt(medId); // Pastikan dikirim sebagai angka murni
             }
-
-            // Gunakan query execute asli bawaan Bos, tanpa trik "|| null" di dalam array parameter
             await conn.execute(
                 "UPDATE finance_reports SET mediator_id = ?, commission_amount = ? WHERE id = ?",
                 [medId, item.comm || 0, item.id]
             );
         }
-
         await conn.commit();
         res.json({ success: true });
-
     } catch (e) {
         await conn.rollback();
         console.error("Error Bulk Update:", e);
@@ -168,32 +148,26 @@ router.post('/api/bulk-update', async (req, res) => {
         conn.release();
     }
 });
-
 // ==========================================
 // [FINAL] FUNGSI HAPUS MASAL LAPORAN
 // ==========================================
 router.post('/api/bulk-delete-reports', async (req, res) => {
     const { ids } = req.body;
-
     // Cek apakah ada data yang dikirim
     if (!ids || !Array.isArray(ids) || ids.length === 0) {
-        return res.json({ success: false, message: 'Pilih data yang ingin dihapus dulu, Bos!' });
+        return res.json({ success: false, message: 'Please select records to delete.' });
     }
-
     try {
         // Eksekusi Hapus Permanen
         const [result] = await dbPool.query(
             "DELETE FROM finance_reports WHERE id IN (?)", 
             [ids]
         );
-
         console.log(`[BULK DELETE] ${result.affectedRows} laporan dibersihkan oleh Admin.`);
-
         res.json({ 
             success: true, 
             message: `${result.affectedRows} data laporan berhasil dihapus selamanya!` 
         });
-
     } catch (error) {
         console.error("? Database Error (Bulk Delete):", error.message);
         res.status(500).json({ 
@@ -202,5 +176,4 @@ router.post('/api/bulk-delete-reports', async (req, res) => {
         });
     }
 });
-
 module.exports = router;

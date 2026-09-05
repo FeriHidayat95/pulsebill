@@ -2,33 +2,27 @@ const express = require('express');
 const router = express.Router();
 const { adminAuth } = require('./adminAuth');
 const billingManager = require('../config/billing'); // Panggil Manager Utama
-
-// 1. HALAMAN UTAMA (DASHBOARD ADMIN) - SULTAN SYNC
 router.get('/', adminAuth, async (req, res) => {
     try {
-        // [SULTAN SYNC] Mengambil data dashboard dan data pelanggan yang sudah divalidasi secara paralel
+    // Synchronize subscriber account state
         // agar performa tetap maksimal dan data sinkron dengan tab baru di EJS.
         const [data, validatedList] = await Promise.all([
             billingManager.getPendaftaranDashboardData(),
             billingManager.getValidatedRegistrations() // <--- OTOT BARU: Mengambil data hasil teknisi
         ]);
-
         res.render('admin/billing/pendaftaran_control', { 
             ...data,
             validatedList: validatedList, // <--- DISINKRONKAN: Mengirim data ke tab "Pelanggan Aktif"
             page: 'pendaftaran',
             
-            // ? INI YANG DIGANTI BOS! (ID Card Sultan dipasang di sini)
             user: res.locals.user 
             
         });
     } catch (error) {
-        // Logging error untuk memudahkan Sultan memantau kesehatan server
         console.error("?? Error loading pendaftaran control:", error.message);
         res.status(500).send("Server Error: Gagal memuat data pendaftaran.");
     }
 });
-
 // 2. MANAJEMEN TEKNISI
 router.post('/api/save-tech', adminAuth, async (req, res) => {
     try {
@@ -38,7 +32,6 @@ router.post('/api/save-tech', adminAuth, async (req, res) => {
         res.json({ success: false, message: "Gagal menyimpan: " + error.message });
     }
 });
-
 router.post('/api/delete-tech', adminAuth, async (req, res) => {
     try {
         await billingManager.deleteTechnician(req.body.id);
@@ -47,7 +40,6 @@ router.post('/api/delete-tech', adminAuth, async (req, res) => {
         res.json({ success: false, message: error.message });
     }
 });
-
 // 3. ALARM NOTIFIKASI
 router.get('/api/check-pending', async (req, res) => {
     try {
@@ -57,7 +49,6 @@ router.get('/api/check-pending', async (req, res) => {
         res.json({ success: false, count: 0 });
     }
 });
-
 // 4. VALIDASI PENDAFTARAN (SINKRON RADIUS)
 router.post('/api/validate', adminAuth, async (req, res) => {
     try {
@@ -67,7 +58,6 @@ router.post('/api/validate', adminAuth, async (req, res) => {
         res.json({ success: false, message: error.message });
     }
 });
-
 // 5. TOLAK PENDAFTARAN
 router.post('/api/reject', adminAuth, async (req, res) => {
     try {
@@ -77,7 +67,6 @@ router.post('/api/reject', adminAuth, async (req, res) => {
         res.json({ success: false, message: error.message });
     }
 });
-
 // API UPDATE DATA DIVALIDASI (Koreksi ODP/Port dari Admin)
 router.post('/api/update-validated', adminAuth, async (req, res) => {
     try {
@@ -88,13 +77,11 @@ router.post('/api/update-validated', adminAuth, async (req, res) => {
             "UPDATE pending_registrations SET address = ?, odp_data = ?, port_data = ? WHERE id = ?",
             [address, odp_data, port_data, id]
         );
-
         res.json({ success: true, message: "Data PSB Berhasil Dikoreksi!" });
     } catch (error) {
         res.json({ success: false, message: "Gagal update: " + error.message });
     }
 });
-
 // API HAPUS DATA DIVALIDASI (Pembersih Riwayat)
 router.post('/api/delete-validated', adminAuth, async (req, res) => {
     try {
@@ -106,5 +93,4 @@ router.post('/api/delete-validated', adminAuth, async (req, res) => {
         res.json({ success: false, message: error.message });
     }
 });
-
 module.exports = router;

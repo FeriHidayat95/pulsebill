@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Login Pelanggan | INETKU WiFi</title>
+    <title>Login Pelanggan | PulseBill Portal</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -13,7 +13,6 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="/icons/icon-cust-192.png">
-
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -33,7 +32,6 @@
             min-height: 100vh;
             margin: 0;
         }
-
         .login-card {
             width: 100%;
             max-width: 420px;
@@ -46,7 +44,6 @@
             margin: 20px;
             position: relative;
         }
-
         .logo-box {
             width: 140px;
             height: 140px;
@@ -61,13 +58,11 @@
             position: relative;
             z-index: 5;
         }
-
         .logo-box img {
             width: 85%;
             height: auto;
             border-radius: 50%;
         }
-
         .input-group-custom {
             background: #f8f9fa;
             border: 1px solid #dee2e6;
@@ -78,19 +73,16 @@
             padding: 12px 20px;
             transition: 0.3s;
         }
-
         .input-group-custom:focus-within {
             border-color: #6f42c1;
             background: #fff;
             box-shadow: 0 0 0 4px rgba(111, 66, 193, 0.1);
         }
-
         .input-group-custom i {
             color: #6f42c1;
             font-size: 1.2rem;
             margin-right: 15px;
         }
-
         .input-group-custom input {
             border: none;
             outline: none;
@@ -99,7 +91,6 @@
             font-size: 16px;
             color: #333;
         }
-
         /* Styling Khusus Checkbox Biar Rapi */
         .remember-container {
             display: flex;
@@ -123,7 +114,6 @@
             margin-left: 8px;
             margin-top: 2px;
         }
-
         .btn-purple {
             background-color: #6f42c1;
             color: white;
@@ -138,13 +128,11 @@
             text-transform: uppercase;
             letter-spacing: 1px;
         }
-
         .btn-purple:hover {
             background-color: #5a32a3;
             transform: translateY(-2px);
             box-shadow: 0 8px 20px rgba(111, 66, 193, 0.4);
         }
-
         .footer-text {
             margin-top: 30px;
             font-size: 13px;
@@ -154,49 +142,39 @@
     </style>
 </head>
 <body>
-
 <div class="login-card">
     <div class="logo-box">
         <img src="/img/Customer.png" alt="Logo" onerror="this.src='/icons/icon-cust-192.png'">
     </div>
-
     <h3 class="fw-bold mb-4" style="color: #333;">LOGIN MEMBER</h3>
-
     <form id="loginForm">
         <div class="input-group-custom">
             <i class="bi bi-person-fill"></i>
             <input type="text" id="username" placeholder="Masukkan Username" required>
         </div>
-
         <div class="input-group-custom">
             <i class="bi bi-lock-fill"></i>
             <input type="password" id="password" placeholder="Masukan Password" required>
         </div>
-
         <div class="input-group-custom" style="margin-bottom: 12px;">
             <i class="bi bi-whatsapp"></i>
             <input type="text" id="phone" placeholder="No Whatsapp (08xxx)" required>
         </div>
-
         <div class="remember-container">
             <input class="form-check-input shadow-none" type="checkbox" id="rememberMe" checked>
             <label class="form-check-label" for="rememberMe">Ingat Saya (Tetap Login)</label>
         </div>
-
         <button type="submit" class="btn-purple" id="loginBtn">
             <span class="btn-text">MASUK</span>
             <span class="spinner-border spinner-border-sm d-none" id="loadingIcon"></span>
         </button>
     </form>
-
     <div class="footer-text">
-        &copy; <%= new Date().getFullYear() %> <strong>INETKU NETWORK</strong><br>
+        &copy; <%= new Date().getFullYear() %> <strong>PULSEBILL NETWORKS</strong><br>
         <span class="opacity-75 text-uppercase" style="font-size: 10px;">Fast & Reliable Connection</span>
     </div>
 </div>
-
 <div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
-
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <script>
     function showToast(type, title, message) {
@@ -216,7 +194,6 @@
             $('.toast').first().fadeOut(500, function() { $(this).remove(); });
         }, 4000);
     }
-
     $('#loginForm').on('submit', function(e) {
         e.preventDefault();
         
@@ -227,12 +204,10 @@
             phone: $('#phone').val(),
             remember: $('#rememberMe').is(':checked') // SUNTIKAN SAKTI ANTI LOGOUT
         };
-
         const $btn = $('#loginBtn');
         $btn.prop('disabled', true);
         $('.btn-text').addClass('d-none');
         $('#loadingIcon').removeClass('d-none');
-
         $.ajax({
             url: '/customer/login',
             method: 'POST',
@@ -255,7 +230,6 @@
             }
         });
     });
-
     function resetButton() {
         const $btn = $('#loginBtn');
         $btn.prop('disabled', false);
@@ -263,6 +237,5 @@
         $('#loadingIcon').addClass('d-none');
     }
 </script>
-
 </body>
 </html>

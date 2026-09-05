@@ -1,4 +1,4 @@
-﻿<%- include('partials/header') %>
+<%- include('partials/header') %>
 <%- include('partials/admin-header') %>
 <%- include('partials/admin-sidebar', { page: 'voucher-monitor' }) %>
 
@@ -20,8 +20,8 @@
 
     .glass-panel-monitor { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(15px); border: 1px solid var(--border-soft); border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.3); }
     .kolom-no { width: 1% !important; white-space: nowrap !important; text-align: center !important; padding-left: 15px !important; padding-right: 15px !important; }
-    .table-sultan { border-collapse: collapse; width: 100%; }
-    .table-sultan th, .table-sultan td { border: 1px solid rgba(255, 255, 255, 0.12) !important; }
+    .table-custom { border-collapse: collapse; width: 100%; }
+    .table-custom th, .table-custom td { border: 1px solid rgba(255, 255, 255, 0.12) !important; }
 </style>
 
 <main class="main-content-move sm:ml-64 px-6 pb-12">
@@ -45,7 +45,7 @@
             <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
                 <div>
                     <h3 class="text-2xl font-black text-white uppercase tracking-tighter">Inventory Control</h3>
-                    <p class="text-[11px] text-gray-400 font-bold tracking-widest uppercase mt-1">Sultan Voucher Management</p>
+                    <p class="text-[11px] text-gray-400 font-bold tracking-widest uppercase mt-1">PulseBill Voucher Management</p>
                 </div>
                 
                 <div class="flex flex-wrap items-center gap-2">
@@ -87,7 +87,7 @@
         </div>
 
         <div class="overflow-x-auto max-h-[600px] overflow-y-auto no-scrollbar p-1">
-            <table class="table-sultan text-left">
+            <table class="table-custom text-left">
                 <thead class="sticky top-0 bg-[#0f172a] text-xs font-black text-gray-300 uppercase tracking-widest shadow-lg z-10">
                     <tr>
                         <th class="py-4 kolom-no text-center"><input type="checkbox" id="selectAll" class="w-5 h-5 rounded bg-[#020617] border-gray-500 text-blue-500 cursor-pointer"></th>

@@ -4,7 +4,6 @@ const { adminAuth } = require('./adminAuth');
 const { radiusServer } = require('../config/radius');
 const { getSettingsWithCache } = require('../config/settingsManager');
 const logger = require('../config/logger');
-
 // ==========================================
 // 1. DASHBOARD RADIUS (SOLDERED: FIXED AWAIT)
 // ==========================================
@@ -12,7 +11,6 @@ router.get('/radius', adminAuth, async (req, res) => {
   try {
     const settings = getSettingsWithCache();
     
-    // --- DI SINI PERBAIKANNYA, BOS! ---
     const radiusStatus = await radiusServer.getStatus();
     const nasClients = await radiusServer.getNASClients();
     const activeSessions = await radiusServer.getActiveSessions();
@@ -37,7 +35,6 @@ router.get('/radius', adminAuth, async (req, res) => {
     });
   }
 });
-
 // ==========================================
 // 2. KONTROL SERVER (START/STOP)
 // ==========================================
@@ -57,7 +54,6 @@ router.post('/radius/start', adminAuth, async (req, res) => {
     res.json({ success: false, message: `Error: ${error.message}` });
   }
 });
-
 router.post('/radius/stop', adminAuth, async (req, res) => {
   try {
     const stopped = await radiusServer.stop();
@@ -72,7 +68,6 @@ router.post('/radius/stop', adminAuth, async (req, res) => {
     res.json({ success: false, message: `Error: ${error.message}` });
   }
 });
-
 // ==========================================
 // 3. MANAJEMEN NAS (MIKROTIK CLIENT)
 // ==========================================
@@ -83,12 +78,10 @@ router.post('/radius/nas/add', adminAuth, async (req, res) => {
     if (!ip || !secret) {
       return res.json({ success: false, message: 'IP address dan secret wajib diisi.' });
     }
-
     const ipRegex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
     if (!ipRegex.test(ip)) {
       return res.json({ success: false, message: 'Format IP address tidak valid.' });
     }
-
     // Pakai AWAIT karena menulis ke database
     await radiusServer.addNASClient(ip, secret, name || '');
     logger.info(`NAS client added: ${ip} by admin`);
@@ -98,20 +91,17 @@ router.post('/radius/nas/add', adminAuth, async (req, res) => {
     res.json({ success: false, message: `Error: ${error.message}` });
   }
 });
-
 router.post('/radius/nas/update', adminAuth, async (req, res) => {
     try {
         const { oldIp, ip, secret, name } = req.body;
         
         // 1. Validasi Input Dasar
         if (!ip || !secret) return res.json({ success: false, message: 'IP dan Secret tidak boleh kosong.' });
-
         // 2. Tambahkan Validasi Format IP (Biar Aman)
         const ipRegex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
         if (!ipRegex.test(ip)) {
             return res.json({ success: false, message: 'Format IP baru tidak valid.' });
         }
-
         // 3. Eksekusi Update
         const updated = await radiusServer.updateNASClient(oldIp, ip, secret, name);
         
@@ -126,12 +116,10 @@ router.post('/radius/nas/update', adminAuth, async (req, res) => {
         res.json({ success: false, message: error.message });
     }
 });
-
 router.post('/radius/nas/remove', adminAuth, async (req, res) => {
   try {
     const { ip } = req.body;
     if (!ip) return res.json({ success: false, message: 'IP address wajib diisi.' });
-
     // Pakai AWAIT karena menghapus di database
     const removed = await radiusServer.removeNASClient(ip);
    
@@ -146,7 +134,6 @@ router.post('/radius/nas/remove', adminAuth, async (req, res) => {
     res.json({ success: false, message: `Error: ${error.message}` });
   }
 });
-
 // ==========================================
 // 4. API STATUS & SESSIONS (UNTUK AJAX)
 // ==========================================
@@ -164,7 +151,6 @@ router.get('/radius/status', adminAuth, async (req, res) => {
     res.json({ success: false, message: `Error: ${error.message}` });
   }
 });
-
 router.get('/radius/sessions', adminAuth, async (req, res) => {
   try {
     const sessions = await radiusServer.getActiveSessions();
@@ -173,7 +159,6 @@ router.get('/radius/sessions', adminAuth, async (req, res) => {
     res.json({ success: false, message: `Error: ${error.message}` });
   }
 });
-
 router.get('/radius/nas', adminAuth, async (req, res) => {
   try {
     const clients = await radiusServer.getNASClients();
@@ -183,7 +168,6 @@ router.get('/radius/nas', adminAuth, async (req, res) => {
     res.json({ success: false, message: `Error: ${error.message}` });
   }
 });
-
 // ==========================================
 // 5. SCRIPT GENERATOR (MIKROTIK CONFIG)
 // ==========================================
@@ -220,9 +204,7 @@ router.get('/radius/mikrotik-script/:type', adminAuth, async (req, res) => {
     res.json({ success: false, message: `Error: ${error.message}` });
   }
 });
-
 // --- FUNGSI GENERATOR SCRIPT (STANDALONE) ---
-
 function generatePPPoEScript(serverIP, mikrotikIP, secret) {
   return `# --- GEMBOK RADIUS: PPPoE CONFIG ---
 # Generated: ${new Date().toLocaleString('id-ID')}
@@ -234,7 +216,6 @@ function generatePPPoEScript(serverIP, mikrotikIP, secret) {
 /ip firewall filter add chain=input protocol=udp dst-port=1812,1813,3799 action=accept comment="Allow-GEMBOK-Radius" place-before=0
 # Selesai! Tempel di Terminal Mikrotik.`;
 }
-
 function generateHotspotScript(serverIP, mikrotikIP, secret) {
   return `# --- GEMBOK RADIUS: HOTSPOT CONFIG ---
 # Generated: ${new Date().toLocaleString('id-ID')}
@@ -247,7 +228,6 @@ function generateHotspotScript(serverIP, mikrotikIP, secret) {
 /ip firewall filter add chain=input protocol=udp dst-port=1812,1813,3799 action=accept comment="Allow-GEMBOK-Radius" place-before=0
 # Selesai!`;
 }
-
 function generateCompleteScript(serverIP, mikrotikIP, secret) {
   return `# --- GEMBOK RADIUS: COMPLETE (PPPoE + Hotspot) ---
 /radius remove [find comment="GEMBOK-All"]
@@ -261,5 +241,4 @@ function generateCompleteScript(serverIP, mikrotikIP, secret) {
 /ip firewall filter add chain=input protocol=udp dst-port=1812,1813,3799 action=accept comment="Allow-GEMBOK-Radius" place-before=0
 # Selesai!`;
 }
-
 module.exports = router;

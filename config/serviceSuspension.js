@@ -3,12 +3,10 @@ const { getMikrotikConnection } = require('./mikrotik');
 // const { findDeviceByPhoneNumber, findDeviceByPPPoE, setParameterValues } = require('./genieacs'); // Opsional ACS
 const { getSetting } = require('./settingsManager');
 const dbPool = require('./database'); // Akses Database Langsung
-
 class ServiceSuspensionManager {
     constructor() {
         this.isRunning = false;
     }
-
     /**
      * Helper: Ambil Billing Manager dengan Aman
      */
@@ -20,7 +18,6 @@ class ServiceSuspensionManager {
             return null;
         }
     }
-
     /**
      * Pastikan profile isolir tersedia di Mikrotik & RADIUS (Dibuat Fleksibel)
      */
@@ -29,23 +26,21 @@ class ServiceSuspensionManager {
             const mikrotik = await getMikrotikConnection();
             
             // --- TARIK PARAMETER DARI SETTINGS (FLEKSIBEL) ---
-            const profileName = getSetting('isolir_profile', 'pool-inetku-isolir'); 
-            const poolName    = getSetting('isolir_pool', 'pool-inetku-isolir');
+            const profileName = getSetting('isolir_profile', 'pool-pulsebill-isolir'); 
+            const poolName    = getSetting('isolir_pool', 'pool-pulsebill-isolir');
             const localAddr   = getSetting('isolir_local_address', '10.10.10.1');
             const rateLimit   = getSetting('isolir_rate_limit', '128k/128k');
-
             // --- 1. SINKRONISASI KE DATABASE RADIUS (SOLUSI FRAMED-POOL) ---
             try {
                 // Hapus yang lama agar tidak dobel
                 await dbPool.execute("DELETE FROM radgroupreply WHERE groupname = ? AND attribute = 'Framed-Pool'", [profileName]);
                 // Masukkan atribut Framed-Pool yang baru
                 await dbPool.execute("INSERT INTO radgroupreply (groupname, attribute, op, value) VALUES (?, 'Framed-Pool', '=', ?)", [profileName, poolName]);
-                logger.info(`✅ Atribut Framed-Pool RADIUS untuk grup '${profileName}' sukses diset ke '${poolName}'`);
+                logger.info(`âœ… Atribut Framed-Pool RADIUS untuk grup '${profileName}' sukses diset ke '${poolName}'`);
             } catch (radDbErr) {
-                logger.error(`❌ Error set Framed-Pool RADIUS: ${radDbErr.message}`);
+                logger.error(`âŒ Error set Framed-Pool RADIUS: ${radDbErr.message}`);
             }
-
-            // --- 2. SINKRONISASI KE MIKROTIK (LOGIKA ASLI BOS) ---
+    // RouterOS and RADIUS policy synchronization
             // Cek apakah profile sudah ada di Mikrotik
             const profiles = await mikrotik.write('/ppp/profile/print', [`?name=${profileName}`]);
             
@@ -58,7 +53,6 @@ class ServiceSuspensionManager {
                 ]);
                 return profiles[0]['.id'];
             }
-
             // Jika belum ada, buat otomatis menggunakan variabel fleksibel
             const newProfile = await mikrotik.write('/ppp/profile/add', [
                 `=name=${profileName}`,
@@ -70,23 +64,21 @@ class ServiceSuspensionManager {
                 '=shared-users=1'
             ]);
             
-            logger.info(`✅ Profile Isolir Mikrotik '${profileName}' berhasil disinkronkan dengan Pool '${poolName}'`);
+            logger.info(`âœ… Profile Isolir Mikrotik '${profileName}' berhasil disinkronkan dengan Pool '${poolName}'`);
             return newProfile[0]['ret'];
         } catch (error) {
             logger.error('Error ensuring flexible isolir profile:', error.message);
             return null;
         }
     }
-
     /**
-     * Suspend layanan pelanggan (VERSI SULTAN - ANTI LOLOS)
+     * Suspend subscriber service profile
      */
     async suspendCustomerService(customer, reason = 'Telat bayar') {
         try {
-            logger.info(`������ Menjalankan Isolir Resmi: ${customer.pppoe_username || customer.name}`);
+            logger.info(`ï¿½ï¿½ï¿½ï¿½ Menjalankan Isolir Resmi: ${customer.pppoe_username || customer.name}`);
             const results = { mikrotik: false, billing: false, radius: false };
-            const isolirProfile = getSetting('isolir_profile', 'pool-inetku-isolir');
-
+            const isolirProfile = getSetting('isolir_profile', 'pool-pulsebill-isolir');
             if (customer.pppoe_username) {
                 // 1. UPDATE RADIUS (Gunakan pool yang sudah ada di file ini)
                 try {
@@ -100,14 +92,12 @@ class ServiceSuspensionManager {
                 } catch (e) { 
                     logger.error(`Radius Suspend Error: ${e.message}`); 
                 }
-
                 // =========================================================
-                // ������️ 2. KICK MIKROTIK (VERSI SULTAN CoA - ANTI LOLOS v7)
+    // RouterOS and RADIUS policy synchronization
                 // =========================================================
                 try {
                     const { exec } = require('child_process');
                     
-                    // ������ SULTAN FIX: Tarik data sesi aktif dari radacct (Berlaku untuk PPPoE & Hotspot)
                     // Kita gunakan query() jika dbPool adalah promise pool standar MariaDB/MySQL2
                     const [nas] = await dbPool.query(`
                         SELECT r.nasipaddress, n.secret, r.framedipaddress, r.callingstationid 
@@ -115,33 +105,30 @@ class ServiceSuspensionManager {
                         LEFT JOIN nas n ON r.nasipaddress = n.nasname 
                         WHERE r.username = ? AND r.acctstoptime IS NULL LIMIT 1
                     `, [customer.pppoe_username]);
-
                     if (nas.length > 0) {
                         const { nasipaddress, secret, framedipaddress, callingstationid } = nas[0];
                         
-                        // ������ RAKIT PELURU LENGKAP: Anti NAK v7
+                        // ï¿½ï¿½ï¿½ï¿½ RAKIT PELURU LENGKAP: Anti NAK v7
                         let attr = `User-Name=${customer.pppoe_username}`;
                         if (framedipaddress && callingstationid) {
                             attr += `,Framed-IP-Address=${framedipaddress},Calling-Station-Id=${callingstationid}`;
                         }
-
                         // Tembak langsung via Radius CoA (Super Cepat & Ringan)
                         exec(`echo "${attr}" | radclient -x ${nasipaddress}:3799 disconnect '${secret}'`, (err) => {
                             if (err) {
-                                logger.error(`❌ [SUSPEND-KICK-FAIL] Gagal tendang ${customer.pppoe_username}: ${err.message}`);
+                                logger.error(`âŒ [SUSPEND-KICK-FAIL] Gagal tendang ${customer.pppoe_username}: ${err.message}`);
                             } else {
-                                logger.info(`������ [SUSPEND-KICK-SUCCESS] ${customer.pppoe_username} sukses ditendang, siap masuk Pool Isolir!`);
+                                logger.info(`ï¿½ï¿½ï¿½ï¿½ [SUSPEND-KICK-SUCCESS] ${customer.pppoe_username} sukses ditendang, siap masuk Pool Isolir!`);
                             }
                         });
                     } else {
-                        logger.info(`ℹ️ [MIKROTIK] Tidak ada sesi aktif untuk ${customer.pppoe_username}, gembok Radius Isolir sudah siaga.`);
+                        logger.info(`â„¹ï¸ [MIKROTIK] Tidak ada sesi aktif untuk ${customer.pppoe_username}, gembok Radius Isolir sudah siaga.`);
                     }
                     results.mikrotik = true;
                 } catch (e) {
-                    logger.error(`❌ Mikrotik Suspend Kick Error (CoA): ${e.message}`);
+                    logger.error(`âŒ Mikrotik Suspend Kick Error (CoA): ${e.message}`);
                 }
-            } // <=== INI KURUNG PENUTUP "IF" YANG TADI HILANG, BOS!
-
+            } 
             // 3. UPDATE DATABASE BILLING
             try {
                 // Pastikan status jadi 'suspended'
@@ -150,7 +137,6 @@ class ServiceSuspensionManager {
             } catch (dbErr) {
                 logger.error(`Database Update Error: ${dbErr.message}`);
             }
-
             // 4. KIRIM NOTIFIKASI WHATSAPP
             try {
                 const whatsappNotifications = require('./whatsapp-notifications');
@@ -159,7 +145,6 @@ class ServiceSuspensionManager {
             } catch (waErr) {
                 logger.error(`[WA] Gagal kirim notif: ${waErr.message}`);
             }
-
             return { success: true, results };
         } catch (error) {
             logger.error(`Suspension Failed for ${customer.name}:`, error.message);
@@ -172,11 +157,9 @@ class ServiceSuspensionManager {
      */
     async restoreCustomerService(customer, reason = 'Manual restore') {
         const billingManager = this.getBillingManager();
-
         try {
-            logger.info(`✅ Restoring service for customer: ${customer.pppoe_username || customer.name}`);
+            logger.info(`âœ… Restoring service for customer: ${customer.pppoe_username || customer.name}`);
             const results = { mikrotik: false, billing: false, radius: false };
-
             // 1. Restore via Radius & Mikrotik
             if (customer.pppoe_username) {
                 // Cari Profile Asli
@@ -186,7 +169,6 @@ class ServiceSuspensionManager {
                     profileToUse = packageData?.pppoe_profile || 'default';
                 }
                 if (!profileToUse) profileToUse = 'default';
-
                 // A. Update Radius
                 try {
                     await dbPool.execute("DELETE FROM radusergroup WHERE username = ?", [customer.pppoe_username]);
@@ -196,16 +178,14 @@ class ServiceSuspensionManager {
                 } catch (radErr) {
                     logger.error(`Radius Restore Failed: ${radErr.message}`);
                 }
-
                 // B. Update Mikrotik (Kick User)
                 try {
-                    // SULTAN FIX: Cari tahu dulu user ini nyangkut di router (NAS) mana?
+    // RouterOS and RADIUS policy synchronization
                     const [nasInfo] = await dbPool.query(`
                         SELECT n.* FROM radacct r 
                         JOIN nas n ON r.nasipaddress = n.nasname 
                         WHERE r.username = ? AND r.acctstoptime IS NULL LIMIT 1
                     `, [customer.pppoe_username]);
-
                     // Tarik datanya, lalu kirim ke mikrotik.js
                     const targetNas = nasInfo.length > 0 ? nasInfo[0] : null;
                     const mikrotik = await getMikrotikConnection(targetNas);
@@ -243,9 +223,7 @@ class ServiceSuspensionManager {
                     whatsappNotifications.sendServiceRestorationNotification(customer, reason).catch(() => {});
                 } catch (e) {}
             }
-
             return { success: true, results, customer: customer.pppoe_username };
-
         } catch (error) {
             logger.error(`Error restoring service:`, error);
             throw error;
@@ -253,24 +231,21 @@ class ServiceSuspensionManager {
     }
     
     /**
-     * Algojo Otomatis: Patroli & Eksekusi (VERSI SULTAN - ANTI DOBEL INVOICE)
+     * Automated overdue subscriber service suspension routine
      */
     async checkAndSuspendOverdueCustomers() {
         let billingManager;
         try {
             billingManager = require('./billing');
         } catch (e) {
-            logger.error("[ALGOJO] ❌ Gagal memanggil Kasir (Billing):", e.message);
+            logger.error("[SUSPENSION-ENGINE] âŒ Gagal memanggil Kasir (Billing):", e.message);
             return { success: false, message: 'Billing Module Error' };
         }
-
         if (this.isRunning) return { success: false, message: 'System Busy' };
         this.isRunning = true;
         let suspendedCount = 0;
-
         try {
-            logger.info("[ALGOJO] ⚔️ Memulai Patroli Sultan (Cek Ketat 1 Bulan 1 Invoice)...");
-
+            logger.info("[SUSPENSION-ENGINE] Initiating scheduled invoice suspension check...");
             // Ambil target: Pelanggan aktif yang masa aktifnya sudah habis
             const [targets] = await dbPool.execute(`
                 SELECT c.*, p.price, p.name as package_name
@@ -280,16 +255,13 @@ class ServiceSuspensionManager {
                 AND c.auto_suspension = 1 
                 AND c.expired_date <= NOW()
             `);
-
             if (targets.length === 0) {
-                logger.info("[ALGOJO] ✅ Aman Bos, tidak ada pelanggan yang jatuh tempo hari ini.");
+                logger.info("[SUSPENSION-ENGINE] âœ… No overdue subscribers scheduled for suspension today.");
                 return { success: true, count: 0 };
             }
-
             const sekarang = new Date();
             const bulanIni = sekarang.getMonth() + 1;
             const tahunIni = sekarang.getFullYear();
-
             for (const customer of targets) {
                 try {
                     // --- 1. CEK RIWAYAT INVOICE (Paling Teliti) ---
@@ -304,12 +276,10 @@ class ServiceSuspensionManager {
                          ORDER BY created_at DESC LIMIT 1`,
                         [customer.id, bulanIni, tahunIni]
                     );
-
                     let shouldSuspend = false;
-
                     // KONDISI A: Benar-benar belum ada invoice bulan ini
                     if (invoices.length === 0) {
-                        logger.warn(`[ALGOJO] ������ ${customer.name} telat & BELUM punya tagihan bulan ${bulanIni}. Membuatkan satu...`);
+                        logger.warn(`[SUSPENSION-ENGINE] ï¿½ï¿½ï¿½ï¿½ ${customer.name} telat & BELUM punya tagihan bulan ${bulanIni}. Membuatkan satu...`);
                         
                         if (customer.price) {
                             await billingManager.createInvoice({
@@ -320,7 +290,7 @@ class ServiceSuspensionManager {
                                 phone: customer.phone,
                                 notes: `Tagihan Otomatis Periode ${bulanIni}/${tahunIni}`
                             });
-                            logger.info(`[ALGOJO] ⏳ Invoice sukses dibuat. ${customer.name} diberi napas 24 jam.`);
+                            logger.info(`[SUSPENSION-ENGINE] â³ Invoice sukses dibuat. ${customer.name} diberi napas 24 jam.`);
                         }
                         // Baru dibuat = Jangan isolir dulu
                         shouldSuspend = false;
@@ -329,48 +299,41 @@ class ServiceSuspensionManager {
                     // KONDISI B: Sudah ada invoice di bulan ini
                     else {
                         const inv = invoices[0];
-
                         if (inv.status === 'unpaid') {
                             // Cek masa tenggang 24 jam dari waktu pembuatan invoice
                             const invoiceAgeMs = Date.now() - new Date(inv.created_at).getTime();
                             const gracePeriodMs = 24 * 60 * 60 * 1000; 
-
                             if (invoiceAgeMs >= gracePeriodMs) {
                                 // Sudah nunggu 24 jam tapi belum bayar? EKSEKUSI!
                                 shouldSuspend = true;
                             } else {
-                                logger.info(`[ALGOJO] ⏳ ${customer.name} nunggu sisa waktu tenggang bayar.`);
+                                logger.info(`[SUSPENSION-ENGINE] â³ ${customer.name} nunggu sisa waktu tenggang bayar.`);
                             }
                         } else if (inv.status === 'paid') {
                             // SUDAH BAYAR: Jangan diapa-apain!
-                            logger.info(`[ALGOJO] ✅ ${customer.name} sudah lunas bulan ini. Aman.`);
+                            logger.info(`[SUSPENSION-ENGINE] âœ… ${customer.name} sudah lunas bulan ini. Aman.`);
                             shouldSuspend = false;
                         }
                     }
-
                     // --- 2. EKSEKUSI AKHIR (Tarik Pedang Mikrotik) ---
                     if (shouldSuspend) {
-                        logger.info(`[ALGOJO] ������ Mengeksekusi Isolir: ${customer.name} (Nunggak Tagihan)`);
+                        logger.info(`[SUSPENSION-ENGINE] ï¿½ï¿½ï¿½ï¿½ Mengeksekusi Isolir: ${customer.name} (Nunggak Tagihan)`);
                         const res = await this.suspendCustomerService(customer, "Masa aktif habis & Belum ada pembayaran");
                         if (res && res.success) suspendedCount++;
                     }
-
                 } catch (err) {
-                    logger.error(`[ALGOJO] Gagal memproses ${customer.name}:`, err.message);
+                    logger.error(`[SUSPENSION-ENGINE] Gagal memproses ${customer.name}:`, err.message);
                 }
             }
-
-            logger.info(`[ALGOJO] ✅ Patroli Selesai. Total ${suspendedCount} user diisolir.`);
+            logger.info(`[SUSPENSION-ENGINE] âœ… Patroli Selesai. Total ${suspendedCount} user diisolir.`);
             return { success: true, count: suspendedCount };
-
         } catch (error) {
-            logger.error('[ALGOJO] ❌ Error Fatal:', error.message);
+            logger.error('[SUSPENSION-ENGINE] âŒ Error Fatal:', error.message);
             return { success: false, error: error.message };
         } finally {
             this.isRunning = false;
         }
     }
 }
-
 const serviceSuspensionManager = new ServiceSuspensionManager();
 module.exports = serviceSuspensionManager;

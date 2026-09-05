@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const billingManager = require('../config/billing');
-
 // =============================================================
 // ?? MIDDLEWARE INTERNAL: Ambil Pengaturan (Logo, Nama ISP)
 // =============================================================
@@ -14,11 +13,9 @@ const getAppSettings = async (req, res, next) => {
         next();
     }
 };
-
 // ==========================================
 // 1. HALAMAN UTAMA MANAJEMEN AGEN
 // ==========================================
-// KITA COPOT 'adminAuth' DARI SINI BIAR BOS BISA MASUK
 router.get('/admin/agents', getAppSettings, async (req, res) => {
     try {
         const data = await billingManager.getSultanAgentControlData();
@@ -37,7 +34,6 @@ router.get('/admin/agents', getAppSettings, async (req, res) => {
         res.status(500).send("Gagal memuat data Agen: " + e.message); 
     }
 });
-
 // ==========================================
 // 2. KELOLA AGEN (ADD, UPDATE, ACTION)
 // ==========================================
@@ -49,7 +45,6 @@ router.post('/admin/agent/add', async (req, res) => {
         res.redirect(`/admin/agents?msg=error&detail=${encodeURIComponent(err.message)}`);
     }
 });
-
 router.post('/admin/agent/update', async (req, res) => {
     try {
         await billingManager.updateSultanAgent(req.body.agent_id, req.body);
@@ -58,7 +53,6 @@ router.post('/admin/agent/update', async (req, res) => {
         res.redirect(`/admin/agents?msg=error&detail=${encodeURIComponent(err.message)}`);
     }
 });
-
 router.post('/admin/agent/action', async (req, res) => {
     try {
         const { agent_id, action } = req.body;
@@ -72,7 +66,6 @@ router.post('/admin/agent/action', async (req, res) => {
         res.redirect(`/admin/agents?msg=error&detail=${encodeURIComponent(err.message)}`);
     }
 });
-
 // ==========================================
 // 3. KELOLA TOPUP (MANUAL, APPROVE, DELETE)
 // ==========================================
@@ -84,7 +77,6 @@ router.post('/admin/agent/topup-manual', async (req, res) => {
         res.redirect(`/admin/agents?msg=error&detail=${encodeURIComponent(err.message)}`);
     }
 });
-
 router.post('/admin/agent/approve-topup', async (req, res) => {
     try {
         await billingManager.approveSultanTopup(req.body.request_id);
@@ -93,7 +85,6 @@ router.post('/admin/agent/approve-topup', async (req, res) => {
         res.redirect(`/admin/agents?msg=error&detail=${encodeURIComponent(err.message)}`);
     }
 });
-
 router.post('/admin/agent/delete-topup', async (req, res) => {
     try {
         await billingManager.deleteTopupRequest(req.body.request_id);
@@ -102,7 +93,6 @@ router.post('/admin/agent/delete-topup', async (req, res) => {
         res.redirect(`/admin/agents?msg=error&detail=${encodeURIComponent(err.message)}`);
     }
 });
-
 // ==========================================
 // 4. SETTING HARGA PAKET VOUCHER (One Door Style)
 // ==========================================
@@ -116,7 +106,6 @@ router.post('/admin/agent/package/add', async (req, res) => {
         res.redirect('/admin/agents?msg=error');
     }
 });
-
 router.post('/admin/agent/package/update', async (req, res) => {
     try {
         await billingManager.manageAgentPackage('update', req.body);
@@ -125,7 +114,6 @@ router.post('/admin/agent/package/update', async (req, res) => {
         res.redirect('/admin/agents?msg=error');
     }
 });
-
 router.post('/admin/agent/package/delete', async (req, res) => {
     try {
         await billingManager.manageAgentPackage('delete', req.body);
@@ -134,7 +122,6 @@ router.post('/admin/agent/package/delete', async (req, res) => {
         res.redirect('/admin/agents?msg=error');
     }
 });
-
 // ==========================================
 // 5. KELOLA VOUCHER (DELETE)
 // ==========================================
@@ -146,8 +133,6 @@ router.post('/admin/agent/voucher/delete', async (req, res) => {
         res.redirect(`/admin/agents?msg=error&detail=${encodeURIComponent(err.message)}`);
     }
 });
-
-// --- JURUS SULTAN: PINTU TARIK SALDO ---
 router.post('/admin/agent/deduct-balance', async (req, res) => {
     try {
         const { agent_id, amount } = req.body;
@@ -161,5 +146,4 @@ router.post('/admin/agent/deduct-balance', async (req, res) => {
         res.redirect(`/admin/agents?msg=error_insufficient_balance`);
     }
 });
-
 module.exports = router;

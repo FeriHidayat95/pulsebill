@@ -1,9 +1,8 @@
-﻿const express = require('express');
+const express = require('express');
 const router = express.Router();
 const { getSettingsWithCache } = require('../config/settingsManager');
 const { RadiusManager } = require('../config/RadiusManager'); // Pintu Otak
 const { adminAuth } = require('../routes/adminAuth');
-
 // =============================================================
 // 1. HALAMAN MONITORING USER HOTSPOT AKTIF
 // =============================================================
@@ -12,14 +11,12 @@ router.get('/', adminAuth, async (req, res) => {
     try {
         // Memanggil fungsi dari Si Otak
         const cleanUsers = await RadiusManager.getActiveHotspotUsers();
-
         res.render('adminHotspot', {
             users: cleanUsers, 
             onlineCount: cleanUsers.length,
             company_header: settings.company_header || "pulsebill.io",
             settings: settings
         });
-
     } catch (e) {
         console.error('[HOTSPOT ERROR]', e.message);
         res.render('adminHotspot', { 
@@ -30,7 +27,6 @@ router.get('/', adminAuth, async (req, res) => {
         });
     }
 });
-
 // =============================================================
 // 2. API KICK USER (VERSI ANTI MAMPET)
 // =============================================================
@@ -50,11 +46,9 @@ router.get('/kick/:router/:user', adminAuth, async (req, res) => {
         res.redirect('/admin/hotspot'); 
     }
 });
-
 // =============================================================
 // 3. PROFILE MANAGER
 // =============================================================
-
 // Tampilan Halaman Profile
 router.get('/profiles', adminAuth, async (req, res) => {
     const settings = getSettingsWithCache() || {};
@@ -80,7 +74,6 @@ router.get('/profiles', adminAuth, async (req, res) => {
         }); 
     }
 });
-
 // Endpoint API Profile (JSON)
 router.get('/api/profiles', adminAuth, async (req, res) => {
     try {
@@ -93,7 +86,6 @@ router.get('/api/profiles', adminAuth, async (req, res) => {
         res.json({ success: false, message: e.message }); 
     }
 });
-
 // ==========================================
 // API SAVE PROFILE HOTSPOT
 // ==========================================
@@ -105,7 +97,6 @@ router.post('/api/save-profile', adminAuth, async (req, res) => {
             message: "Nama Paket dan Rate Limit Wajib Diisi!" 
         });
     }
-
     try {
         // Teruskan data payload utuh ke Si Otak
         const result = await RadiusManager.saveHotspotProfile(req.body);
@@ -114,7 +105,6 @@ router.post('/api/save-profile', adminAuth, async (req, res) => {
         res.status(500).json({ success: false, message: e.message }); 
     }
 });
-
 // ==========================================
 // API DELETE PROFILE HOTSPOT
 // ==========================================
@@ -127,11 +117,8 @@ router.post('/api/delete-profile', adminAuth, async (req, res) => {
         res.status(500).json({ success: false, message: e.message }); 
     }
 });
-
 // =============================================================
-// 4. VOUCHER LIST & PENCARIAN (SULTAN ENGINE INTEGRATED)
 // =============================================================
-
 router.get('/voucher', adminAuth, async (req, res) => {
     try {
         const settings = getSettingsWithCache() || {};
@@ -151,7 +138,6 @@ router.get('/voucher', adminAuth, async (req, res) => {
         res.send("Error Database: " + e.message); 
     }
 });
-
 // Endpoint API untuk Pencarian Voucher
 router.post('/api/voucher-history', adminAuth, async (req, res) => {
     try {
@@ -168,7 +154,6 @@ router.post('/api/voucher-history', adminAuth, async (req, res) => {
         res.json({ success: false, message: e.message });
     }
 });
-
 // =============================================================
 // 5. GENERATE VOUCHER & TAMBAH MANUAL
 // =============================================================
@@ -182,7 +167,6 @@ router.post('/generate-voucher', adminAuth, async (req, res) => {
             message: "Limit maksimal 750 voucher!" 
         });
     }
-
     try {
         // 2. Eksekusi Generate Melalui Si Otak
         const result = await RadiusManager.generateHotspotVouchers(req.body);
@@ -195,13 +179,11 @@ router.post('/generate-voucher', adminAuth, async (req, res) => {
             price: result.price, 
             namaHotspot: getSettingsWithCache().company_header || "pulsebill.io" 
         });
-
     } catch (e) {
         console.error("[GENERATE VOUCHER ERROR]", e.message);
         res.json({ success: false, message: e.message });
     }
 });
-
 // ==========================================
 // API TAMBAH USER HOTSPOT (MANUAL)
 // ==========================================
@@ -212,7 +194,6 @@ router.post('/add-user', adminAuth, async (req, res) => {
         
         // Kirim respon sukses ke Frontend
         res.json(result);
-
     } catch (e) {
         console.error("[ADD USER ROUTE ERROR]", e.message);
         // Kirim pesan error asli agar admin tahu penyebab kegagalan (misal: user duplikat)
@@ -222,9 +203,7 @@ router.post('/add-user', adminAuth, async (req, res) => {
         });
     }
 });
-
 // ==========================================
-// 6. API EDIT FULL MEMBER (SULTAN VERSION)
 // ==========================================
 router.post('/api/update-member-full', adminAuth, async (req, res) => {
     try {
@@ -233,7 +212,6 @@ router.post('/api/update-member-full', adminAuth, async (req, res) => {
         
         // Berikan respon sukses ke Dashboard
         res.json(result);
-
     } catch (e) {
         console.error("[ROUTE UPDATE MEMBER ERROR]", e.message);
         res.json({ 
@@ -242,11 +220,9 @@ router.post('/api/update-member-full', adminAuth, async (req, res) => {
         });
     }
 });
-
 // =============================================================
 // 7. HAPUS VOUCHER & MEMBER (INTEGRATED)
 // =============================================================
-
 // Hapus Single Voucher (Redirect Mode)
 router.post('/delete-voucher', adminAuth, async (req, res) => {
     const { username } = req.body;
@@ -254,14 +230,12 @@ router.post('/delete-voucher', adminAuth, async (req, res) => {
         // Serahkan eksekusi ke Si Otak
         await RadiusManager.deleteSingleVoucher(username);
         
-        // Sesuai alur asli Bos: Redirect kembali ke daftar voucher
         res.redirect('/admin/hotspot/voucher'); 
     } catch (e) { 
         console.error("[ROUTE DELETE VOUCHER ERROR]", e.message);
         res.status(500).send("Gagal hapus: " + e.message); 
     }
 });
-
 // Hapus Voucher Batch (JSON Mode)
 router.post('/delete-voucher-batch', adminAuth, async (req, res) => {
     try {
@@ -279,7 +253,6 @@ router.post('/delete-voucher-batch', adminAuth, async (req, res) => {
         });
     }
 });
-
 // =============================================================
 // 8. API HOTSPOT MEMBER (INTEGRASI RADIUS + BILLING)
 // =============================================================
@@ -290,7 +263,6 @@ router.post('/add-member', adminAuth, async (req, res) => {
         
         // Berikan respon hasil akhir ke Frontend
         res.json(result);
-
     } catch (e) {
         console.error("[ROUTE ADD MEMBER ERROR]", e.message);
         res.json({ 
@@ -299,5 +271,4 @@ router.post('/add-member', adminAuth, async (req, res) => {
         });
     }
 });
-
 module.exports = router;

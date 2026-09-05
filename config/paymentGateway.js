@@ -1,29 +1,25 @@
-﻿const fs = require('fs');
+const fs = require('fs');
 const crypto = require('crypto');
 const axios = require('axios'); // Kita pakai axios agar lebih stabil
 const { getSetting, getSettingsWithCache } = require('./settingsManager');
-
 class PaymentGatewayManager {
-
     constructor() {
         this.settings = this.loadSettings();
         this.gateways = {};
         this.initGateways();
     }
-
     initGateways() {
         // --- 1. AMBIL CONFIG TRIPAY (DARI TRIPAY_CONFIG) ---
         let tripayData = null;
         if (this.settings.tripay_config) {
             try {
-                // Bongkar data JSON dari database Bos
+    // Database initialization routine
                 tripayData = typeof this.settings.tripay_config === 'string' 
                     ? JSON.parse(this.settings.tripay_config) : this.settings.tripay_config;
             } catch (e) {
                 console.error('[PAYMENT] Gagal bongkar JSON tripay_config');
             }
         }
-
         // --- 2. INIT TRIPAY (PRIORITAS) ---
         if (tripayData && tripayData.enabled) {
             try {
@@ -41,11 +37,9 @@ class PaymentGatewayManager {
         
         this.activeGateway = pg.active || 'tripay';
     }
-
     loadSettings() {
         try { return getSettingsWithCache(); } catch (error) { return {}; }
     }
-
     // Support untuk ambil daftar bank di portal
     async getAvailablePaymentMethods() {
         const methods = [];
@@ -60,13 +54,11 @@ class PaymentGatewayManager {
         // Tambahkan gateway lain jika aktif
         return methods;
     }
-
     async createPayment(invoice, gateway = null) {
         const target = gateway || this.activeGateway;
         if (!this.gateways[target]) throw new Error(`Gateway ${target} belum siap.`);
         return await this.gateways[target].createPayment(invoice);
     }
-
     async createPaymentWithMethod(invoice, gateway = null, method = null) {
         const target = gateway || this.activeGateway;
         if (target === 'tripay' && this.gateways.tripay) {
@@ -74,7 +66,6 @@ class PaymentGatewayManager {
         }
         return this.createPayment(invoice, target);
     }
-
     async handleWebhook(payload, gateway) {
         if (!this.gateways[gateway]) throw new Error(`Gateway ${gateway} tidak dikenal.`);
         const body = payload?.body || payload;
@@ -82,31 +73,26 @@ class PaymentGatewayManager {
         return await this.gateways[gateway].handleWebhook(body, headers);
     }
 }
-
 // ================================================================
 // TRIPAY GATEWAY CLASS
 // ================================================================
 class TripayGateway {
     constructor(config) {
         this.config = config || {};
-        // Paksa ke Production sesuai gambar Dashboard Bos
         this.baseUrl = 'https://tripay.co.id/api'; 
         
         // Bersihkan data kunci
         this.apiKey = (this.config.api_key || '').trim();
         this.privateKey = (this.config.private_key || '').trim();
         this.merchantCode = (this.config.merchant_code || '').trim();
-
         console.log(`[TRIPAY] Merchant Code: ${this.merchantCode} terpantau standby.`);
     }
-
     async getAvailablePaymentMethods() {
         try {
             const url = `${this.baseUrl}/merchant/payment-channel`;
             const response = await axios.get(url, {
                 headers: { 'Authorization': `Bearer ${this.apiKey}` }
             });
-
             if (response.data && response.data.success) {
                 return response.data.data.map(c => ({
                     gateway: 'tripay',
@@ -123,11 +109,9 @@ class TripayGateway {
             return [];
         }
     }
-
     async createPayment(invoice) {
         return this.createPaymentWithMethod(invoice, 'DIRECT');
     }
-
     async createPaymentWithMethod(invoice, method) {
         const merchantRef = invoice.invoice_number.startsWith('INV-') ? invoice.invoice_number : `INV-${invoice.invoice_number}`;
         const amount = Math.floor(invoice.amount);
@@ -136,7 +120,6 @@ class TripayGateway {
         const signature = crypto.createHmac('sha256', this.privateKey)
             .update(this.merchantCode + merchantRef + amount)
             .digest('hex');
-
         const payload = {
             'method': method || 'DIRECT',
             'merchant_ref': merchantRef,
@@ -146,11 +129,9 @@ class TripayGateway {
             'order_items': [{ 'name': invoice.package_name || 'Internet', 'price': amount, 'quantity': 1 }],
             'signature': signature
         };
-
         const res = await axios.post(`${this.baseUrl}/transaction/create`, payload, {
             headers: { 'Authorization': `Bearer ${this.apiKey}` }
         });
-
         if (res.data.success) {
             return {
                 payment_url: res.data.data.checkout_url,
@@ -160,7 +141,6 @@ class TripayGateway {
         }
         throw new Error(res.data.message);
     }
-
     async handleWebhook(payload, headers) {
         const sig = headers['x-callback-signature'];
         const verify = crypto.createHmac('sha256', this.privateKey)
@@ -173,7 +153,6 @@ class TripayGateway {
         };
     }
 }
-
 // ================================================================
 // XENDIT GATEWAY CLASS (TAMBAHAN - AMAN)
 // ================================================================
@@ -185,7 +164,6 @@ class XenditGateway {
         // Xendit butuh auth Basic Base64 (apiKey + titik dua)
         this.tokenBase64 = Buffer.from(this.apiKey + ':').toString('base64');
     }
-
     async createPayment(invoice) {
         const merchantRef = invoice.invoice_number.startsWith('INV-') ? invoice.invoice_number : `INV-${invoice.invoice_number}`;
         
@@ -200,14 +178,12 @@ class XenditGateway {
                 mobile_number: invoice.customer_phone || ''
             }
         };
-
         const res = await axios.post('https://api.xendit.co/v2/invoices', payload, {
             headers: { 
                 'Authorization': `Basic ${this.tokenBase64}`,
                 'Content-Type': 'application/json'
             }
         });
-
         // Kembalikan URL pembayaran untuk ditangkap oleh rute Admin/Pelanggan
         return {
             gateway: 'xendit',
@@ -216,19 +192,16 @@ class XenditGateway {
             order_id: payload.external_id
         };
     }
-
     async handleWebhook(payload, headers) {
         // =========================================================
         // ??? SOLDER ANTI-HACKER XENDIT (VERIFIKASI TOKEN)
         // =========================================================
         const incomingToken = headers['x-callback-token'];
         
-        // Ambil token rahasia Xendit dari config/database Bos
+    // Database initialization routine
         const secretToken = (this.config.webhook_token || '').trim();
-
-        // 1. TENDANG JIKA TOKEN DI SISTEM BOS KOSONG
         if (!secretToken) {
-             throw new Error('Sistem Bos belum di-setting Xendit Webhook Token-nya!');
+             throw new Error('Xendit webhook token is not configured in settings.');
         }
         
         // 2. TENDANG JIKA HACKER KIRIM TOKEN PALSU
@@ -236,7 +209,6 @@ class XenditGateway {
              console.error("?? [HACKER DETECTED] Tembakan Webhook Xendit Palsu Diblokir!");
              throw new Error('Invalid Xendit Webhook Token');
         }
-
         // 3. JIKA ASLI, LANJUTKAN PROSES
         return {
             order_id: payload.external_id,
@@ -245,5 +217,4 @@ class XenditGateway {
         };
     }
 }
-
 module.exports = new PaymentGatewayManager();

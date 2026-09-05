@@ -1,9 +1,7 @@
 <%- include('partials/header') %>
 <%- include('partials/admin-header') %>
 <%- include('partials/admin-sidebar', { page: 'trouble' }) %>
-
 <style>
-    /* STYLE IDENTIK DENGAN CONTOH BOS */
     .dataTables_wrapper .dataTables_length,
     .dataTables_wrapper .dataTables_filter,
     .dataTables_wrapper .dataTables_info,
@@ -27,7 +25,6 @@
     .status-glow-progress { box-shadow: 0 0 10px rgba(245, 158, 11, 0.2); }
     .status-glow-resolved { box-shadow: 0 0 10px rgba(16, 185, 129, 0.2); }
 </style>
-
 <main class="p-4 sm:ml-64 pt-20 bg-gray-900 min-h-screen text-gray-300">
     
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 border-b border-gray-800 pb-4">
@@ -42,7 +39,6 @@
             </button>
         </div>
     </div>
-
     <% 
         let openCount = reports.filter(r => r.status === 'open').length;
         let progressCount = reports.filter(r => r.status === 'in_progress').length;
@@ -58,7 +54,6 @@
                 <i class="bi bi-ticket-detailed-fill text-2xl"></i>
             </div>
         </div>
-
         <div class="p-5 bg-gray-800 border border-gray-700 rounded-2xl shadow-lg flex items-center justify-between group hover:border-red-500/50 transition-all">
             <div>
                 <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest">Belum Ditangani</p>
@@ -68,7 +63,6 @@
                 <i class="bi bi-exclamation-octagon-fill text-2xl animate-pulse"></i>
             </div>
         </div>
-
         <div class="p-5 bg-gray-800 border border-gray-700 rounded-2xl shadow-lg flex items-center justify-between group hover:border-yellow-500/50 transition-all">
             <div>
                 <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest">Dalam Progres</p>
@@ -78,7 +72,6 @@
                 <i class="bi bi-tools text-2xl"></i>
             </div>
         </div>
-
         <div class="p-5 bg-gray-800 border border-gray-700 rounded-2xl shadow-lg flex items-center justify-between group hover:border-green-500/50 transition-all">
             <div>
                 <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest">Selesai</p>
@@ -89,7 +82,6 @@
             </div>
         </div>
     </div>
-
     <div class="bg-gray-800 border border-gray-700 rounded-2xl shadow-2xl overflow-hidden mb-10">
         <div class="p-4 bg-gray-900/50 border-b border-gray-700 flex justify-between items-center">
             <div class="flex items-center text-gray-300 font-bold text-sm tracking-widest uppercase">
@@ -156,15 +148,12 @@
         </div>
     </div>
 </main>
-
 <%- include('partials/footer') %>
-
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-
 <script>
     $(document).ready(function() {
-        // Init DataTable IDENTIK DENGAN CONTOH BOS
+    // Database initialization routine
         $('#troubleTable').DataTable({ 
             pageLength: 10,
             dom: '<"flex flex-col md:flex-row justify-between items-center p-4 gap-4"f>rt<"p-4 flex justify-between items-center text-gray-500 font-bold text-xs"ip>',
@@ -177,10 +166,8 @@
             },
             order: [[ 3, "desc" ]] // Sort Tanggal Terbaru
         });
-
         // Styling Search Input
         $('.dataTables_filter input').addClass('bg-gray-900 border border-gray-700 text-white rounded-xl text-sm px-4 py-2 focus:ring-2 focus:ring-blue-500 w-full md:w-64 outline-none');
-
         // Logic Delete Tiket
         $(document).on('click', '.delete-btn', function() {
             const id = $(this).data('id');

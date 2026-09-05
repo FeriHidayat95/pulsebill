@@ -1,12 +1,8 @@
 <%- include('../../partials/header') %>
 <body class="bg-[#0f172a] text-slate-300 font-sans antialiased selection:bg-blue-500 selection:text-white">
-
 <%- include('../../partials/admin-header') %>
-
 <%- include('../../partials/billing-sidebar', { page: 'pendaftaran', settings: settings }) %>
-
 <main class="p-4 sm:ml-64 pt-20 min-h-screen">
-
     <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
         <div>
             <h1 class="text-3xl font-black text-white tracking-tighter uppercase leading-none">
@@ -15,7 +11,6 @@
             <p class="text-[10px] font-bold text-slate-500 uppercase tracking-[4px] mt-2">Validasi Instalasi & Manajemen Personil</p>
         </div>
     </div>
-
     <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
         <div class="bg-[#1e293b] border-l-4 border-l-amber-500 border-y border-r border-slate-700/60 rounded-2xl p-5 shadow-lg group hover:-translate-y-1 transition-all">
             <div class="flex justify-between items-start">
@@ -28,7 +23,6 @@
                 </div>
             </div>
         </div>
-
         <div class="bg-[#1e293b] border-l-4 border-l-blue-500 border-y border-r border-slate-700/60 rounded-2xl p-5 shadow-lg group hover:-translate-y-1 transition-all">
             <div class="flex justify-between items-start">
                 <div>
@@ -40,7 +34,6 @@
                 </div>
             </div>
         </div>
-
         <div class="bg-[#1e293b] border-l-4 border-l-emerald-500 border-y border-r border-slate-700/60 rounded-2xl p-5 shadow-lg group hover:-translate-y-1 transition-all">
             <div class="flex justify-between items-start">
                 <div>
@@ -53,7 +46,6 @@
             </div>
         </div>
     </div>
-
     <div class="bg-[#1e293b] border border-slate-700/60 rounded-3xl shadow-2xl overflow-hidden mb-10">
         <div class="px-6 py-5 border-b border-slate-700 bg-[#111827]/50">
             <div class="flex flex-wrap gap-2" id="pendaftaranTabs">
@@ -68,7 +60,6 @@
                 </button>
             </div>
         </div>
-
         <div class="p-6">
             <div id="tab_validasi" class="tab-content block animate-fade-in">
                 <% if(pendingList.length === 0) { %>
@@ -131,7 +122,6 @@
                     </div>
                 <% } %>
             </div>
-
             <div id="tab_aktif" class="tab-content hidden animate-fade-in">
                 <div class="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
                     <div class="flex items-center gap-2">
@@ -150,7 +140,6 @@
                         <input type="text" id="searchAktif" class="block w-full p-2 pl-8 text-[10px] font-bold text-white border border-slate-700 rounded-xl bg-[#111827] focus:ring-blue-500 placeholder-slate-600 uppercase" placeholder="Cari Pelanggan...">
                     </div>
                 </div>
-
                 <div class="overflow-x-auto">
                     <table id="tableAktif" class="w-full text-left text-slate-400">
                         <thead class="text-[10px] text-slate-500 uppercase bg-[#111827]/30 border-b border-slate-700">
@@ -207,7 +196,6 @@
                     </table>
                 </div>
             </div>
-
             <div id="tab_pasukan" class="tab-content hidden animate-fade-in">
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
                     <div class="lg:col-span-4">
@@ -240,7 +228,6 @@
                             </form>
                         </div>
                     </div>
-
                     <div class="lg:col-span-8">
                         <div class="overflow-x-auto">
                             <table id="tableTeknisi" class="w-full text-left text-slate-400">
@@ -275,11 +262,8 @@
             </div>
         </div>
     </div>
-
 </main>
-
 <%- include('../../partials/footer') %>
-
 <div id="modalDetail" tabindex="-1" aria-hidden="true" class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-full bg-black/80 backdrop-blur-sm transition-opacity">
     <div class="relative w-full max-w-sm mx-auto mt-40">
         <div class="relative bg-[#1e293b] rounded-2xl shadow-2xl border border-slate-700 overflow-hidden">
@@ -298,7 +282,6 @@
                         <span class="text-xl font-black text-white font-mono tracking-wider" id="detailPass"></span>
                     </div>
                 </div>
-
                 <div class="bg-blue-600/10 border border-blue-500/20 rounded-xl p-3 mb-6">
                     <p class="text-[9px] text-blue-400 font-bold leading-relaxed">
                         <i class="bi bi-info-circle-fill me-1"></i> 
@@ -311,7 +294,6 @@
         </div>
     </div>
 </div>
-
 <div id="modalEditAktif" tabindex="-1" aria-hidden="true" class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-full bg-black/80 backdrop-blur-sm transition-opacity">
     <div class="relative w-full max-w-md mx-auto mt-20">
         <div class="relative bg-[#1e293b] rounded-3xl shadow-2xl border border-slate-700 overflow-hidden">
@@ -348,10 +330,8 @@
         </div>
     </div>
 </div>
-
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
-
 <style>
     /* DataTables Dark Styling */
     .dataTables_wrapper .dataTables_filter { display: none; }
@@ -365,10 +345,8 @@
     @keyframes fade-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     .animate-fade-in { animation: fade-in 0.4s ease-out forwards; }
 </style>
-
 <script>
     let tableAktif;
-
     $(document).ready(function() {
         // Init DataTables
         $('#tablePending').DataTable({ pageLength: 10 });
@@ -381,18 +359,14 @@
                 info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ pelanggan"
             }
         });
-
         // Search Custom Box for Tab Aktif
         $('#searchAktif').on('keyup', function() {
             tableAktif.search(this.value).draw();
         });
-
         // Check All Logic
         $('#checkAll').change(function() {
             $('.customer-check').prop('checked', $(this).prop('checked'));
         });
-
-        // LOGIC TAB: SIMPAN EDIT AKTIF (SULTAN PATH)
         $('#formEditAktif').submit(function(e) {
             e.preventDefault();
             const btn = $(this).find('button[type="submit"]');
@@ -403,7 +377,6 @@
             });
         });
     });
-
     // --- TAB SWITCHER ---
     function switchTab(tabId, btn) {
         $('.tab-content').addClass('hidden').removeClass('block');
@@ -412,12 +385,10 @@
         $('.tab-btn').removeClass('bg-blue-600 text-white shadow-lg shadow-blue-500/20 active-tab').addClass('text-slate-500 hover:bg-slate-800 hover:text-white');
         $(btn).addClass('bg-blue-600 text-white shadow-lg shadow-blue-500/20 active-tab').removeClass('text-slate-500 hover:bg-slate-800 hover:text-white');
     }
-
     // --- DATATABLE UTILS ---
     function changeEntries(val) {
         tableAktif.page.len(parseInt(val)).draw();
     }
-
     // --- MODAL CONTROLLER ---
     function openModal(id) {
         const m = document.getElementById(id);
@@ -429,14 +400,12 @@
         m.classList.add('hidden'); m.classList.remove('flex');
         document.body.style.overflow = '';
     }
-
     // --- LOGIC TAB 1: VALIDASI ---
     function lihatDetail(id, nama, user, pass) {
         $('#detailUser').text(user);
         $('#detailPass').text(pass);
         openModal('modalDetail');
     }
-
     function prosesValidasi(id, nama) {
         if(confirm(`Yakin validasi pelanggan ${nama}?\n\nSistem akan otomatis:\n1. Membuat Customer Baru\n2. Mendaftarkan ke Radius & MikroTik\n3. Mengirim WA Sambutan`)) {
             $.post('/admin/pendaftaran/api/validate', { id: id }, function(res) {
@@ -449,7 +418,6 @@
             });
         }
     }
-
     function tolakUser(id) {
         if(confirm("Tolak pendaftaran ini? Data akan dipindahkan ke arsip sampah.")) {
             $.post('/admin/pendaftaran/api/reject', { id: id }, function(res) {
@@ -457,8 +425,6 @@
             });
         }
     }
-
-    // --- LOGIC TAB 2: EDIT & HAPUS AKTIF (SULTAN SYNC) ---
     function editAktif(id, nama, alamat, odp, port) {
         $('#edit_aktif_id').val(id);
         $('#edit_aktif_name').val(nama);
@@ -467,16 +433,14 @@
         $('#edit_aktif_port').val(port);
         openModal('modalEditAktif');
     }
-
     function hapusAktif(id, nama) {
-        if(confirm(`SULTAN WARNING!\n\nYakin ingin menghapus riwayat pendaftaran ${nama}?`)) {
+        if(confirm(`Warning\n\nYakin ingin menghapus riwayat pendaftaran ${nama}?`)) {
             $.post('/admin/pendaftaran/api/delete-validated', { id: id }, function(res) {
                 if(res.success) location.reload();
                 else alert("Gagal: " + res.message);
             });
         }
     }
-
     // --- LOGIC TAB: MANAJEMEN TEKNISI ---
     $('#formTeknisi').submit(function(e) {
         e.preventDefault();
@@ -489,7 +453,6 @@
             }
         });
     });
-
     function hapusTeknisi(id, nama) {
         if(confirm(`PERINGATAN!\n\nAnda akan mencabut akses untuk: ${nama}.\nTeknisi ini tidak akan bisa login lagi.\nLanjutkan?`)) {
             $.post('/admin/pendaftaran/api/delete-tech', { id: id }, function(res) {
@@ -499,6 +462,5 @@
         }
     }
 </script>
-
 </body>
 </html>

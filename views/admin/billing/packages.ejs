@@ -9,11 +9,9 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css" rel="stylesheet">
-
     <style>
         :root { --bg-deep: #05080f; --bg-matte: #0a0f1e; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-deep); color: #94a3b8; }
-
         /* --- CSS NUKLIR ANTI SILAU --- */
         input, select, textarea, .batman-input {
             background-color: #020617 !important; border: 1px solid #1e293b !important; color: #f1f5f9 !important; border-radius: 0.75rem !important;
@@ -22,23 +20,19 @@
             -webkit-box-shadow: 0 0 0 30px #020617 inset !important; -webkit-text-fill-color: #f1f5f9 !important; transition: background-color 5000s ease-in-out 0s;
         }
         ::-webkit-calendar-picker-indicator { filter: invert(1) !important; opacity: 0.6; cursor: pointer; }
-
         .dataTables_wrapper .dataTables_length select { background-color: #020617 !important; color: #f1f5f9 !important; padding: 4px 24px 4px 8px !important; border-radius: 8px !important; }
         .dataTables_wrapper .dataTables_filter input { background-color: #020617 !important; color: #f1f5f9 !important; border: 1px solid #3b82f6 !important; padding: 6px 12px !important; border-radius: 8px !important; margin-left: 8px !important; }
         .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_paginate, .dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter { color: #64748b !important; font-weight: 700 !important; text-transform: uppercase !important; font-size: 0.75rem !important; margin-bottom: 10px !important; }
         .dataTables_wrapper .dataTables_paginate .paginate_button.current { background: #3b82f6 !important; color: white !important; border: none !important; border-radius: 6px !important; }
         .dataTables_wrapper .dataTables_paginate .paginate_button:hover { background: #1e293b !important; color: white !important; border: 1px solid #334155 !important; }
-
         .glass-card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
         .lis-blue { border-left: 4px solid #3b82f6; } .lis-emerald { border-left: 4px solid #10b981; } .lis-purple { border-left: 4px solid #a855f7; } .lis-orange { border-left: 4px solid #f97316; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body class="no-scrollbar">
-
 <%- include('../../partials/admin-header') %>
 <%- include('../../partials/billing-sidebar', { page: 'packages', settings: typeof settings !== 'undefined' ? settings : {} }) %>
-
 <main class="p-4 sm:ml-64 pt-24 min-h-screen transition-all duration-300">
     <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
         <div>
@@ -52,7 +46,6 @@
             <i class="bi bi-plus-lg text-lg"></i> Tambah Paket
         </button>
     </div>
-
     <div class="grid grid-cols-1 md:grid-cols-4 gap-5 mb-8">
         <div class="glass-card rounded-2xl p-5 shadow-lg lis-blue">
             <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Total Paket</p>
@@ -72,7 +65,6 @@
             <h3 class="text-2xl font-black text-white"><%= (maxPrice/1000).toFixed(0) %>k</h3>
         </div>
     </div>
-
     <div class="glass-card rounded-3xl shadow-2xl overflow-hidden mb-10">
         <div class="p-6">
             <table id="packagesTable" class="w-full text-left text-slate-400">
@@ -124,7 +116,6 @@
         </div>
     </div>
 </main>
-
 <div id="addPackageModal" class="fixed inset-0 z-[70] hidden bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
     <div class="glass-card w-full max-w-2xl border border-white/5 shadow-2xl overflow-hidden rounded-[2rem]">
         <div class="bg-gray-900/50 p-6 border-b border-gray-800 flex justify-between items-center">
@@ -156,7 +147,6 @@
                     <label class="block text-[10px] font-black text-yellow-500 uppercase tracking-widest mb-2">Masa Aktif (Hari)</label>
                     <input type="number" id="add_active_period" name="active_period" value="30" class="batman-input w-full p-3 font-bold text-yellow-400 text-center text-lg" placeholder="30">
                 </div>
-
                 <div class="md:col-span-2"><label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Deskripsi</label><textarea name="description" class="batman-input w-full p-3" rows="2"></textarea></div>
             </div>
             <div class="flex justify-end gap-3 pt-4 border-t border-gray-800">
@@ -166,7 +156,6 @@
         </form>
     </div>
 </div>
-
 <div id="editPackageModal" class="fixed inset-0 z-[70] hidden bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
     <div class="glass-card w-full max-w-2xl border border-white/5 shadow-2xl overflow-hidden rounded-[2rem]">
         <div class="bg-gray-900/50 p-6 border-b border-gray-800 flex justify-between items-center">
@@ -186,7 +175,6 @@
                         <% if (typeof radiusProfiles !== 'undefined') { radiusProfiles.forEach(function(prof) { %><option value="<%= prof %>"><%= prof %></option><% }); } else { %><option value="default">Default</option><% } %>
                     </select>
                 </div>
-
                 <div class="md:col-span-2">
                     <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Sistem Tagihan</label>
                     <input type="hidden" id="edit_billing_type" name="billing_type" value="fixed">
@@ -199,7 +187,6 @@
                     <label class="block text-[10px] font-black text-yellow-500 uppercase tracking-widest mb-2">Masa Aktif (Hari)</label>
                     <input type="number" id="edit_active_period" name="active_period" class="batman-input w-full p-3 font-bold text-yellow-400 text-center text-lg">
                 </div>
-
                 <div class="md:col-span-2"><label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Deskripsi</label><textarea id="edit_description" name="description" class="batman-input w-full p-3" rows="2"></textarea></div>
             </div>
             <div class="flex justify-end gap-3 pt-4 border-t border-gray-800">
@@ -209,13 +196,10 @@
         </form>
     </div>
 </div>
-
 <%- include('../../partials/footer') %>
-
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 <script>
     $(document).ready(function() {
         $('#packagesTable').DataTable({
@@ -223,28 +207,22 @@
             language: { search: "", searchPlaceholder: "Cari paket...", zeroRecords: "Data tidak ditemukan", info: "SHOWING _TOTAL_ PACKAGES", paginate: { next: ">", previous: "<" } }
         });
     });
-
-    // --- SULTAN FIX: Fungsi Format Rupiah ---
     function formatRupiah(obj) {
         let angka = obj.value.replace(/[^0-9]/g, '');
         if (!angka) { obj.value = ''; return; }
         obj.value = parseInt(angka).toLocaleString('id-ID');
     }
-
     function openModal(id) { $(`#${id}`).removeClass('hidden').addClass('flex'); }
     function closeModal(id) { $(`#${id}`).addClass('hidden').removeClass('flex'); }
-
     function openAddModal() {
         $('#addPackageForm')[0].reset();
         setAddBillingType('fixed'); 
         openModal('addPackageModal');
     }
-
     function setAddBillingType(type) {
         $('#add_billing_type').val(type);
         $('#btn-add-fixed, #btn-add-dynamic').removeClass('bg-blue-600 bg-yellow-600 text-white shadow-lg').addClass('text-gray-400 hover:text-white');
         $('#wrap-add-active-period').addClass('hidden');
-
         if(type === 'fixed') {
             $('#btn-add-fixed').addClass('bg-blue-600 text-white shadow-lg').removeClass('text-gray-400 hover:text-white');
         } else {
@@ -252,12 +230,10 @@
             $('#wrap-add-active-period').removeClass('hidden');
         }
     }
-
     function setEditBillingType(type) {
         $('#edit_billing_type').val(type);
         $('#btn-edit-fixed, #btn-edit-dynamic').removeClass('bg-blue-600 bg-yellow-600 text-white shadow-lg').addClass('text-gray-400 hover:text-white');
         $('#wrap-edit-active-period').addClass('hidden');
-
         if(type === 'fixed') {
             $('#btn-edit-fixed').addClass('bg-blue-600 text-white shadow-lg').removeClass('text-gray-400 hover:text-white');
         } else {
@@ -265,24 +241,20 @@
             $('#wrap-edit-active-period').removeClass('hidden');
         }
     }
-
     // --- CREATE PACKAGE ---
     $('#addPackageForm').submit(function(e) {
         e.preventDefault();
         const btn = $(this).find('button[type="submit"]');
         btn.prop('disabled', true).text('Menyimpan...');
-
         const data = {
             name: $(this).find('[name="name"]').val(),
             speed: $(this).find('[name="speed"]').val(),
-            // SULTAN FIX: Hapus titik sebelum dikirim ke backend
             price: $(this).find('[name="price"]').val().replace(/[^0-9]/g, ''), 
             description: $(this).find('[name="description"]').val(),
             pppoe_profile: $(this).find('[name="pppoe_profile"]').val(),
             billing_type: $('#add_billing_type').val(),
             active_period: $('#add_active_period').val()
         };
-
         $.ajax({
             url: '/admin/billing/packages', method: 'POST', contentType: 'application/json', data: JSON.stringify(data),
             success: function(res) {
@@ -291,7 +263,6 @@
             }
         });
     });
-
     // --- EDIT PACKAGE (FETCH) ---
     function editPackage(id) {
         $.get(`/admin/billing/api/packages/${id}`, function(res) {
@@ -300,7 +271,6 @@
                 $('#edit_package_id').val(p.id);
                 $('#edit_name').val(p.name);
                 $('#edit_speed').val(p.speed);
-                // SULTAN FIX: Kasih format titik saat buka modal edit
                 $('#edit_price').val(parseInt(p.price).toLocaleString('id-ID')); 
                 $('#edit_description').val(p.description);
                 $('#edit_pppoe_profile').val(p.pppoe_profile);
@@ -308,32 +278,28 @@
                 const bType = p.billing_type || 'fixed';
                 setEditBillingType(bType);
                 $('#edit_active_period').val(p.active_period || 30);
-
                 openModal('editPackageModal');
             } else {
                 Swal.fire({ icon: 'error', title: 'Error', text: 'Gagal mengambil data', background: '#0a0f1e', color: '#fff' });
             }
         });
     }
-
     // --- UPDATE PACKAGE ---
     $('#editPackageForm').submit(function(e) {
         e.preventDefault();
         const id = $('#edit_package_id').val();
         const btn = $(this).find('button[type="submit"]');
         btn.prop('disabled', true).text('Updating...');
-
         const data = {
             name: $('#edit_name').val(),
             speed: $('#edit_speed').val(),
-            // SULTAN FIX: Hapus titik sebelum update
+    // Synchronize subscriber account state
             price: $('#edit_price').val().replace(/[^0-9]/g, ''), 
             description: $('#edit_description').val(),
             pppoe_profile: $('#edit_pppoe_profile').val(),
             billing_type: $('#edit_billing_type').val(),
             active_period: $('#edit_active_period').val()
         };
-
         $.ajax({
             url: `/admin/billing/packages/${id}`, method: 'PUT', contentType: 'application/json', data: JSON.stringify(data),
             success: function(res) {
@@ -342,7 +308,6 @@
             }
         });
     });
-
     // --- DELETE PACKAGE ---
     function deletePackage(id, name) {
         Swal.fire({
@@ -357,6 +322,5 @@
         });
     }
 </script>
-
 </body>
 </html>

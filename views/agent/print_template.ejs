@@ -21,7 +21,6 @@
             .btn-print { background: #000; color: #fff; border: none; padding: 10px 20px; font-weight: bold; border-radius: 50px; cursor: pointer; font-size: 16px; margin-bottom: 10px; }
             .btn-back { display: inline-block; padding: 10px 20px; background: #6c757d; color: #fff; border-radius: 50px; text-decoration: none; font-weight: bold; font-size: 16px; font-family: sans-serif; }
             .help-text { font-family: sans-serif; font-size: 12px; color: #555; margin-top: 10px; }
-
             #thermal-area { width: 58mm; background: #fff; padding: 0; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
             .voucher-struk { width: 100%; padding: 15px 5px; border-bottom: 2px dashed #000; text-align: center; box-sizing: border-box; }
             .v-header { font-size: 16px; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; border-bottom: 1px solid #000; padding-bottom: 3px; }
@@ -31,7 +30,6 @@
             .v-pass { font-size: 14px; font-weight: bold; margin-bottom: 10px; }
             .v-desc { font-size: 11px; line-height: 1.4; }
             .v-footer { font-size: 10px; margin-top: 10px; border-top: 1px dotted #000; padding-top: 5px; }
-
             @media print {
                 .no-print { display: none !important; }
                 body { background: #fff; padding: 0; display: block; }
@@ -42,33 +40,28 @@
         <style>
             * { box-sizing: border-box; font-family: 'Arial', sans-serif; }
             body { background: #e9ecef; margin: 0; padding: 20px; text-align: center; }
-
             @media print {
                 body { background: white; margin: 0; padding: 0; -webkit-print-color-adjust: exact; color-adjust: exact; }
                 .no-print { display: none !important; }
                 @page { size: A4 landscape; margin: 5mm; }
                 .page-break { page-break-after: always; display: block; height: 0; }
             }
-
             .page-container {
                 display: flex; flex-wrap: wrap; align-content: flex-start; justify-content: flex-start;
                 width: 287mm; height: 200mm; margin: 0 auto; background: white;
                 box-shadow: 0 0 10px rgba(0,0,0,0.1); padding: 2mm; page-break-inside: avoid;
             }
-
             .voucher-card {
                 width: 54mm; height: 37mm; border: 1px solid #333; margin: 1.3mm;
                 border-radius: 4px; overflow: hidden; position: relative; background: #fff;
                 display: flex; flex-direction: column; justify-content: space-between;
             }
-
             .voucher-header { background: #0d6efd; color: #fff; font-size: 9px; font-weight: bold; text-align: center; padding: 2px 0; text-transform: uppercase; letter-spacing: 1px; }
             .voucher-body { display: flex; flex-direction: column; align-items: center; justify-content: center; flex-grow: 1; padding: 1px 4px; }
             .voucher-price { font-size: 11px; font-weight: 900; color: #198754; text-align: center; margin-bottom: 2px; }
             .voucher-code { font-family: 'Courier New', Courier, monospace; font-size: 15px; font-weight: 900; letter-spacing: 2px; background: #f8f9fa; border: 1px dashed #777; padding: 2px 8px; display: inline-block; border-radius: 4px; color: #000; }
             .voucher-meta { font-size: 7px; color: #444; margin-top: 2px; }
             .voucher-footer { font-size: 6.5px; text-align: center; color: #555; background: #f1f1f1; padding: 2px 4px; border-top: 1px solid #ccc; display: flex; justify-content: space-between; }
-
             .btn-print { padding: 12px 25px; background: #0d6efd; color: white; border: none; font-size: 16px; font-weight: bold; border-radius: 50px; cursor: pointer; margin-bottom: 10px; }
             .btn-back { padding: 12px 25px; background: #6c757d; color: white; border: none; font-size: 16px; font-weight: bold; border-radius: 50px; text-decoration: none; margin-left: 10px; display: inline-block; }
             .help-text { color: #666; font-size: 13px; margin-top: 10px; }
@@ -76,7 +69,6 @@
     <% } %>
 </head>
 <body>
-
     <div class="no-print">
         <button onclick="window.print()" class="btn-print"><i class="bi bi-printer"></i> KLIK UNTUK PRINT</button>
         <a href="/agent/my-vouchers" class="btn-back">KEMBALI KE STOK</a>
@@ -87,7 +79,6 @@
             <div class="help-text">Mode: <b>A4 Landscape (25/lembar)</b> | Setting Printer: <b>Layout Landscape, Margins Minimum/None</b>.</div>
         <% } %>
     </div>
-
     <% if (vouchers.length === 1) { %>
         <div id="thermal-area">
             <% vouchers.forEach(function(v) { %>
@@ -115,13 +106,11 @@
             </div>
             <% }); %>
         </div>
-
     <% } else { %>
         <% 
             const VOUCHER_PER_PAGE = 25; 
             const totalPages = Math.ceil(vouchers.length / VOUCHER_PER_PAGE);
         %>
-
         <% for (let p = 0; p < totalPages; p++) { %>
             <div class="page-container">
                 <% 
@@ -149,7 +138,6 @@
                             <%= v.profile %> | Login: 192.168.88.1
                         </div>
                     </div>
-
                     <div class="voucher-footer">
                         <span>Agen: <%= typeof agent_name !== 'undefined' ? agent_name : 'Admin' %></span>
                         <span><%= moment().format('DD/MM/YY') %></span>
@@ -163,20 +151,16 @@
             <% } %>
         <% } %>
     <% } %>
-
     <script>
         // 1. Buat fungsi mandiri agar tidak tabrakan
         function panggilMesinPrint() {
             window.print();
         }
-
         window.onload = function() {
             // 2. Deteksi perangkat Agen secara detail
             var userAgent = navigator.userAgent || navigator.vendor || window.opera;
             var isHP = /android|iphone|ipad|ipod/i.test(userAgent.toLowerCase());
-
             if (!isHP) {
-                // 3. Jika di PC/Laptop, auto-print tetap jalan (Sesuai kemauan Bos)
                 setTimeout(function(){ 
                     panggilMesinPrint(); 
                 }, 1000);
