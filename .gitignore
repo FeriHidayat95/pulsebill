@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+
+# Environment & Live Runtime Configurations
+.env
+.env.local
+.env.*.local
+settings.json
+config/settings.json
+config/superadmin.txt
+config/database.js
+config/whatsapp.js
+
+# Authentication & Live WhatsApp Sessions
+whatsapp-session/
+*.session
+
+# Database Files & Backups
+data/*.db
+data/*.sqlite
+data/*.sqlite3
+data/backup/
+*.sql
+*.sqlite
+
+# Logs & Debugging
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# System Files
+.DS_Store
+Thumbs.db

@@ -1,0 +1,401 @@
+<%- include('partials/header') %>
+<%- include('partials/admin-header') %>
+<%- include('partials/admin-sidebar', { page: 'dashboard' }) %>
+
+<main class="p-4 sm:ml-64 pt-20 bg-[#0f172a] min-h-screen text-slate-300 font-sans selection:bg-blue-500 selection:text-white">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 pb-2">
+        <div>
+            <h1 class="text-3xl font-black text-white tracking-tighter uppercase leading-none">
+                Monitoring <span class="text-blue-500">Dashboard</span>
+            </h1>
+            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-[4px] mt-2">Sultan Network & Financial Control</p>
+        </div>
+        <button data-modal-target="restartMikrotikModal" data-modal-toggle="restartMikrotikModal" class="group relative inline-flex items-center justify-center px-6 py-3 text-xs font-black text-white bg-rose-600 rounded-xl hover:bg-rose-700 shadow-lg shadow-rose-500/30 transition-all uppercase tracking-widest">
+            <i class="bi bi-power text-lg me-2 group-hover:scale-110 transition-transform"></i> RESTART ROUTER
+        </button>
+    </div>
+
+    <div class="grid grid-cols-1 xl:grid-cols-4 gap-6 mb-8">
+        
+        <div class="col-span-1 xl:col-span-3 space-y-6">
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <div class="bg-[#1e293b] border border-slate-700/60 rounded-2xl p-6 shadow-lg relative overflow-hidden group">
+                    <div class="flex justify-between items-start relative z-10">
+                        <div>
+                            <p class="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">Monthly Earning (Kotor)</p>
+                            <h3 id="stat-monthlyIncome" class="text-3xl font-black text-white"><%= typeof monthlyIncome !== 'undefined' ? monthlyIncome : 'Rp 0' %></h3>
+                            <p class="text-[11px] text-slate-500 font-bold mt-2">
+                                <span id="stat-lastMonthIncome" class="text-slate-400"><%= typeof lastMonthIncome !== 'undefined' ? lastMonthIncome : 'Rp 0' %></span> Last Month
+                            </p>
+                        </div>
+                        <div class="w-8 h-8 rounded-lg bg-[#111827] flex items-center justify-center text-slate-500 border border-slate-700 cursor-pointer hover:text-white transition-colors">
+                            <i class="bi bi-three-dots"></i>
+                        </div>
+                    </div>
+                    <i class="bi bi-wallet2 text-7xl text-blue-500 absolute -right-4 -bottom-4 opacity-10 group-hover:scale-110 transition-transform"></i>
+                </div>
+
+                <div class="bg-[#1e293b] border border-slate-700/60 rounded-2xl p-6 shadow-lg relative overflow-hidden group">
+                    <div class="flex justify-between items-start relative z-10">
+                        <div>
+                            <p class="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">Monthly Expenses</p>
+                            <h3 id="stat-monthlyExpense" class="text-3xl font-black text-rose-500"><%= typeof monthlyExpense !== 'undefined' ? monthlyExpense : 'Rp 0' %></h3>
+                            <p class="text-[11px] text-slate-500 font-bold mt-2">
+                                Total Pengeluaran Bulan Ini
+                            </p>
+                        </div>
+                        <div class="w-8 h-8 rounded-lg bg-[#111827] flex items-center justify-center text-slate-500 border border-slate-700 cursor-pointer hover:text-white transition-colors">
+                            <i class="bi bi-three-dots"></i>
+                        </div>
+                    </div>
+                    <i class="bi bi-cart-x text-7xl text-rose-500 absolute -right-4 -bottom-4 opacity-10 group-hover:scale-110 transition-transform"></i>
+                </div>
+
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-[#1e293b] border border-slate-700/60 rounded-2xl p-5 shadow-lg relative overflow-hidden">
+                    <div class="flex justify-between items-start relative z-10">
+                        <div>
+                            <p class="text-[10px] font-black text-amber-500 uppercase tracking-widest mb-2">Total Unpaid</p>
+                            <h3 id="stat-unpaidInvoices" class="text-2xl font-black text-white"><%= typeof unpaidInvoices !== 'undefined' ? unpaidInvoices : '0' %> <span class="text-xs text-slate-500 font-bold">Tagihan</span></h3>
+                        </div>
+                        <i class="bi bi-three-dots text-slate-500 cursor-pointer hover:text-white"></i>
+                    </div>
+                </div>
+
+                <div class="bg-[#1e293b] border border-slate-700/60 rounded-2xl p-5 shadow-lg relative overflow-hidden">
+                    <div class="flex justify-between items-start relative z-10">
+                        <div>
+                            <p class="text-[10px] font-black text-rose-500 uppercase tracking-widest mb-2">Total Overdue</p>
+                            <h3 id="stat-overdueInvoices" class="text-2xl font-black text-white"><%= typeof overdueInvoices !== 'undefined' ? overdueInvoices : '0' %> <span class="text-xs text-slate-500 font-bold">User</span></h3>
+                        </div>
+                        <i class="bi bi-three-dots text-slate-500 cursor-pointer hover:text-white"></i>
+                    </div>
+                </div>
+
+                <div class="bg-[#1e293b] border border-slate-700/60 rounded-2xl p-5 shadow-lg relative overflow-hidden">
+                    <div class="flex justify-between items-start relative z-10">
+                        <div>
+                            <p class="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-2">Net Profit (Laba Bersih)</p>
+                            <h3 id="stat-netProfit" class="text-2xl font-black text-emerald-400"><%= typeof netProfit !== 'undefined' ? netProfit : 'Rp 0' %></h3>
+                        </div>
+                        <i class="bi bi-three-dots text-slate-500 cursor-pointer hover:text-white"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-[#1e293b] border border-slate-700/60 rounded-2xl p-6 shadow-lg">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-sm font-black text-white uppercase tracking-widest">PPP & DHCP Users</h3>
+                        <i class="bi bi-three-dots text-slate-500"></i>
+                    </div>
+                    
+                    <% 
+                       let totalPPP = parseInt(typeof mikrotikTotal !== 'undefined' ? mikrotikTotal : 0);
+                       let activePPP = parseInt(typeof mikrotikAktif !== 'undefined' ? mikrotikAktif : 0);
+                       let offlinePPP = parseInt(typeof mikrotikOffline !== 'undefined' ? mikrotikOffline : 0);
+                       let pppPct = totalPPP > 0 ? ((activePPP / totalPPP) * 100).toFixed(2) : 0;
+                    %>
+                    <div class="flex justify-between items-end mb-2">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Session Online</span>
+                        <span id="ppp-pct-text" class="text-xs font-black text-white"><%= activePPP %> Users / <%= pppPct %>%</span>
+                    </div>
+                    <div class="w-full bg-[#111827] rounded-full h-3 mb-6 flex overflow-hidden border border-slate-700">
+                        <div id="ppp-progress" class="bg-blue-500 h-3 transition-all duration-1000" style="width: <%= pppPct %>%"></div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500"><i class="bi bi-people-fill text-xl"></i></div>
+                            <div><p id="stat-mikrotikTotal" class="text-xl font-black text-white leading-none"><%= totalPPP %></p><p class="text-[10px] text-slate-500 font-bold uppercase mt-1">Total</p></div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500"><i class="bi bi-person-check-fill text-xl"></i></div>
+                            <div><p id="stat-mikrotikAktif" class="text-xl font-black text-white leading-none"><%= activePPP %></p><p class="text-[10px] text-slate-500 font-bold uppercase mt-1">Active</p></div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center text-rose-500"><i class="bi bi-person-x-fill text-xl"></i></div>
+                            <div><p id="stat-mikrotikOffline" class="text-xl font-black text-white leading-none"><%= offlinePPP %></p><p class="text-[10px] text-slate-500 font-bold uppercase mt-1">Isolir</p></div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-slate-700/50 flex items-center justify-center text-slate-400"><i class="bi bi-person-dash-fill text-xl"></i></div>
+                            <div><p id="stat-mikrotikTerminate" class="text-xl font-black text-white leading-none"><%= typeof mikrotikTerminate !== 'undefined' ? mikrotikTerminate : 0 %></p><p class="text-[10px] text-slate-500 font-bold uppercase mt-1">Terminate</p></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-[#1e293b] border border-slate-700/60 rounded-2xl p-6 shadow-lg">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-sm font-black text-white uppercase tracking-widest">Hotspot Users</h3>
+                        <i class="bi bi-three-dots text-slate-500"></i>
+                    </div>
+                    
+                    <% 
+                       let totalHS = parseInt(typeof hotspotTotal !== 'undefined' ? hotspotTotal : 0);
+                       let activeHS = parseInt(typeof hotspotActive !== 'undefined' ? hotspotActive : 0);
+                       let expiredHS = parseInt(typeof hotspotExpired !== 'undefined' ? hotspotExpired : 0);
+                       let hsPct = totalHS > 0 ? ((activeHS / totalHS) * 100).toFixed(2) : 0;
+                    %>
+                    <div class="flex justify-between items-end mb-2">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Session Online</span>
+                        <span id="hs-pct-text" class="text-xs font-black text-white"><%= activeHS %> Users / <%= hsPct %>%</span>
+                    </div>
+                    <div class="w-full bg-[#111827] rounded-full h-3 mb-6 flex overflow-hidden border border-slate-700">
+                        <div id="hs-progress" class="bg-emerald-500 h-3 transition-all duration-1000" style="width: <%= hsPct %>%"></div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500"><i class="bi bi-people-fill text-xl"></i></div>
+                            <div><p id="stat-hotspotTotal" class="text-xl font-black text-white leading-none"><%= totalHS %></p><p class="text-[10px] text-slate-500 font-bold uppercase mt-1">Total</p></div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500"><i class="bi bi-person-check-fill text-xl"></i></div>
+                            <div><p id="stat-hotspotActive" class="text-xl font-black text-white leading-none"><%= activeHS %></p><p class="text-[10px] text-slate-500 font-bold uppercase mt-1">Active</p></div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center text-rose-500"><i class="bi bi-wifi-off text-xl"></i></div>
+                            <div><p id="stat-hotspotExpired" class="text-xl font-black text-white leading-none"><%= expiredHS %></p><p class="text-[10px] text-slate-500 font-bold uppercase mt-1">Expired</p></div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-slate-700/50 flex items-center justify-center text-slate-400"><i class="bi bi-plus-circle-fill text-xl"></i></div>
+                            <div><p class="text-xl font-black text-white leading-none">0</p><p class="text-[10px] text-slate-500 font-bold uppercase mt-1">New</p></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-span-1 xl:col-span-1 space-y-6">
+            
+            <div class="bg-[#1e293b] border border-slate-700/60 rounded-2xl shadow-lg flex flex-col divide-y divide-slate-700/50">
+                <div class="p-5 flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500"><i class="bi bi-cash-stack text-xl"></i></div>
+                    <div>
+                        <h4 id="stat-netProfitSide" class="text-lg font-black text-emerald-400 leading-tight"><%= typeof netProfit !== 'undefined' ? netProfit : 'Rp 0' %></h4>
+                        <p class="text-[10px] text-slate-500 font-bold uppercase mt-1">Monthly Profit (Net)</p>
+                    </div>
+                </div>
+                <div class="p-5 flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500"><i class="bi bi-receipt-cutoff text-xl"></i></div>
+                    <div>
+                        <h4 id="stat-totalTransactions" class="text-lg font-black text-white leading-tight"><%= typeof totalTransactions !== 'undefined' ? totalTransactions : '0' %></h4>
+                        <p class="text-[10px] text-slate-500 font-bold uppercase mt-1">Tagihan Lunas</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-[#1e293b] border border-slate-700/60 rounded-2xl p-5 shadow-lg relative overflow-hidden group">
+                <div class="relative z-10">
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Monthly Invoice</p>
+                    <h3 id="stat-totalInvoicesMonth" class="text-3xl font-black text-white"><%= typeof totalInvoicesMonth !== 'undefined' ? totalInvoicesMonth : '0' %></h3>
+                    <p class="text-[10px] text-slate-500 font-bold mt-2">Total Invoice Dibuat Bulan Ini</p>
+                </div>
+                <i class="bi bi-file-earmark-text text-7xl text-blue-500 absolute -right-4 -bottom-4 opacity-10 group-hover:scale-110 transition-transform"></i>
+            </div>
+
+            <div class="bg-[#1e293b] border border-slate-700/60 rounded-2xl p-5 shadow-lg flex items-center gap-4">
+                <div class="relative flex h-12 w-12">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-20"></span>
+                  <div class="relative inline-flex rounded-full h-12 w-12 bg-emerald-500/10 items-center justify-center text-emerald-500"><i class="bi bi-whatsapp text-2xl"></i></div>
+                </div>
+                <div>
+                    <h4 class="text-sm font-black text-emerald-500 uppercase tracking-widest">Online</h4>
+                    <p class="text-[10px] text-slate-500 font-bold mt-1">Whatsapp Api Gateway</p>
+                </div>
+            </div>
+
+            <div class="bg-[#1e293b] border border-slate-700/60 rounded-2xl p-5 shadow-lg">
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Router Nas</p>
+                
+                <div class="relative mb-4">
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                        <i class="bi bi-hdd-network text-blue-500"></i>
+                    </div>
+                    <select id="router-select" class="bg-[#111827] border border-slate-700 text-white text-xs font-bold rounded-xl focus:ring-blue-500 focus:border-blue-500 block w-full pl-9 pr-8 py-3 appearance-none cursor-pointer outline-none hover:bg-slate-800 transition-colors">
+                        <% if (typeof routerList !== 'undefined' && routerList.length > 0) { %>
+                            <% routerList.forEach((router, index) => { %>
+                                <option value="<%= router.id %>" <%= index === 0 ? 'selected' : '' %>>
+                                    <%= router.shortname || 'Router' %> (<%= router.nasname %>)
+                                </option>
+                            <% }) %>
+                        <% } else { %>
+                            <option value="">Mengambil Data Router...</option>
+                        <% } %>
+                    </select>
+                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                        <i class="bi bi-chevron-down text-slate-500"></i>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="flex items-start gap-3">
+                        <i class="bi bi-ethernet text-emerald-500 mt-0.5"></i>
+                        <div>
+                            <h4 id="stat-routerNasname" class="text-xs font-black text-emerald-500 uppercase tracking-widest">
+                                <%= (typeof routerList !== 'undefined' && routerList.length > 0) ? routerList[0].nasname : '0.0.0.0' %>
+                            </h4>
+                            <p class="text-[10px] text-slate-500 font-bold">IP Address</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <i class="bi bi-router text-blue-500 mt-0.5"></i>
+                        <div>
+                            <h4 id="stat-routerType" class="text-xs font-black text-white uppercase tracking-widest">
+                                <%= (typeof routerList !== 'undefined' && routerList.length > 0) ? routerList[0].type : 'Unknown' %>
+                            </h4>
+                            <p class="text-[10px] text-slate-500 font-bold">Router Type</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <i class="bi bi-hash text-slate-400 mt-0.5"></i>
+                        <div>
+                            <h4 id="stat-totalRouters" class="text-xs font-black text-white uppercase tracking-widest"><%= typeof totalRouters !== 'undefined' ? totalRouters : '0' %> Unit</h4>
+                            <p class="text-[10px] text-slate-500 font-bold">Terdaftar di Sistem</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</main>
+
+<div id="restartMikrotikModal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-[100] justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full backdrop-blur-sm bg-black/80">
+    <div class="relative w-full max-w-sm max-h-full mx-auto mt-20">
+        <div class="relative bg-[#1e293b] rounded-2xl shadow-2xl border border-slate-700">
+            <button type="button" class="absolute top-3 end-2.5 text-slate-400 hover:text-white bg-transparent rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center" data-modal-hide="restartMikrotikModal">
+                <i class="bi bi-x-lg"></i>
+            </button>
+            <div class="p-6 text-center">
+                <div class="w-20 h-20 mx-auto mb-4 bg-rose-900/30 rounded-full flex items-center justify-center border border-rose-500/20 shadow-[0_0_20px_rgba(244,63,94,0.3)]">
+                    <i class="bi bi-exclamation-triangle-fill text-5xl text-rose-500 animate-pulse"></i>
+                </div>
+                <h3 class="mb-2 text-2xl font-black text-white tracking-tighter">RESTART ROUTER?</h3>
+                <p class="text-xs text-slate-400 mb-8 font-bold leading-relaxed">Koneksi internet pelanggan akan terputus sementara waktu selama proses reboot Mikrotik berlangsung.</p>
+                <div class="flex gap-3 justify-center">
+                    <button data-modal-hide="restartMikrotikModal" type="button" class="text-slate-300 bg-slate-700 hover:bg-slate-600 rounded-xl border border-slate-600 text-xs font-black uppercase tracking-widest px-6 py-3 transition-all">BATAL</button>
+                    <button id="confirmRestartMikrotik" type="button" class="text-white bg-rose-600 hover:bg-rose-700 rounded-xl text-xs font-black uppercase tracking-widest px-6 py-3 shadow-lg shadow-rose-500/30 transition-all">YA, RESTART</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('partials/footer') %>
+
+<script>
+// =============================================================
+// JURUS WUZ: JAVASCRIPT MURNI + KALKULATOR PERSENTASE
+// =============================================================
+document.addEventListener("DOMContentLoaded", function() {
+    const apiUrl = '/admin/api/dashboard-stats';
+
+    fetch(apiUrl)
+        .then(response => {
+            if (!response.ok) throw new Error("Gagal akses API");
+            return response.json();
+        })
+        .then(res => {
+            if(res && res.success) {
+                const d = res.data;
+                const setText = (id, text) => {
+                    const el = document.getElementById(id);
+                    if(el) el.innerHTML = text;
+                };
+
+                // 1. Inject Finansial
+                setText('stat-monthlyIncome', d.monthlyIncome);
+                setText('stat-lastMonthIncome', d.lastMonthIncome);
+                setText('stat-monthlyExpense', d.monthlyExpense);
+                setText('stat-netProfit', d.netProfit);
+                setText('stat-netProfitSide', d.netProfit);
+                
+                // 2. Inject Invoice
+                setText('stat-unpaidInvoices', `${d.unpaidInvoices} <span class="text-xs text-slate-500 font-bold">Tagihan</span>`);
+                setText('stat-overdueInvoices', `${d.overdueInvoices} <span class="text-xs text-slate-500 font-bold">User</span>`);
+                setText('stat-totalTransactions', d.totalTransactions);
+                setText('stat-totalInvoicesMonth', d.totalInvoicesMonth);
+
+                // 3. Inject MikroTik PPP
+                setText('stat-mikrotikTotal', d.mikrotikTotal);
+                setText('stat-mikrotikAktif', d.mikrotikAktif);
+                setText('stat-mikrotikOffline', d.mikrotikOffline);
+                setText('stat-mikrotikTerminate', d.mikrotikTerminate);
+                
+                // --- HITUNG PERSENTASE PPP DI SINI ---
+                let totalPPP = parseInt(d.mikrotikTotal) || 0;
+                let activePPP = parseInt(d.mikrotikAktif) || 0;
+                let pppPct = totalPPP > 0 ? ((activePPP / totalPPP) * 100).toFixed(2) : (activePPP > 0 ? 100 : 0);
+                
+                setText('ppp-pct-text', `${activePPP} Users / ${pppPct}%`);
+                const pppBar = document.getElementById('ppp-progress');
+                // Kalau aktif lebih banyak dari total, tahan bar di 100% biar UI gak rusak
+                if(pppBar) pppBar.style.width = (pppPct > 100 ? 100 : pppPct) + '%';
+
+                // 4. Inject Hotspot
+                setText('stat-hotspotTotal', d.hotspotTotal);
+                setText('stat-hotspotActive', d.hotspotActive);
+                setText('stat-hotspotExpired', d.hotspotExpired);
+                
+                // --- HITUNG PERSENTASE HOTSPOT DI SINI ---
+                let totalHS = parseInt(d.hotspotTotal) || 0;
+                let activeHS = parseInt(d.hotspotActive) || 0;
+                let hsPct = totalHS > 0 ? ((activeHS / totalHS) * 100).toFixed(2) : (activeHS > 0 ? 100 : 0);
+                
+                setText('hs-pct-text', `${activeHS} Users / ${hsPct}%`);
+                const hsBar = document.getElementById('hs-progress');
+                if(hsBar) hsBar.style.width = (hsPct > 100 ? 100 : hsPct) + '%';
+
+                // 5. Inject Router Info
+                setText('stat-totalRouters', `${d.totalRouters} Unit`);
+                if(d.routerList && d.routerList.length > 0) {
+                    setText('stat-routerNasname', d.routerList[0].nasname);
+                    setText('stat-routerType', d.routerList[0].type);
+                    let rHtml = '';
+                    d.routerList.forEach(r => {
+                        rHtml += `<option value="${r.id}">${r.shortname || 'Router'} (${r.nasname})</option>`;
+                    });
+                    const rSelect = document.getElementById('router-select');
+                    if(rSelect) rSelect.innerHTML = rHtml;
+                }
+            }
+        })
+        .catch(error => console.error("Error Fetch API:", error));
+});
+
+// Logic Restart Mikrotik
+document.addEventListener("click", function(e) {
+    const btn = e.target.closest('#confirmRestartMikrotik');
+    if (btn) {
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="bi bi-arrow-repeat animate-spin me-2"></i>Processing...';
+        
+        fetch('/admin/mikrotik/restart', { method: 'POST' })
+            .then(res => res.json())
+            .then(res => {
+                if(typeof showAlert === 'function') {
+                    if(res.success) showAlert(res.message || 'Mikrotik restart command sent.', 'success');
+                    else showAlert(res.message || 'Gagal restart Mikrotik.', 'danger');
+                }
+                const modalElement = document.getElementById('restartMikrotikModal');
+                if(modalElement) {
+                    modalElement.classList.add('hidden');
+                    modalElement.classList.remove('flex');
+                }
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            })
+            .catch(() => {
+                if(typeof showAlert === 'function') showAlert('Gagal menghubungi server MikroTik.', 'danger');
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            });
+    }
+});
+</script>

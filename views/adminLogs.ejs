@@ -1,0 +1,128 @@
+<%- include('partials/header') %>
+<%- include('partials/admin-header') %>
+<%- include('partials/admin-sidebar', { page: 'logs' }) %>
+
+<main class="p-4 sm:ml-64 pt-20 bg-gray-900 min-h-screen text-gray-300">
+    
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 border-b border-gray-800 pb-4">
+        <div>
+            <h1 class="text-2xl font-black text-white tracking-tight">LOG AUDIT SISTEM</h1>
+            <p class="text-sm text-gray-400 font-bold uppercase tracking-wider">Rekaman Aktivitas & Perubahan Data</p>
+        </div>
+        
+        <div class="relative w-full md:w-80">
+            <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                <i class="bi bi-search text-gray-500"></i>
+            </div>
+            <input type="text" id="logSearch" class="bg-gray-800 border border-gray-700 text-white text-sm rounded-xl focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 font-bold shadow-sm placeholder-gray-500" placeholder="Cari admin, user, atau aktivitas...">
+        </div>
+    </div>
+
+    <div class="bg-gray-800 border border-gray-700 rounded-2xl shadow-xl overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left text-gray-400" id="tableLogs">
+                <thead class="text-[10px] text-gray-500 uppercase bg-gray-900 border-b border-gray-700 font-black">
+                    <tr>
+                        <th scope="col" class="px-6 py-4">Waktu</th>
+                        <th scope="col" class="px-6 py-4">Operator</th>
+                        <th scope="col" class="px-6 py-4">Aktivitas</th>
+                        <th scope="col" class="px-6 py-4">Detail</th>
+                        <th scope="col" class="px-6 py-4 text-center">IP Address</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-700" id="logBody">
+                    </tbody>
+            </table>
+        </div>
+
+        <div class="p-6 text-center bg-gray-800 border-t border-gray-700">
+            <button id="btnLoadMore" class="inline-flex items-center px-6 py-2.5 text-xs font-black text-gray-300 bg-gray-700 border border-gray-600 rounded-full hover:bg-gray-600 hover:text-white transition-all shadow-lg uppercase tracking-wider">
+                <i class="bi bi-arrow-down-circle me-2 text-lg"></i> Tampilkan Lebih Banyak
+            </button>
+        </div>
+    </div>
+</main>
+
+<%- include('partials/footer') %>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    let page = 1;
+
+    // Helper untuk Warna Badge (Dark Mode Version)
+    function getBadge(action) {
+        const act = action.toUpperCase();
+        if(act.includes('DELETE') || act.includes('HAPUS')) 
+            return 'bg-red-900/40 text-red-400 border border-red-900';
+        if(act.includes('CREATE') || act.includes('ADD') || act.includes('PAYMENT')) 
+            return 'bg-green-900/40 text-green-400 border border-green-900';
+        if(act.includes('ISOLIR') || act.includes('SUSPEND') || act.includes('BLOCK')) 
+            return 'bg-yellow-900/40 text-yellow-400 border border-yellow-900';
+        
+        return 'bg-blue-900/40 text-blue-400 border border-blue-900';
+    }
+
+    function loadLogs(reset = true) {
+        const btn = $('#btnLoadMore');
+        const originalText = btn.html();
+        btn.prop('disabled', true).html('<i class="bi bi-hourglass-split animate-spin me-2"></i> LOADING...');
+
+        if(reset) { page = 1; $('#logBody').empty(); }
+        const search = $('#logSearch').val();
+        
+        $.get(`/admin/logs/data?page=${page}&search=${search}`, function(res) {
+            btn.prop('disabled', false).html(originalText);
+
+            if (res.success && res.logs.length > 0) {
+                res.logs.forEach(log => {
+                    const d = new Date(log.created_at);
+                    const time = d.getHours()+':'+String(d.getMinutes()).padStart(2,'0');
+                    const date = d.getDate()+' '+(d.toLocaleString('id-ID', { month: 'short' }));
+
+                    $('#logBody').append(`
+                        <tr class="hover:bg-gray-700/50 transition-colors group">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-bold text-white">${time}</div>
+                                <div class="text-[10px] text-gray-500 font-bold uppercase">${date}</div>
+                            </td>
+                            <td class="px-6 py-4 font-bold text-blue-400">
+                                <i class="bi bi-person-fill me-1"></i> ${log.user_id}
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wide ${getBadge(log.action)}">
+                                    ${log.action}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-gray-400 text-sm max-w-xs truncate md:max-w-md lg:max-w-xl group-hover:whitespace-normal group-hover:text-gray-200 transition-all">
+                                ${log.description}
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="bg-gray-900 text-gray-500 text-[10px] font-mono px-2 py-1 rounded border border-gray-700">
+                                    ${log.ip_address || '127.0.0.1'}
+                                </span>
+                            </td>
+                        </tr>
+                    `);
+                });
+            } else {
+                if (reset) {
+                    $('#logBody').html('<tr><td colspan="5" class="p-10 text-center text-gray-500 font-bold uppercase tracking-widest"><i class="bi bi-search text-4xl block mb-2 opacity-20"></i>Data log tidak ditemukan</td></tr>');
+                    btn.hide();
+                } else {
+                    btn.text('SEMUA DATA SUDAH DITAMPILKAN').prop('disabled', true);
+                }
+            }
+        });
+    }
+
+    $('#btnLoadMore').click(() => { page++; loadLogs(false); });
+    $('#logSearch').on('keyup', function() { 
+        clearTimeout(this.t); 
+        this.t = setTimeout(() => {
+            $('#btnLoadMore').show(); 
+            loadLogs(true)
+        }, 400); 
+    });
+    
+    $(document).ready(() => loadLogs());
+</script>

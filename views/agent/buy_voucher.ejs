@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cetak Voucher - Portal Agen</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <style>
+        body {
+            background-color: #f3f6ff;
+            font-family: 'Poppins', sans-serif;
+            color: #333;
+        }
+
+        /* Navbar Style */
+        .navbar {
+            background: #fff;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+            padding: 15px 0;
+        }
+        .navbar-brand { font-weight: 700; color: #0d6efd !important; }
+
+        /* Wallet Mini Card */
+        .balance-card {
+            background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
+            border-radius: 15px;
+            padding: 20px;
+            color: white;
+            box-shadow: 0 10px 20px rgba(13, 110, 253, 0.2);
+            margin-bottom: 30px;
+        }
+
+        /* Form Card */
+        .card-custom {
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+            overflow: hidden;
+        }
+        .card-header-custom {
+            background: #fff;
+            padding: 20px 25px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .form-label { font-weight: 600; color: #555; font-size: 0.9rem; }
+        .form-control, .form-select {
+            border-radius: 12px;
+            padding: 12px 15px;
+            border: 2px solid #eee;
+            font-weight: 500;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #0d6efd;
+            box-shadow: none;
+        }
+
+        /* Vouchers Result Grid */
+        .voucher-item {
+            background: #f8faff;
+            border: 2px dashed #cbd5e1;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            font-weight: 700;
+            color: #0d6efd;
+            font-size: 1.1rem;
+            transition: 0.3s;
+        }
+        .voucher-item:hover { border-color: #0d6efd; background: #fff; }
+
+        .btn-generate {
+            background: #198754;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 15px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            transition: 0.3s;
+        }
+        .btn-generate:hover {
+            background: #157347;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(25, 135, 84, 0.2);
+        }
+
+        .btn-print-now {
+            background: #ffc107;
+            color: #000;
+            padding: 15px;
+            border-radius: 15px;
+            font-weight: 700;
+            border: none;
+            box-shadow: 0 10px 20px rgba(255, 193, 7, 0.3);
+        }
+
+        .step-badge {
+            width: 30px; height: 30px;
+            background: #0d6efd;
+            color: white;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar sticky-top mb-4">
+    <div class="container">
+        <a href="/agent/dashboard" class="text-decoration-none fw-bold"><i class="bi bi-arrow-left"></i> Kembali</a>
+        <span class="navbar-brand mb-0">CETAK VOUCHER</span>
+        <div style="width: 50px;"></div>
+    </div>
+</nav>
+
+<div class="container pb-5">
+
+    <div class="balance-card d-flex justify-content-between align-items-center">
+        <div>
+            <div class="small opacity-75">Saldo Tersedia</div>
+            <h3 class="fw-bold mb-0">Rp <%= parseInt(balance).toLocaleString('id-ID') %></h3>
+        </div>
+        <i class="bi bi-wallet2 fs-1 opacity-25"></i>
+    </div>
+
+    <% if (error) { %>
+        <div class="alert alert-danger border-0 shadow-sm rounded-4 mb-4">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> <%= error %>
+        </div>
+    <% } %>
+
+    <% if (success) { %>
+        <div class="card card-custom mb-4 border-success border-2">
+            <div class="card-body p-4 text-center">
+                <div class="icon-box mb-3">
+                    <i class="bi bi-check-circle-fill text-success fs-1"></i>
+                </div>
+                <h4 class="fw-bold text-success">Berhasil Dibuat!</h4>
+                <p class="text-muted"><%= success %></p>
+                
+                <div class="row g-2 mt-3">
+                    <% newVouchers.forEach(v => { %>
+                        <div class="col-6 col-md-3">
+                            <div class="voucher-item"><%= v.code %></div>
+                        </div>
+                    <% }) %>
+                </div>
+
+                <form action="/agent/print-preview" method="POST" target="_blank" class="mt-4">
+                    <input type="hidden" name="vouchers" value='<%= JSON.stringify(newVouchers.map(v => ({
+                        username: v.code, 
+                        password: v.code, 
+                        profile: v.profile, 
+                        price_sell: v.price
+                    }))) %>'>
+                    <input type="hidden" name="agent_name" value="<%= typeof agent !== 'undefined' ? agent.name : 'Agen' %>">
+                    
+                    <button type="submit" class="btn btn-print-now w-100 btn-lg">
+                        <i class="bi bi-printer-fill me-2"></i> PRINT VOUCHER SEKARANG
+                    </button>
+                </form>
+            </div>
+        </div>
+    <% } %>
+
+    <div class="card card-custom">
+        <div class="card-header-custom">
+            <h5 class="fw-bold mb-0 text-primary">Konfigurasi Voucher</h5>
+        </div>
+        <div class="card-body p-4">
+            <form action="/agent/buy-voucher" method="POST">
+                
+                <div class="mb-4">
+                    <label class="form-label d-flex align-items-center">
+                        <span class="step-badge">1</span> Pilih Paket Internet
+                    </label>
+                    <select name="package_id" class="form-select form-select-lg" required>
+                        <option value="" disabled selected>-- Pilih Profil --</option>
+                        <% packages.forEach(pkg => { %>
+                            <option value="<%= pkg.id %>">
+                                <%= pkg.name %> — (Modal: Rp <%= parseInt(pkg.agent_cost).toLocaleString('id-ID') %>)
+                            </option>
+                        <% }) %>
+                    </select>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label d-flex align-items-center">
+                        <span class="step-badge">2</span> Jumlah Voucher (Qty)
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-tags"></i></span>
+                        <input type="number" name="qty" class="form-control form-control-lg border-start-0" min="1" max="50" value="1" required>
+                    </div>
+                    <small class="text-muted mt-2 d-block">Maksimal 50 voucher sekali cetak.</small>
+                </div>
+
+                <div class="alert alert-info border-0 rounded-4 small">
+                    <i class="bi bi-info-circle me-1"></i> Saldo akan otomatis terpotong sesuai total modal (Harga Modal x Qty).
+                </div>
+
+                <button type="submit" class="btn btn-generate w-100 btn-lg shadow">
+                    <i class="bi bi-rocket-takeoff me-2"></i> PROSES & CETAK SEKARANG
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

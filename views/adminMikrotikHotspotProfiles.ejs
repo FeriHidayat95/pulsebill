@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Profile Hotspot | <%= typeof company_header !== 'undefined' ? company_header : 'ISP System' %></title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+
+    <style>
+        body { background-color: #f1f5f9; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        .card-stat { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); color: #fff; position: relative; overflow: hidden; border: none; min-height: 110px; }
+        .bg-blue { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+        .bg-green { background: linear-gradient(135deg, #10b981, #059669); }
+        .bg-dark { background: linear-gradient(135deg, #475569, #334155); }
+        .table-container { background: #fff; border-radius: 12px; padding: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; }
+        table.dataTable thead th { background: #f8fafc; color: #64748b; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; padding: 15px !important; border-bottom: 2px solid #e2e8f0; }
+        .badge-limit { background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 6px; font-family: monospace; font-weight: bold; }
+        .main-content { padding-top: 20px; min-height: 100vh; }
+    </style>
+</head>
+<body>
+
+<div class="container-fluid">
+    <div class="row">
+        <%- include('partials/admin-responsive-sidebar', { page: 'hotspot', settings: settings }) %>
+
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h4 class="fw-bold m-0 text-dark">Profile Hotspot (Voucher)</h4>
+                <p class="text-muted small m-0">Pengaturan Durasi & Masa Aktif Voucher</p>
+            </div>
+            <button class="btn btn-primary fw-bold shadow-sm px-4" id="btnAdd">
+                <i class="bi bi-plus-lg me-2"></i>Tambah Profile
+            </button>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-md-4">
+                <div class="card-stat bg-blue">
+                    <h2 class="fw-bold m-0" id="countTotal">0</h2>
+                    <small class="opacity-75">TOTAL PROFILE</small>
+                    <i class="bi bi-hdd-rack position-absolute top-50 end-0 translate-middle-y me-3 fs-1 opacity-25"></i>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card-stat bg-green">
+                    <h2 class="fw-bold m-0" id="countLimit">0</h2>
+                    <small class="opacity-75">AKTIF LIMITASI</small>
+                    <i class="bi bi-speedometer2 position-absolute top-50 end-0 translate-middle-y me-3 fs-1 opacity-25"></i>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card-stat bg-dark">
+                    <h2 class="fw-bold m-0" id="countShared">0</h2>
+                    <small class="opacity-75">SHARED USERS</small>
+                    <i class="bi bi-people position-absolute top-50 end-0 translate-middle-y me-3 fs-1 opacity-25"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table id="profileTable" class="table table-hover w-100">
+                <thead>
+                    <tr>
+                        <th width="5%">No</th>
+                        <th>Nama Profile</th>
+                        <th>Rate Limit</th>
+                        <th>Shared</th>
+                        <th class="text-primary">Durasi Pakai</th> <th class="text-danger">Masa Aktif</th>   <th>Harga</th>
+                        <th class="text-center">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </main>
+
+    <div class="modal fade" id="modalProfile" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered"> 
+            <form id="formProfile" class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-light border-bottom-0">
+                    <h5 class="modal-title fw-bold" id="modalTitle">Konfigurasi Profile Hotspot</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <input type="hidden" id="oldName" name="oldName">
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-7 mb-3">
+                            <label class="form-label small fw-bold text-muted">NAMA PROFILE</label>
+                            <input type="text" class="form-control fw-bold" id="name" name="name" required placeholder="Contoh: 3jam_2000">
+                        </div>
+                        <div class="col-md-5 mb-3">
+                            <label class="form-label small fw-bold text-muted">HARGA (RP)</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">Rp</span>
+                                <input type="number" class="form-control" id="price" name="price" placeholder="0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-primary"><i class="bi bi-hourglass-split"></i> 1. DURASI PAKAI (JATAH JAM)</label>
+                            <input type="text" class="form-control border-primary" id="validity" name="validity" placeholder="Contoh: 6h">
+                            <small class="text-muted" style="font-size: 0.7rem;">Total jam internetan (Ex: 6h, 12h)</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-danger"><i class="bi bi-calendar-check"></i> 2. MASA AKTIF (UMUR VOUCHER)</label>
+                            <input type="text" class="form-control border-danger" id="validityPeriod" name="validityPeriod" placeholder="Contoh: 1d">
+                            <small class="text-muted" style="font-size: 0.7rem;">Voucher hangus sejak login (Ex: 1d, 30d)</small>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">LIMIT KECEPATAN (RX/TX)</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-primary text-white"><i class="bi bi-speedometer2"></i></span>
+                                <input type="text" class="form-control" id="rateLimit" name="rateLimit" placeholder="1M/2M">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">SHARED USERS</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="bi bi-people"></i></span>
+                                <input type="number" class="form-control" id="sharedUsers" name="sharedUsers" value="1">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card border-0 bg-light mb-3">
+                        <div class="card-body p-3">
+                            <label class="form-label small fw-bold text-primary mb-2">KONFIGURASI BURST (OPSIONAL)</label>
+                            <div class="row g-2">
+                                <div class="col-md-4">
+                                    <input type="text" class="form-control form-control-sm" id="burstLimit" name="burstLimit" placeholder="Burst Limit">
+                                </div>
+                                <div class="col-md-4">
+                                    <input type="text" class="form-control form-control-sm" id="burstThreshold" name="burstThreshold" placeholder="Threshold">
+                                </div>
+                                <div class="col-md-4">
+                                    <input type="text" class="form-control form-control-sm" id="burstTime" name="burstTime" placeholder="Time (8/8)">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer border-top-0 bg-light p-3">
+                    <button type="button" class="btn btn-link text-decoration-none text-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary px-5 fw-bold shadow-sm">Simpan Profile</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            let table = $('#profileTable').DataTable({
+                ajax: {
+                    url: '/admin/hotspot/api/profiles',
+                    dataSrc: function(json) {
+                        if(json.success) {
+                            const data = json.data;
+                            $('#countTotal').text(data.length);
+                            $('#countLimit').text(data.filter(x => x.rateLimit !== '').length);
+                            $('#countShared').text(data.filter(x => parseInt(x.sharedUsers) > 1).length);
+                            return data;
+                        }
+                        return [];
+                    }
+                },
+                columns: [
+                    { data: null, render: (d,t,r,m) => m.row + 1, className: "text-center" },
+                    { data: 'name', render: d => `<span class="fw-bold text-primary">${d}</span>` },
+                    { data: 'rateLimit', render: d => d !== '' ? `<span class="badge-limit">${d}</span>` : '-' },
+                    { data: 'sharedUsers', className: "text-center" },
+                    // KOLOM DURASI (validity)
+                    { data: 'validity', render: d => `<span class="badge bg-primary">${d}</span>` },
+                    // KOLOM MASA AKTIF (validityPeriod)
+                    { data: 'validityPeriod', render: d => `<span class="badge bg-danger">${d || '-'}</span>` },
+                    { data: 'price', render: d => parseInt(d) > 0 ? `<b>Rp ${parseInt(d).toLocaleString()}</b>` : '-' },
+                    { 
+                        data: null, className: "text-center",
+                        render: r => {
+                            const rowData = JSON.stringify(r).replace(/"/g, '&quot;');
+                            return `
+                            <button class="btn btn-sm btn-outline-warning btn-edit me-1" data-json="${rowData}"><i class="bi bi-pencil-fill"></i></button>
+                            <button class="btn btn-sm btn-outline-danger btn-delete" data-name="${r.name}"><i class="bi bi-trash-fill"></i></button>`;
+                        }
+                    }
+                ]
+            });
+
+            // EDIT ACTION
+            $(document).on('click', '.btn-edit', function() {
+                const data = $(this).data('json');
+                $('#oldName').val(data.name);
+                $('#name').val(data.name);
+                $('#rateLimit').val(data.rateLimit);
+                $('#burstLimit').val(data.burstLimit || '');
+                $('#burstThreshold').val(data.burstThreshold || '');
+                $('#burstTime').val(data.burstTime || '');
+                $('#sharedUsers').val(data.sharedUsers);
+                
+                // MENGISI 2 KOLOM INPUT (DURASI & MASA AKTIF)
+                $('#validity').val(data.validity !== '-' ? data.validity : '');
+                $('#validityPeriod').val(data.validityPeriod !== '-' ? data.validityPeriod : '');
+                
+                $('#price').val(data.price);
+                $('#modalTitle').text('Edit Profile Hotspot');
+                $('#modalProfile').modal('show');
+            });
+
+            // ADD ACTION
+            $('#btnAdd').click(() => {
+                $('#formProfile')[0].reset();
+                $('#oldName').val('');
+                $('#modalTitle').text('Tambah Profile Hotspot');
+                $('#modalProfile').modal('show');
+            });
+
+            // SAVE ACTION
+            $('#formProfile').submit(function(e) {
+                e.preventDefault();
+                $.post('/admin/hotspot/api/save-profile', $(this).serialize(), function(res) {
+                    if(res.success) {
+                        $('#modalProfile').modal('hide');
+                        table.ajax.reload();
+                    } else alert('Error: ' + res.message);
+                });
+            });
+
+            // DELETE ACTION
+            $(document).on('click', '.btn-delete', function() {
+                const name = $(this).data('name');
+                if(confirm(`Hapus profile ${name}?`)) {
+                    $.post('/admin/hotspot/api/delete-profile', { name }, function() { table.ajax.reload(); });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

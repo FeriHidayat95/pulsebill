@@ -1,0 +1,427 @@
+<%- include('../../partials/header') %>
+<body class="bg-[#0f172a] text-slate-300 font-sans antialiased selection:bg-blue-500 selection:text-white">
+
+<%- include('../../partials/admin-header') %>
+
+<%- include('../../partials/billing-sidebar', { page: 'invoices', settings: settings }) %>
+
+<main class="p-4 sm:ml-64 pt-20 min-h-screen">
+
+    <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+        <div>
+            <h1 class="text-3xl font-black text-white tracking-tighter uppercase leading-none text-shadow-xl">
+                Detail <span class="text-blue-500">Invoice</span>
+            </h1>
+            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-[4px] mt-2 italic">Informasi Lengkap Tagihan #<%= invoice.invoice_number %></p>
+        </div>
+        
+        <div class="flex flex-wrap gap-2">
+            <a href="/admin/billing/invoices" class="px-5 py-2.5 text-xs font-black text-slate-400 border border-slate-700 rounded-xl hover:bg-slate-800 hover:text-white transition-all uppercase tracking-widest">
+                <i class="bi bi-arrow-left me-2"></i> Kembali
+            </a>
+            <a href="/admin/billing/invoices/<%= invoice.id %>/edit" class="px-5 py-2.5 text-xs font-black text-amber-500 border border-amber-500/30 rounded-xl hover:bg-amber-600 hover:text-white transition-all uppercase tracking-widest">
+                <i class="bi bi-pencil-square me-2"></i> Edit
+            </a>
+            <a href="/admin/billing/invoices/<%= invoice.id %>/print" target="_blank" class="px-5 py-2.5 text-xs font-black text-white bg-blue-600 rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-500/30 transition-all uppercase tracking-widest">
+                <i class="bi bi-printer me-2"></i> Cetak
+            </a>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <div class="lg:col-span-8 space-y-6">
+            
+            <div class="bg-[#1e293b] border border-slate-700/60 rounded-3xl shadow-2xl overflow-hidden relative">
+                <div class="px-6 py-5 border-b border-slate-700 bg-[#111827]/50 flex justify-between items-center">
+                    <h3 class="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
+                        <i class="bi bi-info-circle text-blue-500"></i> Rincian Tagihan
+                    </h3>
+                    <span class="px-3 py-1 rounded-lg bg-slate-800 text-slate-400 text-[10px] font-mono font-bold border border-slate-700">#<%= invoice.id %></span>
+                </div>
+                
+                <div class="p-8">
+                    <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-6 border-b border-slate-700/50 pb-8">
+                        <div class="text-center md:text-left">
+                            <p class="text-[10px] font-black text-slate-500 uppercase tracking-[2px] mb-2">Status Pembayaran</p>
+                            <% if (invoice.status === 'paid') { %>
+                                <span class="inline-flex items-center px-4 py-2 rounded-full text-xs font-black bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase tracking-widest animate-pulse">
+                                    <i class="bi bi-check-circle-fill me-2"></i> LUNAS
+                                </span>
+                            <% } else { %>
+                                <% if (new Date(invoice.due_date) < new Date()) { %>
+                                    <span class="inline-flex items-center px-4 py-2 rounded-full text-xs font-black bg-red-500/10 text-red-500 border border-red-500/20 uppercase tracking-widest">
+                                        <i class="bi bi-exclamation-triangle-fill me-2"></i> TERLAMBAT
+                                    </span>
+                                <% } else { %>
+                                    <span class="inline-flex items-center px-4 py-2 rounded-full text-xs font-black bg-amber-500/10 text-amber-400 border border-amber-500/20 uppercase tracking-widest">
+                                        <i class="bi bi-clock-history me-2"></i> BELUM LUNAS
+                                    </span>
+                                <% } %>
+                            <% } %>
+                        </div>
+                        <div class="text-center md:text-right">
+                            <p class="text-[10px] font-black text-slate-500 uppercase tracking-[2px] mb-1">Total Tagihan</p>
+                            <h2 class="text-4xl font-black text-white font-mono tracking-tighter">Rp <%= parseFloat(invoice.amount).toLocaleString('id-ID') %></h2>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="bg-[#111827] rounded-3xl p-6 border border-slate-700/50 group hover:border-blue-500/30 transition-all">
+                            <h6 class="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                                <i class="bi bi-person-badge"></i> Informasi Pelanggan
+                            </h6>
+                            <table class="w-full text-xs">
+                                <tr class="border-b border-slate-800"><td class="py-2 text-slate-500">Nama:</td><td class="py-2 font-black text-white text-right"><%= invoice.customer_name %></td></tr>
+                                <tr class="border-b border-slate-800"><td class="py-2 text-slate-500">Username:</td><td class="py-2 font-mono text-slate-300 text-right"><%= invoice.customer_username %></td></tr>
+                                <tr class="border-b border-slate-800"><td class="py-2 text-slate-500">Telepon:</td><td class="py-2 text-slate-300 text-right"><%= invoice.customer_phone %></td></tr>
+                                <tr><td class="py-2 text-slate-500">Alamat:</td><td class="py-2 text-[10px] text-slate-400 text-right leading-tight"><%= invoice.customer_address || '-' %></td></tr>
+                            </table>
+                        </div>
+                        <div class="bg-[#111827] rounded-3xl p-6 border border-slate-700/50 group hover:border-amber-500/30 transition-all">
+                            <h6 class="text-[10px] font-black text-amber-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                                <i class="bi bi-box-seam"></i> Rincian Layanan
+                            </h6>
+                            <table class="w-full text-xs">
+                                <tr class="border-b border-slate-800"><td class="py-2 text-slate-500">Paket:</td><td class="py-2 font-black text-white text-right uppercase"><%= invoice.package_name %></td></tr>
+                                <tr class="border-b border-slate-800"><td class="py-2 text-slate-500">Kapasitas:</td><td class="py-2 text-slate-300 text-right"><%= invoice.package_speed || '-' %></td></tr>
+                                <tr class="border-b border-slate-800"><td class="py-2 text-slate-500">Terbit:</td><td class="py-2 text-slate-300 text-right"><%= new Date(invoice.created_at).toLocaleDateString('id-ID') %></td></tr>
+                                <tr><td class="py-2 text-slate-500">Jatuh Tempo:</td><td class="py-2 font-black text-red-500 text-right"><%= new Date(invoice.due_date).toLocaleDateString('id-ID') %></td></tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <% if(invoice.notes) { %>
+                        <div class="mt-8 p-4 bg-red-500/5 border border-red-500/20 rounded-2xl">
+                            <p class="text-[9px] font-black text-red-500 uppercase tracking-[2px] mb-1 italic">Catatan Internal:</p>
+                            <p class="text-xs text-slate-400"><%= invoice.notes %></p>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+
+            <% if (invoice.status === 'unpaid') { %>
+            <div class="bg-[#1e293b] border border-blue-500/30 rounded-3xl shadow-2xl overflow-hidden group">
+                <div class="px-6 py-4 border-b border-slate-700 bg-blue-600/10 flex justify-between items-center">
+                    <h3 class="text-xs font-black text-blue-400 uppercase tracking-widest flex items-center gap-2">
+                        <i class="bi bi-credit-card-2-front"></i> Pembayaran Online (Gateway)
+                    </h3>
+                    <div id="gatewayStatus" class="flex gap-1">
+                        <span class="animate-pulse text-[9px] text-slate-600 uppercase font-bold">Checking...</span>
+                    </div>
+                </div>
+                <div class="p-8">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <button onclick="createPayment('midtrans')" class="flex flex-col items-center justify-center p-6 bg-[#111827] border border-slate-700 rounded-2xl hover:border-blue-500 transition-all group/btn active:scale-95">
+                            <i class="bi bi-wallet2 text-3xl mb-3 text-slate-500 group-hover/btn:text-blue-500 group-hover/btn:scale-110 transition-all"></i>
+                            <span class="text-[11px] font-black uppercase tracking-widest text-slate-400 group-hover/btn:text-white">Midtrans</span>
+                        </button>
+                        <button onclick="createPayment('xendit')" class="flex flex-col items-center justify-center p-6 bg-[#111827] border border-slate-700 rounded-2xl hover:border-cyan-400 transition-all group/btn active:scale-95">
+                            <i class="bi bi-send text-3xl mb-3 text-slate-500 group-hover/btn:text-cyan-400 group-hover/btn:scale-110 transition-all"></i>
+                            <span class="text-[11px] font-black uppercase tracking-widest text-slate-400 group-hover/btn:text-white">Xendit</span>
+                        </button>
+                        <button onclick="createPayment('tripay')" class="flex flex-col items-center justify-center p-6 bg-[#111827] border border-slate-700 rounded-2xl hover:border-amber-500 transition-all group/btn active:scale-95">
+                            <i class="bi bi-bag-check text-3xl mb-3 text-slate-500 group-hover/btn:text-amber-500 group-hover/btn:scale-110 transition-all"></i>
+                            <span class="text-[11px] font-black uppercase tracking-widest text-slate-400 group-hover/btn:text-white">Tripay</span>
+                        </button>
+                    </div>
+
+                    <div id="paymentResult" class="hidden mt-6 bg-[#111827] border border-emerald-500/30 rounded-2xl p-6 shadow-xl animate-fade-in">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+                                <i class="bi bi-check2-circle text-xl"></i>
+                            </div>
+                            <h6 class="text-sm font-black text-white uppercase tracking-widest">Link Pembayaran Siap!</h6>
+                        </div>
+                        <div class="flex gap-2">
+                            <input type="text" id="paymentUrl" readonly class="w-full bg-[#0f172a] border border-slate-700 text-blue-400 text-xs rounded-xl p-3 font-mono font-bold truncate">
+                            <button onclick="copyPaymentUrl()" class="px-4 bg-slate-800 hover:bg-slate-700 text-white rounded-xl transition-all border border-slate-700 active:scale-90"><i class="bi bi-clipboard"></i></button>
+                        </div>
+                        <a id="paymentLinkBtn" href="#" target="_blank" class="block w-full mt-4 py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black text-center rounded-xl uppercase tracking-widest shadow-lg shadow-emerald-500/20">Buka Checkout</a>
+                    </div>
+                </div>
+            </div>
+            <% } %>
+
+            <div class="bg-[#1e293b] border border-slate-700/60 rounded-3xl shadow-2xl overflow-hidden">
+                <div class="px-6 py-4 border-b border-slate-700 bg-[#111827]/50">
+                    <h3 class="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
+                        <i class="bi bi-clock-history text-emerald-500"></i> Log Transaksi Online
+                    </h3>
+                </div>
+                <div id="paymentTransactions" class="min-h-[100px]">
+                    <div class="flex flex-col items-center justify-center py-10 text-slate-600">
+                        <div class="animate-spin w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full mb-3"></div>
+                        <span class="text-[10px] font-black uppercase tracking-widest">Sinkronisasi Data Transaksi...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="lg:col-span-4 space-y-6">
+            
+            <% if (invoice.status === 'unpaid') { %>
+            <div class="bg-[#1e293b] border border-slate-700/60 rounded-3xl shadow-2xl p-8 group hover:border-emerald-500/30 transition-all">
+                <h3 class="text-xs font-black text-white uppercase tracking-widest mb-6 flex items-center gap-2">
+                    <i class="bi bi-cash-stack text-emerald-500 text-lg"></i> Tandai Lunas Manual
+                </h3>
+                <form id="markAsPaidForm" class="space-y-4">
+                    <input type="hidden" name="invoice_id" value="<%= invoice.id %>">
+                    <div>
+                        <label class="block mb-2 text-[10px] font-black text-slate-500 uppercase tracking-widest">Pilih Metode</label>
+                        <select name="payment_method" required class="w-full bg-[#111827] border border-slate-700 text-white text-sm rounded-xl p-3 font-bold uppercase tracking-widest focus:ring-emerald-500 focus:border-emerald-500 appearance-none">
+                            <option value="cash">Tunai (Cash)</option>
+                            <option value="transfer">Transfer Bank</option>
+                            <option value="other">Lainnya</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block mb-2 text-[10px] font-black text-slate-500 uppercase tracking-widest">Catatan</label>
+                        <textarea name="notes" rows="2" placeholder="Contoh: Diterima oleh Admin" class="w-full bg-[#111827] border border-slate-700 text-white text-xs rounded-xl p-3 focus:ring-emerald-500"></textarea>
+                    </div>
+                    <button type="submit" class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black rounded-xl transition-all uppercase tracking-widest shadow-lg shadow-emerald-500/20 active:scale-95">
+                        Konfirmasi Lunas
+                    </button>
+                </form>
+                <p class="text-[9px] text-center text-slate-600 font-bold mt-4 uppercase italic">Gunakan ini jika pelanggan membayar langsung via admin.</p>
+            </div>
+            <% } %>
+
+            <div class="bg-[#1e293b] border border-slate-700/60 rounded-3xl shadow-2xl p-8 group hover:border-red-500/30 transition-all">
+                <h3 class="text-xs font-black text-white uppercase tracking-widest mb-6 flex items-center gap-2">
+                    <i class="bi bi-router text-red-500 text-lg"></i> Kontrol Layanan (Radius)
+                </h3>
+                <div class="grid grid-cols-1 gap-3">
+                    <button id="btnIsolir" onclick="isolirManual()" class="group flex items-center justify-center py-4 px-4 bg-red-600 hover:bg-red-700 text-white text-[10px] font-black rounded-xl transition-all uppercase tracking-widest shadow-lg shadow-red-900/20 active:scale-95">
+                        <i class="bi bi-slash-circle text-lg mr-3 group-hover:rotate-90 transition-transform"></i> Isolir (Suspend)
+                    </button>
+                    <button id="btnRestore" onclick="restoreManual()" class="group flex items-center justify-center py-4 px-4 bg-[#111827] border border-emerald-500/50 text-emerald-400 hover:bg-emerald-600 hover:text-white text-[10px] font-black rounded-xl transition-all uppercase tracking-widest active:scale-95">
+                        <i class="bi bi-arrow-counterclockwise text-lg mr-3 group-hover:-rotate-180 transition-transform duration-500"></i> Restore (Aktif)
+                    </button>
+                </div>
+                <div class="mt-6 p-4 bg-[#0f172a] rounded-2xl border border-slate-800">
+                    <p class="text-[9px] text-slate-500 font-bold leading-relaxed uppercase">
+                        <i class="bi bi-exclamation-triangle-fill text-amber-500 mr-1"></i> Aksi ini akan mengubah Profile pelanggan di MikroTik secara langsung.
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="toast-container" class="fixed top-24 right-5 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
+
+    <div id="invoiceMeta" class="hidden" data-id="<%= invoice.id %>" data-amount="<%= invoice.amount %>"></div>
+
+</main>
+
+<%- include('../../partials/footer') %>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<script>
+    const INV_ID = $('#invoiceMeta').data('id');
+    const INV_AMT = $('#invoiceMeta').data('amount');
+
+    // --- Batman Toast Function ---
+    function showToast(type, title, message) {
+        const colors = {
+            success: 'bg-emerald-600 border-emerald-500',
+            error: 'bg-red-600 border-red-500',
+            warning: 'bg-amber-600 border-amber-500'
+        };
+        const icons = {
+            success: 'bi-check-circle-fill',
+            error: 'bi-exclamation-triangle-fill',
+            warning: 'bi-info-circle-fill'
+        };
+        const id = 'toast-' + Math.random().toString(36).substr(2, 9);
+        const html = `
+            <div id="${id}" class="toast-item flex items-center w-full max-w-xs p-4 text-white ${colors[type] || 'bg-slate-800'} rounded-2xl shadow-2xl border transition-all duration-500 pointer-events-auto transform translate-x-0" role="alert">
+                <div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-white rounded-lg bg-white/20">
+                    <i class="bi ${icons[type] || 'bi-bell'}"></i>
+                </div>
+                <div class="ml-3">
+                    <span class="text-[10px] font-black uppercase tracking-widest opacity-70 block">${title}</span>
+                    <div class="text-xs font-bold">${message}</div>
+                </div>
+                <button type="button" class="ml-auto p-1.5 inline-flex h-8 w-8 text-white hover:text-slate-200" onclick="this.parentElement.remove()">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>`;
+        $('#toast-container').append(html);
+        setTimeout(() => {
+            $(`#${id}`).addClass('translate-x-full opacity-0');
+            setTimeout(() => $(`#${id}`).remove(), 500);
+        }, 5000);
+    }
+
+    // --- 1. Load Status Gateway ---
+    async function loadGatewayStatus() {
+        try {
+            const res = await fetch('/payment/gateway-status');
+            const data = await res.json();
+            if(data.success) {
+                let html = '';
+                Object.keys(data.data).forEach(k => {
+                    const gw = data.data[k];
+                    const color = gw.enabled ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-slate-800 text-slate-500 border-slate-700';
+                    html += `<span class="px-2 py-0.5 rounded text-[8px] font-black border ${color} uppercase">${k}</span>`;
+                });
+                $('#gatewayStatus').html(html);
+            }
+        } catch(e) { $('#gatewayStatus').html('<span class="text-[9px] text-slate-700">Offline</span>'); }
+    }
+
+    // --- 2. Load Riwayat Transaksi Online ---
+    async function loadTransactions() {
+        try {
+            const res = await fetch(`/payment/transactions?invoice_id=${INV_ID}`);
+            const data = await res.json();
+            if(data.success && data.data.length > 0) {
+                let html = `
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-[11px]">
+                        <thead class="text-[9px] text-slate-500 uppercase bg-[#111827]/30 border-b border-slate-800">
+                            <tr><th class="px-6 py-3">Gateway</th><th class="px-6 py-3">Status</th><th class="px-6 py-3">Jumlah</th><th class="px-6 py-3">Tanggal</th></tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800/50">`;
+                data.data.forEach(t => {
+                    const statusColors = {
+                        settlement: 'bg-emerald-500/10 text-emerald-400', PAID: 'bg-emerald-500/10 text-emerald-400',
+                        pending: 'bg-amber-500/10 text-amber-400',
+                        expire: 'bg-red-500/10 text-red-400'
+                    };
+                    const colorClass = statusColors[t.status] || 'bg-slate-700 text-slate-400';
+                    html += `<tr>
+                        <td class="px-6 py-4 font-bold text-slate-300 uppercase">${t.gateway}</td>
+                        <td class="px-6 py-4"><span class="px-2 py-0.5 rounded-full text-[9px] font-black border border-current uppercase ${colorClass}">${t.status}</span></td>
+                        <td class="px-6 py-4 font-mono font-bold text-white">Rp ${parseFloat(t.amount).toLocaleString('id-ID')}</td>
+                        <td class="px-6 py-4 text-slate-500 font-bold">${new Date(t.created_at).toLocaleString('id-ID')}</td>
+                    </tr>`;
+                });
+                html += '</tbody></table></div>';
+                $('#paymentTransactions').html(html);
+            } else {
+                $('#paymentTransactions').html('<div class="flex flex-col items-center justify-center py-10 opacity-30"><i class="bi bi-inbox text-3xl"></i><span class="text-[10px] font-black uppercase mt-2">Belum ada transaksi online</span></div>');
+            }
+        } catch(e) { $('#paymentTransactions').html('<div class="text-center text-red-500 text-[10px] py-10">Gagal memuat data log.</div>'); }
+    }
+
+    // --- 3. Buat Link Pembayaran Online ---
+    async function createPayment(gateway) {
+        const btn = event.currentTarget;
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="bi bi-arrow-repeat animate-spin text-2xl"></i>';
+    
+        try {
+            const response = await fetch(`/admin/billing/invoices/${INV_ID}/generate-tripay`, { method: 'POST' });
+            const res = await response.json();
+    
+            if (res.success) {
+                document.getElementById('paymentResult').classList.remove('hidden');
+                document.getElementById('paymentUrl').value = res.pay_url;
+                document.getElementById('paymentLinkBtn').href = res.pay_url;
+                showToast('success', 'GENERATED', `Link Pembayaran ${gateway.toUpperCase()} berhasil dibuat!`);
+            } else {
+                showToast('error', 'FAILED', res.message);
+            }
+        } catch (e) {
+            showToast('error', 'SYSTEM ERROR', 'Gagal menghubungi server gateway.');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
+    }
+    
+    function copyPaymentUrl() {
+        const copyText = document.getElementById("paymentUrl");
+        if(!copyText.value) return;
+        copyText.select();
+        document.execCommand("copy");
+        showToast('success', 'COPIED', 'Link pembayaran disalin ke clipboard.');
+    }
+
+    // --- 4. Pembayaran Manual (Form) - FIXED BY GEMINI ---
+    $('#markAsPaidForm').submit(function(e) {
+        e.preventDefault();
+        const btn = $(this).find('button[type="submit"]');
+        const originalText = btn.text();
+        btn.prop('disabled', true).text('MEMPROSES...');
+    
+        // KABEL SUDAH DIPINDAH KE JALUR SULTAN (payment.js)
+        $.post('/payment/manual-process', $(this).serialize())
+        .done(res => {
+            if(res.success) {
+                showToast('success', 'LUNAS', 'Pembayaran manual berhasil diverifikasi!');
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                showToast('error', 'GAGAL', res.message || 'Terjadi kesalahan sistem');
+                btn.prop('disabled', false).text(originalText);
+            }
+        })
+        .fail((xhr) => {
+            // Tangkap pesan error dari server jika ada
+            const errMsg = xhr.responseJSON?.message || 'Gagal lapor ke database.';
+            showToast('error', 'SERVER ERROR', errMsg);
+            btn.prop('disabled', false).text(originalText);
+        });
+    });
+    
+    // --- 5. Kontrol Layanan (ISOLIR & RESTORE) ---
+    async function isolirManual() {
+        if(!confirm("?? PERINGATAN: Isolir layanan pelanggan ini?")) return;
+        callServiceAPI('isolir');
+    }
+    async function restoreManual() {
+        if(!confirm("? AKTIFKAN kembali layanan pelanggan ini?")) return;
+        callServiceAPI('restore');
+    }
+
+    async function callServiceAPI(action) {
+        const btnId = action === 'isolir' ? '#btnIsolir' : '#btnRestore';
+        const $btn = $(btnId);
+        const originalHtml = $btn.html();
+        
+        $btn.prop('disabled', true).html('<i class="bi bi-arrow-repeat animate-spin text-lg mr-2"></i> MEMPROSES...');
+        
+        try {
+            const res = await fetch(`/admin/billing/invoices/${INV_ID}/${action}`, { 
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ reason: 'Manual via Admin Batman UI' })
+            });
+            const result = await res.json();
+            if(result.success) {
+                showToast('success', 'Radius Updated', result.message);
+                setTimeout(() => location.reload(), 1500); 
+            } else {
+                showToast('error', 'Action Failed', result.message);
+                $btn.prop('disabled', false).html(originalHtml);
+            }
+        } catch(e) { 
+            showToast('error', 'Connection Error', 'Gagal memproses ke MikroTik/Radius.');
+            $btn.prop('disabled', false).html(originalHtml);
+        }
+    }
+
+    $(document).ready(() => {
+        loadGatewayStatus();
+        loadTransactions();
+    });
+</script>
+
+<style>
+    @keyframes fade-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-fade-in { animation: fade-in 0.4s ease-out forwards; }
+    .text-shadow-xl { text-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #3b82f6; }
+</style>
+
+</body>
+</html>

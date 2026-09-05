@@ -1,0 +1,238 @@
+<nav class="navbar navbar-expand-md navbar-dark d-md-none mobile-navbar">
+    <div class="container-fluid">
+        <div class="d-flex align-items-center justify-content-between w-100">
+            <div class="d-flex align-items-center">
+                <button class="btn btn-link text-white p-0 me-3" type="button" id="sidebarToggle">
+                    <i class="bi bi-list" style="font-size: 1.5rem;"></i>
+                </button>
+                <img src="/img/<%= typeof settings !== 'undefined' && settings.logo_filename ? settings.logo_filename : 'logo.png' %>?ts=<%= Date.now() %>" alt="Logo" style="height: 35px; border-radius: 4px;">
+                <span class="navbar-brand ms-2 mb-0 font-black tracking-tighter">ADMIN PANEL</span>
+            </div>
+            
+            <button id="globalRadarBtnMobile" class="btn btn-link p-0 text-decoration-none" onclick="toggleGlobalRadar()">
+                <i class="bi bi-bell-slash-fill text-red-500" style="font-size: 1.3rem;"></i>
+            </button>
+        </div>
+    </div>
+</nav>
+
+<div class="sidebar-overlay d-md-none" id="sidebarOverlay"></div>
+
+<nav class="col-md-2 sidebar d-flex flex-column" id="adminSidebar" style="background-color: #111827 !important; border-right: 1px solid #374151;">
+    <div class="d-md-none text-end p-3">
+        <button class="btn btn-link text-white p-0" id="sidebarClose">
+            <i class="bi bi-x" style="font-size: 1.5rem;"></i>
+        </button>
+    </div>
+    
+    <div class="sidebar-header mb-4 text-center" style="border-bottom: 1px solid #374151;">
+        <div class="d-flex align-items-center justify-content-center">
+            <img id="logoImage" src="/img/<%= typeof settings !== 'undefined' && settings.logo_filename ? settings.logo_filename : 'logo.png' %>?v=<%= new Date().getTime() %>" alt="Logo" style="max-width:130px;max-height:60px; border-radius: 8px; filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.2));">
+            
+            <button id="globalRadarBtnDesktop" class="btn btn-link p-0 text-decoration-none ms-2" onclick="toggleGlobalRadar()" title="Klik untuk Alarm">
+                <i class="bi bi-bell-slash-fill text-red-500" style="font-size: 1.4rem;"></i>
+            </button>
+        </div>
+    </div>
+    
+    <div class="px-3 overflow-y-auto flex-grow no-scrollbar">
+        <a href="/admin/dashboard" class="<%= typeof page !== 'undefined' && page === 'dashboard' ? 'active' : '' %>">
+            <i class="bi bi-house-door-fill"></i> Dashboard
+        </a>
+        <a href="/admin/billing/dashboard" class="<%= typeof page !== 'undefined' && page === 'billing' ? 'active' : '' %>">
+            <i class="bi bi-receipt-cutoff"></i> Billing & Kasir
+        </a>
+        <a href="/admin/genieacs" class="<%= typeof page !== 'undefined' && page === 'genieacs' ? 'active' : '' %>">
+            <i class="bi bi-hdd-network-fill"></i> Device Manager (ACS)
+        </a>
+        <div class="text-[10px] font-black text-gray-500 uppercase tracking-widest px-4 mt-4 mb-2">RADIUS SYSTEM</div>
+        <a href="/admin/mikrotik" class="<%= typeof page !== 'undefined' && page === 'mikrotik' ? 'active' : '' %>">
+            <i class="bi bi-router-fill text-blue-400"></i> Data PPPoE
+        </a>
+        <a href="/admin/mikrotik/profiles" class="<%= typeof page !== 'undefined' && page === 'mikrotik-profiles' ? 'active' : '' %>">
+            <i class="bi bi-person-badge-fill"></i> Profile PPPoE
+        </a>
+        <a href="/admin/mikrotik/hotspot-profiles" class="<%= typeof page !== 'undefined' && page === 'hotspot-profiles' ? 'active' : '' %>">
+            <i class="bi bi-wifi text-yellow-500"></i> Profile Hotspot
+        </a>
+        <a href="/admin/hotspot" class="<%= typeof page !== 'undefined' && page === 'hotspot' ? 'active' : '' %>">
+            <i class="bi bi-broadcast-pin"></i> Monitoring Hotspot
+        </a>
+        <a href="/admin/hotspot/voucher" class="<%= typeof page !== 'undefined' && page === 'voucher' ? 'active' : '' %>">
+            <i class="bi bi-ticket-perforated-fill"></i> Voucher Hotspot
+        </a>
+        
+        <div class="text-[10px] font-black text-gray-500 uppercase tracking-widest px-4 mt-4 mb-2">INFRASTRUCTURE</div>
+        <a href="/admin/radius" class="<%= typeof page !== 'undefined' && page === 'radius' ? 'active' : '' %>">
+            <i class="bi bi-shield-lock-fill"></i> RADIUS Server
+        </a>
+        <a href="/admin/nas" class="<%= typeof title !== 'undefined' && title === 'Manajemen NAS Radius' ? 'active' : '' %>">
+            <i class="bi bi-server"></i> Manajemen Router (NAS)
+        </a>
+        <a href="/admin/trouble" class="<%= typeof page !== 'undefined' && page === 'trouble' ? 'active' : '' %>">
+            <i class="bi bi-exclamation-octagon-fill"></i> Trouble Report
+        </a>
+        
+        <div class="text-[10px] font-black text-gray-500 uppercase tracking-widest px-4 mt-4 mb-2">SYSTEM</div>
+        <a href="/admin/setting" class="<%= typeof page !== 'undefined' && page === 'setting' ? 'active' : '' %>">
+            <i class="bi bi-gear-wide-connected"></i> Pengaturan
+        </a>
+        <a href="/admin/logs" class="<%= typeof page !== 'undefined' && page === 'logs' ? 'active' : '' %>">
+            <i class="bi bi-clock-history"></i> Log Kegiatan
+        </a>
+        <a href="#" id="restartMikrotikBtn" class="text-orange-400 hover:text-white">
+            <i class="bi bi-arrow-repeat"></i> REBOOT MIKROTIK
+        </a>
+    </div>
+
+    <div class="mt-auto p-3">
+        <a href="/admin/logout" class="bg-red-900/30 text-red-400 hover:bg-red-600 hover:text-white rounded-xl border border-red-900/50 flex justify-center py-2.5 font-black text-xs transition-all">
+            <i class="bi bi-box-arrow-right me-2"></i> KELUAR SISTEM
+        </a>
+    </div>
+</nav>
+
+<style>
+/* PAKSA CSS DARK UNTUK SIDEBAR */
+.mobile-navbar { background: #111827 !important; border-bottom: 1px solid #374151; }
+.sidebar { background: #111827 !important; color: #d1d5db !important; }
+
+.sidebar a { 
+    color: #9ca3af; 
+    text-decoration: none; 
+    display: flex; 
+    align-items: center;
+    padding: 10px 20px; 
+    border-radius: 12px; 
+    margin: 4px 10px; 
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.2s ease; 
+}
+
+.sidebar a i { font-size: 1.1rem; margin-right: 12px; width: 20px; text-align: center; }
+
+/* Menu Aktif & Hover */
+.sidebar a.active { 
+    background: #2563eb !important; 
+    color: #ffffff !important; 
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.sidebar a:hover:not(.active) { 
+    background: #1f2937; 
+    color: #ffffff; 
+    transform: translateX(5px);
+}
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
+/* Animasi Lonceng Radar */
+@keyframes ring {
+    0% { transform: rotate(0); }
+    10% { transform: rotate(30deg); }
+    30% { transform: rotate(-28deg); }
+    50% { transform: rotate(34deg); }
+    70% { transform: rotate(-32deg); }
+    90% { transform: rotate(30deg); }
+    100% { transform: rotate(0); }
+}
+.ringing { animation: ring 1s infinite ease-in-out; }
+.text-neon-green { color: #00ff00 !important; text-shadow: 0 0 10px #00ff00; }
+
+@media (max-width: 767.98px) {
+    .sidebar { width: 280px; transform: translateX(-100%); position: fixed; height: 100vh; top: 0; left: 0; z-index: 1050; transition: transform 0.3s; }
+    .sidebar.show { transform: translateX(0); }
+}
+</style>
+
+<script>
+    // Logic JS sama seperti aslinya, hanya merapikan pemanggilan
+    document.addEventListener('DOMContentLoaded', function() {
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebarClose = document.getElementById('sidebarClose');
+        const sidebar = document.getElementById('adminSidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+
+        if (sidebarToggle) {
+            sidebarToggle.addEventListener('click', () => {
+                sidebar.classList.add('show');
+                overlay.classList.add('show');
+            });
+        }
+        
+        function closeSidebar() {
+            sidebar.classList.remove('show');
+            overlay.classList.remove('show');
+        }
+
+        if (sidebarClose) sidebarClose.addEventListener('click', closeSidebar);
+        if (overlay) overlay.addEventListener('click', closeSidebar);
+
+        // Radar Alarm System (Cerewet Mode)
+        const notificationSound = new Audio('/sounds/alert.mp3'); 
+        let isRadarOn = (localStorage.getItem('globalRadarStatus') === 'ON');
+        let radarInterval = null;
+        let lastSoundTime = 0;
+        const CEREWET_INTERVAL = 60000;
+
+        window.toggleGlobalRadar = function() {
+            isRadarOn = !isRadarOn;
+            localStorage.setItem('globalRadarStatus', isRadarOn ? 'ON' : 'OFF');
+            updateBellUI(isRadarOn);
+            if(isRadarOn) {
+                notificationSound.play().catch(e => console.log("Klik dulu bos"));
+                startRadar();
+            } else {
+                stopRadar();
+            }
+        }
+
+        function updateBellUI(isOn) {
+            const icons = document.querySelectorAll('#globalRadarBtnDesktop i, #globalRadarBtnMobile i');
+            icons.forEach(icon => {
+                if(isOn) {
+                    icon.className = 'bi bi-bell-fill text-neon-green';
+                } else {
+                    icon.className = 'bi bi-bell-slash-fill text-red-500';
+                    icon.classList.remove('ringing');
+                }
+            });
+        }
+
+        async function checkNewTickets() {
+            if (!isRadarOn) return;
+            try {
+                const [resTrouble, resReg] = await Promise.all([
+                    fetch('/admin/trouble/api/unresolved-count').then(r => r.json()),
+                    fetch('/admin/pendaftaran/api/check-pending').then(r => r.json())
+                ]);
+                const total = (resTrouble.count || 0) + (resReg.count || 0);
+                const icons = document.querySelectorAll('#globalRadarBtnDesktop i, #globalRadarBtnMobile i');
+                
+                if (total > 0) {
+                    icons.forEach(i => i.classList.add('ringing'));
+                    if (Date.now() - lastSoundTime > CEREWET_INTERVAL) {
+                        notificationSound.play().catch(e => {});
+                        lastSoundTime = Date.now();
+                    }
+                } else {
+                    icons.forEach(i => i.classList.remove('ringing'));
+                }
+            } catch (e) {}
+        }
+
+        function startRadar() { checkNewTickets(); radarInterval = setInterval(checkNewTickets, 15000); }
+        function stopRadar() { clearInterval(radarInterval); }
+
+        if(isRadarOn) { updateBellUI(true); startRadar(); }
+
+        // Restart Mikrotik
+        document.getElementById('restartMikrotikBtn')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            if(confirm('Reboot Mikrotik Sekarang?')) {
+                fetch('/admin/mikrotik/restart', {method:'POST'}).then(r => r.json()).then(d => alert(d.message));
+            }
+        });
+    });
+</script>

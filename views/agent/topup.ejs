@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topup Saldo - <%= agent.name %></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body { background: #f8f9fa; font-family: 'Segoe UI', sans-serif; }
+        .card { border: none; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        /* Gradasi Header disamakan dengan Invoice */
+        .topup-header { background: linear-gradient(135deg, #0d6efd 0%, #0043a8 100%); border-radius: 12px 12px 0 0; }
+        .status-badge { font-size: 0.85rem; padding: 0.4rem 0.8rem; border-radius: 50px; font-weight: 600; }
+        .nominal-btn { transition: all 0.2s; border: 2px solid #eee; }
+        .nominal-btn:hover { border-color: #0d6efd; background: #f0f7ff; }
+        .btn-check:checked + .nominal-btn { border-color: #0d6efd; background: #0d6efd; color: white; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-dark bg-primary mb-4 shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/agent/dashboard">
+                <i class="bi bi-shop me-2"></i> PORTAL AGEN
+            </a>
+            <span class="navbar-text text-white small">Saldo: Rp <%= parseInt(agent.balance).toLocaleString('id-ID') %></span>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-12 d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="fw-bold mb-0">Isi Saldo</h2>
+                    <p class="text-muted">Topup otomatis via Tripay Gateway</p>
+                </div>
+                <a href="/agent/dashboard" class="btn btn-outline-primary">
+                    <i class="bi bi-arrow-left"></i> Dashboard
+                </a>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card mb-4">
+                    <div class="card-header topup-header text-white py-3">
+                        <h5 class="mb-0"><i class="bi bi-wallet2 me-2"></i> Buat Pesanan Topup</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <form action="/agent/topup/process" method="POST">
+                            <label class="fw-bold mb-3">Pilih Nominal Topup:</label>
+                            <div class="row g-3 mb-4">
+                                <% [20000, 50000, 100000, 200000, 500000].forEach(amt => { %>
+                                <div class="col-6 col-md-4">
+                                    <input type="radio" class="btn-check" name="amount" id="amt_<%= amt %>" value="<%= amt %>" <%= amt === 50000 ? 'checked' : '' %>>
+                                    <label class="btn btn-outline-light w-100 py-3 nominal-btn text-dark fw-bold" for="amt_<%= amt %>">
+                                        Rp <%= amt.toLocaleString('id-ID') %>
+                                    </label>
+                                </div>
+                                <% }) %>
+                            </div>
+
+                            <label class="fw-bold mb-3">Metode Pembayaran:</label>
+                            <div class="list-group mb-4">
+                                <label class="list-group-item d-flex align-items-center py-3">
+                                    <input class="form-check-input me-3" type="radio" name="method" value="QRIS" checked>
+                                    <div>
+                                        <i class="bi bi-qr-code-scan text-primary fs-4 me-2"></i>
+                                        <strong>QRIS (Otomatis)</strong>
+                                        <div class="small text-muted">Dukungan: Dana, OVO, GoPay, ShopeePay, LinkAja</div>
+                                    </div>
+                                </label>
+                                <label class="list-group-item d-flex align-items-center py-3">
+                                    <input class="form-check-input me-3" type="radio" name="method" value="BRIVA">
+                                    <div>
+                                        <i class="bi bi-bank text-info fs-4 me-2"></i>
+                                        <strong>BRI Virtual Account</strong>
+                                        <div class="small text-muted">Transfer ATM / M-Banking BRI (Otomatis 24 Jam)</div>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <div class="alert alert-info border-0 shadow-sm">
+                                <i class="bi bi-shield-check me-2"></i> Saldo akan bertambah otomatis dalam hitungan detik setelah pembayaran diverifikasi.
+                            </div>
+
+                            <button type="submit" class="btn btn-success btn-lg w-100 fw-bold py-3 shadow">
+                                <i class="bi bi-cart-check me-2"></i> BAYAR SEKARANG
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i> 10 Riwayat Terakhir</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="ps-4">Tanggal</th>
+                                        <th>Nominal</th>
+                                        <th>Referensi</th>
+                                        <th class="text-center">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% if(history.length === 0) { %>
+                                        <tr><td colspan="4" class="text-center py-4 text-muted">Belum ada transaksi</td></tr>
+                                    <% } %>
+                                    <% history.forEach(h => { %>
+                                    <tr>
+                                        <td class="ps-4">
+                                            <div class="fw-bold"><%= moment(h.created_at).format('DD/MM/YYYY') %></div>
+                                            <small class="text-muted"><%= moment(h.created_at).format('HH:mm') %> WIB</small>
+                                        </td>
+                                        <td class="fw-bold text-success">Rp <%= parseInt(h.amount).toLocaleString('id-ID') %></td>
+                                        <td><small class="text-muted"><%= h.proof_img || '-' %></small></td>
+                                        <td class="text-center">
+                                            <% if(h.status === 'approved') { %>
+                                                <span class="badge bg-success-subtle text-success status-badge">LUNAS</span>
+                                            <% } else if(h.status === 'pending') { %>
+                                                <span class="badge bg-warning-subtle text-warning status-badge">PENDING</span>
+                                            <% } else { %>
+                                                <span class="badge bg-danger-subtle text-danger status-badge">GAGAL</span>
+                                            <% } %>
+                                        </td>
+                                    </tr>
+                                    <% }) %>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card mb-4">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i> Info Akun</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-1"><strong>Nama Toko:</strong></p>
+                        <p class="text-primary fw-bold"><%= agent.name %></p>
+                        <hr>
+                        <p class="mb-1"><strong>Username:</strong></p>
+                        <p class="text-muted"><%= agent.username %></p>
+                        <hr>
+                        <p class="mb-0 text-center">
+                            <small class="text-muted">Butuh bantuan? Hubungi Admin</small><br>
+                            <a href="https://wa.me/628123456789" class="btn btn-sm btn-outline-success mt-2">
+                                <i class="bi bi-whatsapp"></i> Chat WhatsApp
+                            </a>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="card border-primary bg-primary-subtle">
+                    <div class="card-body">
+                        <h6 class="fw-bold"><i class="bi bi-lightbulb"></i> Tips Topup:</h6>
+                        <ul class="small mb-0 ps-3">
+                            <li>QRIS adalah metode tercepat.</li>
+                            <li>Gunakan nominal yang tersedia untuk proses instan.</li>
+                            <li>Pastikan jaringan stabil saat membayar.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="text-center mt-5 py-4 text-muted">
+        <small>&copy; 2026 <%= company_header %> - Agent Infrastructure</small>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

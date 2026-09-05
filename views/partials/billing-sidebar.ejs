@@ -1,0 +1,202 @@
+<aside id="logo-sidebar" class="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full bg-[#111827] border-r border-gray-800 sm:translate-x-0" aria-label="Sidebar">
+   <div class="h-full px-3 pb-4 overflow-y-auto bg-[#111827] overflow-x-hidden">
+      <ul class="space-y-1 font-medium">
+         
+         <li>
+            <a href="/admin/billing/dashboard" class="flex items-center p-2 rounded-xl group transition-all duration-200 
+               <%= (typeof page !== 'undefined' && page === 'dashboard') 
+               ? 'bg-[#1f2937] text-blue-400 border-l-4 border-blue-500 shadow-lg shadow-blue-500/10' 
+               : 'text-gray-400 hover:bg-gray-800 hover:text-white' %>">
+               <i class="bi bi-speedometer2 text-lg min-w-[24px] text-center"></i>
+               <span class="ms-3 text-sm font-bold sidebar-text whitespace-nowrap">Dashboard</span>
+            </a>
+         </li>
+
+         <% if (typeof user !== 'undefined' && user.role === 'superadmin') { %>
+         <li>
+            <a href="/admin/billing/customers" class="flex items-center p-2 rounded-xl group transition-all duration-200
+               <%= (typeof page !== 'undefined' && page === 'customers') 
+               ? 'bg-[#1f2937] text-blue-400 border-l-4 border-blue-500 shadow-lg shadow-blue-500/10' 
+               : 'text-gray-400 hover:bg-gray-800 hover:text-white' %>">
+               <i class="bi bi-people text-lg min-w-[24px] text-center"></i>
+               <span class="ms-3 text-sm font-bold sidebar-text whitespace-nowrap">Pelanggan</span>
+            </a>
+         </li>
+
+         <li>
+            <a href="/admin/billing/packages" class="flex items-center p-2 rounded-xl group transition-all duration-200
+               <%= (typeof page !== 'undefined' && page === 'packages') 
+               ? 'bg-[#1f2937] text-blue-400 border-l-4 border-blue-500 shadow-lg shadow-blue-500/10' 
+               : 'text-gray-400 hover:bg-gray-800 hover:text-white' %>">
+               <i class="bi bi-box-seam text-lg min-w-[24px] text-center"></i>
+               <span class="ms-3 text-sm font-bold sidebar-text whitespace-nowrap">Paket</span>
+            </a>
+         </li>
+         <% } %>
+
+         <li>
+            <a href="/admin/billing/invoices" class="flex items-center p-2 rounded-xl group transition-all duration-200
+               <%= (typeof page !== 'undefined' && page === 'invoices') 
+               ? 'bg-[#1f2937] text-blue-400 border-l-4 border-blue-500 shadow-lg shadow-blue-500/10' 
+               : 'text-gray-400 hover:bg-gray-800 hover:text-white' %>">
+               <i class="bi bi-receipt text-lg min-w-[24px] text-center"></i>
+               <span class="ms-3 text-sm font-bold sidebar-text whitespace-nowrap">Invoice</span>
+            </a>
+         </li>
+
+         <li>
+            <a href="/admin/billing/payments" class="flex items-center p-2 rounded-xl group transition-all duration-200
+               <%= (typeof page !== 'undefined' && page === 'payments') 
+               ? 'bg-[#1f2937] text-blue-400 border-l-4 border-blue-500 shadow-lg shadow-blue-500/10' 
+               : 'text-gray-400 hover:bg-gray-800 hover:text-white' %>">
+               <i class="bi bi-cash-coin text-lg min-w-[24px] text-center"></i>
+               <span class="ms-3 text-sm font-bold sidebar-text whitespace-nowrap">Transaksi</span>
+            </a>
+         </li>
+
+         <% if (typeof user !== 'undefined' && user.role === 'superadmin') { %>
+         <li>
+            <a href="/admin/billing/auto-invoice" class="flex items-center p-2 rounded-xl group transition-all duration-200
+               <%= (typeof page !== 'undefined' && page === 'auto-invoice') 
+               ? 'bg-[#1f2937] text-blue-400 border-l-4 border-blue-500 shadow-lg shadow-blue-500/10' 
+               : 'text-gray-400 hover:bg-gray-800 hover:text-white' %>">
+               <i class="bi bi-robot text-lg min-w-[24px] text-center"></i>
+               <span class="ms-3 text-sm font-bold sidebar-text whitespace-nowrap">Auto Invoice</span>
+            </a>
+         </li>
+         <% } %>
+
+         <li>
+            <a href="/admin/finance" class="flex items-center p-2 rounded-xl group transition-all duration-200 
+               <%= (typeof page !== 'undefined' && page === 'finance') 
+               ? 'bg-[#1f2937] text-blue-400 border-l-4 border-blue-500 shadow-lg shadow-blue-500/10' 
+               : 'text-gray-400 hover:bg-gray-800 hover:text-white' %>">
+               <i class="bi bi-wallet2 text-lg min-w-[24px] text-center"></i>
+               <span class="ms-3 text-sm font-bold sidebar-text whitespace-nowrap">Laporan & Komisi</span>
+            </a>
+         </li>
+
+         <li class="mt-2 border-t border-slate-700/50 pt-2">
+            <a href="/admin/billing/customer-nunggak" class="flex items-center p-2 rounded-xl group transition-all duration-200
+               <%= (typeof page !== 'undefined' && page === 'customer-nunggak') 
+               ? 'bg-[#1f2937] text-amber-400 border-l-4 border-amber-500 shadow-lg shadow-amber-500/10' 
+               : 'text-gray-400 hover:bg-gray-800 hover:text-amber-400' %>">
+               <i class="bi bi-exclamation-triangle text-lg min-w-[24px] text-center"></i>
+               <span class="ms-3 text-sm font-bold sidebar-text whitespace-nowrap">Customer Nunggak</span>
+            </a>
+         </li>
+
+         <% if (typeof user !== 'undefined' && user.role === 'superadmin') { %>
+         <div class="pt-4 mt-4 space-y-1 border-t border-gray-700">
+             <p class="px-2 text-xs font-black text-gray-500 uppercase tracking-widest mb-2 sidebar-text">Konfigurasi</p>
+             
+             <li>
+                <a href="/admin/billing/payment-settings" class="flex items-center p-2 rounded-xl group transition-all duration-200
+                   <%= (typeof page !== 'undefined' && page === 'payment-settings') 
+                   ? 'bg-[#1f2937] text-blue-400 border-l-4 border-blue-500' 
+                   : 'text-gray-400 hover:bg-gray-800 hover:text-white' %>">
+                   <i class="bi bi-credit-card-2-front text-lg min-w-[24px] text-center"></i>
+                   <span class="ms-3 text-sm font-bold sidebar-text whitespace-nowrap">Payment Settings</span>
+                </a>
+             </li>
+             
+             <li>
+                <a href="/admin/billing/whatsapp-settings" class="flex items-center p-2 rounded-xl group transition-all duration-200
+                   <%= (typeof page !== 'undefined' && page === 'whatsapp-settings') 
+                   ? 'bg-[#1f2937] text-blue-400 border-l-4 border-blue-500' 
+                   : 'text-gray-400 hover:bg-gray-800 hover:text-white' %>">
+                   <i class="bi bi-whatsapp text-lg min-w-[24px] text-center"></i>
+                   <span class="ms-3 text-sm font-bold sidebar-text whitespace-nowrap">WhatsApp Settings</span>
+                </a>
+             </li>
+
+             <li>
+                <a href="/admin/billing/service-suspension" class="flex items-center p-2 rounded-xl group transition-all duration-200
+                   <%= (typeof page !== 'undefined' && page === 'service-suspension') 
+                   ? 'bg-[#1f2937] text-blue-400 border-l-4 border-blue-500' 
+                   : 'text-gray-400 hover:bg-gray-800 hover:text-white' %>">
+                   <i class="bi bi-shield-lock text-lg min-w-[24px] text-center"></i>
+                   <span class="ms-3 text-sm font-bold sidebar-text whitespace-nowrap">Service Suspension</span>
+                </a>
+             </li>
+         </div>
+         <% } %>
+
+         <div class="pt-4 mt-4 space-y-1 border-t border-gray-700">
+             <p class="px-2 text-xs font-black text-gray-500 uppercase tracking-widest mb-2 sidebar-text">Mitra & Agen</p>
+
+             <% if (typeof user !== 'undefined' && user.role === 'superadmin') { %>
+             <li>
+                <a href="/admin/pendaftaran" class="flex items-center p-2 rounded-xl group transition-all duration-200
+                   <%= (typeof page !== 'undefined' && page === 'pendaftaran') 
+                   ? 'bg-[#1f2937] text-blue-400 border-l-4 border-blue-500' 
+                   : 'text-gray-400 hover:bg-gray-800 hover:text-white' %>">
+                   <i class="bi bi-person-lines-fill text-lg min-w-[24px] text-center"></i>
+                   <span class="ms-3 text-sm font-bold sidebar-text whitespace-nowrap">Pendaftaran & Pasukan</span>
+                </a>
+             </li>
+             <% } %>
+
+             <li>
+                <a href="/admin/agents" class="flex items-center p-2 rounded-xl group transition-all duration-200
+                   <%= (typeof page !== 'undefined' && page === 'agents') 
+                   ? 'bg-[#1f2937] text-blue-400 border-l-4 border-blue-500' 
+                   : 'text-gray-400 hover:bg-gray-800 hover:text-white' %>">
+                   <i class="bi bi-shop text-lg min-w-[24px] text-center"></i>
+                   <span class="ms-3 text-sm font-bold sidebar-text whitespace-nowrap">Agen & Reseller</span>
+                </a>
+             </li>
+         </div>
+
+         <li class="pt-4 mt-4 border-t border-gray-700">
+            <a href="/admin/dashboard" class="flex items-center p-2 text-red-400 rounded-xl hover:bg-red-500/10 group transition-all duration-200">
+               <i class="bi bi-arrow-left-circle-fill text-xl min-w-[24px] text-center group-hover:-translate-x-1 transition-transform"></i>
+               <span class="ms-3 text-sm font-black uppercase tracking-widest sidebar-text whitespace-nowrap">Kembali ke Admin</span>
+            </a>
+         </li>
+      </ul>
+   </div>
+</aside>
+
+<style>
+   /* Transisi Global Tetap Utuh */
+   #logo-sidebar { transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important; }
+   main, footer { transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important; }
+   #logo-sidebar a, #logo-sidebar button { overflow: hidden; white-space: nowrap; }
+   .sidebar-text, .chevron-icon { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); transform: translateX(0); opacity: 1; visibility: visible; }
+   
+   body.sidebar-mini #logo-sidebar { width: 5rem !important; }
+   body.sidebar-mini .sidebar-text, body.sidebar-mini .chevron-icon { opacity: 0; width: 0; margin-left: 0 !important; visibility: hidden; transform: translateX(-15px); }
+   body.sidebar-mini ul[id^="dropdown-"] { display: none !important; }
+   body.sidebar-mini #logo-sidebar a, body.sidebar-mini #logo-sidebar button { justify-content: center; padding-left: 0.5rem; padding-right: 0.5rem; }
+   
+   @media (min-width: 640px) {
+       body.sidebar-mini main, body.sidebar-mini footer { margin-left: 5rem !important; }
+   }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const toggleBtn = document.getElementById('btnToggleSidebar');
+    const body = document.body;
+
+    if (localStorage.getItem('miniSidebar') === 'true') {
+        body.classList.add('sidebar-mini');
+    }
+
+    if (toggleBtn) {
+        const newToggleBtn = toggleBtn.cloneNode(true);
+        toggleBtn.parentNode.replaceChild(newToggleBtn, toggleBtn);
+        
+        newToggleBtn.addEventListener('click', (e) => {
+            if (window.innerWidth >= 640) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                body.classList.toggle('sidebar-mini');
+                localStorage.setItem('miniSidebar', body.classList.contains('sidebar-mini'));
+            }
+        });
+    }
+});
+</script>

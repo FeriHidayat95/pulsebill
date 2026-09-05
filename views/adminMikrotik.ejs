@@ -1,0 +1,277 @@
+<%- include('partials/header') %>
+<%- include('partials/admin-header') %>
+<%- include('partials/admin-sidebar', { page: 'mikrotik' }) %>
+
+<main class="p-4 sm:ml-64 pt-20 bg-gray-900 min-h-screen text-gray-300">
+    
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 border-b border-gray-800 pb-4">
+        <div>
+            <h1 class="text-2xl font-black text-white tracking-tight">DATA PELANGGAN PPPoE</h1>
+            <p class="text-sm text-gray-400 font-bold uppercase tracking-wider">Mode Gelap (Dark Monitoring)</p>
+        </div>
+        
+        <div class="w-full md:w-72">
+            <label class="block mb-1 text-[10px] font-black text-gray-500 uppercase">Pilih Router / NAS</label>
+            <select class="bg-gray-800 border border-gray-700 text-white text-sm rounded-xl focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 font-bold shadow-lg" id="nasSelector" onchange="window.location.href='?nasId=' + this.value">
+                <% if(nasList && nasList.length > 0) { %>
+                    <% nasList.forEach(function(nas) { %>
+                        <option value="<%= nas.id %>" <%= selectedNasId == nas.id ? 'selected' : '' %>>
+                            <%= nas.shortname %> (<%= nas.nasname %>)
+                        </option>
+                    <% }) %>
+                <% } else { %>
+                    <option disabled>Tidak ada Router</option>
+                <% } %>
+            </select>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div class="p-5 bg-gray-800 border border-gray-700 rounded-2xl shadow-lg flex items-center justify-between group hover:border-blue-500/50 transition-all">
+            <div>
+                <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest">Total User</p>
+                <p class="text-3xl font-black text-white"><%= users.length %></p>
+            </div>
+            <div class="w-12 h-12 bg-gray-700 rounded-xl flex items-center justify-center text-blue-400 shadow-inner">
+                <i class="bi bi-people-fill text-2xl"></i>
+            </div>
+        </div>
+        <div class="p-5 bg-gray-800 border border-gray-700 rounded-2xl shadow-lg flex items-center justify-between border-l-4 border-l-green-500">
+            <div>
+                <p class="text-[10px] font-black text-green-400 uppercase tracking-widest">Online</p>
+                <p class="text-3xl font-black text-white"><%= users.filter(u => u.active).length %></p>
+            </div>
+            <div class="w-12 h-12 bg-gray-700 rounded-xl flex items-center justify-center text-green-400 shadow-inner">
+                <i class="bi bi-wifi text-2xl animate-pulse"></i>
+            </div>
+        </div>
+        <div class="p-5 bg-gray-800 border border-gray-700 rounded-2xl shadow-lg flex items-center justify-between border-l-4 border-l-red-500">
+            <div>
+                <p class="text-[10px] font-black text-red-400 uppercase tracking-widest">Offline</p>
+                <p class="text-3xl font-black text-white"><%= users.filter(u => !u.active).length %></p>
+            </div>
+            <div class="w-12 h-12 bg-gray-700 rounded-xl flex items-center justify-center text-red-500 shadow-inner">
+                <i class="bi bi-x-circle text-2xl"></i>
+            </div>
+        </div>
+        <div class="p-5 bg-gray-800 border border-gray-700 rounded-2xl shadow-lg flex items-center justify-between">
+            <div>
+                <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest">Paket</p>
+                <p class="text-3xl font-black text-yellow-400" id="profileCount">-</p>
+            </div>
+            <div class="w-12 h-12 bg-gray-700 rounded-xl flex items-center justify-center text-yellow-400 shadow-inner">
+                <i class="bi bi-hdd-stack text-2xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-gray-800 border border-gray-700 rounded-2xl shadow-2xl overflow-hidden mb-10">
+        <div class="p-4 bg-gray-900/50 border-b border-gray-700 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center text-gray-300 font-bold text-sm tracking-widest uppercase">
+                <i class="bi bi-database-fill me-2 text-blue-500"></i> Database Pelanggan
+            </div>
+            <div class="flex gap-2">
+                <button id="btnAddUser" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-black px-4 py-2.5 rounded-lg transition-all shadow-lg uppercase flex items-center">
+                    <i class="bi bi-plus-lg me-2"></i> Tambah User
+                </button>
+                <button onclick="location.reload()" class="bg-gray-700 hover:bg-gray-600 text-white text-xs font-black px-4 py-2.5 rounded-lg transition-all shadow-lg uppercase flex items-center">
+                    <i class="bi bi-arrow-clockwise me-2"></i> Refresh
+                </button>
+            </div>
+        </div>
+        
+        <div class="p-4 overflow-x-auto">
+            <table class="w-full text-sm text-left text-gray-300" id="pppoeTable">
+                <thead class="text-[11px] text-gray-400 uppercase bg-gray-900 border-b border-gray-700 font-black">
+                    <tr>
+                        <th class="px-4 py-4 text-center">No</th>
+                        <th class="px-4 py-4">Username / Pelanggan</th>
+                        <th class="px-4 py-4">Password</th>
+                        <th class="px-4 py-4">Profile Paket</th>
+                        <th class="px-4 py-4 text-center">Status</th>
+                        <th class="px-4 py-4 text-right">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-700">
+                    <% if(users && users.length > 0) { %>
+                        <% users.forEach(function(user, i) { %>
+                        <tr class="hover:bg-gray-700/50 transition-all group">
+                            <td class="px-4 py-4 text-center text-gray-500 font-mono font-bold"><%= i+1 %></td>
+                            <td class="px-4 py-4">
+                                <span class="font-bold text-white block text-base"><%= user.name %></span>
+                                <% if(user.comment) { %>
+                                    <span class="text-[11px] text-gray-400 font-bold bg-gray-700 px-1.5 rounded border border-gray-600"><i class="bi bi-tag-fill me-1"></i><%= user.comment %></span>
+                                <% } %>
+                            </td>
+                            <td class="px-4 py-4">
+                                <code class="bg-gray-900 text-gray-300 px-2 py-1 rounded text-xs font-mono border border-gray-700"><%= user.password %></code>
+                            </td>
+                            <td class="px-4 py-4">
+                                <span class="bg-gray-700 text-blue-300 text-[10px] font-black px-3 py-1 rounded-md border border-gray-600 uppercase shadow-sm">
+                                    <%= user.profile %>
+                                </span>
+                            </td>
+                            <td class="px-4 py-4 text-center">
+                                <% if (user.active) { %>
+                                    <span class="inline-flex items-center bg-green-900/30 text-green-400 text-[10px] font-black px-3 py-1 rounded-full border border-green-900/50 shadow-[0_0_10px_rgba(74,222,128,0.2)]">
+                                        <span class="w-2 h-2 bg-green-400 rounded-full me-2 animate-pulse shadow-[0_0_5px_#4ade80]"></span> ONLINE
+                                    </span>
+                                <% } else { %>
+                                    <span class="inline-flex items-center bg-gray-700 text-gray-400 text-[10px] font-black px-3 py-1 rounded-full border border-gray-600">
+                                        OFFLINE
+                                    </span>
+                                <% } %>
+                            </td>
+                            <td class="px-4 py-4 text-right">
+                                <div class="inline-flex shadow-sm rounded-lg overflow-hidden border border-gray-600">
+                                    <button class="edit-user-btn p-2 bg-gray-800 hover:bg-yellow-900/50 text-yellow-500 border-r border-gray-600" 
+                                            data-id="<%= user.id %>" data-username="<%= user.name %>" data-password="<%= user.password %>" data-profile="<%= user.profile %>">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </button>
+                                    <% if (user.active) { %>
+                                        <button class="disconnect-session-btn p-2 bg-gray-800 hover:bg-blue-900/50 text-blue-400 border-r border-gray-600" 
+                                                data-username="<%= user.name %>">
+                                            <i class="bi bi-lightning-charge-fill"></i>
+                                        </button>
+                                    <% } %>
+                                    <button class="delete-user-btn p-2 bg-gray-800 hover:bg-red-900/50 text-red-500" 
+                                            data-id="<%= user.id %>" data-username="<%= user.name %>">
+                                        <i class="bi bi-trash3-fill"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <% }) %>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <div class="mt-8 flex justify-end pb-10">
+        <button id="restartMikrotikBtn" class="bg-red-900/80 hover:bg-red-800 text-red-100 font-black px-6 py-3 rounded-xl shadow-[0_0_15px_rgba(220,38,38,0.4)] transition-all flex items-center border border-red-700 hover:shadow-[0_0_25px_rgba(220,38,38,0.6)]">
+            <i class="bi bi-power me-2 text-xl"></i> REBOOT ROUTER
+        </button>
+    </div>
+</main>
+
+<div id="userModal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-[100] justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full backdrop-blur-sm bg-black/70">
+    <div class="relative p-4 w-full max-w-md max-h-full">
+        <div class="relative bg-gray-800 rounded-2xl shadow-2xl border border-gray-700">
+            <div class="flex items-center justify-between p-4 md:p-5 border-b border-gray-700 rounded-t bg-gray-900/50">
+                <h3 class="text-lg font-black text-white" id="userModalLabel">User PPPoE</h3>
+                <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-700 hover:text-white rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center" id="closeModalBtn">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <form id="userForm" class="p-4 md:p-5">
+                <input type="hidden" id="userId" name="id">
+                <div class="grid gap-4 mb-4">
+                    <div>
+                        <label class="block mb-2 text-xs font-black text-gray-500 uppercase">Username</label>
+                        <input type="text" name="username" id="username" class="bg-gray-900 border border-gray-600 text-white text-sm rounded-xl focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 font-bold" placeholder="Contoh: user01" required>
+                    </div>
+                    <div>
+                        <label class="block mb-2 text-xs font-black text-gray-500 uppercase">Password</label>
+                        <input type="text" name="password" id="password" class="bg-gray-900 border border-gray-600 text-white text-sm rounded-xl focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 font-mono" placeholder="Password rahasia" required>
+                    </div>
+                    <div>
+                        <label class="block mb-2 text-xs font-black text-gray-500 uppercase">Pilih Profile</label>
+                        <select id="profile" name="profile" class="bg-gray-900 border border-gray-600 text-white text-sm rounded-xl focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 font-bold" required>
+                            <option value="">Loading...</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="text-white inline-flex items-center justify-center bg-blue-700 hover:bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-900 font-black rounded-xl text-sm px-5 py-3 text-center w-full shadow-lg transition-all">
+                    <i class="bi bi-save2-fill me-2"></i> SIMPAN DATA
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<%- include('partials/footer') %>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<script>
+    const currentNasId = '<%= selectedNasId %>';
+    const modalEl = document.getElementById('userModal');
+    
+    function showModal() { modalEl.classList.remove('hidden'); modalEl.classList.add('flex'); }
+    function hideModal() { modalEl.classList.add('hidden'); modalEl.classList.remove('flex'); }
+    
+    document.getElementById('closeModalBtn').addEventListener('click', hideModal);
+    modalEl.addEventListener('click', (e) => { if (e.target === modalEl) hideModal(); });
+
+    $(document).ready(function() {
+        // Init Datatable Dark Mode Style
+        $('#pppoeTable').DataTable({ 
+            pageLength: 25,
+            dom: '<"flex flex-col md:flex-row justify-between items-center p-4 gap-4"f>rt<"p-4 flex justify-between items-center text-gray-500 font-bold text-xs"ip>',
+            language: { 
+                search: "", searchPlaceholder: "Cari data user...",
+                zeroRecords: "Data tidak ditemukan",
+                info: "Hal _PAGE_ dari _PAGES_",
+                paginate: { next: "Maju >", previous: "< Mundur" }
+            }
+        });
+
+        // Styling Search Input Datatable biar Gelap
+        $('.dataTables_filter input').addClass('bg-gray-900 border border-gray-700 text-white rounded-xl text-sm px-4 py-2 focus:ring-blue-500 outline-none w-full md:w-64');
+
+        // Load Profiles
+        $.get('/admin/mikrotik/profiles/api', { nasId: currentNasId }, function(res) {
+            if(res.success || res.profiles) { 
+                let list = res.data || res.profiles;
+                if(list) {
+                    let opts = '<option value="">Pilih Profile</option>';
+                    list.forEach(p => { let val = p.name || p; opts += `<option value="${val}">${val}</option>`; });
+                    $('#profile').html(opts);
+                    $('#profileCount').text(list.length);
+                }
+            }
+        });
+    });
+
+    // --- LOGIC CRUD (SAMA SEPERTI SEBELUMNYA) ---
+    $('#btnAddUser').click(() => { $('#userForm')[0].reset(); $('#userId').val(''); $('#userModalLabel').text('Tambah User Baru'); showModal(); });
+    
+    $(document).on('click', '.edit-user-btn', function() {
+        const d = $(this).data();
+        $('#userId').val(d.id); $('#username').val(d.username); $('#password').val(d.password); $('#profile').val(d.profile);
+        $('#userModalLabel').text('Edit User: ' + d.username); showModal();
+    });
+
+    $('#userForm').submit(function(e) {
+        e.preventDefault();
+        const id = $('#userId').val();
+        const url = id ? '/admin/mikrotik/edit-user' : '/admin/mikrotik/add-user';
+        const btn = $(this).find('button[type="submit"]');
+        const originalText = btn.html();
+        btn.prop('disabled', true).html('<i class="bi bi-hourglass-split animate-spin me-2"></i> PROSES...');
+
+        $.post(url, { id: id, username: $('#username').val(), password: $('#password').val(), profile: $('#profile').val(), nasId: currentNasId }, function(res) {
+            if(res.success) { location.reload(); } else { alert('Gagal: ' + res.message); btn.prop('disabled', false).html(originalText); }
+        });
+    });
+
+    $(document).on('click', '.delete-user-btn', function() {
+        if(confirm(`Yakin hapus permanen user ${$(this).data('username')}?`)) {
+            $.post('/admin/mikrotik/delete-user', { id: $(this).data('id'), nasId: currentNasId }, function(res) { if(res.success) location.reload(); });
+        }
+    });
+
+    $(document).on('click', '.disconnect-session-btn', function() {
+        if(confirm(`Tendang user ${$(this).data('username')}?`)) {
+            $.post('/admin/mikrotik/disconnect-session', { username: $(this).data('username'), nasId: currentNasId }, function(res) { if(res.success) location.reload(); });
+        }
+    });
+
+    $('#restartMikrotikBtn').click(() => {
+        if(confirm("PERINGATAN: Router akan direstart!")) {
+            $.post('/admin/mikrotik/restart', { nasId: currentNasId }, function(res) { alert(res.message); });
+        }
+    });
+</script>

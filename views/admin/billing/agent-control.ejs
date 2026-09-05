@@ -1,0 +1,536 @@
+<%- include('../../partials/header') %>
+<body class="bg-[#0f172a] text-slate-300 font-sans antialiased selection:bg-blue-500 selection:text-white">
+
+<%- include('../../partials/admin-header') %>
+
+<%- include('../../partials/billing-sidebar', { page: 'agents', settings: settings }) %>
+
+<main class="p-4 sm:ml-64 pt-20 min-h-screen">
+
+    <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+        <div>
+            <h1 class="text-3xl font-black text-white tracking-tighter uppercase leading-none">
+                Manajemen <span class="text-blue-500">Agen & Reseller</span>
+            </h1>
+            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-[4px] mt-2">Pusat Kendali Mitra & Voucher</p>
+        </div>
+        
+        <button onclick="openModal('modalAddAgent')" class="group relative inline-flex items-center justify-center px-6 py-3 text-xs font-black text-white bg-blue-600 rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-500/30 transition-all uppercase tracking-widest">
+            <i class="bi bi-plus-circle text-lg me-2 group-hover:scale-110 transition-transform"></i> Daftar Agen Baru
+        </button>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+        <div class="bg-[#1e293b] border border-slate-700/60 rounded-2xl p-5 shadow-lg relative group hover:-translate-y-1 transition-all">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Total Mitra Agen</p>
+                    <h3 class="text-3xl font-black text-white uppercase"><%= (typeof agents !== 'undefined') ? agents.length : 0 %> <span class="text-sm text-slate-500 font-bold tracking-normal">Toko</span></h3>
+                </div>
+                <div class="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500 border border-blue-500/20">
+                    <i class="bi bi-shop text-2xl"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-[#1e293b] border-l-4 border-l-amber-500 border-y border-r border-slate-700/60 rounded-2xl p-5 shadow-lg hover:-translate-y-1 transition-all">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-[10px] font-black text-amber-500 uppercase tracking-widest mb-1">Request Topup</p>
+                    <h3 class="text-3xl font-black text-amber-400 uppercase"><%= (typeof topups !== 'undefined') ? topups.length : 0 %> <span class="text-sm text-slate-600 font-bold tracking-normal">Menunggu</span></h3>
+                </div>
+                <div class="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500 border border-amber-500/20">
+                    <i class="bi bi-wallet2 text-2xl"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-[#1e293b] border-l-4 border-l-emerald-500 border-y border-r border-slate-700/60 rounded-2xl p-5 shadow-lg hover:-translate-y-1 transition-all">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-1">Voucher Terjual</p>
+                    <h3 class="text-3xl font-black text-emerald-400 uppercase"><%= (typeof vouchers !== 'undefined') ? vouchers.length : 0 %> <span class="text-sm text-slate-600 font-bold tracking-normal">Transaksi</span></h3>
+                </div>
+                <div class="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 border border-emerald-500/20">
+                    <i class="bi bi-ticket-perforated text-2xl"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-[#1e293b] border border-slate-700/60 rounded-3xl shadow-2xl overflow-hidden mb-10">
+        <div class="px-6 py-5 border-b border-slate-700 bg-[#111827]/50">
+            <div class="flex flex-wrap gap-2" id="agentTabs">
+                <button onclick="switchTab('tab_data_agen', this)" class="tab-btn px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all bg-blue-600 text-white shadow-lg shadow-blue-500/20">
+                    <i class="bi bi-list-stars me-2 text-lg"></i>Data Agen
+                </button>
+                <button onclick="switchTab('tab_paket', this)" class="tab-btn px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all text-slate-500 hover:bg-slate-800 hover:text-white">
+                    <i class="bi bi-router me-2 text-lg"></i>Setting Harga
+                </button>
+                <button onclick="switchTab('tab_request_topup', this)" class="tab-btn px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all text-slate-500 hover:bg-slate-800 hover:text-white relative">
+                    <i class="bi bi-cash-coin me-2 text-lg"></i>Topup
+                    <% if(typeof topups !== 'undefined' && topups.length > 0) { %>
+                        <span class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white flex items-center justify-center rounded-full text-[9px]"><%= topups.length %></span>
+                    <% } %>
+                </button>
+                <button onclick="switchTab('tab_riwayat', this)" class="tab-btn px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all text-slate-500 hover:bg-slate-800 hover:text-white">
+                    <i class="bi bi-clock-history me-2 text-lg"></i>Riwayat Voucher
+                </button>
+            </div>
+        </div>
+
+        <div class="p-4">
+            <% if (typeof msg !== 'undefined') { %>
+                <% let alertColors = { success_pkg: 'bg-emerald-500', deleted: 'bg-red-500', success_add: 'bg-blue-500', success_pkg_add: 'bg-cyan-500', updated: 'bg-emerald-500', success_deduct: 'bg-rose-500', error_insufficient_balance: 'bg-red-600' }; %>
+                <div class="<%= alertColors[msg] || 'bg-blue-500' %> p-4 rounded-xl text-white font-bold text-sm mb-4 flex justify-between items-center shadow-lg">
+                    <span>
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        <% if (msg == 'success_pkg') { %> 
+                            Setting Paket Agen berhasil disimpan! 
+                        <% } else if (msg == 'deleted') { %> 
+                            Data berhasil dihapus permanen! 
+                        <% } else if (msg == 'success_add') { %> 
+                            Agen Baru Ditambahkan! 
+                        <% } else if (msg == 'success_pkg_add') { %> 
+                            Paket Voucher Baru Berhasil Dibuat! 
+                        <% } else if (msg == 'updated') { %> 
+                            Data berhasil diperbarui! 
+                        <% } else if (msg == 'success_deduct') { %> 
+                            Saldo agen berhasil ditarik/dikoreksi! 
+                        <% } else if (msg == 'error_insufficient_balance') { %> 
+                            Gagal: Saldo agen tidak mencukupi untuk ditarik! 
+                        <% } else { %> 
+                            <%= msg %> 
+                        <% } %>
+                    </span>
+                    <button onclick="this.parentElement.remove()" class="text-white opacity-50 hover:opacity-100"><i class="bi bi-x-lg"></i></button>
+                </div>
+            <% } %>
+
+            <div id="tab_data_agen" class="tab-content block">
+                <div class="overflow-x-auto">
+                    <table id="tableAgen" class="w-full text-left text-slate-400">
+                        <thead class="text-[10px] text-slate-500 uppercase bg-[#111827]/50 border-b border-slate-700">
+                            <tr>
+                                <th class="px-6 py-4 font-black tracking-wider">Nama Agen / Toko</th>
+                                <th class="px-6 py-4 font-black tracking-wider">Username</th>
+                                <th class="px-6 py-4 font-black tracking-wider">Kontak</th>
+                                <th class="px-6 py-4 font-black tracking-wider">Sisa Saldo</th>
+                                <th class="px-6 py-4 font-black tracking-wider text-center">Status</th>
+                                <th class="px-6 py-4 font-black tracking-wider text-right">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-700/50">
+                            <% if(typeof agents !== 'undefined') { %>
+                            <% agents.forEach(a => { %>
+                            <tr class="hover:bg-slate-800/50 transition-colors">
+                                <td class="px-6 py-4 font-bold text-white"><%= a.name %></td>
+                                <td class="px-6 py-4"><span class="px-2 py-1 rounded bg-[#111827] border border-slate-700 text-[10px] font-mono font-bold text-blue-400"><%= a.username %></span></td>
+                                <td class="px-6 py-4 text-xs font-bold"><%= a.phone %></td>
+                                <td class="px-6 py-4 font-mono text-xs font-bold text-emerald-400">Rp <%= parseInt(a.balance || 0).toLocaleString('id-ID') %></td>
+                                <td class="px-6 py-4 text-center">
+                                    <% if(a.status == 'active') { %> 
+                                        <span class="px-2.5 py-0.5 rounded-full text-[9px] font-black bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">AKTIF</span> 
+                                    <% } else { %> 
+                                        <span class="px-2.5 py-0.5 rounded-full text-[9px] font-black bg-red-500/10 text-red-400 border border-red-500/20">SUSPEND</span> 
+                                    <% } %>
+                                </td>
+                                <td class="px-6 py-4 text-right">
+                                    <div class="flex justify-end gap-1">
+                                        <button onclick="openModal('modalTopup<%= a.id %>')" class="p-1.5 rounded-lg text-emerald-400 hover:bg-emerald-500/20 transition-all" title="Isi Saldo"><i class="bi bi-wallet-fill"></i></button>
+                                        
+                                        <button onclick="openModal('modalDeduct<%= a.id %>')" class="p-1.5 rounded-lg text-rose-400 hover:bg-rose-500/20 transition-all" title="Tarik Saldo"><i class="bi bi-dash-circle-fill"></i></button>
+                                        
+                                        <% if(a.status == 'active') { %>
+                                            <form action="/admin/agent/action" method="POST" class="inline" onsubmit="return confirm('Blokir agen ini?')">
+                                                <input type="hidden" name="agent_id" value="<%= a.id %>">
+                                                <input type="hidden" name="action" value="suspend">
+                                                <button class="p-1.5 rounded-lg text-slate-400 hover:text-amber-500 hover:bg-amber-500/20 transition-all" title="Suspend"><i class="bi bi-pause-circle"></i></button>
+                                            </form>
+                                        <% } else { %>
+                                            <form action="/admin/agent/action" method="POST" class="inline">
+                                                <input type="hidden" name="agent_id" value="<%= a.id %>">
+                                                <input type="hidden" name="action" value="active">
+                                                <button class="p-1.5 rounded-lg text-emerald-400 hover:bg-emerald-500/20 transition-all" title="Aktifkan"><i class="bi bi-check-lg"></i></button>
+                                            </form>
+                                        <% } %>
+
+                                        <button onclick="openModal('modalEditAgent<%= a.id %>')" class="p-1.5 rounded-lg text-blue-400 hover:bg-blue-500/20 transition-all" title="Edit Agen"><i class="bi bi-pencil-square"></i></button>
+
+                                        <form action="/admin/agent/delete" method="POST" class="inline" onsubmit="return confirm('HATI-HATI! Yakin hapus agen ini secara permanen?')">
+                                            <input type="hidden" name="agent_id" value="<%= a.id %>">
+                                            <button class="p-1.5 rounded-lg text-red-500 hover:bg-red-500/20 transition-all" title="Hapus Agen"><i class="bi bi-trash3"></i></button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            <% }) %>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="tab_paket" class="tab-content hidden">
+                <div class="mb-4 flex flex-col md:flex-row justify-between items-center gap-4 bg-[#111827]/30 p-4 rounded-2xl border border-slate-700/50">
+                    <p class="text-xs font-bold text-slate-400"><i class="bi bi-info-circle text-blue-500 me-2"></i> Daftar di bawah adalah profil voucher dari Radius yang dijual oleh Agen.</p>
+                    <button onclick="openModal('modalAddVoucher')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black rounded-xl transition-all uppercase tracking-widest"><i class="bi bi-plus-lg me-1"></i> Buat Profil Baru</button>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table id="tablePaket" class="w-full text-left text-slate-400">
+                        <thead class="text-[10px] text-slate-500 uppercase bg-[#111827]/30 border-b border-slate-700">
+                            <tr>
+                                <th class="px-6 py-4 font-black tracking-wider">Nama Profil</th>
+                                <th class="px-6 py-4 font-black tracking-wider">Harga Jual (User)</th>
+                                <th class="px-6 py-4 font-black tracking-wider">Modal Agen</th>
+                                <th class="px-6 py-4 font-black tracking-wider text-center">Status Jual</th>
+                                <th class="px-6 py-4 font-black tracking-wider text-right">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-700/50">
+                            <% if(typeof agentPackages !== 'undefined') { %>
+                            <% agentPackages.forEach(p => { %>
+                            <tr class="hover:bg-slate-800/50 transition-colors">
+                                <td class="px-6 py-4">
+                                    <input form="formUpdate<%= p.id %>" type="text" name="name" class="bg-transparent border-0 text-white font-bold text-sm w-full focus:ring-0" value="<%= p.name %>" readonly>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center bg-[#111827] border border-slate-700 rounded-lg px-2 py-1 w-32 group-hover:border-blue-500/50 transition-colors">
+                                        <span class="text-[10px] text-slate-500 me-1">Rp</span>
+                                        <input form="formUpdate<%= p.id %>" type="number" name="price" class="bg-transparent border-0 text-xs font-bold text-white w-full p-0 focus:ring-0" value="<%= p.price %>">
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center bg-[#111827] border border-slate-700 rounded-lg px-2 py-1 w-32 group-hover:border-emerald-500/50 transition-colors">
+                                        <span class="text-[10px] text-emerald-500 me-1">Rp</span>
+                                        <input form="formUpdate<%= p.id %>" type="number" name="agent_cost" class="bg-transparent border-0 text-xs font-bold text-emerald-400 w-full p-0 focus:ring-0" value="<%= p.agent_cost %>">
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-center">
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input form="formUpdate<%= p.id %>" type="checkbox" name="is_for_agent" class="sr-only peer" <%= p.is_for_agent ? 'checked' : '' %>>
+                                        <div class="w-11 h-6 bg-slate-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                    </label>
+                                </td>
+                                <td class="px-6 py-4 text-right">
+                                    <div class="flex justify-end gap-2">
+                                        <form id="formUpdate<%= p.id %>" action="/admin/agent/package/update" method="POST" class="m-0 p-0">
+                                            <input type="hidden" name="id" value="<%= p.id %>">
+                                            <button type="submit" class="p-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white transition-all shadow-lg shadow-blue-500/20" title="Simpan Perubahan"><i class="bi bi-save-fill"></i></button>
+                                        </form>
+                                        
+                                        <form action="/admin/agent/package/delete" method="POST" class="m-0 p-0" onsubmit="return confirm('Hapus profil harga ini? (Hanya menghapus dari list agen)')">
+                                            <input type="hidden" name="id" value="<%= p.id %>">
+                                            <button type="submit" class="p-2 rounded-lg bg-red-600/20 text-red-500 hover:bg-red-500 hover:text-white transition-all" title="Hapus Paket"><i class="bi bi-trash3-fill"></i></button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            <% }) %>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="tab_request_topup" class="tab-content hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-slate-400">
+                        <thead class="text-[10px] text-slate-500 uppercase bg-[#111827]/30 border-b border-slate-700">
+                            <tr>
+                                <th class="px-6 py-4 font-black">Waktu</th>
+                                <th class="px-6 py-4 font-black">Mitra Agen</th>
+                                <th class="px-6 py-4 font-black">Nominal Request</th>
+                                <th class="px-6 py-4 font-black">Bukti Transfer</th>
+                                <th class="px-6 py-4 font-black text-right">Aksi Konfirmasi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-700/50">
+                            <% if(typeof topups !== 'undefined' && topups.length > 0) { %>
+                                <% topups.forEach(t => { %>
+                                <tr class="hover:bg-slate-800/50 transition-colors">
+                                    <td class="px-6 py-4 text-xs font-bold text-slate-500"><%= moment(t.created_at).format('DD/MM HH:mm') %></td>
+                                    <td class="px-6 py-4 font-bold text-white"><%= t.agent_name %></td>
+                                    <td class="px-6 py-4 font-mono text-sm font-black text-emerald-400">Rp <%= parseInt(t.amount).toLocaleString('id-ID') %></td>
+                                    <td class="px-6 py-4">
+                                        <% if(t.proof_img) { %> 
+                                            <a href="<%= t.proof_img %>" target="_blank" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-black rounded-lg transition-all uppercase tracking-widest"><i class="bi bi-eye-fill me-1"></i> Cek Bukti</a> 
+                                        <% } else { %> 
+                                            <span class="text-[10px] text-slate-600 font-bold italic">Tanpa Foto</span> 
+                                        <% } %>
+                                    </td>
+                                    <td class="px-6 py-4 text-right">
+                                        <div class="flex justify-end gap-2">
+                                            <form action="/admin/agent/approve-topup" method="POST" onsubmit="return confirm('Konfirmasi saldo ini ke agen?')">
+                                                <input type="hidden" name="request_id" value="<%= t.id %>">
+                                                <button title="Setujui" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black rounded-xl transition-all shadow-lg shadow-emerald-500/20"><i class="bi bi-check-lg"></i></button>
+                                            </form>
+                                            
+                                            <form action="/admin/agent/delete-topup" method="POST" onsubmit="return confirm('Tolak dan hapus request topup ini?')">
+                                                <input type="hidden" name="request_id" value="<%= t.id %>">
+                                                <button title="Tolak / Hapus" class="px-3 py-2 bg-red-600/20 text-red-500 hover:bg-red-500 hover:text-white text-xs font-black rounded-xl transition-all"><i class="bi bi-x-lg"></i></button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <% }) %>
+                            <% } else { %>
+                                <tr><td colspan="5" class="px-6 py-12 text-center text-xs font-bold text-slate-500 uppercase tracking-widest">Tidak ada antrean topup</td></tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="tab_riwayat" class="tab-content hidden">
+                <div class="overflow-x-auto">
+                    <table id="tableRiwayat" class="w-full text-left text-slate-400">
+                        <thead class="text-[10px] text-slate-500 uppercase bg-[#111827]/30 border-b border-slate-700">
+                            <tr>
+                                <th class="px-6 py-4 font-black">Waktu</th>
+                                <th class="px-6 py-4 font-black">Agen</th>
+                                <th class="px-6 py-4 font-black">Kode</th>
+                                <th class="px-6 py-4 font-black">Profil</th>
+                                <th class="px-6 py-4 font-black">Modal</th>
+                                <th class="px-6 py-4 font-black text-emerald-500">Cuan</th>
+                                <th class="px-6 py-4 font-black text-right">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-700/50">
+                            <% if(typeof vouchers !== 'undefined') { %>
+                            <% vouchers.forEach(v => { %>
+                            <tr class="hover:bg-slate-800/50 transition-colors group">
+                                <td class="px-6 py-4 text-[10px] font-bold text-slate-500"><%= moment(v.created_at).format('DD/MM HH:mm') %></td>
+                                <td class="px-6 py-4 text-xs font-bold text-slate-300"><%= v.agent_name %></td>
+                                <td class="px-6 py-4 font-mono text-xs font-black text-blue-400 tracking-wider"><%= v.username %></td>
+                                <td class="px-6 py-4"><span class="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 text-[10px] font-bold text-slate-400 uppercase"><%= v.profile %></span></td>
+                                <td class="px-6 py-4 text-[10px] font-mono"><%= parseInt(v.price_cost).toLocaleString('id-ID') %></td>
+                                <td class="px-6 py-4 font-mono text-xs font-black text-emerald-400">+<%= parseInt(v.price_sell - v.price_cost).toLocaleString('id-ID') %></td>
+                                <td class="px-6 py-4 text-right">
+                                    <form action="/admin/agent/voucher/delete" method="POST" class="inline" onsubmit="return confirm('Hapus voucher ini? Radius user akan dihapus juga.')">
+                                        <input type="hidden" name="voucher_code" value="<%= v.username %>">
+                                        <input type="hidden" name="log_id" value="<%= v.id %>">
+                                        <button class="p-1.5 rounded-lg text-red-400 hover:bg-red-500 hover:text-white transition-all"><i class="bi bi-trash"></i></button>
+                                    </form>
+                                </td>
+                            </tr>
+                            <% }) %>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<%- include('../../partials/footer') %>
+
+<div id="modalAddAgent" tabindex="-1" aria-hidden="true" class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full bg-black/80 backdrop-blur-sm transition-opacity">
+    <div class="relative w-full max-w-md max-h-full mx-auto mt-20">
+        <div class="relative bg-[#1e293b] rounded-2xl shadow-2xl border border-slate-700">
+            <div class="flex items-center justify-between p-5 border-b border-slate-700 bg-[#111827] rounded-t-2xl">
+                <h3 class="text-lg font-black text-white uppercase tracking-tight flex items-center gap-2">
+                    <i class="bi bi-person-plus-fill text-blue-500"></i> DAFTAR AGEN BARU
+                </h3>
+                <button onclick="closeModal('modalAddAgent')" type="button" class="text-slate-400 hover:text-white"><i class="bi bi-x-lg text-lg"></i></button>
+            </div>
+            <form action="/admin/agent/add" method="POST" class="p-6 space-y-4">
+                <div class="space-y-4 border-b border-slate-700/50 pb-4">
+                    <p class="text-[10px] font-black text-blue-500 uppercase tracking-widest">Informasi Mitra</p>
+                    <div><label class="block mb-2 text-xs font-bold text-slate-400 uppercase">Nama Toko / Agen</label>
+                    <input type="text" name="name" class="bg-[#111827] border border-slate-700 text-white text-sm rounded-xl focus:ring-blue-500 block w-full p-3 font-bold" required></div>
+                    <div><label class="block mb-2 text-xs font-bold text-slate-400 uppercase">Kontak (WA)</label>
+                    <input type="text" name="contact" class="bg-[#111827] border border-slate-700 text-white text-sm rounded-xl focus:ring-blue-500 block w-full p-3 font-mono font-bold" placeholder="628xxx"></div>
+                </div>
+                <div class="space-y-4 pt-2">
+                    <p class="text-[10px] font-black text-amber-500 uppercase tracking-widest">Kredensial Login</p>
+                    <div><label class="block mb-2 text-xs font-bold text-slate-400 uppercase">Username</label>
+                    <input type="text" name="username" class="bg-[#111827] border border-slate-700 text-white text-sm rounded-xl focus:ring-blue-500 block w-full p-3 font-bold" required></div>
+                    <div><label class="block mb-2 text-xs font-bold text-slate-400 uppercase">Password</label>
+                    <input type="text" name="password" class="bg-[#111827] border border-slate-700 text-white text-sm rounded-xl focus:ring-blue-500 block w-full p-3 font-bold" required></div>
+                </div>
+                <div class="pt-4 border-t border-slate-700">
+                    <button type="submit" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white text-xs font-black rounded-xl transition-all uppercase tracking-widest shadow-lg shadow-blue-500/20">Simpan Agen</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div id="modalAddVoucher" tabindex="-1" aria-hidden="true" class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full bg-black/80 backdrop-blur-sm transition-opacity">
+    <div class="relative w-full max-w-md max-h-full mx-auto mt-20">
+        <div class="relative bg-[#1e293b] rounded-2xl shadow-2xl border border-slate-700">
+            <div class="flex items-center justify-between p-5 border-b border-slate-700 bg-[#111827] rounded-t-2xl">
+                <h3 class="text-lg font-black text-white uppercase tracking-tight flex items-center gap-2">
+                    <i class="bi bi-ticket-perforated text-emerald-500"></i> BUAT PAKET VOUCHER
+                </h3>
+                <button onclick="closeModal('modalAddVoucher')" type="button" class="text-slate-400 hover:text-white"><i class="bi bi-x-lg text-lg"></i></button>
+            </div>
+            <form action="/admin/agent/package/add" method="POST" class="p-6 space-y-4">
+                <div class="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl">
+                    <p class="text-[10px] font-bold text-amber-500 uppercase leading-relaxed"><i class="bi bi-exclamation-triangle-fill me-1"></i> Nama Paket <b>WAJIB SAMA</b> dengan nama <b>User Profile</b> di Mikrotik.</p>
+                </div>
+                <div>
+                    <label class="block mb-2 text-xs font-bold text-slate-400 uppercase">NAMA PROFIL (MIKROTIK)</label>
+                    <input type="text" name="name" class="bg-[#111827] border border-slate-700 text-white text-sm rounded-xl focus:ring-emerald-500 block w-full p-3 font-black uppercase tracking-widest" placeholder="Contoh: 3JAM" required>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block mb-2 text-xs font-bold text-slate-400 uppercase">Harga Jual</label>
+                        <input type="number" name="price" class="bg-[#111827] border border-slate-700 text-white text-sm rounded-xl block w-full p-3 font-bold" required>
+                    </div>
+                    <div>
+                        <label class="block mb-2 text-xs font-bold text-emerald-500 uppercase">Modal Agen</label>
+                        <input type="number" name="agent_cost" class="bg-[#111827] border border-emerald-500/50 text-emerald-400 text-sm rounded-xl block w-full p-3 font-bold" required>
+                    </div>
+                </div>
+                <div class="pt-4 border-t border-slate-700">
+                    <button type="submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black rounded-xl transition-all uppercase tracking-widest">Simpan Paket</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<% if(typeof agents !== 'undefined') { %>
+<% agents.forEach(a => { %>
+
+<div id="modalTopup<%= a.id %>" tabindex="-1" aria-hidden="true" class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full bg-black/80 backdrop-blur-sm transition-opacity">
+    <div class="relative w-full max-w-sm max-h-full mx-auto mt-40">
+        <div class="relative bg-[#1e293b] rounded-2xl shadow-2xl border border-slate-700 p-6">
+            <h3 class="text-lg font-black text-white uppercase tracking-tight text-center mb-1">ISI SALDO MANUAL</h3>
+            <p class="text-[10px] font-bold text-emerald-400 uppercase text-center mb-6 tracking-widest"><%= a.name %></p>
+            
+            <form action="/admin/agent/topup-manual" method="POST" class="space-y-4">
+                <input type="hidden" name="agent_id" value="<%= a.id %>">
+                <div>
+                    <label class="block mb-2 text-xs font-bold text-slate-400 uppercase text-center">Nominal (Rp)</label>
+                    <input type="number" name="amount" class="bg-[#111827] border border-slate-700 text-white text-xl text-center rounded-xl focus:ring-emerald-500 block w-full p-4 font-black" placeholder="0" required>
+                </div>
+                <div class="pt-2">
+                    <button type="submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black rounded-xl transition-all uppercase tracking-widest shadow-lg shadow-emerald-500/20">Topup Sekarang</button>
+                    <button type="button" onclick="closeModal('modalTopup<%= a.id %>')" class="w-full mt-2 py-2 text-slate-500 text-[10px] font-bold uppercase tracking-widest">Batal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div id="modalDeduct<%= a.id %>" tabindex="-1" aria-hidden="true" class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full bg-black/80 backdrop-blur-sm transition-opacity">
+    <div class="relative w-full max-w-sm max-h-full mx-auto mt-40">
+        <div class="relative bg-[#1e293b] rounded-2xl shadow-2xl border border-rose-700/50 p-6">
+            <h3 class="text-lg font-black text-white uppercase tracking-tight text-center mb-1">TARIK SALDO AGEN</h3>
+            <p class="text-[10px] font-bold text-rose-400 uppercase text-center mb-6 tracking-widest"><%= a.name %></p>
+            
+            <form action="/admin/agent/deduct-balance" method="POST" class="space-y-4">
+                <input type="hidden" name="agent_id" value="<%= a.id %>">
+                <div>
+                    <label class="block mb-2 text-xs font-bold text-slate-400 uppercase text-center">Nominal Ditarik (Rp)</label>
+                    <input type="number" name="amount" class="bg-[#111827] border border-slate-700 text-rose-400 text-xl text-center rounded-xl focus:ring-rose-500 block w-full p-4 font-black" placeholder="0" required>
+                    <p class="text-center text-[10px] text-slate-500 mt-2">Maksimal tarikan: Rp <%= parseInt(a.balance || 0).toLocaleString('id-ID') %></p>
+                </div>
+                <div class="pt-2">
+                    <button type="submit" class="w-full py-3 bg-rose-600 hover:bg-rose-500 text-white text-xs font-black rounded-xl transition-all uppercase tracking-widest shadow-lg shadow-rose-500/20">Tarik Saldo</button>
+                    <button type="button" onclick="closeModal('modalDeduct<%= a.id %>')" class="w-full mt-2 py-2 text-slate-500 text-[10px] font-bold uppercase tracking-widest">Batal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div id="modalEditAgent<%= a.id %>" tabindex="-1" aria-hidden="true" class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full bg-black/80 backdrop-blur-sm transition-opacity">
+    <div class="relative w-full max-w-md max-h-full mx-auto mt-20">
+        <div class="relative bg-[#1e293b] rounded-2xl shadow-2xl border border-slate-700">
+            <div class="flex items-center justify-between p-5 border-b border-slate-700 bg-[#111827] rounded-t-2xl">
+                <h3 class="text-lg font-black text-white uppercase tracking-tight flex items-center gap-2">
+                    <i class="bi bi-pencil-square text-amber-500"></i> EDIT DATA AGEN
+                </h3>
+                <button onclick="closeModal('modalEditAgent<%= a.id %>')" type="button" class="text-slate-400 hover:text-white"><i class="bi bi-x-lg text-lg"></i></button>
+            </div>
+            <form action="/admin/agent/update" method="POST" class="p-6 space-y-4">
+                <input type="hidden" name="agent_id" value="<%= a.id %>">
+                <div class="space-y-4 border-b border-slate-700/50 pb-4">
+                    <p class="text-[10px] font-black text-amber-500 uppercase tracking-widest">Informasi Mitra</p>
+                    <div><label class="block mb-2 text-xs font-bold text-slate-400 uppercase">Nama Toko / Agen</label>
+                    <input type="text" name="name" value="<%= a.name %>" class="bg-[#111827] border border-slate-700 text-white text-sm rounded-xl focus:ring-amber-500 block w-full p-3 font-bold" required></div>
+                    <div><label class="block mb-2 text-xs font-bold text-slate-400 uppercase">Kontak (WA)</label>
+                    <input type="text" name="contact" value="<%= a.phone %>" class="bg-[#111827] border border-slate-700 text-white text-sm rounded-xl focus:ring-amber-500 block w-full p-3 font-mono font-bold" placeholder="628xxx"></div>
+                </div>
+                <div class="space-y-4 pt-2">
+                    <p class="text-[10px] font-black text-amber-500 uppercase tracking-widest">Kredensial Login</p>
+                    <div><label class="block mb-2 text-xs font-bold text-slate-400 uppercase">Username</label>
+                    <input type="text" name="username" value="<%= a.username %>" class="bg-[#111827] border border-slate-700 text-white text-sm rounded-xl focus:ring-amber-500 block w-full p-3 font-bold" required></div>
+                    <div>
+                        <label class="block mb-2 text-xs font-bold text-slate-400 uppercase">Password Baru <span class="text-[9px] text-red-400 lowercase italic">(Kosongkan jika tidak diganti)</span></label>
+                        <input type="text" name="password" class="bg-[#111827] border border-slate-700 text-white text-sm rounded-xl focus:ring-amber-500 block w-full p-3 font-bold" placeholder="*******">
+                    </div>
+                </div>
+                <div class="pt-4 border-t border-slate-700">
+                    <button type="submit" class="w-full py-3 bg-amber-600 hover:bg-amber-700 text-white text-xs font-black rounded-xl transition-all uppercase tracking-widest shadow-lg shadow-amber-500/20">Simpan Perubahan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<% }) %>
+<% } %>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+
+<style>
+    /* DataTable Dark Styling Custom */
+    .dataTables_wrapper .dataTables_filter { display: none; }
+    .dataTables_wrapper .dataTables_length { display: none; }
+    .dataTables_info { color: #64748b !important; font-size: 0.7rem; font-weight: 800; margin-top: 1rem; text-transform: uppercase; padding-left: 1rem; }
+    .dataTables_paginate { margin-top: 1rem; display: flex; justify-content: flex-end; gap: 5px; padding-right: 1rem; }
+    .paginate_button { padding: 4px 12px; border-radius: 8px; background: #111827; color: #94a3b8 !important; cursor: pointer; border: 1px solid #334151; font-size: 0.7rem; font-weight: 800; }
+    .paginate_button.current { background: #3b82f6; color: white !important; border-color: #3b82f6; }
+    .paginate_button:hover:not(.current) { background: #1f2937; color: white !important; }
+</style>
+
+<script>
+    $(document).ready(function() {
+        $('#tableAgen').DataTable({ pageLength: 10 });
+        $('#tablePaket').DataTable({ searching: true, paging: false, info: false });
+        $('#tableRiwayat').DataTable({ pageLength: 10, order: [[0, 'desc']] });
+    });
+
+    // Custom Tab Switching Logic
+    function switchTab(tabId, btn) {
+        document.querySelectorAll('.tab-content').forEach(c => {
+            c.classList.add('hidden');
+            c.classList.remove('block');
+        });
+        document.getElementById(tabId).classList.remove('hidden');
+        document.getElementById(tabId).classList.add('block');
+
+        document.querySelectorAll('.tab-btn').forEach(b => {
+            b.classList.remove('bg-blue-600', 'text-white', 'shadow-lg', 'shadow-blue-500/20');
+            b.classList.add('text-slate-500', 'hover:bg-slate-800', 'hover:text-white');
+        });
+        btn.classList.add('bg-blue-600', 'text-white', 'shadow-lg', 'shadow-blue-500/20');
+        btn.classList.remove('text-slate-500', 'hover:bg-slate-800', 'hover:text-white');
+    }
+
+    // Modal Controller
+    function openModal(id) {
+        const m = document.getElementById(id);
+        m.classList.remove('hidden');
+        m.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeModal(id) {
+        const m = document.getElementById(id);
+        m.classList.add('hidden');
+        m.classList.remove('flex');
+        document.body.style.overflow = '';
+    }
+</script>
+
+</body>
+</html>

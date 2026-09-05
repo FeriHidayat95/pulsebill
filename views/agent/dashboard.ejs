@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Agen - Woby Cell</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#4f46e5"> <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+
+    <script>
+        // Aktivasi Pekerja Belakang Layar (Service Worker)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                .then(reg => console.log('? PWA Aktif! Woby Cell siap jadi Aplikasi Mobile.'))
+                .catch(err => console.log('? PWA Gagal:', err));
+            });
+        }
+    </script>
+    <style>
+        body {
+            background-color: #f3f4f6;
+            font-family: 'Poppins', sans-serif;
+            color: #333;
+        }
+
+        /* NAVBAR */
+        .navbar {
+            background: #ffffff;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.03);
+            padding: 15px 0;
+        }
+        .navbar-brand {
+            font-weight: 700;
+            color: #2c3e50 !important;
+            font-size: 1.2rem;
+        }
+        .btn-logout {
+            background-color: #fee2e2;
+            color: #ef4444;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: 0.3s;
+        }
+        .btn-logout:hover {
+            background-color: #fecaca;
+            color: #dc2626;
+        }
+
+        /* CARD SALDO (Wallet Style) */
+        .wallet-card {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            border-radius: 20px;
+            padding: 30px;
+            color: white;
+            box-shadow: 0 10px 25px rgba(79, 70, 229, 0.3);
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+        .wallet-card::before {
+            content: '';
+            position: absolute;
+            top: -50px; right: -50px;
+            width: 150px; height: 150px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+        }
+        .wallet-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            font-weight: 400;
+        }
+        .wallet-balance {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 10px 0;
+            letter-spacing: -1px;
+        }
+        .wallet-actions .btn {
+            border-radius: 50px;
+            padding: 8px 20px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            border: none;
+            backdrop-filter: blur(5px);
+        }
+        .btn-topup {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            margin-right: 10px;
+        }
+        .btn-topup:hover { background: rgba(255,255,255,0.3); color: white; }
+        .btn-history {
+            background: white;
+            color: #4f46e5;
+        }
+        .btn-history:hover { background: #f0f0f0; color: #4338ca; }
+
+        /* MENU GRID */
+        .menu-card {
+            background: white;
+            border-radius: 16px;
+            padding: 25px 15px;
+            text-align: center;
+            border: 1px solid #f0f0f0;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+            transition: all 0.3s ease;
+            height: 100%;
+            cursor: pointer;
+            text-decoration: none !important;
+        }
+        .menu-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            border-color: #e0e7ff;
+        }
+        .icon-box {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            font-size: 1.5rem;
+        }
+        .menu-title {
+            font-weight: 600;
+            color: #374151;
+            font-size: 0.95rem;
+            margin: 0;
+        }
+
+        /* WARNA ICON MENU */
+        .icon-blue { background: #eff6ff; color: #3b82f6; }
+        .icon-purple { background: #f5f3ff; color: #8b5cf6; }
+        .icon-orange { background: #fff7ed; color: #f97316; }
+
+        /* TABEL TRANSAKSI */
+        .table-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+            overflow: hidden;
+            border: 1px solid #f0f0f0;
+        }
+        .table thead th {
+            background: #f9fafb;
+            color: #6b7280;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            padding: 15px;
+            border: none;
+        }
+        .table tbody td {
+            padding: 15px;
+            vertical-align: middle;
+            color: #374151;
+            border-bottom: 1px solid #f3f4f6;
+            font-size: 0.9rem;
+        }
+        .table tr:last-child td { border-bottom: none; }
+        .badge-voucher {
+            background: #e0e7ff;
+            color: #4f46e5;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar sticky-top">
+    <div class="container">
+        <span class="navbar-brand d-flex align-items-center">
+            <i class="bi bi-shop-window me-2 text-primary"></i>
+            <span><%= agent.name %></span>
+        </span>
+        <a href="/agent/logout" class="btn-logout text-decoration-none">
+            <i class="bi bi-box-arrow-right me-1"></i> Keluar
+        </a>
+    </div>
+</nav>
+
+<div class="container py-4">
+
+    <div class="mb-4">
+        <h4 class="fw-bold mb-1">Halo, Juragan! ??</h4>
+        <p class="text-muted">Siap mencetak cuan hari ini?</p>
+    </div>
+
+    <div class="wallet-card">
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="wallet-label">Saldo Aktif</div>
+            <i class="bi bi-wallet2 fs-4 opacity-50"></i>
+        </div>
+        <div class="wallet-balance">Rp <%= parseInt(agent.balance).toLocaleString('id-ID') %></div>
+        <div class="wallet-actions">
+            <a href="/agent/topup" class="btn btn-topup">
+                <i class="bi bi-plus-lg me-1"></i> Isi Saldo
+            </a>
+            <a href="/agent/history" class="btn btn-history">
+                <i class="bi bi-clock-history me-1"></i> Riwayat
+            </a>
+        </div>
+    </div>
+
+    <h6 class="fw-bold text-muted mb-3 text-uppercase small ls-1">Menu Utama</h6>
+    <div class="row g-3 mb-5">
+        <div class="col-4 col-md-4">
+            <a href="/agent/buy-voucher" class="menu-card d-block">
+                <div class="icon-box icon-blue">
+                    <i class="fa-solid fa-print"></i>
+                </div>
+                <h6 class="menu-title">Cetak Voucher</h6>
+            </a>
+        </div>
+        
+        <div class="col-4 col-md-4">
+            <a href="/agent/my-vouchers" class="menu-card d-block">
+                <div class="icon-box icon-purple">
+                    <i class="fa-solid fa-ticket"></i>
+                </div>
+                <h6 class="menu-title">Stok Saya</h6>
+            </a>
+        </div>
+
+        <div class="col-4 col-md-4">
+            <a href="/agent/report" class="menu-card d-block">
+                <div class="icon-box icon-orange">
+                    <i class="fa-solid fa-chart-pie"></i>
+                </div>
+                <h6 class="menu-title">Laporan</h6>
+            </a>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="fw-bold text-muted mb-0 text-uppercase small ls-1">Transaksi Terakhir</h6>
+        <a href="/agent/my-vouchers" class="text-decoration-none small fw-bold text-primary">Lihat Semua</a>
+    </div>
+
+    <div class="table-card">
+        <div class="table-responsive">
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th>Waktu</th>
+                        <th>Kode Voucher</th>
+                        <th>Profil</th>
+                        <th class="text-end">Harga</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (history.length === 0) { %>
+                        <tr>
+                            <td colspan="4" class="text-center py-4 text-muted">Belum ada transaksi</td>
+                        </tr>
+                    <% } else { %>
+                        <% history.forEach(item => { %>
+                        <tr>
+                            <td>
+                                <div class="fw-bold text-dark"><%= moment(item.created_at).format('DD MMM') %></div>
+                                <small class="text-muted"><%= moment(item.created_at).format('HH:mm') %></small>
+                            </td>
+                            <td><span class="badge-voucher"><%= item.username %></span></td>
+                            <td><%= item.profile %></td>
+                            <td class="text-end fw-bold text-success">
+                                Rp <%= parseInt(item.price_sell).toLocaleString('id-ID') %>
+                            </td>
+                        </tr>
+                        <% }) %>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<div class="text-center py-4 text-muted small opacity-50">
+    &copy; <%= new Date().getFullYear() %> Woby Cell System
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

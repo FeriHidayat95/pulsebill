@@ -1,0 +1,493 @@
+<%- include('partials/header') %>
+<%- include('partials/admin-header') %>
+<%- include('partials/admin-sidebar', { page: 'voucher' }) %>
+
+<style>
+    :root {
+        --bg-carbon: #05080f;
+        --bg-card: #0c1220;
+        --border-soft: rgba(255, 255, 255, 0.03);
+        --accent-blue: #3b82f6;
+        --accent-emerald: #10b981;
+        --accent-amber: #f59e0b;
+        --accent-purple: #a855f7; 
+    }
+
+    body { 
+        background-color: var(--bg-carbon) !important; 
+        color: #94a3b8 !important; 
+        font-family: 'Inter', sans-serif;
+    }
+
+    .main-content-move {
+        transition: all 0.3s ease;
+        padding-top: 130px !important; 
+        min-height: 100vh;
+    }
+    
+    body.sidebar-mini .main-content-move { margin-left: 80px !important; }
+
+    .stat-card-compact {
+        background: #0a0f1e;
+        border: 1px solid var(--border-soft);
+        border-radius: 16px;
+        padding: 16px 20px;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    
+    .lis-blue { border-left: 4px solid var(--accent-blue); }
+    .lis-emerald { border-left: 4px solid var(--accent-emerald); }
+    .lis-amber { border-left: 4px solid var(--accent-amber); }
+
+    .stat-label-mini { font-weight: 900; text-[9px] uppercase tracking-[1.5px] opacity-60 mb-1; }
+    .stat-value-mini { font-weight: 900; text-2xl text-slate-200 tracking-tighter leading-none; }
+
+    .batman-input {
+        background-color: #020617 !important;
+        border: 1px solid #1e293b !important;
+        color: #cbd5e1 !important;
+        border-radius: 12px !important;
+        padding: 10px 15px !important;
+        font-size: 13px;
+    }
+    .batman-input:focus { border-color: var(--accent-blue) !important; outline: none; }
+
+    input[type="date"]::-webkit-calendar-picker-indicator {
+        filter: invert(1);
+        cursor: pointer;
+        opacity: 0.8;
+        padding: 5px;
+    }
+    input[type="date"]::-webkit-calendar-picker-indicator:hover {
+        opacity: 1;
+        transform: scale(1.1);
+        transition: all 0.2s ease;
+    }
+
+    .glass-panel {
+        background: rgba(15, 23, 42, 0.7);
+        backdrop-filter: blur(15px);
+        border: 1px solid var(--border-soft);
+        border-radius: 24px;
+    }
+
+    .tab-btn-active { background: #3b82f6 !important; color: white !important; font-weight: 800; }
+    .tab-btn-member-active { background: var(--accent-purple) !important; color: white !important; font-weight: 800; }
+    .tab-btn-inactive { color: #64748b; font-weight: 700; }
+
+    .v-card-sample { 
+        width: 160px; 
+        margin: 0 auto; 
+        border: 1px solid #000; 
+        border-radius: 6px; 
+        background: #fff; 
+        color: #000; 
+        overflow: hidden; 
+        box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    }
+    .v-head-sample { background: #000; color: #fff; padding: 4px; font-weight: bold; font-size: 9px; text-transform: uppercase; text-align: center; }
+    .v-body-sample { padding: 10px; text-align: center; }
+    .v-code-sample { font-family: monospace; font-size: 1.2rem; font-weight: 900; border: 1px dashed #000; margin: 5px 0; padding: 2px; }
+    .v-info-sample { font-size: 7px; color: #333; border-top: 1px solid #eee; padding-top: 5px; font-weight: bold; }
+    
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+</style>
+
+<main class="main-content-move sm:ml-64 px-6 pb-12">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+        <div class="stat-card-compact lis-blue">
+            <p class="stat-label-mini text-blue-400">Database Records</p>
+            <h3 class="stat-value-mini"><%= stats.totalVouchers %> <small class="text-[10px] opacity-30">Vouchers</small></h3>
+            <i class="bi bi-ticket-perforated absolute right-4 text-3xl opacity-5"></i>
+        </div>
+        <div class="stat-card-compact lis-emerald">
+            <p class="stat-label-mini text-emerald-400">Available Plans</p>
+            <h3 class="stat-value-mini"><%= stats.totalProfiles %> <small class="text-[10px] opacity-30">Profiles</small></h3>
+            <i class="bi bi-hdd-stack absolute right-4 text-3xl opacity-5"></i>
+        </div>
+        <div class="stat-card-compact lis-amber">
+            <p class="stat-label-mini text-amber-400">Radius Core</p>
+            <div class="flex items-center gap-2">
+                <h3 class="stat-value-mini text-amber-400">ONLINE</h3>
+                <span class="relative flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+            </div>
+            <i class="bi bi-cpu absolute right-4 text-3xl opacity-5"></i>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div class="lg:col-span-4 space-y-6">
+            <div class="glass-panel overflow-hidden shadow-2xl">
+                <div class="flex bg-black/40 p-1.5 gap-1.5">
+                    <button onclick="changeTab('batch')" id="btn-tab-batch" class="flex-1 py-3 text-[9px] font-black uppercase tracking-widest rounded-xl transition-all tab-btn-active">Batch</button>
+                    <button onclick="changeTab('manual')" id="btn-tab-manual" class="flex-1 py-3 text-[9px] font-black uppercase tracking-widest rounded-xl transition-all tab-btn-inactive">Manual</button>
+                    <button onclick="changeTab('member')" id="btn-tab-member" class="flex-1 py-3 text-[9px] font-black uppercase tracking-widest rounded-xl transition-all tab-btn-inactive border border-purple-500/20">Member</button>
+                </div>
+
+                <div class="p-6">
+                    <div id="pane-batch" class="block">
+                        <form id="formGenerate" class="space-y-4">
+                            <div class="bg-black/30 p-3 rounded-xl border border-gray-800">
+                                <label class="block mb-2 text-[9px] font-black text-gray-500 uppercase">Login Mode</label>
+                                <div class="flex gap-5">
+                                    <label class="flex items-center cursor-pointer">
+                                        <input type="radio" name="login_mode" value="same" checked class="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600">
+                                        <span class="ms-2 text-xs font-bold text-gray-500">User=Pass</span>
+                                    </label>
+                                    <label class="flex items-center cursor-pointer">
+                                        <input type="radio" name="login_mode" value="different" class="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600">
+                                        <span class="ms-2 text-xs font-bold text-gray-500">User+Pass</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div><label class="block text-[9px] font-black text-gray-500 uppercase">Jumlah</label><input type="number" name="count" value="54" class="batman-input w-full font-black"></div>
+                                <div><label class="block text-[9px] font-black text-gray-500 uppercase">Prefix</label><input type="text" name="prefix" value="WIFI-" class="batman-input w-full uppercase font-black"></div>
+                            </div>
+                            <div>
+                                <label class="block text-[9px] font-black text-gray-500 uppercase">Profile Paket</label>
+                                <select name="profile" id="profileSelect" class="batman-input w-full font-bold">
+                                    <% if(profiles) { profiles.forEach(p => { %>
+                                        <option value="<%= p.name %>" data-price="<%= p.price %>"><%= p.name %></option>
+                                    <% }) } %>
+                                </select>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div><label class="block text-[9px] font-black text-gray-500 uppercase">Harga</label><input type="number" name="price" id="priceInput" class="batman-input w-full font-black text-emerald-500"></div>
+                                <div><label class="block text-[9px] font-black text-gray-500 uppercase">Panjang</label><select name="charLength" class="batman-input w-full font-bold"><option value="4">4</option><option value="6" selected>6</option><option value="8">8</option></select></div>
+                            </div>
+                            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-2xl shadow-xl transition-all uppercase tracking-widest text-[10px] mt-2">
+                                <i class="bi bi-printer-fill me-2"></i> Generate & Print
+                            </button>
+                        </form>
+                    </div>
+
+                    <div id="pane-manual" class="hidden">
+                        <form id="formManual" class="space-y-4">
+                            <div><label class="block text-[9px] font-black text-gray-500 uppercase">Username</label><input type="text" name="username" class="batman-input w-full font-black" required></div>
+                            <div>
+                                <label class="block text-[9px] font-black text-gray-500 uppercase">Password</label>
+                                <div class="flex gap-2">
+                                    <input type="text" name="password" class="batman-input w-full font-black" required>
+                                    <button type="button" onclick="randomPass(this)" class="bg-gray-800 px-4 rounded-xl border border-gray-700 text-white"><i class="bi bi-shuffle"></i></button>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-[9px] font-black text-gray-500 uppercase">Profile Paket</label>
+                                <select name="profile" class="batman-input w-full font-bold">
+                                    <% if(profiles) { profiles.forEach(p => { %>
+                                        <option value="<%= p.name %>"><%= p.name %></option>
+                                    <% }) } %>
+                                </select>
+                            </div>
+                            <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-4 rounded-2xl transition-all uppercase tracking-widest text-[10px] mt-2">
+                                <i class="bi bi-save2-fill me-2"></i> Simpan User
+                            </button>
+                        </form>
+                    </div>
+
+                    <div id="pane-member" class="hidden">
+                        <form id="formMember" class="space-y-4">
+                            <div class="bg-purple-500/5 p-3 rounded-xl border border-purple-500/20 mb-4 text-center">
+                                <p class="text-[8px] font-black text-purple-400 uppercase tracking-widest">Fixed Member - 3 Column Identity Pattern</p>
+                            </div>
+                            <div><label class="block text-[9px] font-black text-gray-500 uppercase">No. WhatsApp (Gunakan Angka Saja)</label><input type="text" name="phone" placeholder="Contoh: 08123456789" class="batman-input w-full font-black" required></div>
+                            <div><label class="block text-[9px] font-black text-gray-500 uppercase">Alamat Lengkap / Lokasi Pasang</label><input type="text" name="address" placeholder="CONTOH: DUSUN MERDEKA RT 01" class="batman-input w-full font-black uppercase" required></div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div><label class="block text-[9px] font-black text-gray-500 uppercase">User Portal</label><input type="text" name="username" placeholder="Nama/ID" class="batman-input w-full font-black" required></div>
+                                <div><label class="block text-[9px] font-black text-gray-500 uppercase">Pass Portal</label><input type="text" name="password" value="2233" class="batman-input w-full font-black" required></div>
+                            </div>
+                            <div>
+                                <label class="block text-[9px] font-black text-gray-500 uppercase">Pilih Paket Langganan</label>
+                                <select name="profile" class="batman-input w-full font-bold border-purple-500/30">
+                                    <% if(profiles) { profiles.forEach(p => { %>
+                                        <option value="<%= p.name %>"><%= p.name %> - Rp <%= p.price %></option>
+                                    <% }) } %>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[9px] font-black text-emerald-500 uppercase">Pilih Tanggal Jatuh Tempo (Kalender)</label>
+                                <input type="date" name="expired_date" class="batman-input w-full font-black text-emerald-500" required>
+                                <p class="text-[8px] text-gray-500 mt-1">*Pilih Tanggal & Bulan yang diinginkan. Sistem akan mengunci ke pilihan ini.</p>
+                            </div>
+                            <button type="submit" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-black py-4 rounded-2xl transition-all uppercase tracking-widest text-[10px] mt-2 shadow-lg shadow-purple-500/20">
+                                <i class="bi bi-star-fill me-2"></i> Daftarkan Member Paten
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-panel p-6 border-dashed border-gray-800">
+                <p class="text-center text-[10px] font-black uppercase tracking-[3px] text-gray-600 mb-5">Voucher Template</p>
+                <div class="v-card-sample">
+                    <div class="v-head-sample"><%= typeof company_header !== 'undefined' ? company_header : 'hotspot.net' %></div>
+                    <div class="v-body-sample">
+                        <div class="text-[10px] font-black text-emerald-600 mb-1">Rp 5.000</div>
+                        <div class="v-code-sample">A7B8X9</div>
+                        <div class="v-info-sample">
+                            PROFILE: PAKET 24 JAM<br>
+                            LOGIN: http://inetku.net
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="lg:col-span-8">
+            <div class="glass-panel p-8 h-full flex flex-col shadow-2xl">
+                <div class="flex flex-col md:flex-row justify-between items-center mb-8 pb-8 border-b border-gray-800 gap-4">
+                    <div>
+                        <h3 class="text-2xl font-black text-white uppercase tracking-tighter">Archive & Reprint</h3>
+                        <p class="text-[10px] font-bold text-gray-600 uppercase tracking-[2px]">Radius Activity History</p>
+                    </div>
+                    <div class="flex gap-3">
+                        <button id="btnDeleteSelected" disabled class="bg-red-500/10 text-red-500 border border-red-500/20 px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase disabled:opacity-10 transition-all">Hapus</button>
+                        <button id="btnPrintSelected" disabled class="bg-blue-600 text-white px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase disabled:opacity-10 shadow-lg shadow-blue-500/20 transition-all">Cetak</button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-12 gap-4 mb-8 bg-black/40 p-6 rounded-[2rem] border border-gray-800">
+                    <div class="col-span-12 md:col-span-4">
+                        <label class="block mb-2 text-[9px] font-black text-gray-600 uppercase tracking-widest">Cari Username / HP</label>
+                        <input type="text" id="filterSearch" placeholder="Ketik kata kunci..." class="batman-input w-full text-xs font-bold text-white placeholder-gray-600">
+                    </div>
+                    <div class="col-span-6 md:col-span-3">
+                        <label class="block mb-2 text-[9px] font-black text-gray-600 uppercase tracking-widest">Profile</label>
+                        <select id="filterProfile" class="batman-input w-full text-xs font-bold">
+                            <option value="all">Semua Profile</option>
+                            <% if(profiles) { profiles.forEach(p => { %><option value="<%= p.name %>"><%= p.name %></option><% }) } %>
+                        </select>
+                    </div>
+                    <div class="col-span-6 md:col-span-2">
+                        <label class="block mb-2 text-[9px] font-black text-gray-600 uppercase tracking-widest">Limit</label>
+                        <input type="number" id="filterLimit" value="50" class="batman-input w-full text-xs font-black">
+                    </div>
+                    <div class="col-span-12 md:col-span-3 flex items-end">
+                        <button id="btnLoadHistory" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black text-[10px] rounded-2xl py-3.5 uppercase tracking-widest transition-all shadow-lg shadow-blue-500/20"><i class="bi bi-search me-1"></i> Tampilkan</button>
+                    </div>
+                </div>
+
+                <div class="border border-gray-800 rounded-3xl overflow-hidden bg-black/20 flex-grow">
+                    <div class="max-h-[450px] overflow-y-auto no-scrollbar">
+                        <table class="w-full text-left text-sm">
+                            <thead class="sticky top-0 bg-slate-900 text-[10px] font-black text-gray-500 uppercase tracking-widest border-b border-gray-800 z-10">
+                                <tr>
+                                    <th class="px-6 py-5 text-center"><input type="checkbox" id="checkAll" class="w-4 h-4 rounded border-gray-700 bg-gray-900 text-blue-600"></th>
+                                    <th class="px-6 py-5">Username</th>
+                                    <th class="px-6 py-5">Password</th>
+                                    <th class="px-6 py-5">Profile</th>
+                                    <th class="px-6 py-5">Jatuh Tempo</th>
+                                    <th class="px-6 py-5 text-right">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reprintBody" class="divide-y divide-gray-800/50">
+                                <tr><td colspan="6" class="px-6 py-20 text-center text-gray-700 text-[10px] font-black uppercase tracking-[3px]">Klik Tampilkan Untuk Memuat Data</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<%- include('partials/footer') %>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    function changeTab(target) {
+        $('#pane-batch, #pane-manual, #pane-member').addClass('hidden').removeClass('block');
+        $('#btn-tab-batch, #btn-tab-manual, #btn-tab-member').removeClass('tab-btn-active tab-btn-member-active').addClass('tab-btn-inactive');
+        if(target === 'batch') {
+            $('#pane-batch').removeClass('hidden').addClass('block');
+            $('#btn-tab-batch').addClass('tab-btn-active').removeClass('tab-btn-inactive');
+        } else if(target === 'manual') {
+            $('#pane-manual').removeClass('hidden').addClass('block');
+            $('#btn-tab-manual').addClass('tab-btn-active').removeClass('tab-btn-inactive');
+        } else if(target === 'member') {
+            $('#pane-member').removeClass('hidden').addClass('block');
+            $('#btn-tab-member').addClass('tab-btn-member-active').removeClass('tab-btn-inactive');
+        }
+    }
+
+    $('#profileSelect').change(function() { 
+        const selectedPrice = $(this).find(':selected').data('price') || '';
+        $('#priceInput').val(selectedPrice); 
+    }).trigger('change');
+
+    $('#formGenerate').submit(function(e) {
+        e.preventDefault();
+        const btn = $(this).find('button[type="submit"]'); 
+        const currentPrice = $('#priceInput').val();
+        btn.prop('disabled', true).html('<i class="animate-spin bi bi-arrow-repeat me-2"></i> SYNCING...');
+        $.post('/admin/hotspot/generate-voucher', $(this).serialize(), function(res) {
+            if(res.success) { 
+                printBatch(res.vouchers, "<%= settings.company_header || 'HOTSPOT' %>", currentPrice); 
+                setTimeout(() => location.reload(), 1500); 
+            } else { 
+                alert(res.message); 
+                btn.prop('disabled', false).html('<i class="bi bi-printer-fill me-2"></i> Generate & Print'); 
+            }
+        });
+    });
+
+    $('#btnLoadHistory').click(function() {
+        const btn = $(this); btn.prop('disabled', true).html('<i class="bi bi-hourglass-split animate-spin me-1"></i> Loading...');
+        $.post('/admin/hotspot/api/voucher-history', { 
+            search: $('#filterSearch').val(), 
+            profile: $('#filterProfile').val(), 
+            limit: $('#filterLimit').val() 
+        }, function(res) {
+            btn.prop('disabled', false).html('<i class="bi bi-search me-1"></i> Tampilkan');
+            if(res.success && res.vouchers.length > 0) {
+                const rows = res.vouchers.map(v => {
+                    const vData = JSON.stringify(v).replace(/"/g, '&quot;');
+                    const phone = v.phone ? v.phone : '';
+                    const address = v.address ? v.address : '';
+                    let expDateForEdit = '';
+                    let expDateRender = '<span class="text-[9px] text-gray-600 font-black">N/A</span>';
+                    if (v.expired_date && v.expired_date !== '0000-00-00 00:00:00') {
+                        try { 
+                            let d = new Date(v.expired_date);
+                            expDateForEdit = d.toISOString().split('T')[0]; 
+                            expDateRender = `<span class="text-xs font-black text-amber-500 bg-amber-500/10 px-2 py-1 rounded-md border border-amber-500/20 whitespace-nowrap"><i class="bi bi-calendar-event me-1"></i>${d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}</span>`;
+                        } catch(e) {}
+                    }
+                    return `
+                    <tr class="hover:bg-white/[0.01] transition-colors group">
+                        <td class="px-6 py-4 text-center"><input type="checkbox" class="chk-voucher w-5 h-5 rounded border-slate-700 bg-slate-800 text-blue-500" value="${vData}"></td>
+                        <td class="px-6 py-4 font-black text-slate-200">${v.username}${phone ? `<br><span class="text-[9px] text-gray-500 font-mono tracking-widest"><i class="bi bi-whatsapp text-emerald-500"></i> ${phone}</span>` : ''}</td>
+                        <td class="px-6 py-4 font-mono text-gray-500">${v.password}</td>
+                        <td class="px-6 py-4"><span class="px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 text-xs font-bold border border-blue-500/20 whitespace-nowrap"> ${v.profile} </span></td>
+                        <td class="px-6 py-4">${expDateRender}</td>
+                        <td class="px-6 py-4 text-right flex gap-2 justify-end">
+                            <button class="w-10 h-10 rounded-2xl bg-blue-500/5 text-blue-500/40 hover:text-blue-500 hover:bg-blue-500/10 transition-all" onclick="editOne('${v.username}', '${v.profile}', '${v.password}', '${phone}', '${address}', '${expDateForEdit}')" title="Edit Full"><i class="bi bi-pencil-square"></i></button>
+                            <button class="w-10 h-10 rounded-2xl bg-red-500/5 text-red-500/40 hover:text-red-500 hover:bg-red-500/10 transition-all" onclick="deleteOne('${v.username}')" title="Hapus"><i class="bi bi-trash3"></i></button>
+                        </td>
+                    </tr>`;
+                }).join('');
+                $('#reprintBody').html(rows);
+            } else {
+                $('#reprintBody').html('<tr><td colspan="6" class="text-center py-20 text-red-400 font-black uppercase tracking-widest opacity-50">Data Tidak Ditemukan</td></tr>');
+            }
+            updateSelection();
+        });
+    });
+
+    $('#filterSearch').keypress(function(e){ if(e.which == 13) $('#btnLoadHistory').click(); });
+
+    window.editOne = function(username, currentProfile, currentPassword, currentPhone, currentAddress, currentExpiredDate) {
+        let optProfiles = $('#filterProfile').html();
+        optProfiles = optProfiles.replace('<option value="all">Semua Profile</option>', '');
+        Swal.fire({
+            title: `EDIT: ${username}`,
+            html: `
+                <div class="space-y-4 text-left mt-2">
+                    <div><label class="text-[10px] font-black text-gray-500 uppercase tracking-widest">Password Portal</label><input id="swal-pass" class="batman-input w-full font-mono text-white mt-1" value="${currentPassword}"></div>
+                    <div><label class="text-[10px] font-black text-gray-500 uppercase tracking-widest">Profile Paket</label><select id="swal-profile" class="batman-input w-full font-bold mt-1 text-white">${optProfiles}</select></div>
+                    <div class="border-t border-gray-800 pt-4 mt-2">
+                        <p class="text-[10px] text-purple-500 font-black uppercase tracking-widest mb-3"><i class="bi bi-calendar-check me-1"></i> Data Member & Masa Aktif</p>
+                        <label class="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Masa Aktif / Jatuh Tempo</label>
+                        <input type="date" id="swal-expired_date" class="batman-input w-full font-mono text-white mt-1 mb-3" style="border-color: #10b981 !important;" value="${currentExpiredDate}">
+                        <label class="text-[10px] font-black text-gray-500 uppercase tracking-widest">No. WhatsApp</label>
+                        <input id="swal-phone" class="batman-input w-full font-mono text-white mt-1 mb-3" placeholder="08xxx..." value="${currentPhone}">
+                        <label class="text-[10px] font-black text-gray-500 uppercase tracking-widest">Alamat Lengkap</label>
+                        <input id="swal-address" class="batman-input w-full text-white mt-1 uppercase" placeholder="Blok / RT RW" value="${currentAddress}">
+                    </div>
+                </div>`,
+            background: '#111827', color: '#fff',
+            showCancelButton: true, confirmButtonColor: '#3b82f6', cancelButtonColor: '#1e293b',
+            confirmButtonText: 'Simpan Perubahan', cancelButtonText: 'Batal',
+            didOpen: () => { $('#swal-profile').val(currentProfile); },
+            preConfirm: () => {
+                return {
+                    username: username,
+                    password: $('#swal-pass').val(),
+                    profile: $('#swal-profile').val(),
+                    phone: $('#swal-phone').val(),
+                    address: $('#swal-address').val(),
+                    expired_date: $('#swal-expired_date').val() 
+                }
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({ title: 'Menyimpan Data...', background: '#111827', color: '#fff', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                $.post('/admin/hotspot/api/update-member-full', result.value, function(res) {
+                    if(res.success) {
+                        Swal.fire({ icon: 'success', title: 'Berhasil!', text: res.message, background: '#111827', color: '#fff' });
+                        $('#btnLoadHistory').click();
+                    } else {
+                        Swal.fire({ icon: 'error', title: 'Gagal!', text: res.message, background: '#111827', color: '#fff' });
+                    }
+                });
+            }
+        });
+    };
+
+    $('#checkAll').change(function() { $('.chk-voucher').prop('checked', $(this).prop('checked')); updateSelection(); });
+    $(document).on('change', '.chk-voucher', updateSelection);
+    function updateSelection() { const count = $('.chk-voucher:checked').length; $('#btnPrintSelected, #btnDeleteSelected').prop('disabled', count === 0); }
+
+    $('#btnPrintSelected').click(function() {
+        const selected = []; 
+        $('.chk-voucher:checked').each(function() { try { selected.push(JSON.parse($(this).val())); } catch(e) {} });
+        let reprintPrice = $('#priceInput').val();
+        if(!reprintPrice || reprintPrice == "0") { reprintPrice = prompt("Masukkan harga untuk voucher ini:", "5000"); }
+        if (reprintPrice !== null && selected.length > 0) printBatch(selected, "<%= settings.company_header %>", reprintPrice);
+    });
+
+    window.deleteOne = function(u) { if(confirm(`Hapus permanen [${u}]?`)) executeDelete([u]); };
+    $('#btnDeleteSelected').click(function() {
+        const users = []; 
+        $('.chk-voucher:checked').each(function() { try { users.push(JSON.parse($(this).val()).username); } catch(e) { users.push($(this).val()); } });
+        if(confirm(`Hapus ${users.length} item secara permanen?`)) executeDelete(users);
+    });
+
+    function executeDelete(u) { 
+        const btn = $('#btnDeleteSelected'); const oldText = btn.text();
+        btn.prop('disabled', true).text('DELETING...');
+        $.post('/admin/hotspot/delete-voucher-batch', { usernames: u }, function(res) { 
+            if(res.success) { alert("Berhasil dihapus!"); $('#btnLoadHistory').click(); } else { alert("Gagal: " + res.message); }
+            btn.prop('disabled', false).text(oldText);
+        }).fail(function() { alert("Koneksi ke server putus!"); btn.prop('disabled', false).text(oldText); }); 
+    }
+
+    $('#formManual').submit(function(e) { e.preventDefault(); $.post('/admin/hotspot/add-user', $(this).serialize(), function(res) { if(res.success) location.reload(); else alert(res.message); }); });
+
+    $('#formMember').submit(function(e) { 
+        e.preventDefault(); const btn = $(this).find('button');
+        btn.prop('disabled', true).html('<i class="animate-spin bi bi-arrow-repeat me-2"></i> REGISTERING...');
+        $.post('/admin/hotspot/add-member', $(this).serialize(), function(res) { 
+            if(res.success) { alert("SULTAN SUCCESS: Member berhasil didaftarkan!"); location.reload(); } else { alert(res.message); btn.prop('disabled', false).html('<i class="bi bi-star-fill me-2"></i> Daftarkan Member Paten'); } 
+        }); 
+    });
+
+    window.randomPass = function(btn) { $(btn).parent().find('input').val(Math.random().toString(36).slice(-6).toUpperCase()); }
+
+    function printBatch(vouchers, headerName, price) {
+        const nominal = parseInt(price.toString().replace(/[^0-9]/g, '')) || 0;
+        const priceDisplay = nominal > 0 ? 'Rp ' + nominal.toLocaleString('id-ID') : 'Rp ' + price;
+        let theme = { head: '#475569', bg: '#f8fafc' }; 
+        if (nominal === 3000) { theme = { head: '#3b82f6', bg: '#eff6ff' }; } else if (nominal === 5000) { theme = { head: '#ef4444', bg: '#fef2f2' }; } else if (nominal === 10000) { theme = { head: '#10b981', bg: '#f0fdf4' }; } else if (nominal > 10000) { theme = { head: '#8b5cf6', bg: '#f5f3ff' }; }
+        let html = `<html><head><style>@page { size: A4 landscape; margin: 5mm; } body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; background: #fff !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } .grid { display: grid; grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(5, 1fr); gap: 8px; width: 100%; height: 190mm; box-sizing: border-box; padding: 2mm; } .card { border: 1px solid #000000 !important; text-align: center; height: 36mm; display: flex; flex-direction: column; justify-content: space-between; position: relative; border-radius: 10px; overflow: hidden; background-color: ${theme.bg} !important; } .head { background-color: ${theme.head} !important; color: #ffffff !important; font-size: 10px; font-weight: 800; padding: 5px 0; text-transform: uppercase; letter-spacing: 1.5px; } .price-tag { position: absolute; top: 22px; right: 5px; font-size: 7.5px; font-weight: 900; background-color: #000000 !important; color: #ffffff !important; padding: 2px 6px; border-radius: 4px; z-index: 10; } .content { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 2px 5px; } .box-code { border: 2px solid #000000 !important; padding: 4px 10px; border-radius: 8px; margin: 2px 0; background-color: #ffffff !important; min-width: 100px; } .user-txt { font-size: 17px; font-weight: 900; color: #000000 !important; font-family: 'Courier New', monospace; line-height: 1; } .pass-txt { font-size: 10px; font-weight: 800; color: #000000 !important; border-top: 1px solid #000; margin-top: 3px; padding-top: 2px; width: 100%; } .lbl { font-size: 6px; font-weight: 800; color: #000000 !important; opacity: 0.7; margin-bottom: 2px; text-transform: uppercase; } .foot { font-size: 6.5px; padding: 3px 0; font-weight: 800; color: #000 !important; background-color: rgba(0,0,0,0.04) !important; border-top: 1px solid #000; text-transform: uppercase; } .page-break { page-break-after: always; }</style></head><body>`;
+        for (let i = 0; i < vouchers.length; i += 25) {
+            html += '<div class="grid">';
+            vouchers.slice(i, i + 25).forEach(v => {
+                let body = (v.username == v.password) ? `<div class="lbl">KODE LOGIN</div><div class="box-code"><div class="user-txt">${v.username}</div></div>` : `<div class="lbl">LOGIN VOUCHER</div><div class="box-code" style="padding: 4px 10px;"><div class="user-txt" style="font-size:13px;">U: ${v.username}</div><div class="pass-txt">P: ${v.password}</div></div>`;
+                html += `<div class="card"><div class="head">${headerName}</div>${nominal > 0 ? `<div class="price-tag">${priceDisplay}</div>` : ''}<div class="content">${body}</div><div class="foot">Plan: ${v.profile} | Login: http://inetku.net</div></div>`;
+            });
+            html += '</div>' + (i + 25 < vouchers.length ? '<div class="page-break"></div>' : '');
+        }
+        const win = window.open('', '_blank'); win.document.write(html + '</body></html>'); win.document.close(); setTimeout(() => { win.print(); }, 1000);
+    }
+</script>

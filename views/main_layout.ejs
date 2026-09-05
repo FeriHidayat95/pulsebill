@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+    <title><%= locals.title || 'Dashboard' %> - <%= company_header %></title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@latest/dist/css/tabler.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <style>
+      @import url('https://rsms.me/inter/inter.css');
+      :root { --tblr-font-sans-serif: 'Inter Var', sans-serif; }
+      body { font-feature-settings: "cv03", "cv04", "cv11"; }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <aside class="navbar navbar-vertical navbar-expand-lg navbar-dark">
+            <div class="container-fluid">
+                <h1 class="navbar-brand navbar-brand-autodark">
+                    <a href="/admin/dashboard"><i class="ti ti-wifi text-primary me-2"></i><%= company_header %></a>
+                </h1>
+                <div class="collapse navbar-collapse" id="sidebar-menu">
+                    <ul class="navbar-nav pt-lg-3">
+                        <li class="nav-item <%= currentPath === '/admin/hotspot' ? 'active' : '' %>">
+                            <a class="nav-link" href="/admin/hotspot">
+                                <span class="nav-link-icon"><i class="ti ti-broadcast"></i></span>
+                                <span class="nav-link-title">Monitoring Hotspot</span>
+                            </a>
+                        </li>
+                        <li class="nav-item <%= currentPath.includes('voucher') ? 'active' : '' %>">
+                            <a class="nav-link" href="/admin/hotspot/voucher">
+                                <span class="nav-link-icon"><i class="ti ti-ticket"></i></span>
+                                <span class="nav-link-title">Manajemen Voucher</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </aside>
+
+        <div class="page-wrapper">
+            <%- body %>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/@tabler/core@latest/dist/js/tabler.min.js" defer></script>
+</body>
+</html>

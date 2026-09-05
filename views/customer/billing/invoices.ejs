@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="id" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title><%= title %> - <%= appSettings.companyHeader %></title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <style>
+    :root {
+      --primary-color: #4361ee;
+      --bg-color: #f4f7fe;
+      --surface-color: #ffffff;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --border-color: rgba(0,0,0,0.05);
+      font-family: 'Inter', sans-serif;
+    }
+
+    [data-bs-theme="dark"] {
+      --bg-color: #0f172a;
+      --surface-color: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-color: rgba(255,255,255,0.08);
+      --primary-color: #3b82f6;
+    }
+
+    body { background-color: var(--bg-color); color: var(--text-main); font-family: var(--font-family); transition: background-color 0.3s ease; }
+    
+    /* STATUS BADGE MODERN (Berlaku Desktop & Mobile) */
+    .status-pill { padding: 6px 14px; border-radius: 50px; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; border: 1px solid transparent; display: inline-flex; align-items: center; gap: 4px; }
+    .status-lunas { background: rgba(16, 185, 129, 0.15); color: #10b981; border-color: rgba(16, 185, 129, 0.3); }
+    .status-belum { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border-color: rgba(245, 158, 11, 0.3); }
+    .status-telat { background: rgba(239, 68, 68, 0.15); color: #ef4444; border-color: rgba(239, 68, 68, 0.3); }
+
+    /* DESKTOP LAYOUT STYLES */
+    .desktop-layout .navbar { background: rgba(var(--surface-color), 0.9) !important; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0,0,0,0.03); position: sticky; top: 0; z-index: 1020; }
+    .desktop-layout .navbar-brand { font-weight: 800; color: var(--primary-color) !important; display: flex; align-items: center; gap: 10px; }
+    
+    /* KUNCIAN LOGO BIAR GAK ZOOM BRUTAL */
+    .desktop-layout .brand-logo { height: 40px !important; width: auto !important; max-width: 180px !important; object-fit: contain !important; border-radius: 8px; }
+    
+    /* Summary Cards Desktop */
+    .desktop-layout .summary-card { background: var(--surface-color); border: 1px solid var(--border-color); border-radius: 16px; padding: 20px; display: flex; align-items: center; gap: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.02); transition: 0.3s; }
+    .desktop-layout .summary-card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.05); }
+    .desktop-layout .summary-icon { width: 56px; height: 56px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 26px; color: white; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    .desktop-layout .icon-blue { background: linear-gradient(135deg, #4361ee, #3f37c9); }
+    .desktop-layout .icon-green { background: linear-gradient(135deg, #10b981, #059669); }
+    .desktop-layout .icon-yellow { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    
+    /* Table Container Desktop */
+    .desktop-layout .table-container { background: var(--surface-color); border: 1px solid var(--border-color); border-radius: 16px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.02); }
+    .desktop-layout .table th { border-bottom: 2px solid var(--border-color); color: var(--text-muted); font-weight: 600; font-size: 12px; text-transform: uppercase; padding: 15px 10px; }
+    .desktop-layout .table td { border-bottom: 1px solid var(--border-color); padding: 15px 10px; vertical-align: middle; color: var(--text-main); }
+    [data-bs-theme="dark"] .table-hover>tbody>tr:hover>* { background-color: rgba(255,255,255,0.02); color: var(--text-main); }
+    </style>
+
+    <style id="mobile-ui-styles">
+        @media (max-width: 767.98px) {
+            /* --- KUNCI LAYAR ANTI BOCOR SAMPING --- */
+            html, body {
+                overflow-x: hidden !important; 
+                width: 100% !important;
+                max-width: 100vw !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            body { padding-bottom: 90px; min-height: 100vh; }
+            html[data-bs-theme="dark"] body { background: #1e1e2d !important; }
+            html[data-bs-theme="light"] body { background: #f9fbfd !important; }
+            
+            .mobile-layout { 
+                color: var(--text-main); 
+                width: 100% !important;
+                max-width: 100vw !important;
+                box-sizing: border-box !important;
+                overflow-x: hidden !important;
+            }
+            .mobile-layout[data-theme="dark"] { background: #1e1e2d !important; color: #f8fafc; --card-bg: #2a2a3c; --border-color: #3b3b54; --text-muted: #a1a1aa; }
+            .mobile-layout[data-theme="light"] { --card-bg: #ffffff; --border-color: #f1f5f9; --text-muted: #64748b; }
+            
+            .mob-top-footer { display: none !important; }
+            
+            /* --- HEADER MELAYANG (STICKY) --- */
+            .mob-header { 
+                position: sticky !important; 
+                top: 0; 
+                left: 0;
+                width: 100%;
+                z-index: 1020; 
+                padding: 15px 20px; 
+                display: flex; 
+                justify-content: space-between; 
+                align-items: center; 
+                background-color: #f9fbfd; 
+                box-sizing: border-box !important;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.03); 
+                transition: background-color 0.3s ease;
+                margin-bottom: 20px;
+            }
+
+            html[data-bs-theme="dark"] .mob-header,
+            .mobile-layout[data-theme="dark"] .mob-header {
+                background-color: #1e1e2d !important;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            }
+
+            .mob-wifi-icon { background: var(--card-bg); color: #4361ee; border-radius: 12px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 20px; box-shadow: 0 4px 15px rgba(67, 97, 238, 0.15); border: 1px solid var(--border-color); }
+            
+            /* Summary Grid Mobile */
+            .mob-summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 0 20px 20px 20px; }
+            .mob-summary-item { background: var(--card-bg); border-radius: 16px; padding: 15px 10px; text-align: center; border: 1px solid var(--border-color); box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
+            .mob-summary-val { font-size: 20px; font-weight: 800; margin-bottom: 2px; }
+            .mob-summary-label { font-size: 10px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
+            
+            /* Invoice Card Mobile */
+            .mob-inv-card { background: var(--card-bg); border-radius: 16px; padding: 18px; margin: 0 20px 15px 20px; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.02); transition: 0.2s; }
+            .mob-inv-card:active { transform: scale(0.98); }
+            
+            /* Bottom Nav */
+            .mob-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card-bg); display: flex; justify-content: space-around; align-items: center; padding: 10px 5px 15px 5px; box-shadow: 0 -5px 25px rgba(0,0,0,0.05); z-index: 1000; border-top: 1px solid var(--border-color); }
+            .mob-nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-muted); font-size: 10px; text-decoration: none; flex: 1; font-weight: 500; transition: color 0.3s; }
+            .mob-nav-item.active { color: #4361ee; font-weight: 700; }
+            .mob-nav-fab { background: linear-gradient(135deg, #4361ee 0%, #3f37c9 100%); color: white; width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; transform: translateY(-22px); box-shadow: 0 8px 20px rgba(67, 97, 238, 0.4); border: 5px solid #f9fbfd; }
+            .mobile-layout[data-theme="dark"] .mob-nav-fab { border-color: #1e1e2d; }
+        }
+    </style>
+</head>
+<body>
+
+  <div class="desktop-layout d-none d-md-block">
+    
+    <nav class="navbar navbar-expand-lg">
+      <div class="container d-flex justify-content-between align-items-center py-2">
+        <a class="navbar-brand text-decoration-none" href="/customer">
+          <img src="/img/<%= appSettings.logoFilename %>" alt="Logo" class="brand-logo me-2">
+          <span class="d-none d-sm-inline"><%= appSettings.companyHeader %></span>
+        </a>
+        <div class="d-flex align-items-center gap-2">
+          <button class="btn btn-outline-secondary btn-sm rounded-pill px-3" onclick="toggleTheme()" title="Ganti Mode Terang/Gelap">
+              <i class="bi bi-moon-stars-fill" id="themeIconDesk"></i> Mode
+          </button>
+          <a href="/customer/dashboard" class="btn btn-outline-primary btn-sm rounded-pill px-3 fw-semibold">
+            <i class="bi bi-house me-1"></i> Dashboard
+          </a>
+          <form method="POST" action="/customer/logout" class="d-inline m-0">
+            <button type="submit" class="btn btn-danger btn-sm rounded-pill px-3 fw-semibold" title="Logout">
+              <i class="bi bi-box-arrow-right me-1"></i> Logout
+            </button>
+          </form>
+          <span class="ms-3 fw-bold text-primary border-start ps-3 border-secondary-subtle">
+            <i class="bi bi-person-circle me-1"></i> <%= customer.name %>
+          </span>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="row mb-4 align-items-center">
+            <div class="col-md-8">
+                <h2 class="fw-bold mb-1">Tagihan Saya</h2>
+                <p class="text-muted mb-0">Kelola, lihat, dan bayar semua tagihan Anda di sini.</p>
+            </div>
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                <a href="/customer/billing/dashboard" class="btn btn-primary rounded-pill fw-semibold shadow-sm px-4">
+                    <i class="bi bi-arrow-left me-1"></i> Kembali
+                </a>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="summary-card">
+                    <div class="summary-icon icon-blue"><i class="bi bi-receipt"></i></div>
+                    <div>
+                        <div class="text-muted small fw-bold text-uppercase mb-1">Total Tagihan</div>
+                        <h3 class="fw-bold mb-0 text-primary"><%= invoices ? invoices.length : 0 %></h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="summary-card">
+                    <div class="summary-icon icon-green"><i class="bi bi-check-circle"></i></div>
+                    <div>
+                        <div class="text-muted small fw-bold text-uppercase mb-1">Lunas</div>
+                        <h3 class="fw-bold mb-0 text-success"><%= invoices ? invoices.filter(inv => inv.status === 'paid').length : 0 %></h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="summary-card">
+                    <div class="summary-icon icon-yellow"><i class="bi bi-exclamation-triangle"></i></div>
+                    <div>
+                        <div class="text-muted small fw-bold text-uppercase mb-1">Belum Lunas</div>
+                        <h3 class="fw-bold mb-0 text-warning"><%= invoices ? invoices.filter(inv => inv.status === 'unpaid').length : 0 %></h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <h5 class="mb-4 fw-bold"><i class="bi bi-list-ul me-2 text-primary"></i> Daftar Tagihan</h5>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th class="ps-3">No. Tagihan</th>
+                            <th>Paket</th>
+                            <th>Jumlah</th>
+                            <th>Status</th>
+                            <th>Jatuh Tempo</th>
+                            <th>Dibuat</th>
+                            <th class="text-end pe-3">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (invoices && invoices.length > 0) { %>
+                            <% invoices.forEach(function(invoice) { %>
+                                <tr>
+                                    <td class="ps-3 fw-bold text-primary"><%= invoice.invoice_number %></td>
+                                    <td><span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill"><%= invoice.package_name %></span></td>
+                                    <td class="fw-bold">Rp <%= parseFloat(invoice.amount).toLocaleString('id-ID') %></td>
+                                    <td>
+                                        <% if (invoice.status === 'paid') { %>
+                                            <div class="status-pill status-lunas"><i class="bi bi-check-circle-fill"></i> LUNAS</div>
+                                        <% } else if (invoice.status === 'unpaid') { %>
+                                            <div class="status-pill status-belum"><i class="bi bi-clock-fill"></i> BELUM LUNAS</div>
+                                        <% } %>
+                                    </td>
+                                    <td>
+                                        <span class="fw-bold"><%= new Date(customer.expired_date).toLocaleDateString('id-ID') %></span>
+                                    </td>
+                                    <td class="text-muted small"><%= new Date(invoice.created_at).toLocaleDateString('id-ID') %></td>
+                                    <td class="text-end pe-3">
+                                        <div class="btn-group shadow-sm rounded-pill" role="group">
+                                            <% if (invoice.status === 'unpaid') { %>
+                                                <a href="/customer/billing/pay-online/<%= invoice.id %>" class="btn btn-sm btn-primary fw-semibold px-3">
+                                                    <i class="bi bi-credit-card me-1"></i> Bayar
+                                                </a>
+                                            <% } %>
+                                            <a href="/customer/billing/invoices/<%= invoice.id %>" class="btn btn-sm btn-light border fw-semibold">
+                                                Detail
+                                            </a>
+                                            <a href="/customer/billing/invoices/<%= invoice.id %>/print" class="btn btn-sm btn-light border text-secondary" target="_blank" title="Print">
+                                                <i class="bi bi-printer"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="7" class="text-center text-muted py-5">
+                                    <i class="bi bi-inbox fs-1 d-block mb-3 opacity-50"></i>
+                                    <h5 class="fw-bold">Belum ada tagihan</h5>
+                                    <p class="small mb-0">Tagihan Anda akan muncul di sini setelah dibuat oleh sistem.</p>
+                                </td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <footer class="text-center text-muted small mt-5 mb-4">
+            <p class="mb-0"><%= appSettings.footerInfo %></p>
+            <p class="mt-1">&copy; <%= new Date().getFullYear() %> <%= appSettings.companyHeader %></p>
+        </footer>
+    </div>
+  </div>
+
+  <div class="mobile-layout d-block d-md-none" data-theme="light">
+
+      <div class="mob-header">
+          <div class="d-flex align-items-center gap-3">
+              <div class="mob-wifi-icon"><i class="bi bi-receipt-cutoff"></i></div>
+              <div>
+                  <div class="mob-text-muted" style="font-size: 10px;">Portal Pelanggan</div>
+                  <div style="font-weight: 800; font-size: 14px; letter-spacing: 0.5px;">TAGIHAN SAYA</div>
+              </div>
+          </div>
+          <div class="d-flex align-items-center gap-3">
+              <button onclick="toggleTheme()" style="background:none; border:none; color:inherit; position: relative; z-index: 9999; cursor: pointer; padding: 5px;">
+                  <i class="bi bi-moon-stars-fill fs-5" id="themeIconMob"></i>
+              </button>
+              <form method="POST" action="/customer/logout" class="m-0">
+                  <button type="submit" style="background:none; border:none; color:#dc3545; position: relative; z-index: 9999; cursor: pointer; padding: 5px;"><i class="bi bi-box-arrow-right fs-4"></i></button>
+              </form>
+          </div>
+      </div>
+
+      <div class="mob-summary-grid">
+          <div class="mob-summary-item">
+              <div class="mob-summary-val text-primary"><%= invoices ? invoices.length : 0 %></div>
+              <div class="mob-summary-label">Total</div>
+          </div>
+          <div class="mob-summary-item">
+              <div class="mob-summary-val text-success"><%= invoices ? invoices.filter(inv => inv.status === 'paid').length : 0 %></div>
+              <div class="mob-summary-label">Lunas</div>
+          </div>
+          <div class="mob-summary-item">
+              <div class="mob-summary-val text-warning"><%= invoices ? invoices.filter(inv => inv.status === 'unpaid').length : 0 %></div>
+              <div class="mob-summary-label">Belum</div>
+          </div>
+      </div>
+
+      <div class="mx-4 mb-3 d-flex justify-content-between align-items-center">
+          <h6 class="fw-bold mb-0" style="font-size: 14px;">Daftar Invoice</h6>
+          <span style="font-size: 10px; color: var(--text-muted);"><i class="bi bi-sort-down"></i> Terbaru</span>
+      </div>
+
+      <% if (invoices && invoices.length > 0) { %>
+          <% invoices.forEach(function(invoice) { %>
+              <div class="mob-inv-card">
+                  <div class="d-flex justify-content-between align-items-start mb-3">
+                      <div>
+                          <div class="fw-bold" style="font-size: 14px; color: var(--primary-color);"><%= invoice.invoice_number %></div>
+                          <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;"><i class="bi bi-box me-1"></i><%= invoice.package_name %></div>
+                      </div>
+                      
+                      <% if (invoice.status === 'paid') { %>
+                          <div class="status-pill status-lunas"><i class="bi bi-check-circle-fill"></i> LUNAS</div>
+                      <% } else if (invoice.status === 'unpaid') { %>
+                          <div class="status-pill status-belum"><i class="bi bi-clock-fill"></i> BELUM LUNAS</div>
+                      <% } %>
+                  </div>
+                  
+                  <div class="d-flex justify-content-between align-items-end mt-2 pt-3" style="border-top: 1px dashed var(--border-color);">
+                      <div>
+                          <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 2px;">Jatuh Tempo</div>
+                          <div class="fw-bold" style="font-size: 12px;"><%= new Date(customer.expired_date).toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric'}) %></div>
+                      </div>
+                      <div class="text-end">
+                          <div class="fw-bold mb-2" style="font-size: 16px;">Rp <%= parseFloat(invoice.amount).toLocaleString('id-ID') %></div>
+                          
+                          <div class="d-flex gap-2 justify-content-end">
+                              <a href="/customer/billing/invoices/<%= invoice.id %>" class="btn btn-sm btn-light border rounded-pill px-3" style="font-size: 10px; font-weight: 600;">Detail</a>
+                              <% if (invoice.status === 'unpaid') { %>
+                                  <a href="/customer/billing/pay-online/<%= invoice.id %>" class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm" style="font-size: 10px; font-weight: 600;">Bayar</a>
+                              <% } %>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          <% }); %>
+      <% } else { %>
+          <div class="mob-card text-center py-5">
+              <i class="bi bi-inbox text-muted mb-3 d-block" style="font-size: 40px; opacity: 0.5;"></i>
+              <h6 class="fw-bold mb-1" style="font-size: 14px;">Belum Ada Tagihan</h6>
+              <p style="font-size: 11px; color: var(--text-muted);">Tagihan Anda akan muncul di sini.</p>
+          </div>
+      <% } %>
+
+      <div style="font-size: 10px; text-align: center; color: var(--text-muted); padding: 10px 20px;"><%= appSettings.footerInfo %></div>
+      <div style="height: 100px; opacity: 0; pointer-events: none;"></div>
+
+      <div class="mob-nav">
+          <a href="/customer/dashboard" class="mob-nav-item"><i class="bi bi-house-door fs-4 mb-1"></i>Home</a>
+          <a href="/customer/billing/invoices" class="mob-nav-item active"><i class="bi bi-ticket-perforated-fill fs-4 mb-1"></i>Tagihan</a>
+          <a href="#" data-bs-toggle="modal" data-bs-target="#qrisModal" class="mob-nav-item" style="flex: 0.8; text-decoration: none;">
+              <div class="mob-nav-fab"><i class="bi bi-qr-code-scan"></i></div>
+          </a>
+          <a href="/customer/trouble/report" class="mob-nav-item"><i class="bi bi-hdd-network fs-4 mb-1"></i>Komplain</a>
+          <a href="/customer/billing/profile" class="mob-nav-item"><i class="bi bi-person fs-4 mb-1"></i>Profil</a>
+      </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <script>
+      const htmlEl = document.documentElement;
+      const mobLayout = document.querySelector('.mobile-layout');
+      const savedTheme = localStorage.getItem('appTheme') || 'light';
+      
+      // Jalankan tema pertama kali load
+      setTheme(savedTheme);
+
+      // Fungsi global ini dipanggil dari tombol di Desktop maupun Mobile
+      window.toggleTheme = function() {
+          const currentTheme = htmlEl.getAttribute('data-bs-theme');
+          setTheme(currentTheme === 'light' ? 'dark' : 'light');
+      };
+
+      function setTheme(theme) {
+          // Ganti warna kanvas utama
+          htmlEl.setAttribute('data-bs-theme', theme);
+          
+          // Ganti variabel khusus mobile
+          if (mobLayout) mobLayout.setAttribute('data-theme', theme);
+          
+          // Simpan memori
+          localStorage.setItem('appTheme', theme);
+          
+          // Sinkronisasi Ikon Desktop
+          const iconDesk = document.getElementById('themeIconDesk');
+          if(iconDesk) iconDesk.className = theme === 'dark' ? 'bi bi-sun-fill text-warning' : 'bi bi-moon-stars-fill text-secondary';
+          
+          // Sinkronisasi Ikon Mobile
+          const iconMob = document.getElementById('themeIconMob');
+          if(iconMob) iconMob.className = theme === 'dark' ? 'bi bi-sun-fill text-warning fs-5' : 'bi bi-moon-stars-fill fs-5';
+      }
+  </script>
+  
+  <div class="modal fade" id="qrisModal" tabindex="-1" aria-labelledby="qrisModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+      <div class="modal-content border-0 shadow-lg rounded-4" style="background-color: var(--surface-color, #fff);">
+        <div class="modal-header border-bottom-0 pb-0">
+          <h6 class="modal-title fw-bold text-primary" id="qrisModalLabel"><i class="bi bi-qr-code-scan me-2"></i>Scan QRIS</h6>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body text-center pt-2 pb-4">
+            
+            <div class="bg-white p-3 rounded-4 border d-inline-block shadow-sm mb-3 mt-2">
+                <img src="/img/ewallet.jpg" onerror="this.onerror=null; this.src='/img/logo.png';" alt="QR Code Pembayaran" class="img-fluid rounded-3" style="max-width: 180px;">
+            </div>
+            
+            <h6 class="fw-bold mb-1">A/N: <%= typeof appSettings !== 'undefined' ? appSettings.payment_account_holder : 'PulseBill Technologies Inc.' %></h6>
+            <p class="small text-muted mb-0" style="font-size: 11px;">Gunakan aplikasi M-Banking atau E-Wallet (DANA, OVO, GoPay) untuk scan kode di atas.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+</body>
+</html>

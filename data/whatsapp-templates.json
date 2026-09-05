@@ -1,0 +1,37 @@
+{
+  "invoice_created": {
+    "template": "📋 *NEW INVOICE GENERATED*\n\nHello {customer_name},\n\nYour monthly service invoice is now ready:\n\n📄 *Invoice No:* {invoice_number}\n💰 *Amount Due:* ${amount}\n📅 *Due Date:* {due_date}\n📦 *Plan:* {package_name} ({package_speed})\n📝 *Notes:* {notes}\n\nPlease submit payment prior to the due date to ensure uninterrupted connectivity.\nDirect One-Click Payment:\n{payment_url}\n\nSubscriber Self-Service Portal:\nhttps://billing.pulsebill.io/portal\n\nThank you for choosing PulseBill Telecom.",
+    "enabled": true
+  },
+  "due_date_reminder": {
+    "template": "⚠️ *PAYMENT DUE REMINDER*\n\nHello {customer_name},\n\nThis is a courtesy reminder that your service invoice will be due in {days_remaining} day(s):\n\n📄 *Invoice No:* {invoice_number}\n💰 *Amount Due:* ${amount}\n📅 *Due Date:* {due_date}\n📦 *Plan:* {package_name} ({package_speed})\n\nPay online instantly:\n{payment_url}\n\nSubscriber Portal:\nhttps://billing.pulsebill.io/portal\n\nThank you for your prompt payment.",
+    "enabled": true
+  },
+  "payment_received": {
+    "template": "✅ *PAYMENT CONFIRMED*\n\nHello {customer_name},\n\nWe have successfully received and processed your payment:\n\n📄 *Invoice No:* {invoice_number}\n💰 *Amount Paid:* ${amount}\n💳 *Payment Method:* {payment_method}\n📅 *Timestamp:* {payment_date}\n🔢 *Reference ID:* {reference_number}\n\nYour network service remains active and healthy.\nAccess your receipt at: https://billing.pulsebill.io/portal\n\nThank you for your valued partnership.",
+    "enabled": true
+  },
+  "service_disruption": {
+    "title": "Network Incident Alert",
+    "template": "🚨 *NETWORK INCIDENT ADVISORY*\n\nDear Valued Customer,\n\nOur automated telemetry system has detected a localized service degradation:\n\n📡 *Incident Type:* {disruption_type}\n📍 *Affected Sector:* {affected_area}\n⏰ *Estimated Resolution:* {estimated_resolution}\n📞 *NOC Support:* {support_phone}\n\nOur field engineering team is actively working to restore normal optical connectivity. We sincerely apologize for the inconvenience.\n\nPulseBill Network Operations Center",
+    "enabled": true
+  },
+  "service_announcement": {
+    "title": "Service Announcement",
+    "template": "📢 *SERVICE ANNOUNCEMENT*\n\nDear Customer,\n\n{announcement_content}\n\nPulseBill Telecom Technologies Inc.",
+    "enabled": true
+  },
+  "service_suspension": {
+    "template": "⚠️ *SERVICE TEMPORARILY SUSPENDED*\n\nHello {customer_name},\n\nYour internet service has been temporarily placed on hold due to:\n📋 *Reason:* {reason}\n\n💡 *Instant Reactivation Steps:*\n1. Complete settlement of the outstanding invoice\n2. Service will be automatically reprovisioned on the router within 60 seconds of payment verification\n3. Quick Payment Link:\n   {payment_url}\n\nSubscriber Portal:\nhttps://billing.pulsebill.io/portal\n\n📞 *Need Assistance?*\nContact Support: +1 (555) 019-2834\n\n*PulseBill Telecom Inc.*",
+    "enabled": true
+  },
+  "service_restoration": {
+    "template": "✅ *SERVICE SUCCESSFULLY RESTORED*\n\nHello {customer_name},\n\nYour network service has been successfully re-enabled on the access router.\n\n📋 *Account Status:*\n• Status: ACTIVE ✅\n• Plan: {package_name}\n• Bandwidth Profile: {package_speed}\n\nAccess your account: https://billing.pulsebill.io/portal\n\nThank you for keeping your account in good standing.\n\n*PulseBill Telecom Inc.*",
+    "enabled": true
+  },
+  "welcome_message": {
+    "title": "Welcome to PulseBill",
+    "template": "✨ *WELCOME TO PULSEBILL TELECOM* ✨\n\nHello *{customer_name}*,\nThank you for subscribing. Your high-speed fiber connection is now active and provisioned!\n\n📦 *SERVICE DETAILS:*\n> 🏷️ *Plan:* {package_name}\n> ⚡ *Speed:* {package_speed}\n> 🔑 *Default WiFi Password:* _{wifi_password}_\n\n🌐 *SUBSCRIBER PORTAL:*\nManage billing, invoices, and speed tests at:\nhttps://billing.pulsebill.io/portal\n\n------------------------------------------\n💳 *BILLING INFORMATION:*\nInvoices are automatically generated on the 1st of each calendar month with 30-day payment terms.\n\n☎️ *24/7 SUPPORT:*\nContact NOC Support: +1 (555) 019-2834\n\n_Enjoy high-speed, reliable fiber connectivity!_",
+    "enabled": true
+  }
+}

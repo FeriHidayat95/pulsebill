@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stok Voucher - Portal Agen</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body { background-color: #f4f7fe; font-family: 'Poppins', sans-serif; color: #333; }
+        .card { border: none; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
+        
+        /* Checkbox Custom */
+        .form-check-input:checked { background-color: #0d6efd; border-color: #0d6efd; }
+        .form-check-input:disabled { background-color: #e9ecef; border-color: #dee2e6; cursor: not-allowed; }
+        
+        /* Toolbar Action (Floating) */
+        #bulk-action-bar {
+            display: none;
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            background: white;
+            padding: 15px 25px;
+            border-radius: 50px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border: 1px solid #e0e0e0;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { bottom: -100px; opacity: 0; }
+            to { bottom: 30px; opacity: 1; }
+        }
+
+        .table thead th {
+            background: #f8f9fa;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .voucher-code {
+            font-family: 'Courier New', monospace;
+            font-weight: 700;
+            color: #0d6efd;
+            background: #f0f7ff;
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+
+        .btn-action { border-radius: 50px; font-weight: 600; padding: 8px 20px; }
+        .badge-profile { background: #e9ecef; color: #495057; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+<div class="container py-4">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <a href="/agent/dashboard" class="text-decoration-none small fw-bold"><i class="bi bi-arrow-left"></i> KEMBALI</a>
+            <h3 class="fw-bold mt-2 mb-0">Manajemen Stok Voucher</h3>
+        </div>
+        <i class="bi bi-ticket-perforated fs-1 text-primary opacity-25"></i>
+    </div>
+
+    <div class="card">
+        <div class="card-body p-4">
+            <div class="mb-3 d-flex gap-2">
+                <button type="button" onclick="filterStatus('')" class="btn btn-sm btn-outline-secondary btn-action border">Semua Stok</button>
+                <button type="button" onclick="filterStatus('READY')" class="btn btn-sm btn-outline-success btn-action border">Hanya Ready</button>
+                <button type="button" onclick="filterStatus('TERPAKAI')" class="btn btn-sm btn-outline-danger btn-action border">Sudah Laku</button>
+            </div>
+
+            <div class="table-responsive">
+                <table id="tableVoucher" class="table table-hover align-middle w-100">
+                    <thead>
+                        <tr>
+                            <th width="40">
+                                <input type="checkbox" class="form-check-input" id="selectAll">
+                            </th>
+                            <th>Waktu Beli</th>
+                            <th>Kode Voucher</th>
+                            <th>Profil Paket</th>
+                            <th class="text-center">Status</th> <th class="text-end">Harga Jual</th> </tr>
+                    </thead>
+                    <tbody>
+                        <% vouchers.forEach(v => { %>
+                        <tr>
+                            <td>
+                                <% if (v.login_count > 0) { %>
+                                    <input type="checkbox" class="form-check-input" disabled title="Sudah Terpakai">
+                                <% } else { %>
+                                    <input type="checkbox" class="form-check-input voucher-checkbox" 
+                                           value='<%= JSON.stringify({username: v.username, profile: v.profile, price_sell: v.price_sell}) %>'>
+                                <% } %>
+                            </td>
+                            <td>
+                                <div class="small fw-bold"><%= moment(v.created_at).format('DD MMM YYYY') %></div>
+                                <div class="text-muted small"><%= moment(v.created_at).format('HH:mm') %> WIB</div>
+                            </td>
+                            <td><span class="voucher-code"><%= v.username %></span></td>
+                            <td><span class="badge badge-profile"><%= v.profile %></span></td>
+                            
+                            <td class="text-center">
+                                <% if (v.login_count > 0) { %>
+                                    <span class="badge rounded-pill bg-danger-subtle text-danger border border-danger-subtle px-3 py-2">
+                                        <i class="bi bi-person-check-fill me-1"></i> TERPAKAI
+                                    </span>
+                                <% } else { %>
+                                    <span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle px-3 py-2">
+                                        <i class="bi bi-check-circle-fill me-1"></i> READY
+                                    </span>
+                                <% } %>
+                            </td>
+                    
+                            <td class="fw-bold text-success text-end">
+                                Rp <%= parseInt(v.price_sell).toLocaleString('id-ID') %>
+                            </td>
+                        </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="bulk-action-bar">
+    <div class="d-flex align-items-center gap-3">
+        <span class="fw-bold text-primary border-end pe-3"><span id="selectedCount">0</span> Terpilih</span>
+        
+        <form action="/agent/print-preview" method="POST" id="formPrint">
+            <input type="hidden" name="vouchers" id="inputPrintData">
+            <input type="hidden" name="agent_name" value="<%= typeof agent !== 'undefined' ? agent.name : 'Agen' %>">
+            <button type="button" onclick="submitBulkPrint()" class="btn btn-primary btn-action shadow-sm">
+                <i class="bi bi-printer me-2"></i> Print Voucher
+            </button>
+        </form>
+
+        <button type="button" onclick="submitBulkDelete()" class="btn btn-light text-danger btn-action border">
+            <i class="bi bi-trash me-2"></i> Hapus
+        </button>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    // Inisialisasi DataTable dengan perbaikan urutan kolom
+    const table = $('#tableVoucher').DataTable({
+        "order": [[1, "desc"]], // Tetap urutkan dari Waktu Beli terbaru
+        "columnDefs": [
+            { "orderable": false, "targets": [0, 4] } // Checkbox dan Status tidak perlu di-sort
+        ],
+        "pageLength": 10,
+        "language": {
+            "search": "Cari Voucher:",
+            "lengthMenu": "_MENU_ per halaman",
+            "info": "Menampilkan _START_ - _END_ dari _TOTAL_ voucher",
+            "paginate": { "next": "Next", "previous": "Prev" },
+            "zeroRecords": "Tidak ada data voucher ditemukan"
+        }
+    });
+
+    // Logika Checkbox Select All (Hanya mencentang yang tidak disabled/ready)
+    $('#selectAll').on('click', function() {
+        const rows = table.rows({ 'search': 'applied' }).nodes();
+        $('input.voucher-checkbox:not(:disabled)', rows).prop('checked', this.checked);
+        updateActionBar();
+    });
+
+    // Logika Checkbox Satuan
+    $('#tableVoucher tbody').on('change', '.voucher-checkbox', function() {
+        updateActionBar();
+    });
+
+    function updateActionBar() {
+        const checkedCount = $('.voucher-checkbox:checked').length;
+        if (checkedCount > 0) {
+            $('#bulk-action-bar').fadeIn();
+            $('#selectedCount').text(checkedCount);
+        } else {
+            $('#bulk-action-bar').fadeOut();
+            $('#selectAll').prop('checked', false);
+        }
+    }
+});
+
+// Fungsi Khusus Filter Status
+function filterStatus(status) {
+    const table = $('#tableVoucher').DataTable();
+    table.column(4).search(status).draw(); // Kolom index ke-4 adalah Status
+}
+
+// Fungsi Submit Print
+function submitBulkPrint() {
+    let selectedData = [];
+    $('.voucher-checkbox:checked').each(function() {
+        selectedData.push(JSON.parse($(this).val()));
+    });
+
+    if (selectedData.length > 0) {
+        $('#inputPrintData').val(JSON.stringify(selectedData));
+        $('#formPrint').submit();
+    }
+}
+
+// Fungsi Submit Delete (Batch)
+function submitBulkDelete() {
+    let selectedUsernames = [];
+    $('.voucher-checkbox:checked').each(function() {
+        const data = JSON.parse($(this).val());
+        selectedUsernames.push(data.username);
+    });
+
+    if (confirm('Apakah Anda yakin ingin menghapus ' + selectedUsernames.length + ' voucher terpilih dari daftar stok?\n(Catatan: Voucher yang sudah terjual tidak disarankan dihapus)')) {
+        fetch('/agent/voucher/delete-batch', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ usernames: selectedUsernames })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.success) {
+                location.reload();
+            } else {
+                alert('Gagal menghapus: ' + data.message);
+            }
+        });
+    }
+}
+</script>
+
+</body>
+</html>

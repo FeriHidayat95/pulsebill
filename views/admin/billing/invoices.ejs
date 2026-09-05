@@ -1,0 +1,542 @@
+<%- include('../../partials/header') %>
+<body class="bg-[#0f172a] text-slate-300 font-sans antialiased selection:bg-blue-500 selection:text-white">
+
+<div class="no-print">
+    <%- include('../../partials/admin-header') %>
+    <%- include('../../partials/billing-sidebar', { page: 'invoices', settings: settings }) %>
+</div>
+
+<main class="p-4 sm:ml-64 pt-20 min-h-screen transition-all duration-300">
+
+    <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+        <div>
+            <h1 class="text-3xl font-black text-white tracking-tighter uppercase leading-none">
+                Kelola <span class="text-blue-500">Tagihan</span>
+            </h1>
+            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-[4px] mt-2 italic">Daftar Invoice & Pembayaran</p>
+        </div>
+        
+        <button onclick="openModal('addInvoiceModal')" class="group relative inline-flex items-center justify-center px-6 py-2.5 text-xs font-black text-white bg-blue-600 rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-500/20 transition-all uppercase tracking-wider active:scale-95">
+            <i class="bi bi-plus-lg text-lg me-2"></i> Buat Tagihan
+        </button>
+    </div>
+
+    <div class="bg-[#1e293b] border border-slate-700/60 rounded-3xl shadow-2xl overflow-hidden mb-10">
+        
+        <div class="px-6 py-5 border-b border-slate-700 bg-[#111827]/50 flex flex-col md:flex-row justify-between items-center gap-4">
+            <h3 class="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
+                <i class="bi bi-receipt text-blue-500 text-lg"></i> Invoice List
+            </h3>
+            
+            <div class="relative w-full md:w-64">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-500">
+                    <i class="bi bi-search"></i>
+                </div>
+                <input type="text" id="customSearch" class="block w-full p-2.5 pl-10 text-xs font-bold text-white border border-slate-700 rounded-xl bg-[#1e293b] focus:ring-blue-500 focus:border-blue-500 placeholder-slate-600 uppercase tracking-wider" placeholder="Cari No. Tagihan atau Nama...">
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table id="invoicesTable" class="w-full text-left text-slate-400">
+                <thead class="text-[10px] text-slate-500 uppercase bg-[#111827]/30 border-b border-slate-700">
+                    <tr>
+                        <th class="px-6 py-4 font-black tracking-wider">No. Tagihan</th>
+                        <th class="px-6 py-4 font-black tracking-wider">Pelanggan</th>
+                        <th class="px-6 py-4 font-black tracking-wider">Paket</th>
+                        <th class="px-6 py-4 font-black tracking-wider text-right">Jumlah</th>
+                        <th class="px-6 py-4 font-black tracking-wider text-amber-500">Jatuh Tempo</th>
+                        <th class="px-6 py-4 font-black tracking-wider text-center">Status</th>
+                        <th class="px-6 py-4 font-black tracking-wider text-right">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-700/50">
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<%- include('../../partials/footer') %>
+
+<div id="addInvoiceModal" tabindex="-1" class="fixed inset-0 z-50 hidden justify-center items-center bg-black/80 backdrop-blur-sm p-4">
+    <div class="relative w-full max-w-lg bg-[#1e293b] rounded-2xl shadow-2xl border border-slate-700">
+        <div class="flex items-center justify-between p-5 border-b border-slate-700 bg-[#111827] rounded-t-2xl">
+            <h3 class="text-lg font-black text-white uppercase">Buat Tagihan Baru</h3>
+            <button onclick="closeModal('addInvoiceModal')" class="text-slate-400 hover:text-white"><i class="bi bi-x-lg text-lg"></i></button>
+        </div>
+        <form id="addInvoiceForm" class="p-6 space-y-4">
+            <div>
+                <label class="block mb-2 text-[10px] font-black text-slate-500 uppercase tracking-widest">Pilih Pelanggan</label>
+                <select name="customer_id" id="customer_id" required class="select2-sultan w-full bg-[#0f172a] border border-slate-700 text-white text-sm rounded-xl p-3 font-bold">
+                    <option value="">-- Cari Nama atau Username --</option>
+                    <% customers.forEach(function(c) { %><option value="<%= c.id %>" data-package="<%= c.package_id %>"><%= c.name %> (<%= c.username %>)</option><% }); %>
+                </select>
+            </div>
+            <div>
+                <label class="block mb-2 text-[10px] font-black text-slate-500 uppercase tracking-widest">Pilih Paket</label>
+                <select name="package_id" id="package_id" class="w-full bg-[#0f172a] border border-slate-700 text-white text-sm rounded-xl p-3 font-bold">
+                    <option value="">-- Pilih --</option>
+                    <% packages.forEach(function(p) { %><option value="<%= p.id %>" data-price="<%= p.price %>"><%= p.name %></option><% }); %>
+                </select>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block mb-2 text-[10px] font-black text-slate-500 uppercase tracking-widest">Nominal (Rp)</label>
+                    <input type="number" name="amount" id="amount" class="w-full bg-[#0f172a] border border-slate-700 text-white text-sm rounded-xl p-3 font-bold" required>
+                </div>
+                <div>
+                    <label class="block mb-2 text-[10px] font-black text-slate-500 uppercase tracking-widest">Jatuh Tempo</label>
+                    <input type="date" name="due_date" id="due_date" class="w-full bg-[#0f172a] border border-slate-700 text-white text-sm rounded-xl p-3 font-bold" required>
+                </div>
+            </div>
+            <div class="pt-4 flex justify-end space-x-2">
+                <button type="button" onclick="closeModal('addInvoiceModal')" class="px-5 py-2.5 text-xs font-bold text-slate-500 uppercase">Batal</button>
+                <button type="submit" class="px-5 py-2.5 text-xs font-black text-white bg-blue-600 rounded-xl hover:bg-blue-700 shadow-lg uppercase">Simpan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="editInvoiceModal" tabindex="-1" class="fixed inset-0 z-50 hidden justify-center items-center bg-black/80 backdrop-blur-sm p-4">
+    <div class="relative w-full max-w-lg bg-[#1e293b] rounded-2xl shadow-2xl border border-slate-700">
+        <div class="flex items-center justify-between p-5 border-b border-slate-700 bg-[#111827] rounded-t-2xl">
+            <h3 class="text-lg font-black text-white uppercase text-amber-500">Edit Invoice</h3>
+            <button onclick="closeModal('editInvoiceModal')" class="text-slate-400 hover:text-white"><i class="bi bi-x-lg text-lg"></i></button>
+        </div>
+        <form id="editInvoiceForm" class="p-6 space-y-4">
+            <input type="hidden" name="id" id="edit_inv_id_asli">
+            <input type="hidden" name="customer_id" id="edit_inv_customer_id">
+            <div>
+                <label class="block mb-2 text-[10px] font-black text-slate-500 uppercase tracking-widest">No. Invoice</label>
+                <input type="text" id="edit_inv_number" class="w-full bg-[#111827] border border-slate-700 text-slate-500 text-sm rounded-xl p-3 font-mono font-bold" readonly>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block mb-2 text-[10px] font-black text-slate-500 uppercase tracking-widest">Jumlah (Rp)</label>
+                    <input type="number" name="amount" id="edit_inv_amount" class="w-full bg-[#0f172a] border border-slate-700 text-white text-sm rounded-xl p-3 font-bold" required>
+                </div>
+                <div>
+                    <label class="block mb-2 text-[10px] font-black text-slate-500 uppercase tracking-widest">Jatuh Tempo</label>
+                    <input type="date" name="due_date" id="edit_inv_date" class="w-full bg-[#0f172a] border border-slate-700 text-white text-sm rounded-xl p-3 font-bold" required>
+                </div>
+            </div>
+            <div>
+                <label class="block mb-2 text-[10px] font-black text-slate-500 uppercase tracking-widest">Status Pembayaran</label>
+                <select name="status" id="edit_inv_status" class="w-full bg-[#0f172a] border border-slate-700 text-white text-sm rounded-xl p-3 font-bold">
+                    <option value="unpaid">BELUM LUNAS</option>
+                    <option value="paid">LUNAS</option>
+                    <option value="cancelled">DIBATALKAN</option>
+                </select>
+            </div>
+            <div>
+                <label class="block mb-2 text-[10px] font-black text-slate-500 uppercase tracking-widest">Catatan</label>
+                <textarea name="notes" id="edit_inv_notes" rows="2" class="w-full bg-[#0f172a] border border-slate-700 text-white text-sm rounded-xl p-3"></textarea>
+            </div>
+            <div class="pt-4 flex justify-end space-x-2">
+                <button type="button" onclick="closeModal('editInvoiceModal')" class="px-5 py-2.5 text-xs font-bold text-slate-500 uppercase">Batal</button>
+                <button type="submit" class="px-5 py-2.5 text-xs font-black text-white bg-amber-600 rounded-xl uppercase">Simpan Perubahan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="paymentChoiceModal" tabindex="-1" class="fixed inset-0 z-50 hidden justify-center items-center bg-black/80 backdrop-blur-sm p-4">
+    <div class="relative w-full max-w-sm bg-[#1e293b] rounded-2xl shadow-2xl border border-slate-700 p-8 text-center">
+        <input type="hidden" id="target_inv_id">
+        <h6 class="text-lg font-black text-white mb-6 uppercase">Bayar: <span id="target_name" class="text-blue-500"></span></h6>
+        <div class="space-y-4">
+            <button onclick="payManual()" class="w-full p-5 rounded-2xl border border-emerald-500/30 bg-[#111827] hover:bg-emerald-600/10 text-emerald-400 transition-all active:scale-95">
+                <i class="bi bi-cash-stack text-3xl mb-2 block"></i><span class="text-xs font-black uppercase">Bayar Tunai (Manual)</span>
+            </button>
+            <button onclick="generateLinkManual(this)" class="w-full p-5 rounded-2xl border border-blue-500/30 bg-[#111827] hover:bg-blue-600/10 text-blue-400 transition-all active:scale-95">
+                <i class="bi bi-link-45deg text-3xl mb-2 block"></i><span class="text-xs font-black uppercase">Buat Link Tripay</span>
+            </button>
+        </div>
+        <button onclick="closeModal('paymentChoiceModal')" class="mt-6 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Batal</button>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<style>
+    /* STYLING SULTAN UNTUK DATATABLES */
+    .dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_length { display: none; }
+    
+    .dataTables_info { 
+        color: #64748b !important; 
+        font-size: 0.75rem; 
+        font-weight: 800; 
+        text-transform: uppercase; 
+        letter-spacing: 1px;
+        padding-top: 0 !important;
+    }
+    
+    .dataTables_paginate { 
+        display: flex; 
+        gap: 6px; 
+        padding-top: 0 !important;
+        margin: 0 !important;
+    }
+    
+    .paginate_button { 
+        padding: 6px 14px !important; 
+        border-radius: 8px !important; 
+        background: #1e293b !important; 
+        color: #94a3b8 !important; 
+        cursor: pointer; 
+        border: 1px solid #334151 !important; 
+        font-size: 0.75rem; 
+        font-weight: 800; 
+        transition: all 0.3s ease;
+    }
+    
+    .paginate_button:hover {
+        background: #334155 !important;
+        color: white !important;
+    }
+    
+    .paginate_button.current, .paginate_button.current:hover { 
+        background: #3b82f6 !important; 
+        color: white !important; 
+        border-color: #3b82f6 !important; 
+        box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
+    }
+    
+    .paginate_button.disabled {
+        opacity: 0.3 !important;
+        cursor: not-allowed !important;
+    }
+
+    table.dataTable { border-collapse: collapse !important; margin-top: 0 !important; margin-bottom: 0 !important; }
+    table.dataTable tbody tr { border-bottom: 1px solid rgba(51, 65, 81, 0.5); }
+    table.dataTable tbody tr:last-child { border-bottom: none; }
+
+    /* STYLING SELECT2 SULTAN DARK MODE */
+    .select2-container--default .select2-selection--single {
+        background-color: #0f172a !important; 
+        border: 1px solid #334151 !important;
+        height: 46px !important;
+        border-radius: 0.75rem !important; 
+        display: flex;
+        align-items: center;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        color: #f8fafc !important; 
+        font-weight: 700;
+        font-size: 14px;
+        padding-left: 12px !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 44px !important;
+        right: 10px !important;
+    }
+    .select2-dropdown {
+        background-color: #1e293b !important;
+        border: 1px solid #3b82f6 !important;
+        color: white !important;
+        border-radius: 12px !important;
+        overflow: hidden;
+        z-index: 99999 !important; 
+    }
+    .select2-search__field {
+        background-color: #0f172a !important;
+        color: white !important;
+        border-radius: 8px !important;
+        border: 1px solid #334151 !important;
+    }
+    .select2-results__option {
+        color: #cbd5e1 !important;
+        font-weight: 600;
+        font-size: 13px;
+    }
+    .select2-results__option--highlighted[aria-selected] {
+        background-color: #3b82f6 !important; 
+        color: white !important;
+    }
+</style>
+
+<script>
+    $(document).ready(function() {
+        
+        // ==============================================================
+        // MENGAKTIFKAN DATATABLES SERVER-SIDE (AJAX) UNTUK INVOICES
+        // ==============================================================
+        const table = $('#invoicesTable').DataTable({
+            responsive: true,
+            pageLength: 20,
+            processing: true, 
+            serverSide: true, // AKTIF MODE BACKEND!
+            ajax: {
+                // ?? PASTIKAN ROUTE INI DIBUAT DI BACKEND ??
+                url: '/admin/billing/invoices/datatable', 
+                type: 'POST'
+            },
+            order: [[4, 'desc']], // Default: Urutkan dari Jatuh Tempo terbaru
+            dom: '<"min-h-[400px]"tr><"flex flex-col md:flex-row justify-between items-center p-5 bg-[#111827]/50 border-t border-slate-700/50"ip>',
+            language: { 
+                search: "", 
+                zeroRecords: "Tidak ada tagihan ditemukan.",
+                processing: "<div class='text-blue-500 font-black uppercase tracking-widest p-4 bg-[#111827] rounded-xl border border-slate-700 shadow-2xl'><i class='bi bi-arrow-repeat animate-spin text-xl inline-block me-2'></i> Memuat Tagihan...</div>"
+            },
+            columns: [
+                { 
+                    data: 'invoice_number', 
+                    name: 'invoice_number',
+                    className: 'px-6 py-4 align-middle whitespace-nowrap',
+                    render: function(data, type, row) {
+                        return `
+                            <span onclick="viewInvoice('${row.id}')" class="font-mono text-xs md:text-sm font-bold text-blue-400 hover:text-white transition-colors underline-offset-4 hover:underline cursor-pointer tracking-wider">
+                                ${row.invoice_number}
+                            </span>
+                        `;
+                    }
+                },
+                { 
+                    data: 'customer_name', 
+                    name: 'customer_name',
+                    className: 'px-6 py-4 align-middle whitespace-nowrap',
+                    render: function(data, type, row) {
+                        return `<div class="font-black text-white text-sm md:text-base">${row.customer_name || 'Pelanggan Dihapus'}</div>`;
+                    }
+                },
+                { 
+                    data: 'package_name', 
+                    name: 'package_name',
+                    className: 'px-6 py-4 align-middle whitespace-nowrap',
+                    render: function(data, type, row) {
+                        return `
+                            <span class="px-2 py-1 rounded-md bg-[#111827] border border-slate-700/80 text-[10px] font-bold text-slate-300 uppercase tracking-tight shadow-inner">
+                                ${row.package_name || 'Custom'}
+                            </span>
+                        `;
+                    }
+                },
+                { 
+                    data: 'amount', 
+                    name: 'amount',
+                    className: 'px-6 py-4 align-middle text-right whitespace-nowrap',
+                    render: function(data, type, row) {
+                        let displayAmt = row.amount;
+                        if (displayAmt >= 100000000) { displayAmt = displayAmt / 100; }
+                        return `<div class="font-mono text-xs md:text-sm font-black text-emerald-400">Rp ${parseFloat(displayAmt).toLocaleString('id-ID')}</div>`;
+                    }
+                },
+                { 
+                    data: 'due_date', 
+                    name: 'due_date',
+                    className: 'px-6 py-4 align-middle whitespace-nowrap',
+                    render: function(data, type, row) {
+                        const tgl = row.due_date ? new Date(row.due_date).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
+                        return `
+                            <div class="flex items-center gap-2">
+                                <div class="p-1.5 rounded-lg bg-amber-500/10 text-amber-400/80"><i class="bi bi-calendar2-week"></i></div>
+                                <span class="text-xs font-bold text-slate-300">${tgl}</span>
+                            </div>
+                        `;
+                    }
+                },
+                { 
+                    data: 'status', 
+                    name: 'status',
+                    className: 'px-6 py-4 align-middle text-center whitespace-nowrap',
+                    render: function(data, type, row) {
+                        if (row.status === 'paid') {
+                            return `<span class="inline-flex items-center px-3 py-1.5 rounded-full text-[9px] font-black bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase tracking-widest">LUNAS</span>`;
+                        } else {
+                            return `<span class="inline-flex items-center px-3 py-1.5 rounded-full text-[9px] font-black bg-amber-500/10 text-amber-400 border border-amber-500/20 uppercase tracking-widest">BELUM</span>`;
+                        }
+                    }
+                },
+                { 
+                    data: 'id', 
+                    orderable: false, 
+                    searchable: false, 
+                    className: 'px-6 py-4 align-middle text-right whitespace-nowrap',
+                    render: function(data, type, row) {
+                        const safeNotes = (row.notes || '').replace(/[\\']/g, '\\$&').replace(/\r?\n|\r/g, ' ');
+                        const rawDueDate = row.due_date ? new Date(row.due_date).toISOString().split('T')[0] : '';
+                        
+                        let buttons = `
+                            <div class="flex items-center justify-end gap-1.5">
+                                <button onclick="resendWA('${row.id}', '${row.customer_name}')" class="p-2 rounded-xl text-emerald-400 bg-emerald-500/5 hover:bg-emerald-500 hover:text-white transition-all border border-transparent hover:border-emerald-400/50" title="Kirim WA"><i class="bi bi-whatsapp text-lg"></i></button>
+                                <a href="/admin/billing/invoices/${row.id}/print" target="_blank" class="p-2 rounded-xl text-blue-400 bg-blue-500/5 hover:bg-blue-500 hover:text-white transition-all border border-transparent hover:border-blue-400/50" title="Cetak"><i class="bi bi-printer-fill text-lg"></i></a>
+                                <button onclick="editInvoice('${row.id}', '${row.customer_id}', '${row.invoice_number}', '${row.amount}', '${rawDueDate}', '${row.status}', '${safeNotes}')" class="p-2 rounded-xl text-amber-400 bg-amber-500/5 hover:bg-amber-500 hover:text-white transition-all border border-transparent hover:border-amber-400/50" title="Edit"><i class="bi bi-pencil-square text-lg"></i></button>
+                        `;
+
+                        if (row.status === 'unpaid') {
+                            buttons += `<button onclick="openPaymentModal('${row.id}', '${row.customer_name}')" class="p-2 rounded-xl text-cyan-400 bg-cyan-500/5 hover:bg-cyan-500 hover:text-white transition-all border border-transparent hover:border-cyan-400/50" title="Bayar"><i class="bi bi-wallet2 text-lg"></i></button>`;
+                        } else {
+                            buttons += `<button onclick="refundInvoice('${row.id}')" class="p-2 rounded-xl text-rose-500 bg-rose-500/5 hover:bg-rose-500 hover:text-white transition-all border border-transparent hover:border-rose-400/50" title="Batal Bayar (Refund)"><i class="bi bi-arrow-counterclockwise text-lg font-black"></i></button>`;
+                        }
+
+                        buttons += `
+                                <button onclick="deleteInvoice('${row.id}')" class="p-2 rounded-xl text-red-400 bg-red-500/5 hover:bg-red-500 hover:text-white transition-all border border-transparent hover:border-red-400/50" title="Hapus"><i class="bi bi-trash3-fill text-lg"></i></button>
+                            </div>
+                        `;
+                        return buttons;
+                    }
+                }
+            ],
+            createdRow: function(row, data, dataIndex) {
+                $(row).addClass('hover:bg-slate-800/50 transition-colors group');
+            }
+        });
+
+        // Hubungkan Input Kolom Custom Pencarian
+        $('#customSearch').on('keyup', function() { 
+            table.search(this.value).draw(); 
+        });
+
+        // ==============================================================
+
+        // INISIALISASI SELECT2 SULTAN
+        $('#customer_id').select2({
+            placeholder: "-- Ketik Nama atau Username --",
+            allowClear: true,
+            width: '100%',
+            dropdownParent: $('#addInvoiceModal') // Mencegah dropdown sembunyi di balik modal
+        });
+
+        $('#customer_id').change(function() {
+            let pkgId = $(this).find(':selected').data('package');
+            if(pkgId) $('#package_id').val(pkgId).trigger('change');
+        });
+        
+        $('#package_id').change(function() {
+            let price = $(this).find(':selected').data('price');
+            if(price) $('#amount').val(price);
+        });
+
+        $('#addInvoiceForm').submit(function(e) {
+            e.preventDefault();
+            $.post('/admin/billing/invoices/create', $(this).serialize()).done((res) => {
+                if (res.success) location.reload();
+                else Swal.fire('Gagal', res.message, 'warning');
+            });
+        });
+
+        $('#editInvoiceForm').submit(function(e) {
+            e.preventDefault();
+            $.post('/admin/billing/invoices/update', $(this).serialize()).done((res) => {
+                if(res.success) location.reload();
+                else Swal.fire('Gagal', res.message, 'error');
+            });
+        });
+    });
+
+    function openModal(id) { $('#' + id).removeClass('hidden').addClass('flex'); }
+    function closeModal(id) { $('#' + id).addClass('hidden').removeClass('flex'); }
+
+    function editInvoice(id, customer_id, number, amount, date, status, notes) {
+        $('#edit_inv_id_asli').val(id);
+        $('#edit_inv_customer_id').val(customer_id);
+        $('#edit_inv_number').val(number);
+        $('#edit_inv_amount').val(amount);
+        $('#edit_inv_date').val(date);
+        $('#edit_inv_status').val(status);
+        $('#edit_inv_notes').val(notes);
+        openModal('editInvoiceModal');
+    }
+
+    function viewInvoice(id) {
+        window.location.href = '/admin/billing/invoices/' + id;
+    }
+
+    function openPaymentModal(id, name) {
+        $('#target_inv_id').val(id);
+        $('#target_name').text(name);
+        openModal('paymentChoiceModal');
+    }
+
+    function payManual() {
+        const invId = $('#target_inv_id').val();
+        
+        $.post('/payment/manual-process', { 
+            invoice_id: invId, 
+            payment_method: 'Cash/Manual' 
+        })
+        .done((res) => {
+            if (res.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'PEMBAYARAN LUNAS!',
+                    text: res.message || 'Tagihan berhasil diverifikasi.',
+                    background: '#1e293b',
+                    color: '#fff',
+                    timer: 2000,
+                    showConfirmButton: false,
+                    allowOutsideClick: false
+                }).then(() => location.reload());
+            } else {
+                Swal.fire({ icon: 'error', title: 'GAGAL', text: res.message, background: '#1e293b', color: '#fff' });
+            }
+        })
+        .fail((xhr) => {
+            Swal.fire({ icon: 'error', title: 'SERVER ERROR', text: 'Gagal lapor ke database. Cek rute /payment/manual-process!', background: '#1e293b', color: '#fff' });
+        });
+    }
+
+    async function generateLinkManual(btn) {
+        const invId = $('#target_inv_id').val();
+        const response = await fetch(`/admin/billing/invoices/${invId}/generate-tripay`, { method: 'POST' });
+        const res = await response.json();
+        if (res.success && res.pay_url) window.open(res.pay_url, '_blank');
+        else Swal.fire('Gagal', res.message, 'error');
+    }
+
+    function resendWA(id, name) {
+        $.post(`/admin/billing/invoices/${id}/resend-wa`).done(function(res) {
+            if (res.success) Swal.fire('Terkirim!', res.message, 'success');
+            else Swal.fire('Gagal!', res.message, 'error');
+        });
+    }
+
+    function deleteInvoice(id) {
+        Swal.fire({
+            title: 'Hapus?', text: "Data hilang selamanya!", icon: 'warning',
+            background: '#1e293b', color: '#fff', showCancelButton: true, confirmButtonText: 'Ya, Hapus'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({ url: '/admin/billing/invoices/' + id, type: 'DELETE', success: (res) => location.reload() });
+            }
+        });
+    }
+    
+    function refundInvoice(id) {
+        Swal.fire({
+            title: 'Batal Bayar?',
+            text: "Tagihan akan kembali BELUM LUNAS dan riwayat uang masuk dihapus dari buku kas!",
+            icon: 'warning',
+            background: '#1e293b', color: '#fff',
+            showCancelButton: true,
+            confirmButtonColor: '#e11d48',
+            cancelButtonColor: '#475569',
+            confirmButtonText: 'Ya, Batalkan!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.post('/admin/billing/invoices/' + id + '/refund')
+                .done((res) => {
+                    if (res.success) {
+                        Swal.fire({
+                            icon: 'success', title: 'REFUND SUKSES!',
+                            text: res.message, background: '#1e293b', color: '#fff',
+                            timer: 2000, showConfirmButton: false
+                        }).then(() => location.reload());
+                    } else {
+                        Swal.fire({ icon: 'error', title: 'GAGAL', text: res.message, background: '#1e293b', color: '#fff' });
+                    }
+                }).fail(() => {
+                    Swal.fire({ icon: 'error', title: 'SERVER ERROR', text: 'Gagal menghubungi server.', background: '#1e293b', color: '#fff' });
+                });
+            }
+        });
+    }
+</script>
+
+</body>
+</html>

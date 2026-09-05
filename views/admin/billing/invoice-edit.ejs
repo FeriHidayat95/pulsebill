@@ -1,0 +1,286 @@
+<%- include('../../partials/header') %>
+<body class="bg-[#0f172a] text-slate-300 font-sans antialiased selection:bg-blue-500 selection:text-white">
+
+<%- include('../../partials/admin-header') %>
+
+<%- include('../../partials/billing-sidebar', { page: 'invoices', settings: settings }) %>
+
+<main class="p-4 sm:ml-64 pt-20 min-h-screen">
+
+    <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+        <div>
+            <h1 class="text-3xl font-black text-white tracking-tighter uppercase leading-none">
+                Edit <span class="text-blue-500">Invoice</span>
+            </h1>
+            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-[4px] mt-2 italic">Perbarui Data Tagihan #<%= invoice.invoice_number %></p>
+        </div>
+        
+        <div class="flex gap-2">
+            <a href="/admin/billing/invoices/<%= invoice.id %>" class="px-5 py-2.5 text-xs font-black text-blue-400 border border-blue-500/30 rounded-xl hover:bg-blue-600 hover:text-white transition-all uppercase tracking-widest">
+                <i class="bi bi-eye me-2"></i> Detail
+            </a>
+            <a href="/admin/billing/invoices" class="px-5 py-2.5 text-xs font-black text-slate-400 border border-slate-700 rounded-xl hover:bg-slate-800 hover:text-white transition-all uppercase tracking-widest">
+                <i class="bi bi-arrow-left me-2"></i> Kembali
+            </a>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <div class="lg:col-span-8">
+            <div class="bg-[#1e293b] border border-slate-700/60 rounded-3xl shadow-2xl overflow-hidden group hover:border-blue-500/30 transition-all duration-500">
+                <div class="px-6 py-5 border-b border-slate-700 bg-[#111827]/50">
+                    <h3 class="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
+                        <i class="bi bi-receipt text-blue-500 text-lg"></i> Formulir Edit Data
+                    </h3>
+                </div>
+                
+                <form id="editInvoiceForm" class="p-8 space-y-6">
+                    <input type="hidden" name="invoice_id" value="<%= invoice.id %>">
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Pelanggan</label>
+                            <select id="editCustomer" name="customer_id" required class="w-full bg-[#0f172a] border border-slate-700 text-white text-sm rounded-2xl p-3.5 font-bold focus:ring-blue-500 focus:border-blue-500 appearance-none cursor-pointer">
+                                <option value="">Pilih Pelanggan</option>
+                                <% if (customers && customers.length > 0) { %>
+                                    <% customers.forEach(function(customer) { %>
+                                        <option value="<%= customer.id %>" <%= customer.id === invoice.customer_id ? 'selected' : '' %>>
+                                            <%= customer.name %> (<%= customer.phone %>)
+                                        </option>
+                                    <% }); %>
+                                <% } %>
+                            </select>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Paket Internet</label>
+                            <select id="editPackage" name="package_id" required class="w-full bg-[#0f172a] border border-slate-700 text-white text-sm rounded-2xl p-3.5 font-bold focus:ring-blue-500 focus:border-blue-500 appearance-none cursor-pointer">
+                                <option value="">Pilih Paket</option>
+                                <% if (packages && packages.length > 0) { %>
+                                    <% packages.forEach(function(pkg) { %>
+                                        <option value="<%= pkg.id %>" data-price="<%= pkg.price %>" <%= pkg.id === invoice.package_id ? 'selected' : '' %>>
+                                            <%= pkg.name %> - Rp <%= parseFloat(pkg.price).toLocaleString('id-ID') %>
+                                        </option>
+                                    <% }); %>
+                                <% } %>
+                            </select>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Jumlah Tagihan (Rp)</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-500 font-bold text-xs">Rp</span>
+                                <input type="number" id="editAmount" name="amount" value="<%= invoice.amount %>" required class="w-full bg-[#0f172a] border border-slate-700 text-emerald-400 text-sm rounded-2xl p-3.5 pl-10 font-mono font-black focus:ring-blue-500">
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Tanggal Jatuh Tempo</label>
+                            <input type="date" id="editDueDate" name="due_date" value="<%= new Date(invoice.due_date).toISOString().split('T')[0] %>" required class="w-full bg-[#0f172a] border border-slate-700 text-white text-sm rounded-2xl p-3.5 font-bold focus:ring-blue-500">
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Status Pembayaran</label>
+                            <select name="status" class="w-full bg-[#0f172a] border border-slate-700 text-white text-sm rounded-2xl p-3.5 font-bold focus:ring-blue-500">
+                                <option value="unpaid" <%= invoice.status === 'unpaid' ? 'selected' : '' %>>BELUM BAYAR (UNPAID)</option>
+                                <option value="paid" <%= invoice.status === 'paid' ? 'selected' : '' %>>SUDAH BAYAR (PAID)</option>
+                            </select>
+                        </div>
+
+                        <div class="col-span-1 md:col-span-2 space-y-2">
+                            <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Catatan Tambahan</label>
+                            <textarea id="editNotes" name="notes" rows="3" class="w-full bg-[#0f172a] border border-slate-700 text-white text-sm rounded-2xl p-4 focus:ring-blue-500 placeholder-slate-700"><%= invoice.notes || '' %></textarea>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col md:flex-row justify-between items-center mt-8 pt-6 border-t border-slate-700/50 gap-4">
+                        <button type="button" onclick="deleteInvoice()" class="px-6 py-3 text-[10px] font-black text-red-500 border border-red-500/20 rounded-xl hover:bg-red-600 hover:text-white transition-all uppercase tracking-[2px]">
+                            <i class="bi bi-trash me-2 text-sm"></i> Hapus Permanen
+                        </button>
+                        <button type="submit" class="w-full md:w-auto px-10 py-3.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-black rounded-2xl transition-all uppercase tracking-widest shadow-lg shadow-blue-500/20 active:scale-95">
+                            <i class="bi bi-save2 me-2 text-sm"></i> Simpan Perubahan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="lg:col-span-4">
+            <div class="bg-[#1e293b] border border-slate-700/60 rounded-3xl shadow-2xl p-6 relative overflow-hidden group">
+                <div class="absolute top-0 right-0 p-4 opacity-5 text-white">
+                    <i class="bi bi-info-circle text-6xl"></i>
+                </div>
+                
+                <h6 class="text-[10px] font-black text-white uppercase tracking-widest mb-6 border-b border-slate-700 pb-3">Ringkasan Saat Ini</h6>
+                
+                <div class="space-y-5">
+                    <div class="flex justify-between items-center">
+                        <span class="text-[10px] font-bold text-slate-500 uppercase">No. Invoice</span>
+                        <span class="font-mono text-sm font-black text-white">#<%= invoice.invoice_number %></span>
+                    </div>
+                    
+                    <div class="flex justify-between items-center">
+                        <span class="text-[10px] font-bold text-slate-500 uppercase">Status</span>
+                        <div>
+                            <% if (invoice.status === 'paid') { %>
+                                <span class="px-3 py-1 rounded-full text-[9px] font-black bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase tracking-widest">Lunas</span>
+                            <% } else if (new Date(invoice.due_date) < new Date()) { %>
+                                <span class="px-3 py-1 rounded-full text-[9px] font-black bg-red-500/10 text-red-400 border border-red-500/20 uppercase tracking-widest text-shadow-sm shadow-red-500/20">Telat</span>
+                            <% } else { %>
+                                <span class="px-3 py-1 rounded-full text-[9px] font-black bg-amber-500/10 text-amber-400 border border-amber-500/20 uppercase tracking-widest">Unpaid</span>
+                            <% } %>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-center">
+                        <span class="text-[10px] font-bold text-slate-500 uppercase">Dibuat</span>
+                        <span class="text-xs font-black text-slate-300"><%= new Date(invoice.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) %></span>
+                    </div>
+
+                    <div class="pt-4 border-t border-slate-700/50">
+                        <span class="text-[10px] font-bold text-slate-500 uppercase block mb-1">Pelanggan Terkait:</span>
+                        <span class="text-sm font-black text-blue-400 leading-tight block"><%= invoice.customer_name %></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 p-6 bg-amber-500/5 border border-amber-500/10 rounded-3xl">
+                <div class="flex gap-3">
+                    <i class="bi bi-exclamation-triangle-fill text-amber-500 text-xl"></i>
+                    <div>
+                        <h6 class="text-[10px] font-black text-amber-500 uppercase tracking-widest mb-1 text-shadow-sm">Peringatan Teknis</h6>
+                        <p class="text-[10px] text-slate-500 font-bold leading-relaxed uppercase">Perubahan paket atau harga akan mempengaruhi laporan keuangan bulanan. Pastikan data sudah sesuai kuitansi fisik.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container" class="fixed top-24 right-5 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
+
+</main>
+
+<%- include('../../partials/footer') %>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<script>
+    // --- Auto Fill Price ---
+    document.getElementById('editPackage').addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        const price = selectedOption.getAttribute('data-price');
+        if (price) {
+            document.getElementById('editAmount').value = price;
+        }
+    });
+
+    // --- Form Submit (SINKRON TOTAL DENGAN BACKEND) ---
+    $('#editInvoiceForm').submit(function(e) {
+        e.preventDefault(); 
+        const btn = $(this).find('button[type="submit"]');
+        const originalHtml = btn.html();
+        
+        btn.prop('disabled', true).html('<i class="bi bi-arrow-repeat animate-spin mr-2"></i> MENYIMPAN...');
+
+        const formData = new FormData(this);
+        const data = Object.fromEntries(formData);
+        
+        // 1. SINKRONISASI ID: Ubah 'invoice_id' (EJS) jadi 'id' (Backend)
+        data.id = data.invoice_id; 
+
+        console.log("?? [Debug] Mengirim ke Server:", data);
+
+        // 2. URL & METHOD: Harus ke /update dan pakai POST
+        fetch(`/admin/billing/invoices/update`, { 
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(result => {
+            console.log("?? [Debug] Respon Server:", result);
+            if (result.success) {
+                showToast('success', 'BERHASIL', result.message);
+                // 3. REFRESH: Pindah ke halaman detail agar nominal baru muncul
+                setTimeout(() => { window.location.href = `/admin/billing/invoices/${data.id}`; }, 1000);
+            } else {
+                showToast('error', 'GAGAL', result.message);
+                btn.prop('disabled', false).html(originalHtml);
+            }
+        })
+        .catch(err => {
+            console.error("? [Debug] Error:", err);
+            showToast('error', 'SYSTEM ERROR', 'Gagal menghubungi server');
+            btn.prop('disabled', false).html(originalHtml);
+        });
+    });
+    
+    // --- Delete Invoice (DELETE Logic) ---
+    function deleteInvoice() {
+        if (!confirm('PERINGATAN!\n\nApakah Anda yakin ingin menghapus invoice ini secara permanen? Data yang dihapus tidak dapat dipulihkan.')) return;
+        
+        showToast('warning', 'HAPUS', 'Sedang memproses penghapusan...');
+
+        fetch(`/admin/billing/invoices/<%= invoice.id %>`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                showToast('success', 'TERHAPUS', 'Invoice berhasil dibuang dari sistem');
+                setTimeout(() => { window.location.href = '/admin/billing/invoices'; }, 1000);
+            } else {
+                showToast('error', 'GAGAL', result.message);
+            }
+        })
+        .catch(() => showToast('error', 'ERROR', 'Gagal menghubungi database'));
+    }
+
+    // --- Batman Toast Function ---
+    function showToast(type, title, message) {
+        const colors = {
+            success: 'bg-emerald-600 border-emerald-500',
+            error: 'bg-red-600 border-red-500',
+            warning: 'bg-amber-600 border-amber-500'
+        };
+        const icons = {
+            success: 'bi-check-circle-fill',
+            error: 'bi-exclamation-triangle-fill',
+            warning: 'bi-info-circle-fill'
+        };
+        
+        const id = 'toast-' + Math.random().toString(36).substr(2, 9);
+        const html = `
+            <div id="${id}" class="toast-item flex items-center w-full max-w-xs p-4 text-white ${colors[type] || 'bg-slate-800'} rounded-2xl shadow-2xl border transition-all duration-500 pointer-events-auto transform translate-x-0" role="alert">
+                <div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-white rounded-lg bg-white/20">
+                    <i class="bi ${icons[type] || 'bi-bell'}"></i>
+                </div>
+                <div class="ml-3">
+                    <span class="text-[10px] font-black uppercase tracking-widest opacity-70 block">${title}</span>
+                    <div class="text-xs font-bold">${message}</div>
+                </div>
+                <button type="button" class="ml-auto -mx-1.5 -my-1.5 p-1.5 inline-flex h-8 w-8 text-white hover:text-slate-200" onclick="this.parentElement.remove()">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>`;
+            
+        $('#toast-container').append(html);
+        setTimeout(() => {
+            $(`#${id}`).addClass('translate-x-full opacity-0');
+            setTimeout(() => $(`#${id}`).remove(), 500);
+        }, 4000);
+    }
+</script>
+
+<style>
+    /* Input Style Fix */
+    input[type="date"]::-webkit-calendar-picker-indicator {
+        filter: invert(1);
+    }
+    .text-shadow-sm { text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+</style>
+
+</body>
+</html>

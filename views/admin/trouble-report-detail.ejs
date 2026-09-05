@@ -1,0 +1,220 @@
+<%- include('../partials/header') %>
+<%- include('../partials/admin-header') %>
+<%- include('../partials/admin-sidebar', { page: 'trouble' }) %>
+
+<style>
+    /* PAKSA SIDEBAR JADI HITAM SEPERTI YANG BOS MAU */
+    #logo-sidebar, #logo-sidebar div, #logo-sidebar ul {
+        background-color: #111827 !important;
+        border-color: #374151 !important;
+    }
+
+    /* TYPOGRAPHY BATMAN MODE */
+    .detail-label { font-size: 10px; font-weight: 800; color: #6b7280; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+    .detail-value { font-size: 15px; font-weight: 700; color: #f3f4f6; margin-bottom: 20px; }
+
+    /* TIMELINE STYLE */
+    .timeline { position: relative; padding-left: 20px; border-left: 2px solid #374151; }
+    .timeline-item { position: relative; margin-bottom: 25px; padding-left: 20px; }
+    .timeline-dot {
+        position: absolute; left: -29px; top: 0; width: 16px; height: 16px;
+        border-radius: 50%; background: #3b82f6; border: 3px solid #111827;
+    }
+    .timeline-content { background: #1f2937; border: 1px solid #374151; padding: 15px; border-radius: 12px; }
+</style>
+
+<main class="p-4 sm:ml-64 pt-20 bg-gray-900 min-h-screen text-gray-300">
+    
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 border-b border-gray-800 pb-4">
+        <div>
+            <h1 class="text-2xl font-black text-white tracking-tight">DETAIL TIKET #<%= report.id %></h1>
+            <p class="text-sm text-gray-400 font-bold uppercase tracking-wider">Penanganan Laporan Gangguan</p>
+        </div>
+        
+        <div class="flex gap-2">
+            <a href="/admin/trouble" class="bg-gray-800 hover:bg-gray-700 text-white text-xs font-black px-4 py-2 rounded-lg border border-gray-700">
+                <i class="bi bi-arrow-left me-2"></i> KEMBALI
+            </a>
+            <button onclick="hapusTiket('<%= report.id %>')" class="bg-red-900/20 hover:bg-red-600 text-red-400 hover:text-white text-xs font-black px-4 py-2 rounded-lg border border-red-900/50">
+                <i class="bi bi-trash me-2"></i> HAPUS
+            </button>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <div class="lg:col-span-2 space-y-6">
+            <div class="bg-gray-800 border border-gray-700 rounded-2xl p-6 shadow-xl">
+                <div class="flex items-center gap-4 mb-6 border-b border-gray-700 pb-4">
+                    <div class="w-16 h-16 bg-blue-600/20 rounded-full flex items-center justify-center text-blue-400 border-2 border-blue-500 font-black text-2xl">
+                        <%= report.name.charAt(0).toUpperCase() %>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-black text-white"><%= report.name %></h2>
+                        <p class="text-sm text-blue-400 font-mono"><i class="bi bi-whatsapp me-2"></i><%= report.phone %></p>
+                    </div>
+                    <div class="ms-auto">
+                        <a href="https://wa.me/<%= report.phone.replace(/^0/, '62') %>" target="_blank" class="bg-green-600 hover:bg-green-700 text-white text-xs font-black px-4 py-2 rounded-full shadow-lg transition-all">
+                            HUBUNGI WA
+                        </a>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <p class="detail-label">Kategori</p>
+                        <p class="detail-value text-blue-400 uppercase"><%= report.category %></p>
+                    </div>
+                    <div>
+                        <p class="detail-label">Status Saat Ini</p>
+                        <p class="detail-value">
+                            <% if(report.status === 'open') { %>
+                                <span class="text-red-500 uppercase">ANTRIAN (OPEN)</span>
+                            <% } else if(report.status === 'in_progress') { %>
+                                <span class="text-yellow-500 uppercase">DALAM PROSES</span>
+                            <% } else { %>
+                                <span class="text-green-500 uppercase">SELESAI (RESOLVED)</span>
+                            <% } %>
+                        </p>
+                    </div>
+                    <div>
+                        <p class="detail-label">Lokasi / Alamat</p>
+                        <p class="detail-value"><%= report.location || '-' %></p>
+                    </div>
+                    <div>
+                        <p class="detail-label">Waktu Lapor</p>
+                        <p class="detail-value text-sm font-mono">
+                            <%= new Date(report.createdAt).toLocaleString('id-ID') %>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-4 border-t border-gray-700">
+                    <p class="detail-label">Keluhan Pelanggan</p>
+                    <div class="bg-gray-900 border border-gray-700 p-4 rounded-xl text-gray-300 italic">
+                        "<%= report.description %>"
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-gray-800 border border-gray-700 rounded-2xl p-6 shadow-xl">
+                <h3 class="text-sm font-black text-white uppercase tracking-widest mb-6"><i class="bi bi-clock-history me-2"></i>Riwayat Aktivitas</h3>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-dot bg-blue-500"></div>
+                        <div class="timeline-content">
+                            <p class="text-xs font-black text-white">Tiket Dibuat</p>
+                            <p class="text-[10px] text-gray-500"><%= new Date(report.createdAt).toLocaleString('id-ID') %></p>
+                        </div>
+                    </div>
+
+                    <% if (report.notes && report.notes.length > 0) { %>
+                        <% report.notes.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).forEach(note => { %>
+                            <div class="timeline-item">
+                                <div class="timeline-dot <%= note.status === 'resolved' ? 'bg-green-500' : 'bg-yellow-500' %>"></div>
+                                <div class="timeline-content">
+                                    <div class="flex justify-between items-center mb-1">
+                                        <p class="text-xs font-black text-white uppercase">Update: <%= note.status %></p>
+                                        <% if(note.notificationSent) { %>
+                                            <span class="text-[9px] text-green-400 font-bold"><i class="bi bi-check-all"></i> WA TERKIRIM</span>
+                                        <% } %>
+                                    </div>
+                                    <p class="text-[10px] text-gray-500 mb-2"><%= new Date(note.timestamp).toLocaleString('id-ID') %></p>
+                                    <p class="text-sm text-gray-300 bg-gray-900/50 p-2 rounded border border-gray-700"><%= note.content %></p>
+                                </div>
+                            </div>
+                        <% }); %>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <div class="lg:col-span-1">
+            <div class="bg-gray-800 border border-gray-700 rounded-2xl p-6 shadow-xl sticky top-24">
+                <h3 class="text-sm font-black text-white uppercase tracking-widest mb-6"><i class="bi bi-pencil-square me-2"></i>Update Status</h3>
+                
+                <form id="updateStatusForm">
+                    <div class="mb-4">
+                        <label class="detail-label">Status Laporan</label>
+                        <select class="w-full bg-gray-900 border border-gray-700 text-white rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500" name="status" id="statusSelect">
+                            <option value="open" <%= report.status === 'open' ? 'selected' : '' %>>Open (Antrian)</option>
+                            <option value="in_progress" <%= report.status === 'in_progress' ? 'selected' : '' %>>In Progress (Proses)</option>
+                            <option value="resolved" <%= report.status === 'resolved' ? 'selected' : '' %>>Resolved (Selesai)</option>
+                            <option value="closed" <%= report.status === 'closed' ? 'selected' : '' %>>Closed (Tutup)</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="detail-label">Catatan Perbaikan</label>
+                        <textarea class="w-full bg-gray-900 border border-gray-700 text-white rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500" name="notes" id="notes" rows="4" placeholder="Tulis tindakan perbaikan..." required></textarea>
+                    </div>
+
+                    <div class="flex items-center mb-6">
+                        <input type="checkbox" id="sendNotification" name="sendNotification" checked class="w-4 h-4 text-blue-600 bg-gray-900 border-gray-700 rounded focus:ring-blue-500">
+                        <label for="sendNotification" class="ms-2 text-xs font-bold text-gray-400 uppercase">Kirim Notifikasi WA</label>
+                    </div>
+
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-3 rounded-xl shadow-lg transition-all border border-blue-500">
+                        SIMPAN PERUBAHAN
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+
+<%- include('../partials/footer') %>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    $(document).ready(function() {
+        // UPDATE LOGIC
+        $('#updateStatusForm').on('submit', function(e) {
+            e.preventDefault();
+            const btn = $(this).find('button[type="submit"]');
+            btn.prop('disabled', true).text('PROCESSING...');
+
+            const data = {
+                status: $('#statusSelect').val(),
+                notes: $('#notes').val(),
+                sendNotification: $('#sendNotification').is(':checked')
+            };
+
+            fetch('/admin/trouble/update-status/<%= report.id %>', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(res => res.json())
+            .then(res => {
+                if(res.success) {
+                    Swal.fire({ title: 'Berhasil!', icon: 'success', background: '#1f2937', color: '#fff', showConfirmButton: false, timer: 1500 })
+                    .then(() => location.reload());
+                } else {
+                    Swal.fire({ title: 'Gagal', text: res.message, icon: 'error', background: '#1f2937', color: '#fff' });
+                    btn.prop('disabled', false).text('SIMPAN PERUBAHAN');
+                }
+            });
+        });
+    });
+
+    function hapusTiket(id) {
+        Swal.fire({
+            title: 'Hapus Tiket?', text: "Data tidak bisa dikembalikan!", icon: 'warning',
+            background: '#1f2937', color: '#fff',
+            showCancelButton: true, confirmButtonColor: '#ef4444', cancelButtonColor: '#374151', confirmButtonText: 'Ya, Hapus'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch('/admin/trouble/delete/' + id, { method: 'DELETE' })
+                .then(res => res.json())
+                .then(data => {
+                    if(data.success) {
+                        window.location.href = '/admin/trouble';
+                    }
+                });
+            }
+        });
+    }
+</script>

@@ -1,0 +1,22 @@
+{
+  "name": "Portal Teknisi Sultan",
+  "short_name": "Teknisi WiFi",
+  "start_url": "/teknisi/login",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#198754",
+  "icons": [
+    {
+      "src": "/icons/icon-tek-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-tek-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

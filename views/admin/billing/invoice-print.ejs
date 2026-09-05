@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice #<%= invoice.invoice_number %></title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@500;700&display=swap');
+
+        @page { size: A4; margin: 0; }
+        
+        :root {
+            --dark-bg: #0f172a;
+            --dark-card: #1e293b;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9; /* Fallback */
+        }
+
+        /* --- STYLES FOR SCREEN (BATMAN MODE) --- */
+        @media screen {
+            body { background-color: var(--dark-bg); padding: 40px 0; }
+            .invoice-container {
+                background-color: var(--dark-card);
+                color: #cbd5e1;
+                width: 210mm;
+                min-height: 297mm;
+                padding: 20mm;
+                margin: 0 auto;
+                border: 1px solid rgba(255,255,255,0.1);
+                border-radius: 24px;
+                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+                position: relative;
+            }
+            .text-dark-custom { color: #ffffff; }
+            .bg-light-custom { background-color: #0f172a; border: 1px solid #334155; }
+            .table-header { background-color: #111827; color: #94a3b8; }
+            .border-custom { border-color: #334151; }
+        }
+
+        /* --- STYLES FOR PRINT (PROFESSIONAL LIGHT MODE) --- */
+        @media print {
+            .print-controls, .no-print { display: none !important; }
+            body { background: #fff !important; color: #000 !important; padding: 0 !important; }
+            .invoice-container { 
+                margin: 0 !important; 
+                padding: 15mm !important; 
+                width: 100% !important; 
+                box-shadow: none !important; 
+                border: none !important;
+                background: #fff !important;
+                color: #000 !important;
+            }
+            .text-dark-custom { color: #000 !important; }
+            .bg-light-custom { background-color: #f8fafc !important; border: 1px solid #e2e8f0 !important; }
+            .table-header { background-color: #f1f5f9 !important; color: #475569 !important; }
+            .border-custom { border-color: #e2e8f0 !important; }
+            .text-primary { color: #2563eb !important; }
+            .text-success { color: #166534 !important; }
+            .text-danger { color: #991b1b !important; }
+        }
+
+        /* Logic Stempel Lunas */
+        .lunas-stamp {
+            border: 4px solid #16a34a;
+            color: #16a34a;
+            padding: 8px 20px;
+            font-size: 24pt;
+            font-weight: 900;
+            text-transform: uppercase;
+            transform: rotate(-12deg);
+            opacity: 0.8;
+            border-radius: 12px;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+    </style>
+</head>
+<body class="antialiased">
+
+<div class="print-controls fixed top-6 right-6 z-50 flex flex-col gap-3 no-print">
+    <button onclick="window.print()" class="flex items-center justify-center px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-2xl transition-all active:scale-95">
+        <i class="bi bi-printer-fill text-lg mr-2"></i> Cetak Invoice
+    </button>
+    <button onclick="downloadPDF()" class="flex items-center justify-center px-5 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-2xl transition-all active:scale-95">
+        <i class="bi bi-file-earmark-pdf-fill text-lg mr-2"></i> Simpan PDF
+    </button>
+    <button onclick="window.close()" class="flex items-center justify-center px-5 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-2xl font-black text-xs uppercase tracking-widest transition-all active:scale-95">
+        <i class="bi bi-x-lg text-lg mr-2"></i> Tutup
+    </button>
+</div>
+
+<div class="invoice-container" id="invoiceArea">
+    
+    <div class="flex justify-between items-start border-b-4 border-blue-600 pb-6 mb-8 border-custom">
+        <div class="flex flex-col gap-2">
+            <div class="flex items-center gap-3">
+                <img src="/img/GEMBOK-Bill.png" alt="Logo" class="h-12 w-auto company-logo">
+                <div>
+                    <div class="font-black text-2xl tracking-tighter text-dark-custom uppercase leading-none">
+                        <%= appSettings.company_header || 'INETKU NETWORK' %>
+                    </div>
+                    <div class="text-[10px] font-bold text-slate-500 uppercase tracking-[3px] mt-1">
+                        <%= appSettings.company_slogan || 'Internet Service Provider' %>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="text-right">
+            <h1 class="text-4xl font-black text-blue-600 tracking-tighter uppercase leading-none mb-1">INVOICE</h1>
+            <div class="text-lg font-bold text-slate-500 font-mono tracking-tighter uppercase">#<%= invoice.invoice_number %></div>
+            <div class="mt-4">
+                <% if(invoice.status === 'paid') { %>
+                    <span class="inline-flex items-center px-4 py-1.5 rounded-full text-[10px] font-black bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 uppercase tracking-widest shadow-lg">
+                        <i class="bi bi-check-circle-fill mr-2 text-xs"></i> Lunas Terbayar
+                    </span>
+                <% } else { %>
+                    <span class="inline-flex items-center px-4 py-1.5 rounded-full text-[10px] font-black bg-red-500/10 text-red-500 border border-red-500/20 uppercase tracking-widest shadow-lg">
+                        <i class="bi bi-exclamation-circle-fill mr-2 text-xs"></i> Belum Lunas
+                    </span>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-6 mb-8">
+        <div class="bg-light-custom p-6 rounded-3xl border border-custom">
+            <p class="text-[9px] font-black text-slate-500 uppercase tracking-[3px] mb-3">DITAGIHKAN KEPADA:</p>
+            <div class="text-lg font-black text-dark-custom tracking-tight mb-1"><%= invoice.customer_name %></div>
+            <div class="text-xs font-medium leading-relaxed mb-3"><%= invoice.customer_address || 'Alamat tidak tersedia' %></div>
+            <div class="space-y-1">
+                <div class="text-[10px] font-bold flex items-center gap-2">
+                    <i class="bi bi-telephone-fill text-blue-500"></i> <%= invoice.customer_phone %>
+                </div>
+                <div class="text-[10px] font-bold flex items-center gap-2">
+                    <i class="bi bi-person-badge-fill text-blue-500"></i> <%= invoice.customer_username %>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-light-custom p-6 rounded-3xl border border-custom">
+            <p class="text-[9px] font-black text-slate-500 uppercase tracking-[3px] mb-3">DETAIL TAGIHAN:</p>
+            <div class="space-y-3">
+                <div class="flex justify-between items-center text-xs">
+                    <span class="font-bold text-slate-500 uppercase tracking-tighter">Tanggal Terbit:</span>
+                    <span class="font-black text-dark-custom"><%= new Date(invoice.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) %></span>
+                </div>
+                <div class="flex justify-between items-center text-xs">
+                    <span class="font-bold text-slate-500 uppercase tracking-tighter">Jatuh Tempo:</span>
+                    <span class="font-black text-red-500 tracking-wide underline underline-offset-4"><%= new Date(invoice.due_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) %></span>
+                </div>
+                <% if(invoice.status === 'paid') { %>
+                    <div class="flex justify-between items-center text-xs pt-2 border-t border-custom">
+                        <span class="font-bold text-slate-500 uppercase tracking-tighter">Tanggal Bayar:</span>
+                        <span class="font-black text-emerald-500">
+                            <% 
+                                // Ambil payment_date, jika NULL ambil paid_at
+                                let tglFinal = invoice.payment_date || invoice.paid_at; 
+                            %>
+                            <%= tglFinal ? new Date(tglFinal).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '-' %>
+                        </span>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <div class="rounded-3xl border border-custom overflow-hidden mb-8">
+        <table class="w-full text-left">
+            <thead>
+                <tr class="table-header">
+                    <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Deskripsi Layanan</th>
+                    <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Keterangan</th>
+                    <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-right">Jumlah</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-700/50 border-custom print:divide-slate-200">
+                <tr>
+                    <td class="px-6 py-5">
+                        <div class="font-black text-dark-custom text-sm"><%= invoice.package_name %></div>
+                        <div class="text-[10px] font-bold text-blue-500 uppercase mt-1 tracking-tighter">Internet Subscription</div>
+                    </td>
+                    <td class="px-6 py-5 text-xs font-bold text-slate-500 uppercase">
+                        Layanan Broadband (<%= invoice.package_speed || 'Unmetered' %>)
+                    </td>
+                    <td class="px-6 py-5 text-right font-mono text-sm font-black text-dark-custom">
+                        Rp <%= parseFloat(invoice.amount).toLocaleString('id-ID') %>
+                    </td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr class="bg-blue-600/5 table-header">
+                    <td colspan="2" class="px-6 py-5 text-right text-xs font-black uppercase tracking-widest">Grand Total</td>
+                    <td class="px-6 py-5 text-right text-xl font-black text-blue-500 font-mono tracking-tighter">
+                        Rp <%= parseFloat(invoice.amount).toLocaleString('id-ID') %>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <div class="grid grid-cols-12 gap-8 mt-12 items-end">
+        <div class="col-span-7">
+            <p class="text-[9px] font-black text-slate-500 uppercase tracking-[3px] mb-3">METODE PEMBAYARAN:</p>
+            <div class="bg-light-custom p-5 rounded-3xl border border-custom">
+                <% const method = (invoice.payment_method || '').toLowerCase(); %>
+
+                <% if (method === 'transfer' || method === 'bank') { %>
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-blue-600/10 rounded-2xl flex items-center justify-center text-blue-500 border border-blue-500/20">
+                            <i class="bi bi-bank text-2xl"></i>
+                        </div>
+                        <div>
+                            <div class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Transfer Bank/Wallet:</div>
+                            <div class="text-sm font-black text-dark-custom"><%= appSettings.payment_bank_name || 'DANA' %> - <span class="font-mono tracking-widest"><%= appSettings.payment_account_number || '5550192834' %></span></div>
+                            <div class="text-[10px] font-bold text-slate-500 uppercase mt-0.5 tracking-tighter">A.N <%= appSettings.payment_account_holder || 'Admin ISP' %></div>
+                        </div>
+                    </div>
+                <% } else if (method === 'cash' || method === 'tunai' || method === 'manual') { %>
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-emerald-600/10 rounded-2xl flex items-center justify-center text-emerald-500 border border-emerald-500/20">
+                            <i class="bi bi-cash-stack text-2xl"></i>
+                        </div>
+                        <div>
+                            <div class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Tunai / Cash:</div>
+                            <div class="text-[11px] font-black text-dark-custom uppercase tracking-tight leading-tight"><%= appSettings.contact_address || 'Kantor Pusat INETKU' %></div>
+                            <div class="text-[9px] font-bold text-slate-500 mt-1 italic leading-none">*Lakukan pembayaran langsung ke loket resmi.</div>
+                        </div>
+                    </div>
+                <% } else { %>
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-indigo-600/10 rounded-2xl flex items-center justify-center text-indigo-500 border border-indigo-500/20">
+                            <i class="bi bi-credit-card-2-front text-2xl"></i>
+                        </div>
+                        <div>
+                            <div class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Sistem Pembayaran:</div>
+                            <div class="text-sm font-black text-dark-custom text-uppercase"><%= invoice.payment_method || 'GATEWAY' %></div>
+                            <div class="text-[9px] font-bold text-slate-500 mt-1 uppercase">Konfirmasi otomatis oleh sistem.</div>
+                        </div>
+                    </div>
+                <% } %>
+            </div>
+
+            <% if(invoice.notes) { %>
+            <div class="mt-4 p-4 bg-red-500/5 border border-red-500/10 rounded-2xl">
+                <p class="text-[9px] font-black text-red-500 uppercase tracking-[2px] mb-1">CATATAN KHUSUS:</p>
+                <p class="text-[11px] font-bold text-slate-400 italic leading-snug"><%= invoice.notes %></p>
+            </div>
+            <% } %>
+        </div>
+        
+        <div class="col-span-5 text-center flex flex-col items-center">
+            <% if(invoice.status === 'paid') { %>
+                <div class="lunas-stamp font-mono tracking-tighter">LUNAS</div>
+            <% } else { %>
+                <div class="h-24"></div>
+            <% } %>
+            
+            <div class="w-48 border-b-2 border-slate-700 font-black text-xs text-dark-custom pb-1 mb-1 border-custom uppercase tracking-tighter">
+                <%= appSettings.company_header || 'INETKU NETWORK' %>
+            </div>
+            <div class="text-[10px] font-bold text-slate-500 uppercase tracking-[4px]">Admin Finance</div>
+        </div>
+    </div>
+    
+    <div class="invoice-footer text-center">
+        <div class="font-black text-[11px] text-dark-custom uppercase tracking-widest mb-1">
+            <%= appSettings.company_header || 'PULSEBILL TELECOM' %>
+        </div>
+        <div class="text-[9px] font-bold tracking-tight">
+            <%= appSettings.contact_address || '742 Evergreen Terrace, Sector 4, Silicon Valley, CA' %> 
+            <span class="mx-2 text-slate-400">|</span> 
+            WA: <%= appSettings.whatsapp_number || appSettings.contact_whatsapp || '+1 (555) 019-2834' %>
+        </div>
+        <div class="mt-2 text-[9px] font-bold italic opacity-60">Terima kasih atas kepercayaan Anda menggunakan layanan kami.</div>
+    </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<script>
+    // Update tanggal cetak untuk tampilan print
+    document.getElementById('tglCetakPrint').innerText = new Date().toLocaleString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) + ' WIB';
+
+    function downloadPDF() {
+        const element = document.getElementById('invoiceArea');
+        const invoiceNum = '<%= invoice.invoice_number %>';
+        const opt = {
+            margin: 0,
+            filename: `Invoice-${invoiceNum}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        
+        // Animasi Loading pada tombol
+        const btn = document.querySelector('button[onclick="downloadPDF()"]');
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="bi bi-arrow-repeat animate-spin mr-2"></i> Memproses...';
+        
+        html2pdf().set(opt).from(element).save().then(() => {
+            btn.innerHTML = originalHtml;
+        });
+    }
+</script>
+
+</body>
+</html>

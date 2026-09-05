@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Login Portal Agen | Gembok Radius Infrastructure</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d6efd"> 
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                .then(reg => console.log('? PWA Ready di Halaman Login!'))
+                .catch(err => console.log('? PWA Gagal Load:', err));
+            });
+        }
+    </script>
+    <style>
+        /* TEMA SERAGAM JALUR AGEN */
+        :root {
+            --bg-overlay: rgba(240, 242, 245, 0.95);
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --input-bg: #f8f9fa;
+            --border-agent: #0d6efd; /* Warna BIRU Khas Portal Agen */
+        }
+
+        [data-theme="dark"] {
+            --bg-overlay: rgba(15, 23, 42, 0.95); 
+            --card-bg: #1e293b;
+            --text-main: #f1f5f9;
+            --input-bg: #0f172a;
+            --border-agent: #3b82f6;
+        }
+
+        body { 
+            background-image: url('/img/bg-login.jpg'); 
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            font-family: 'Segoe UI', sans-serif;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            transition: all 0.5s ease;
+        }
+
+        .overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-overlay);
+            z-index: 1;
+            transition: all 0.5s ease;
+        }
+
+        .login-card {
+            position: relative;
+            z-index: 2;
+            width: 90%;
+            max-width: 400px;
+            background: var(--card-bg);
+            padding: 45px 25px 35px;
+            border: 2px solid var(--border-agent); 
+            border-radius: 25px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            transition: all 0.5s ease;
+        }
+
+        .logo-box {
+            width: 110px;
+            height: 110px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: -100px auto 25px; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            border: 5px solid var(--card-bg);
+            z-index: 5;
+            position: relative;
+        }
+
+        .logo-box img { width: 75%; height: auto; }
+
+        .theme-toggle {
+            position: absolute; top: 15px; right: 20px;
+            cursor: pointer; font-size: 1.2rem; color: var(--text-main);
+            opacity: 0.6; transition: 0.3s;
+        }
+        
+        .input-group-custom {
+            background: var(--input-bg);
+            border: 1px solid rgba(0,0,0,0.1);
+            border-radius: 12px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            transition: 0.3s;
+        }
+
+        .input-group-custom:focus-within {
+            border-color: var(--border-agent);
+            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
+        }
+
+        .input-group-custom i { color: var(--border-agent); font-size: 1.2rem; margin-right: 12px; }
+
+        .input-group-custom input {
+            border: none; outline: none; width: 100%;
+            background: transparent; color: var(--text-main); font-size: 16px; font-weight: 600;
+        }
+
+        .btn-agent {
+            background-color: var(--border-agent);
+            color: white; border: none; border-radius: 12px;
+            padding: 14px; width: 100%; font-size: 16px;
+            font-weight: 800; text-transform: uppercase;
+            letter-spacing: 1px; transition: 0.3s; margin-top: 10px;
+        }
+
+        .btn-agent:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(13, 110, 253, 0.3);
+        }
+
+        .footer-text { margin-top: 25px; font-size: 11px; color: var(--text-main); opacity: 0.5; }
+        
+        .alert-error {
+            background: #ffebe9; color: #cf222e; border: 1px solid #ff818266;
+            padding: 10px; border-radius: 10px; font-size: 13px; font-weight: 600;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body data-theme="grey">
+    <div class="overlay"></div>
+
+    <div class="login-card">
+        <div class="theme-toggle" onclick="switchTheme()">
+            <i id="theme-icon" class="bi bi-moon-stars-fill"></i>
+        </div>
+
+        <div class="logo-box">
+            <img src="/icons/icon-192.png" alt="Logo" onerror="this.src='/img/logo.png'">
+        </div>
+
+        <h5 class="fw-bold mb-1" style="color: var(--text-main); letter-spacing: 1px;">PORTAL AGEN</h5>
+        <small class="d-block mb-4 opacity-50" style="color: var(--text-main);">Management Voucher & Topup Saldo</small>
+
+        <% if (error) { %>
+        <div id="errorAlert" class="alert-error">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> <span><%= error %></span>
+        </div>
+        <% } %>
+
+        <form id="loginAgentForm" action="/agent/login" method="POST">
+            <div class="input-group-custom">
+                <i class="bi bi-person-badge-fill"></i>
+                <input type="text" name="username" placeholder="Username Agen" required autofocus>
+            </div>
+
+            <div class="input-group-custom">
+                <i class="bi bi-shield-lock-fill"></i>
+                <input type="password" name="password" placeholder="Password Agen" required>
+            </div>
+
+            <button type="submit" class="btn-agent" id="loginBtn">
+                <span class="btn-text">MASUK PORTAL</span>
+                <span class="spinner-border spinner-border-sm d-none" id="loadingIcon"></span>
+            </button>
+        </form>
+
+        <div class="footer-text">
+            &copy; <%= new Date().getFullYear() %> <strong>GEMBOK RADIUS</strong><br>
+            Agent Distribution System v1.0
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script>
+        // --- LOGIKA TEMA ---
+        const savedTheme = localStorage.getItem('agent-theme') || 'grey';
+        document.body.setAttribute('data-theme', savedTheme);
+        updateIcon(savedTheme);
+
+        function switchTheme() {
+            let theme = document.body.getAttribute('data-theme');
+            let newTheme = (theme === 'grey') ? 'dark' : 'grey';
+            document.body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('agent-theme', newTheme);
+            updateIcon(newTheme);
+        }
+
+        function updateIcon(theme) {
+            const icon = document.getElementById('theme-icon');
+            if(theme === 'dark') {
+                icon.classList.replace('bi-moon-stars-fill', 'bi-sun-fill');
+            } else {
+                icon.classList.replace('bi-sun-fill', 'bi-moon-stars-fill');
+            }
+        }
+
+        // --- LOADING EFFECT ---
+        $('#loginAgentForm').on('submit', function() {
+            $('#loginBtn').prop('disabled', true);
+            $('.btn-text').addClass('d-none');
+            $('#loadingIcon').removeClass('d-none');
+        });
+    </script>
+</body>
+</html>

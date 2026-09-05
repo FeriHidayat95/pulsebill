@@ -1,0 +1,391 @@
+<%- include('../../partials/header') %>
+<body class="bg-[#0f172a] text-slate-300 font-sans antialiased selection:bg-blue-500 selection:text-white">
+
+<%- include('../../partials/admin-header') %>
+<%- include('../../partials/billing-sidebar', { page: 'customers', settings: settings }) %>
+
+<main class="p-4 sm:ml-64 pt-20 min-h-screen">
+
+    <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+        <div>
+            <h1 class="text-3xl font-black text-white tracking-tighter uppercase leading-none">
+                Detail <span class="text-blue-500">Pelanggan</span>
+            </h1>
+            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-[4px] mt-2">Profil Lengkap & Riwayat Tagihan</p>
+        </div>
+        
+        <div class="flex gap-3">
+            <a href="/admin/billing/customers" class="group relative inline-flex items-center justify-center px-5 py-2.5 text-xs font-black text-slate-400 border border-slate-700 rounded-xl hover:bg-slate-800 hover:text-white transition-all uppercase tracking-widest">
+                <i class="bi bi-arrow-left text-lg me-2 group-hover:-translate-x-1 transition-transform"></i> KEMBALI
+            </a>
+            
+            <button onclick="openEditModal()" class="group relative inline-flex items-center justify-center px-5 py-2.5 text-xs font-black text-white transition-all duration-200 bg-amber-600 rounded-xl hover:bg-amber-700 shadow-lg shadow-amber-500/20 uppercase tracking-widest">
+                <i class="bi bi-pencil-square text-lg me-2"></i> EDIT DATA
+            </button>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <div class="lg:col-span-1 space-y-6">
+            <div class="bg-[#1e293b] border border-slate-700/60 rounded-3xl shadow-2xl overflow-hidden relative group hover:border-blue-500/30 transition-colors">
+                <div class="absolute top-0 right-0 p-4">
+                    <% 
+                        let statusColor = 'bg-slate-700 text-slate-300 border-slate-600';
+                        if(customer.status === 'active') statusColor = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 animate-pulse';
+                        else if(customer.status === 'suspended') statusColor = 'bg-red-500/10 text-red-400 border-red-500/20';
+                    %>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black border <%= statusColor %> uppercase tracking-wide shadow-lg">
+                        <%= customer.status.toUpperCase() %>
+                    </span>
+                </div>
+
+                <div class="p-8 text-center border-b border-slate-700/50 bg-[#111827]/50">
+                    <div class="w-24 h-24 rounded-full bg-gradient-to-br from-slate-700 to-slate-800 border-4 border-[#1e293b] mx-auto flex items-center justify-center text-slate-500 shadow-2xl group-hover:scale-105 transition-transform duration-300">
+                        <i class="bi bi-person-fill text-5xl"></i>
+                    </div>
+                    <h2 class="text-xl font-black text-white mt-4 tracking-tight"><%= customer.name %></h2>
+                    <p class="text-xs font-bold text-blue-400 uppercase tracking-widest mt-1">@<%= customer.username || 'username' %></p>
+                </div>
+
+                <div class="p-6 space-y-4 text-sm">
+                    <div class="flex justify-between items-center border-b border-slate-700/50 pb-3">
+                        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">WhatsApp</span>
+                        <span class="font-bold text-white font-mono"><%= customer.phone %></span>
+                    </div>
+                    <div class="flex justify-between items-center border-b border-slate-700/50 pb-3">
+                        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Email</span>
+                        <span class="font-bold text-slate-300"><%= customer.email || '-' %></span>
+                    </div>
+                    <div class="flex justify-between items-center border-b border-slate-700/50 pb-3">
+                        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Bergabung</span>
+                        <span class="font-bold text-emerald-400">
+                            <%= customer.created_at ? new Date(customer.created_at).toLocaleDateString('id-ID') : '-' %>
+                        </span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Alamat Pemasangan</span>
+                        <p class="text-xs text-slate-300 bg-[#111827] p-3 rounded-xl border border-slate-700/50 leading-relaxed font-medium">
+                            <i class="bi bi-geo-alt text-red-500 me-1"></i> <%= customer.address || '-' %>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-[#1e293b] border border-slate-700/60 rounded-3xl shadow-2xl overflow-hidden group hover:border-blue-500/30 transition-colors">
+                <div class="px-6 py-4 border-b border-slate-700 bg-[#111827]/50">
+                    <h3 class="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
+                        <i class="bi bi-router text-blue-500 text-lg"></i> Layanan Internet
+                    </h3>
+                </div>
+                <div class="p-6">
+                    <% if (customer.package_name) { %>
+                        <div class="flex justify-between items-start mb-6">
+                            <div>
+                                <h4 class="text-lg font-black text-white tracking-tight"><%= customer.package_name %></h4>
+                                <span class="inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                                    <i class="bi bi-speedometer2 me-1"></i> <%= customer.package_speed || 'Speed N/A' %>
+                                </span>
+                            </div>
+                            <div class="text-right">
+                                <h5 class="text-lg font-black text-emerald-400 font-mono">
+                                    Rp <%= parseFloat(customer.package_price || 0).toLocaleString('id-ID') %>
+                                </h5>
+                                <span class="text-[10px] font-bold text-slate-500 uppercase">/ Bulan</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-[#111827] rounded-xl p-4 border border-slate-700/50 relative overflow-hidden">
+                            <div class="absolute top-0 right-0 p-2 opacity-10 text-white">
+                                <i class="bi bi-shield-lock-fill text-6xl"></i>
+                            </div>
+                            <div class="relative z-10 space-y-3">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-400 border border-indigo-500/20">
+                                        <i class="bi bi-person-badge"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-[10px] font-bold text-slate-500 uppercase">PPPoE Username</p>
+                                        <p class="text-sm font-black text-white font-mono"><%= customer.pppoe_username || '-' %></p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-slate-700/30 flex items-center justify-center text-slate-500 border border-slate-600/30">
+                                        <i class="bi bi-key-fill"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-[10px] font-bold text-slate-500 uppercase">Password</p>
+                                        <p class="text-sm font-black text-slate-400 font-mono tracking-widest">******</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <% } else { %>
+                        <div class="text-center py-8 text-slate-500">
+                            <i class="bi bi-exclamation-circle text-4xl mb-2 block opacity-30"></i>
+                            <span class="text-xs font-bold uppercase tracking-widest">Belum Berlangganan</span>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <div class="lg:col-span-2">
+            <div class="bg-[#1e293b] border border-slate-700/60 rounded-3xl shadow-2xl overflow-hidden h-full">
+                <div class="px-6 py-5 border-b border-slate-700 bg-[#111827]/50 flex justify-between items-center">
+                    <h3 class="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
+                        <i class="bi bi-clock-history text-blue-500 text-lg"></i> Riwayat Tagihan
+                    </h3>
+                    <span class="bg-blue-600 text-white text-[10px] font-black px-2 py-1 rounded shadow-lg shadow-blue-500/20">
+                        <%= invoices ? invoices.length : 0 %> Transaksi
+                    </span>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table id="tabelInvoiceFix" class="w-full text-left text-slate-400">
+                        <thead class="text-[10px] text-slate-500 uppercase bg-[#111827]/30 border-b border-slate-700">
+                            <tr>
+                                <th class="px-6 py-4 font-black tracking-wider text-center w-10">No</th>
+                                <th class="px-6 py-4 font-black tracking-wider">No. Tagihan</th>
+                                <th class="px-6 py-4 font-black tracking-wider">Tanggal</th>
+                                <th class="px-6 py-4 font-black tracking-wider">Jumlah</th>
+                                <th class="px-6 py-4 font-black tracking-wider text-center">Status</th>
+                                <th class="px-6 py-4 font-black tracking-wider text-center">Tgl Bayar</th>
+                                <th class="px-6 py-4 font-black tracking-wider text-right">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-700/50">
+                            <% if (invoices && invoices.length > 0) { %>
+                                <% invoices.forEach((inv, i) => { %>
+                                <tr class="hover:bg-slate-800/50 transition-colors group">
+                                    <td class="px-6 py-4 text-center font-bold text-xs"><%= i + 1 %></td>
+                                    
+                                    <td class="px-6 py-4">
+                                        <a href="/admin/billing/invoices/<%= inv.id %>" class="font-mono text-xs font-bold text-blue-400 hover:text-white transition-colors underline-offset-4 hover:underline">
+                                            #<%= inv.invoice_number %>
+                                        </a>
+                                    </td>
+                                    
+                                    <td class="px-6 py-4 text-xs font-bold text-slate-300">
+                                        <%= new Date(inv.created_at).toLocaleDateString('id-ID') %>
+                                    </td>
+                                    
+                                    <td class="px-6 py-4 font-mono text-xs font-bold text-white">
+                                        <% let amt = inv.amount >= 100000000 ? inv.amount / 100 : inv.amount; %>
+                                        Rp <%= parseFloat(amt).toLocaleString('id-ID') %>
+                                    </td>
+                                    
+                                    <td class="px-6 py-4 text-center">
+                                        <% if (inv.status === 'paid') { %>
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-black bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase tracking-wide">LUNAS</span>
+                                        <% } else if (new Date(inv.due_date) < new Date()) { %>
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-black bg-red-500/10 text-red-400 border border-red-500/20 uppercase tracking-wide">TELAT</span>
+                                        <% } else { %>
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-black bg-amber-500/10 text-amber-400 border border-amber-500/20 uppercase tracking-wide">BELUM</span>
+                                        <% } %>
+                                    </td>
+
+                                    <td class="px-6 py-4 text-center text-xs text-slate-500 font-mono">
+                                        <%= inv.paid_at ? new Date(inv.paid_at).toLocaleDateString('id-ID') : '-' %>
+                                    </td>
+
+                                    <td class="px-6 py-4 text-right">
+                                        <div class="flex justify-end gap-2">
+                                            <a href="/admin/billing/invoices/<%= inv.id %>" class="w-8 h-8 flex items-center justify-center rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500 hover:text-white transition-all" title="Detail">
+                                                <i class="bi bi-eye-fill"></i>
+                                            </a>
+                                            <a href="/admin/billing/invoices/<%= inv.id %>/print" target="_blank" class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-700/50 text-slate-400 border border-slate-600/50 hover:bg-slate-700 hover:text-white transition-all" title="Cetak">
+                                                <i class="bi bi-printer-fill"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <% }) %>
+                            <% } %>
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</main>
+
+<%- include('../../partials/footer') %>
+
+<div id="editCustomerModal" tabindex="-1" aria-hidden="true" class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full bg-black/80 backdrop-blur-sm transition-opacity">
+    <div class="relative w-full max-w-2xl max-h-full mx-auto mt-20">
+        <div class="relative bg-[#1e293b] rounded-2xl shadow-2xl border border-slate-700">
+            <div class="flex items-center justify-between p-5 border-b border-slate-700 bg-[#111827] rounded-t-2xl">
+                <h3 class="text-lg font-black text-white uppercase tracking-tight flex items-center gap-2"><i class="bi bi-pencil-square text-amber-500"></i> Edit Detail & Radius</h3>
+                <button onclick="closeModal('editCustomerModal')" type="button" class="text-slate-400 hover:text-white"><i class="bi bi-x-lg text-lg"></i></button>
+            </div>
+            <form id="editCustomerForm" class="p-6 space-y-4">
+                <input type="hidden" name="id" id="edit_id" value="<%= customer.id %>">
+                <input type="hidden" name="original_phone" value="<%= customer.phone %>">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="col-span-2"><p class="text-[10px] font-black text-blue-500 uppercase tracking-widest">Data Diri</p></div>
+                    <div>
+                        <label class="block mb-1 text-[10px] font-black text-slate-500 uppercase tracking-widest">Nama Lengkap</label>
+                        <input type="text" name="name" id="edit_name" value="<%= customer.name %>" required class="bg-[#111827] border border-slate-700 text-white text-sm rounded-xl focus:ring-blue-500 block w-full p-3 font-bold">
+                    </div>
+                    <div>
+                        <label class="block mb-1 text-[10px] font-black text-slate-500 uppercase tracking-widest">No. WhatsApp/HP</label>
+                        <input type="text" name="phone" id="edit_phone" value="<%= customer.phone %>" required class="bg-[#111827] border border-slate-700 text-white text-sm rounded-xl focus:ring-blue-500 block w-full p-3 font-mono font-bold">
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block mb-1 text-[10px] font-black text-slate-500 uppercase tracking-widest">Alamat</label>
+                        <textarea name="address" id="edit_address" rows="2" class="bg-[#111827] border border-slate-700 text-white text-sm rounded-xl focus:ring-blue-500 block w-full p-3"><%= customer.address %></textarea>
+                    </div>
+
+                    <div class="col-span-2 pt-2"><p class="text-[10px] font-black text-red-500 uppercase tracking-widest">Radius Connection</p></div>
+                    <div>
+                        <label class="block mb-1 text-[10px] font-black text-slate-500 uppercase tracking-widest">Username PPPoE</label>
+                        <input type="text" name="pppoe_username" id="edit_pppoe_username" value="<%= customer.pppoe_username %>" required class="bg-[#0f172a] border border-slate-700 text-white text-sm rounded-xl p-3 font-mono font-bold w-full">
+                    </div>
+                    <div>
+                        <label class="block mb-1 text-[10px] font-black text-slate-500 uppercase tracking-widest">Password PPPoE</label>
+                        <input type="text" name="pppoe_password" id="edit_pppoe_password" value="<%= customer.pppoe_password %>" required class="bg-[#0f172a] border border-slate-700 text-white text-sm rounded-xl p-3 font-mono font-bold w-full">
+                    </div>
+                    <div>
+                        <label class="block mb-1 text-[10px] font-black text-slate-500 uppercase tracking-widest">Paket Internet</label>
+                        <select name="package_id" id="edit_package_id" class="bg-[#111827] border border-slate-700 text-white text-sm rounded-xl focus:ring-blue-500 block w-full p-3 font-bold">
+                            <% if(packages) { packages.forEach(p => { %>
+                                <option value="<%= p.id %>" <%= customer.package_id == p.id ? 'selected' : '' %>><%= p.name %></option>
+                            <% }); } %>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block mb-1 text-[10px] font-black text-slate-500 uppercase tracking-widest">Billing Day (Klik Kalender)</label>
+                        <div class="flex gap-2">
+                            <input type="number" name="billing_day" id="edit_billing_day" value="<%= customer.billing_day %>" min="1" max="28" required class="bg-[#111827] border border-slate-700 text-white text-sm rounded-xl p-3 font-black w-20 text-center" readonly>
+                            <input type="date" id="billing_day_picker" class="bg-[#111827] border border-slate-700 text-white text-sm rounded-xl p-3 flex-1 cursor-pointer" onchange="updateBillingDay(this.value)">
+                        </div>
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block mb-1 text-[10px] font-black text-slate-500 uppercase tracking-widest">Status Akun</label>
+                        <select name="status" id="edit_status" class="bg-[#111827] border border-slate-700 text-white text-sm rounded-xl p-3 font-black w-full">
+                            <option value="active" <%= customer.status === 'active' ? 'selected' : '' %>>AKTIF</option>
+                            <option value="suspended" <%= customer.status === 'suspended' ? 'selected' : '' %>>ISOLIR (SUSPEND)</option>
+                            <option value="inactive" <%= customer.status === 'inactive' ? 'selected' : '' %>>NONAKTIF</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="pt-4 border-t border-slate-700 flex justify-end space-x-2">
+                    <button type="button" onclick="closeModal('editCustomerModal')" class="px-6 py-3 text-[10px] font-black text-slate-400 hover:text-white uppercase transition-all">Batal</button>
+                    <button type="submit" class="px-8 py-3 text-[10px] font-black text-white bg-amber-600 rounded-xl hover:bg-amber-700 shadow-lg shadow-amber-500/20 uppercase tracking-widest">Perbarui Data</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+
+<style>
+    .dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter { display: none; }
+    .dataTables_wrapper .dataTables_info { color: #64748b; font-size: 0.75rem; font-weight: 700; margin-top: 1rem; }
+    .dataTables_wrapper .dataTables_paginate { margin-top: 1rem; display: flex; justify-content: flex-end; gap: 5px; }
+    .dataTables_wrapper .paginate_button { 
+        padding: 5px 10px; border-radius: 8px; background: #111827; color: #94a3b8 !important; cursor: pointer; border: 1px solid #334151; font-size: 0.75rem; font-weight: 700;
+    }
+    .dataTables_wrapper .paginate_button.current { background: #3b82f6; color: white !important; border-color: #3b82f6; }
+    .dataTables_wrapper .paginate_button:hover:not(.current) { background: #1e293b; color: white !important; }
+    ::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
+</style>
+
+<script>
+    $(document).ready(function() {
+        // ?? INIT TABEL FIX ??
+        // Langsung hajar inisialisasi tanpa cek length
+        // Biar DataTables yang handle pesan kosong lewat 'language.zeroRecords'
+        $('#tabelInvoiceFix').DataTable({
+            responsive: true,
+            pageLength: 5,
+            language: { 
+                zeroRecords: "Belum ada riwayat tagihan",
+                emptyTable: "Belum ada riwayat tagihan"
+            },
+            dom: 'tp',
+            order: [[ 0, "desc" ]] // Sort No Descending
+        });
+        
+        // Set Default Date Picker
+        const currentBillDay = "<%= customer.billing_day %>";
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(currentBillDay).padStart(2, '0');
+        $('#billing_day_picker').val(`${year}-${month}-${day}`);
+    });
+
+    function openEditModal() {
+        const modal = document.getElementById('editCustomerModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function closeModal(id) {
+        const modal = document.getElementById(id);
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
+    function updateBillingDay(dateString) {
+        if (!dateString) return;
+        const date = new Date(dateString);
+        const day = date.getDate();
+        if(day > 28) {
+            alert('Maksimal tanggal tagihan adalah tgl 28!');
+            document.getElementById('edit_billing_day').value = 28;
+        } else {
+            document.getElementById('edit_billing_day').value = day;
+        }
+    }
+
+    $('#editCustomerForm').submit(function(e) {
+        e.preventDefault();
+        const btn = $(this).find('button[type="submit"]');
+        const originalText = btn.text();
+        btn.prop('disabled', true).text('MENYIMPAN...');
+        const custId = $('#edit_id').val();
+
+        $.ajax({
+            url: `/admin/billing/customers/${custId}`,
+            type: 'PUT',
+            data: $(this).serialize(),
+            success: function(res) {
+                showToast('success', 'Berhasil', 'Data pelanggan diperbarui');
+                setTimeout(() => location.reload(), 1000);
+            },
+            error: function(err) {
+                showToast('error', 'Gagal', 'Terjadi kesalahan server');
+                btn.prop('disabled', false).text(originalText);
+            }
+        });
+    });
+
+    function showToast(type, title, message) {
+        const colors = { success: 'bg-emerald-600', error: 'bg-red-600' };
+        const icons = { success: 'bi-check-circle-fill', error: 'bi-exclamation-triangle-fill' };
+        const html = `
+            <div class="toast-item fixed top-24 right-5 z-[60] flex items-center w-full max-w-xs p-4 text-white ${colors[type]} rounded-xl shadow-2xl transition-all duration-500" role="alert">
+                <div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-white bg-white/20 rounded-lg">
+                    <i class="bi ${icons[type]}"></i>
+                </div>
+                <div class="ml-3 text-sm font-normal">
+                    <span class="font-bold block uppercase tracking-wider text-[10px] opacity-80">${title}</span>
+                    <div class="text-sm font-bold">${message}</div>
+                </div>
+            </div>`;
+        $('body').append(html);
+        setTimeout(() => $('.toast-item').first().fadeOut(500, function(){ $(this).remove(); }), 3000);
+    }
+</script>
+
+</body>
+</html>

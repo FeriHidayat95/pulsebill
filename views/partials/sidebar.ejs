@@ -1,0 +1,110 @@
+<div class="d-flex flex-column flex-shrink-0 p-3 sidebar-container" id="sidebar">
+  
+  <a href="/admin/dashboard" class="d-flex align-items-center mb-4 text-decoration-none px-2 mt-2">
+    <img src="/img/GEMBOK-Bill.png" alt="Logo" class="h-10 w-auto rounded-lg shadow-lg shadow-blue-500/20" style="max-height: 40px;">
+    <span class="ms-3 fs-5 font-black tracking-tighter text-white uppercase" style="font-weight: 900; letter-spacing: -1px;">ACS CORE</span>
+  </a>
+
+  <hr class="border-gray-700 my-3 opacity-25">
+
+  <ul class="nav nav-pills flex-column mb-auto gap-2">
+    <li class="nav-item">
+      <a href="/admin/dashboard" class="nav-link-batman <%= typeof page !== 'undefined' && page === 'dashboard' ? 'active' : '' %>">
+        <i class="bi bi-speedometer2 me-3"></i> Dashboard
+      </a>
+    </li>
+    <li>
+      <a href="/admin/genieacs" class="nav-link-batman <%= typeof page !== 'undefined' && page === 'genieacs' ? 'active' : '' %>">
+        <i class="bi bi-hdd-network me-3"></i> GenieACS Core
+      </a>
+    </li>
+    <li>
+      <a href="/admin/mikrotik" class="nav-link-batman <%= typeof page !== 'undefined' && page === 'mikrotik' ? 'active' : '' %>">
+        <i class="bi bi-router me-3"></i> Manajemen Mikrotik
+      </a>
+    </li>
+    <li>
+      <a href="/admin/nas" class="nav-link-batman <%= typeof page !== 'undefined' && page === 'nas' ? 'active' : '' %>">
+        <i class="bi bi-server me-3"></i> Radius NAS
+      </a>
+    </li>
+    <li>
+      <a href="/admin/hotspot" class="nav-link-batman <%= typeof page !== 'undefined' && page === 'hotspot' ? 'active' : '' %>">
+        <i class="bi bi-wifi me-3"></i> Hotspot Active
+      </a>
+    </li>
+    <li>
+      <a href="/admin/hotspot/voucher" class="nav-link-batman <%= typeof page !== 'undefined' && page === 'voucher' ? 'active' : '' %>">
+        <i class="bi bi-ticket-perforated me-3"></i> Generator Voucher
+      </a>
+    </li>
+
+    <li>
+      <a href="/admin/logs" class="nav-link-batman <%= typeof page !== 'undefined' && page === 'logs' ? 'active' : '' %>">
+        <i class="bi bi-clock-history me-3 text-warning"></i> Log Audit System
+      </a>
+    </li>
+    
+    <li>
+      <a href="/admin/setting" class="nav-link-batman <%= typeof page !== 'undefined' && page === 'setting' ? 'active' : '' %>">
+        <i class="bi bi-gear-wide-connected me-3"></i> System Settings
+      </a>
+    </li>
+  </ul>
+
+  <hr class="border-gray-700 opacity-25">
+
+  <div class="dropdown mt-2">
+    <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle px-3 py-2 rounded-xl hover-glass transition-all" id="dropdownUser" data-bs-toggle="dropdown" aria-expanded="false">
+      <div class="w-8 h-8 rounded-circle bg-gradient-to-tr from-blue-600 to-blue-800 d-flex align-items-center justify-content-center me-2 font-black shadow-sm" style="width: 32px; height: 32px;">A</div>
+      <strong class="small">Administrator</strong>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-dark shadow-xl border-gray-700 rounded-xl mb-2" aria-labelledby="dropdownUser">
+      <li><a class="dropdown-item py-2 small" href="/admin/setting"><i class="bi bi-person me-2"></i> My Settings</a></li>
+      <li><hr class="dropdown-divider border-gray-700"></li>
+      <li><a class="dropdown-item py-2 text-danger small" href="/admin/logout"><i class="bi bi-power me-2"></i> Logout</a></li>
+    </ul>
+  </div>
+</div>
+
+<style>
+  /* GAYA SIDEBAR BATMAN */
+  .sidebar-container {
+      background-color: #111827;
+      border-right: 1px solid #1f2937;
+      width: 260px;
+      min-height: 100vh;
+      position: fixed;
+      top: 0; left: 0;
+      z-index: 1000;
+      overflow-y: auto; /* Biar bisa discroll kalau menu panjang */
+  }
+  .sidebar-container::-webkit-scrollbar { width: 5px; }
+  .sidebar-container::-webkit-scrollbar-thumb { background: #374151; border-radius: 10px; }
+
+  .nav-link-batman {
+    color: #9ca3af; 
+    font-weight: 600;
+    padding: 12px 16px;
+    border-radius: 12px;
+    transition: all 0.2s ease-in-out;
+    display: flex; align-items: center;
+    font-size: 0.9rem;
+    text-decoration: none;
+  }
+
+  .nav-link-batman:hover {
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.08);
+    transform: translateX(3px);
+  }
+
+  .nav-link-batman.active {
+    background-color: #2563eb; 
+    color: white;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+  }
+
+  .nav-link-batman i { font-size: 1.1rem; transition: 0.2s; }
+  .hover-glass:hover { background: rgba(255,255,255,0.1); }
+</style>

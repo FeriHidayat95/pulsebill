@@ -1,0 +1,424 @@
+<%- include('../../partials/header') %>
+<body class="bg-[#0f172a] text-slate-300 font-sans antialiased selection:bg-blue-500 selection:text-white">
+
+<%- include('../../partials/admin-header') %>
+
+<%- include('../../partials/billing-sidebar', { page: 'whatsapp-settings', settings: settings }) %>
+
+<main class="p-4 sm:ml-64 pt-20 min-h-screen">
+
+    <div class="bg-[#1e293b] border-l-4 border-l-[#25D366] border-y border-r border-slate-700/60 rounded-2xl p-6 mb-8 shadow-2xl flex flex-col md:flex-row justify-between items-center gap-4">
+        <div>
+            <h1 class="text-3xl font-black text-white tracking-tighter uppercase leading-none">
+                WhatsApp <span class="text-[#25D366]">Notification</span>
+            </h1>
+            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-[4px] mt-2">Pusat Pengaturan Notifikasi & Broadcast</p>
+        </div>
+        
+        <div class="flex flex-wrap gap-2">
+            <button onclick="enableAllTemplates()" class="px-4 py-2 text-[10px] font-black text-emerald-400 border border-emerald-500/30 rounded-xl hover:bg-emerald-500 hover:text-white transition-all uppercase tracking-widest">
+                <i class="bi bi-check-all me-1"></i> Enable All
+            </button>
+            <button onclick="disableAllTemplates()" class="px-4 py-2 text-[10px] font-black text-red-400 border border-red-500/30 rounded-xl hover:bg-red-500 hover:text-white transition-all uppercase tracking-widest">
+                <i class="bi bi-x-circle me-1"></i> Disable All
+            </button>
+            <button onclick="saveAllTemplates()" class="px-6 py-2 text-[10px] font-black text-white bg-blue-600 rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-500/30 transition-all uppercase tracking-widest">
+                <i class="bi bi-save me-1"></i> Simpan Semua
+            </button>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        
+        <div class="xl:col-span-2 space-y-6">
+            
+            <div class="bg-[#1e293b] border border-slate-700/60 rounded-3xl shadow-xl overflow-hidden group">
+                <div class="px-6 py-4 border-b border-slate-700 bg-[#111827]/50 flex justify-between items-center">
+                    <h3 class="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
+                        <i class="bi bi-file-earmark-plus text-blue-500"></i> Tagihan Baru (Invoice Created)
+                    </h3>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="invoice_created_enabled" class="sr-only peer" checked>
+                        <div class="w-11 h-6 bg-slate-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#25D366]"></div>
+                    </label>
+                </div>
+                <div class="p-6">
+                    <div class="mb-4 flex flex-wrap gap-1">
+                        <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest mr-2 self-center">Variabel:</span>
+                        <span class="bg-blue-500/10 text-blue-400 text-[10px] px-2 py-1 rounded border border-blue-500/20 font-mono cursor-pointer hover:bg-blue-500 hover:text-white transition-colors" onclick="copyVar('{customer_name}')">{customer_name}</span>
+                        <span class="bg-blue-500/10 text-blue-400 text-[10px] px-2 py-1 rounded border border-blue-500/20 font-mono cursor-pointer hover:bg-blue-500 hover:text-white transition-colors" onclick="copyVar('{invoice_number}')">{invoice_number}</span>
+                        <span class="bg-blue-500/10 text-blue-400 text-[10px] px-2 py-1 rounded border border-blue-500/20 font-mono cursor-pointer hover:bg-blue-500 hover:text-white transition-colors" onclick="copyVar('{amount}')">{amount}</span>
+                        <span class="bg-blue-500/10 text-blue-400 text-[10px] px-2 py-1 rounded border border-blue-500/20 font-mono cursor-pointer hover:bg-blue-500 hover:text-white transition-colors" onclick="copyVar('{due_date}')">{due_date}</span>
+                        <span class="bg-blue-500/10 text-blue-400 text-[10px] px-2 py-1 rounded border border-blue-500/20 font-mono cursor-pointer hover:bg-blue-500 hover:text-white transition-colors" onclick="copyVar('{package_name}')">{package_name}</span>
+                    </div>
+                    <textarea id="invoice_created_template" rows="4" class="w-full bg-[#0f172a] border border-slate-700 rounded-2xl p-4 text-sm text-slate-300 focus:ring-blue-500 focus:border-blue-500 placeholder-slate-600 font-medium"></textarea>
+                    <button onclick="testTemplate('invoice_created')" class="mt-4 px-4 py-2 text-[10px] font-black text-amber-400 border border-amber-500/30 rounded-xl hover:bg-amber-500 hover:text-white transition-all uppercase tracking-widest">
+                        <i class="bi bi-send me-1"></i> Test Kirim
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-[#1e293b] border border-slate-700/60 rounded-3xl shadow-xl overflow-hidden group">
+                <div class="px-6 py-4 border-b border-slate-700 bg-[#111827]/50 flex justify-between items-center">
+                    <h3 class="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
+                        <i class="bi bi-cash-coin text-emerald-500"></i> Pembayaran Diterima (Payment Received)
+                    </h3>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="payment_received_enabled" class="sr-only peer" checked>
+                        <div class="w-11 h-6 bg-slate-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#25D366]"></div>
+                    </label>
+                </div>
+                <div class="p-6">
+                    <div class="mb-4 flex flex-wrap gap-1">
+                        <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest mr-2 self-center">Variabel:</span>
+                        <span class="bg-blue-500/10 text-blue-400 text-[10px] px-2 py-1 rounded border border-blue-500/20 font-mono cursor-pointer hover:bg-blue-500 hover:text-white transition-colors" onclick="copyVar('{customer_name}')">{customer_name}</span>
+                        <span class="bg-blue-500/10 text-blue-400 text-[10px] px-2 py-1 rounded border border-blue-500/20 font-mono cursor-pointer hover:bg-blue-500 hover:text-white transition-colors" onclick="copyVar('{invoice_number}')">{invoice_number}</span>
+                        <span class="bg-blue-500/10 text-blue-400 text-[10px] px-2 py-1 rounded border border-blue-500/20 font-mono cursor-pointer hover:bg-blue-500 hover:text-white transition-colors" onclick="copyVar('{amount}')">{amount}</span>
+                        <span class="bg-blue-500/10 text-blue-400 text-[10px] px-2 py-1 rounded border border-blue-500/20 font-mono cursor-pointer hover:bg-blue-500 hover:text-white transition-colors" onclick="copyVar('{payment_method}')">{payment_method}</span>
+                        <span class="bg-blue-500/10 text-blue-400 text-[10px] px-2 py-1 rounded border border-blue-500/20 font-mono cursor-pointer hover:bg-blue-500 hover:text-white transition-colors" onclick="copyVar('{payment_date}')">{payment_date}</span>
+                    </div>
+                    <textarea id="payment_received_template" rows="4" class="w-full bg-[#0f172a] border border-slate-700 rounded-2xl p-4 text-sm text-slate-300 focus:ring-blue-500 focus:border-blue-500 font-medium"></textarea>
+                    <button onclick="testTemplate('payment_received')" class="mt-4 px-4 py-2 text-[10px] font-black text-amber-400 border border-amber-500/30 rounded-xl hover:bg-amber-500 hover:text-white transition-all uppercase tracking-widest">
+                        <i class="bi bi-send me-1"></i> Test Kirim
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-[#1e293b] border border-slate-700/60 rounded-3xl shadow-xl overflow-hidden group">
+                <div class="px-6 py-4 border-b border-slate-700 bg-[#111827]/50 flex justify-between items-center">
+                    <h3 class="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
+                        <i class="bi bi-alarm text-amber-500"></i> Pengingat Jatuh Tempo (Reminder)
+                    </h3>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="due_date_reminder_enabled" class="sr-only peer" checked>
+                        <div class="w-11 h-6 bg-slate-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#25D366]"></div>
+                    </label>
+                </div>
+                <div class="p-6">
+                    <div class="mb-4 flex flex-wrap gap-1">
+                        <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest mr-2 self-center">Variabel:</span>
+                        <span class="bg-blue-500/10 text-blue-400 text-[10px] px-2 py-1 rounded border border-blue-500/20 font-mono cursor-pointer hover:bg-blue-500 hover:text-white transition-colors" onclick="copyVar('{customer_name}')">{customer_name}</span>
+                        <span class="bg-blue-500/10 text-blue-400 text-[10px] px-2 py-1 rounded border border-blue-500/20 font-mono cursor-pointer hover:bg-blue-500 hover:text-white transition-colors" onclick="copyVar('{days_remaining}')">{days_remaining}</span>
+                        <span class="bg-blue-500/10 text-blue-400 text-[10px] px-2 py-1 rounded border border-blue-500/20 font-mono cursor-pointer hover:bg-blue-500 hover:text-white transition-colors" onclick="copyVar('{due_date}')">{due_date}</span>
+                    </div>
+                    <textarea id="due_date_reminder_template" rows="4" class="w-full bg-[#0f172a] border border-slate-700 rounded-2xl p-4 text-sm text-slate-300 focus:ring-blue-500 focus:border-blue-500 font-medium"></textarea>
+                    <button onclick="testTemplate('due_date_reminder')" class="mt-4 px-4 py-2 text-[10px] font-black text-amber-400 border border-amber-500/30 rounded-xl hover:bg-amber-500 hover:text-white transition-all uppercase tracking-widest">
+                        <i class="bi bi-send me-1"></i> Test Kirim
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-[#1e293b] border border-slate-700/60 rounded-3xl shadow-xl overflow-hidden group">
+                <div class="px-6 py-4 border-b border-slate-700 bg-[#111827]/50 flex justify-between items-center">
+                    <h3 class="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
+                        <i class="bi bi-slash-circle text-red-500"></i> Isolir Layanan (Suspended)
+                    </h3>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="service_suspension_enabled" class="sr-only peer" checked>
+                        <div class="w-11 h-6 bg-slate-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#25D366]"></div>
+                    </label>
+                </div>
+                <div class="p-6">
+                    <div class="mb-4 flex flex-wrap gap-1">
+                        <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest mr-2 self-center">Variabel:</span>
+                        <span class="bg-blue-500/10 text-blue-400 text-[10px] px-2 py-1 rounded border border-blue-500/20 font-mono cursor-pointer hover:bg-blue-500 hover:text-white transition-colors" onclick="copyVar('{customer_name}')">{customer_name}</span>
+                        <span class="bg-blue-500/10 text-blue-400 text-[10px] px-2 py-1 rounded border border-blue-500/20 font-mono cursor-pointer hover:bg-blue-500 hover:text-white transition-colors" onclick="copyVar('{amount}')">{amount}</span>
+                        <span class="bg-blue-500/10 text-blue-400 text-[10px] px-2 py-1 rounded border border-blue-500/20 font-mono cursor-pointer hover:bg-blue-500 hover:text-white transition-colors" onclick="copyVar('{due_date}')">{due_date}</span>
+                    </div>
+                    <textarea id="service_suspension_template" rows="4" class="w-full bg-[#0f172a] border border-slate-700 rounded-2xl p-4 text-sm text-slate-300 focus:ring-blue-500 focus:border-blue-500 font-medium"></textarea>
+                    <button onclick="testTemplate('service_suspension')" class="mt-4 px-4 py-2 text-[10px] font-black text-amber-400 border border-amber-500/30 rounded-xl hover:bg-amber-500 hover:text-white transition-all uppercase tracking-widest">
+                        <i class="bi bi-send me-1"></i> Test Kirim
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-[#1e293b] border border-slate-700/60 rounded-3xl shadow-xl overflow-hidden group">
+                <div class="px-6 py-4 border-b border-slate-700 bg-[#111827]/50 flex justify-between items-center">
+                    <h3 class="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
+                        <i class="bi bi-check-circle text-emerald-500"></i> Layanan Aktif Kembali (Restored)
+                    </h3>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="service_restoration_enabled" class="sr-only peer" checked>
+                        <div class="w-11 h-6 bg-slate-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#25D366]"></div>
+                    </label>
+                </div>
+                <div class="p-6">
+                    <div class="mb-4 flex flex-wrap gap-1">
+                        <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest mr-2 self-center">Variabel:</span>
+                        <span class="bg-blue-500/10 text-blue-400 text-[10px] px-2 py-1 rounded border border-blue-500/20 font-mono cursor-pointer hover:bg-blue-500 hover:text-white transition-colors" onclick="copyVar('{customer_name}')">{customer_name}</span>
+                        <span class="bg-blue-500/10 text-blue-400 text-[10px] px-2 py-1 rounded border border-blue-500/20 font-mono cursor-pointer hover:bg-blue-500 hover:text-white transition-colors" onclick="copyVar('{package_name}')">{package_name}</span>
+                    </div>
+                    <textarea id="service_restoration_template" rows="4" class="w-full bg-[#0f172a] border border-slate-700 rounded-2xl p-4 text-sm text-slate-300 focus:ring-blue-500 focus:border-blue-500 font-medium"></textarea>
+                    <button onclick="testTemplate('service_restoration')" class="mt-4 px-4 py-2 text-[10px] font-black text-amber-400 border border-amber-500/30 rounded-xl hover:bg-amber-500 hover:text-white transition-all uppercase tracking-widest">
+                        <i class="bi bi-send me-1"></i> Test Kirim
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="space-y-6">
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-[#1e293b] border border-slate-700 rounded-2xl p-4 text-center shadow-lg group hover:border-[#25D366]/50 transition-all">
+                    <i class="bi bi-whatsapp text-2xl text-[#25D366] mb-1 block group-hover:scale-110 transition-transform"></i>
+                    <div id="whatsappStatus" class="text-xs font-black uppercase text-slate-400">Menghubungkan...</div>
+                    <p class="text-[9px] font-bold text-slate-600 uppercase tracking-wider mt-1">Koneksi Gateway</p>
+                </div>
+                <div class="bg-[#1e293b] border border-slate-700 rounded-2xl p-4 text-center shadow-lg group hover:border-blue-500/50 transition-all">
+                    <i class="bi bi-people text-2xl text-blue-500 mb-1 block group-hover:scale-110 transition-transform"></i>
+                    <div id="activeCustomers" class="text-lg font-black text-white leading-none">-</div>
+                    <p class="text-[9px] font-bold text-slate-600 uppercase tracking-wider mt-1">Pelanggan Aktif</p>
+                </div>
+                <div class="bg-[#1e293b] border border-slate-700 rounded-2xl p-4 text-center shadow-lg group hover:border-amber-500/50 transition-all">
+                    <i class="bi bi-receipt text-2xl text-amber-500 mb-1 block group-hover:scale-110 transition-transform"></i>
+                    <div id="pendingInvoices" class="text-lg font-black text-white leading-none">-</div>
+                    <p class="text-[9px] font-bold text-slate-600 uppercase tracking-wider mt-1">Invoice Pending</p>
+                </div>
+                <div class="bg-[#1e293b] border border-slate-700 rounded-2xl p-4 text-center shadow-lg group hover:border-cyan-500/50 transition-all">
+                    <i class="bi bi-calendar-event text-2xl text-cyan-500 mb-1 block group-hover:scale-110 transition-transform"></i>
+                    <div class="text-xs font-black text-white leading-none uppercase">Daily</div>
+                    <p class="text-[9px] font-bold text-slate-600 uppercase tracking-wider mt-1">Auto Scheduler</p>
+                </div>
+            </div>
+
+            <div class="bg-[#1e293b] border border-slate-700/60 rounded-3xl shadow-xl p-6">
+                <h3 class="text-xs font-black text-white uppercase tracking-widest border-b border-slate-700 pb-3 mb-4 flex items-center gap-2">
+                    <i class="bi bi-tools text-blue-500"></i> Test Manual
+                </h3>
+                <form id="testForm" class="space-y-4">
+                    <div>
+                        <label class="block mb-2 text-[10px] font-black text-slate-500 uppercase tracking-widest">Nomor Tujuan</label>
+                        <input type="text" id="testPhoneNumber" placeholder="62812345xxx" class="w-full bg-[#0f172a] border border-slate-700 rounded-xl p-3 text-sm text-white focus:ring-blue-500 focus:border-blue-500 font-mono">
+                    </div>
+                    <div>
+                        <label class="block mb-2 text-[10px] font-black text-slate-500 uppercase tracking-widest">Template</label>
+                        <select id="testTemplateSelect" class="w-full bg-[#0f172a] border border-slate-700 rounded-xl p-3 text-sm text-white focus:ring-blue-500 font-bold uppercase tracking-tighter">
+                            <option value="invoice_created">Tagihan Baru</option>
+                            <option value="payment_received">Pembayaran</option>
+                            <option value="due_date_reminder">Pengingat</option>
+                            <option value="service_suspension">Isolir</option>
+                            <option value="service_restoration">Pulihkan</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="w-full py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white text-[10px] font-black rounded-xl transition-all uppercase tracking-widest">
+                        <i class="bi bi-send me-1"></i> Kirim Test Sekarang
+                    </button>
+                </form>
+            </div>
+
+            <div class="bg-[#1e293b] border border-slate-700/60 rounded-3xl shadow-xl p-6 relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-4 opacity-5 text-red-500">
+                    <i class="bi bi-broadcast text-6xl"></i>
+                </div>
+                <h3 class="text-xs font-black text-red-500 uppercase tracking-widest border-b border-slate-700 pb-3 mb-4 flex items-center gap-2">
+                    <i class="bi bi-megaphone-fill"></i> Broadcast Massal
+                </h3>
+                <div class="bg-red-500/10 border border-red-500/20 rounded-xl p-3 mb-4">
+                    <p class="text-[9px] font-black text-red-400 uppercase leading-relaxed">
+                        <i class="bi bi-exclamation-triangle-fill"></i> Hati-hati! Pesan ini akan dikirim ke <strong>SEMUA</strong> pelanggan aktif.
+                    </p>
+                </div>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block mb-2 text-[10px] font-black text-slate-500 uppercase tracking-widest">Tipe Pengumuman</label>
+                        <select id="broadcastType" class="w-full bg-[#0f172a] border border-slate-700 rounded-xl p-3 text-sm text-white focus:ring-red-500 font-bold uppercase tracking-tighter">
+                            <option value="service_announcement">Pengumuman Umum</option>
+                            <option value="service_disruption">Gangguan Jaringan</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block mb-2 text-[10px] font-black text-slate-500 uppercase tracking-widest">Isi Pesan</label>
+                        <textarea id="broadcastMsg" rows="3" placeholder="Tulis pengumuman di sini..." class="w-full bg-[#0f172a] border border-slate-700 rounded-xl p-3 text-sm text-white focus:ring-red-500 font-medium"></textarea>
+                    </div>
+                    <button onclick="sendBroadcast()" class="w-full py-3 bg-red-600 hover:bg-red-700 text-white text-[10px] font-black rounded-xl transition-all uppercase tracking-widest shadow-lg shadow-red-500/20">
+                        <i class="bi bi-broadcast me-1"></i> Mulai Broadcast
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="toast-container" class="fixed top-24 right-5 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
+
+</main>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<script>
+    let templates = {};
+
+    // --- TOAST FUNCTION (Tailwind Batman Style) ---
+    function showToast(type, title, message) {
+        const colors = {
+            success: 'bg-emerald-600 border-emerald-500',
+            error: 'bg-red-600 border-red-500',
+            warning: 'bg-amber-600 border-amber-500'
+        };
+        const icons = {
+            success: 'bi-check-circle-fill',
+            error: 'bi-exclamation-triangle-fill',
+            warning: 'bi-info-circle-fill'
+        };
+        
+        const id = 'toast-' + Math.random().toString(36).substr(2, 9);
+        const html = `
+            <div id="${id}" class="toast-item flex items-center w-full max-w-xs p-4 text-white ${colors[type] || 'bg-slate-800'} rounded-2xl shadow-2xl border transition-all duration-500 pointer-events-auto transform translate-x-0" role="alert">
+                <div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-white rounded-lg bg-white/20">
+                    <i class="bi ${icons[type] || 'bi-bell'}"></i>
+                </div>
+                <div class="ml-3">
+                    <span class="text-[10px] font-black uppercase tracking-widest opacity-70 block">${title}</span>
+                    <div class="text-xs font-bold">${message}</div>
+                </div>
+                <button type="button" class="ml-auto -mx-1.5 -my-1.5 p-1.5 inline-flex h-8 w-8 text-white hover:text-slate-200" onclick="this.parentElement.remove()">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>`;
+            
+        $('#toast-container').append(html);
+        setTimeout(() => {
+            $(`#${id}`).addClass('translate-x-full opacity-0');
+            setTimeout(() => $(`#${id}`).remove(), 500);
+        }, 4000);
+    }
+
+    // --- HELPER: COPY VARIABLE ---
+    function copyVar(text) {
+        // Find focused textarea or just show info
+        showToast('warning', 'Info', `Gunakan variabel ${text} di dalam template.`);
+    }
+
+    // --- 1. LOAD STATUS ---
+    function loadStatus() {
+        $.get('/admin/billing/whatsapp-settings/status')
+        .done(function(data) {
+            if (data.success) {
+                if(data.connected) {
+                    $('#whatsappStatus').html('<span class="text-emerald-400 font-black animate-pulse"><i class="bi bi-check-circle-fill me-1"></i> Connected</span>');
+                } else {
+                    $('#whatsappStatus').html('<span class="text-red-500 font-black"><i class="bi bi-x-circle-fill me-1"></i> Disconnected</span>');
+                }
+                
+                if(data.info) {
+                    $('#activeCustomers').text(data.info.activeCustomers || '0');
+                    $('#pendingInvoices').text(data.info.pendingInvoices || '0');
+                } else {
+                    $('#activeCustomers').text(data.activeCustomers || '0');
+                    $('#pendingInvoices').text(data.pendingInvoices || '0');
+                }
+            }
+        })
+        .fail(function() {
+            $('#whatsappStatus').html('<span class="text-slate-600">Error Status</span>');
+        });
+    }
+
+    loadStatus();
+    setInterval(loadStatus, 10000); 
+
+    // --- 2. LOAD TEMPLATES ---
+    async function loadTemplates() {
+        try {
+            const response = await fetch('/admin/billing/whatsapp-settings/templates');
+            const data = await response.json();
+            if (data.success) {
+                templates = data.templates;
+                Object.keys(templates).forEach(key => {
+                    const textarea = document.getElementById(`${key}_template`);
+                    const toggle = document.getElementById(`${key}_enabled`);
+                    if (textarea) textarea.value = templates[key].template || '';
+                    if (toggle) toggle.checked = templates[key].enabled !== false;
+                });
+            }
+        } catch (error) { console.error('Error loading templates:', error); }
+    }
+    loadTemplates();
+
+    // --- 3. SAVE TEMPLATES ---
+    async function saveAllTemplates() {
+        const templateData = {};
+        const keys = ['invoice_created', 'payment_received', 'due_date_reminder', 'service_suspension', 'service_restoration'];
+        
+        keys.forEach(key => {
+            const textarea = document.getElementById(`${key}_template`);
+            const toggle = document.getElementById(`${key}_enabled`);
+            if (textarea) {
+                templateData[key] = {
+                    template: textarea.value,
+                    enabled: toggle ? toggle.checked : true
+                };
+            }
+        });
+        
+        try {
+            const response = await fetch('/admin/billing/whatsapp-settings/templates', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(templateData)
+            });
+            const data = await response.json();
+            if (data.success) showToast('success', 'Berhasil', 'Semua template tersimpan!');
+            else showToast('error', 'Gagal', 'Gagal menyimpan template');
+        } catch (error) { showToast('error', 'Error', 'Terjadi kesalahan sistem'); }
+    }
+
+    // --- 4. TEST TEMPLATE ---
+    function testTemplate(templateKey) {
+        const phoneNumber = prompt('Masukkan nomor tujuan untuk test (628xxx):');
+        if (!phoneNumber) return;
+        sendTestRequest(phoneNumber, templateKey);
+    }
+
+    // --- 5. TEST FORM ---
+    $('#testForm').submit(function(e) {
+        e.preventDefault();
+        const phoneNumber = $('#testPhoneNumber').val();
+        const templateKey = $('#testTemplateSelect').val();
+        if (!phoneNumber) { alert('Masukkan nomor tujuan'); return; }
+        sendTestRequest(phoneNumber, templateKey);
+    });
+
+    function sendTestRequest(phone, key) {
+        showToast('warning', 'Sedang Mengirim', 'Tunggu sebentar...');
+        $.post('/admin/billing/whatsapp-settings/test', {
+            phoneNumber: phone,
+            templateKey: key
+        })
+        .done(res => {
+            if(res.success) showToast('success', 'Berhasil', 'Pesan test terkirim!');
+            else showToast('error', 'Gagal', res.message || 'Gagal mengirim pesan');
+        })
+        .fail(() => showToast('error', 'Error', 'Gagal menghubungi server gateway'));
+    }
+
+    // --- 6. BROADCAST ---
+    function sendBroadcast() {
+        const type = $('#broadcastType').val();
+        const msg = $('#broadcastMsg').val();
+        if(!msg) { alert("Isi pesan broadcast dulu!"); return; }
+        if(!confirm("?? PERINGATAN: Kirim broadcast ke SELURUH pelanggan?")) return;
+
+        showToast('warning', 'Processing', 'Memulai pengiriman massal...');
+        $.post('/admin/billing/whatsapp-settings/broadcast', { type: type, message: msg })
+        .done(res => {
+             if(res.success) showToast('success', 'Selesai', `Sukses: ${res.sent}, Gagal: ${res.failed}`);
+             else showToast('error', 'Gagal', res.message);
+        })
+        .fail(() => alert("Broadcast dijalankan di background server."));
+    }
+
+    // --- HELPER TOGGLE ---
+    function enableAllTemplates() {
+        $('input[type="checkbox"][id$="_enabled"]').prop('checked', true);
+        showToast('success', 'Info', 'Semua diaktifkan (Klik Simpan untuk permanen)');
+    }
+    function disableAllTemplates() {
+        $('input[type="checkbox"][id$="_enabled"]').prop('checked', false);
+        showToast('warning', 'Info', 'Semua dinonaktifkan (Klik Simpan untuk permanen)');
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Paket | <%= typeof settings !== 'undefined' && settings.company_header ? settings.company_header : 'ISP System' %></title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css" rel="stylesheet">
+
+    <style>
+        :root { --bg-deep: #05080f; --bg-matte: #0a0f1e; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-deep); color: #94a3b8; }
+
+        /* --- CSS NUKLIR ANTI SILAU --- */
+        input, select, textarea, .batman-input {
+            background-color: #020617 !important; border: 1px solid #1e293b !important; color: #f1f5f9 !important; border-radius: 0.75rem !important;
+        }
+        input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, input:-webkit-autofill:active {
+            -webkit-box-shadow: 0 0 0 30px #020617 inset !important; -webkit-text-fill-color: #f1f5f9 !important; transition: background-color 5000s ease-in-out 0s;
+        }
+        ::-webkit-calendar-picker-indicator { filter: invert(1) !important; opacity: 0.6; cursor: pointer; }
+
+        .dataTables_wrapper .dataTables_length select { background-color: #020617 !important; color: #f1f5f9 !important; padding: 4px 24px 4px 8px !important; border-radius: 8px !important; }
+        .dataTables_wrapper .dataTables_filter input { background-color: #020617 !important; color: #f1f5f9 !important; border: 1px solid #3b82f6 !important; padding: 6px 12px !important; border-radius: 8px !important; margin-left: 8px !important; }
+        .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_paginate, .dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter { color: #64748b !important; font-weight: 700 !important; text-transform: uppercase !important; font-size: 0.75rem !important; margin-bottom: 10px !important; }
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current { background: #3b82f6 !important; color: white !important; border: none !important; border-radius: 6px !important; }
+        .dataTables_wrapper .dataTables_paginate .paginate_button:hover { background: #1e293b !important; color: white !important; border: 1px solid #334155 !important; }
+
+        .glass-card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .lis-blue { border-left: 4px solid #3b82f6; } .lis-emerald { border-left: 4px solid #10b981; } .lis-purple { border-left: 4px solid #a855f7; } .lis-orange { border-left: 4px solid #f97316; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="no-scrollbar">
+
+<%- include('../../partials/admin-header') %>
+<%- include('../../partials/billing-sidebar', { page: 'packages', settings: typeof settings !== 'undefined' ? settings : {} }) %>
+
+<main class="p-4 sm:ml-64 pt-24 min-h-screen transition-all duration-300">
+    <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+        <div>
+            <h1 class="text-3xl font-black text-white tracking-tighter uppercase leading-none">Kelola <span class="text-blue-500">Paket</span></h1>
+            <div class="flex items-center gap-2 mt-2">
+                <span class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
+                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-[4px]">Internet Service Plans</p>
+            </div>
+        </div>
+        <button onclick="openAddModal()" class="px-6 py-2.5 text-[10px] font-black text-white bg-blue-600 rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-500/20 transition-all uppercase tracking-widest flex items-center gap-2">
+            <i class="bi bi-plus-lg text-lg"></i> Tambah Paket
+        </button>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-5 mb-8">
+        <div class="glass-card rounded-2xl p-5 shadow-lg lis-blue">
+            <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Total Paket</p>
+            <h3 class="text-2xl font-black text-white"><%= packages.length %></h3>
+        </div>
+        <div class="glass-card rounded-2xl p-5 shadow-lg lis-emerald">
+            <p class="text-[9px] font-black text-emerald-500/80 uppercase tracking-widest mb-1">Pelanggan Aktif</p>
+            <h3 class="text-2xl font-black text-white"><%= typeof customers !== 'undefined' ? customers.length : 0 %></h3>
+        </div>
+        <div class="glass-card rounded-2xl p-5 shadow-lg lis-purple">
+            <p class="text-[9px] font-black text-purple-500/80 uppercase tracking-widest mb-1">Profile Radius</p>
+            <h3 class="text-2xl font-black text-white"><%= typeof radiusProfiles !== 'undefined' ? radiusProfiles.length : 0 %></h3>
+        </div>
+        <div class="glass-card rounded-2xl p-5 shadow-lg lis-orange">
+            <% let maxPrice = 0; packages.forEach(p => { if(p.price > maxPrice) maxPrice = p.price; }); %>
+            <p class="text-[9px] font-black text-orange-500/80 uppercase tracking-widest mb-1">Harga Tertinggi</p>
+            <h3 class="text-2xl font-black text-white"><%= (maxPrice/1000).toFixed(0) %>k</h3>
+        </div>
+    </div>
+
+    <div class="glass-card rounded-3xl shadow-2xl overflow-hidden mb-10">
+        <div class="p-6">
+            <table id="packagesTable" class="w-full text-left text-slate-400">
+                <thead class="text-[9px] text-slate-500 uppercase bg-black/30 border-b border-slate-700">
+                    <tr>
+                        <th class="px-4 py-4 font-black tracking-wider text-center w-10">No</th>
+                        <th class="px-4 py-4 font-black tracking-wider">Nama Paket</th>
+                        <th class="px-4 py-4 font-black tracking-wider text-center">Tipe Billing</th>
+                        <th class="px-4 py-4 font-black tracking-wider text-center">Harga</th>
+                        <th class="px-4 py-4 font-black tracking-wider text-center">Profile</th>
+                        <th class="px-4 py-4 font-black tracking-wider text-right">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-700/50">
+                    <% if (packages && packages.length > 0) { %>
+                        <% packages.forEach(function(pkg, i) { %>
+                        <tr class="hover:bg-white/[0.02] transition-colors">
+                            <td class="px-4 py-4 text-center text-xs font-bold"><%= i + 1 %></td>
+                            <td class="px-4 py-4">
+                                <div class="font-black text-white text-sm uppercase"><%= pkg.name %></div>
+                                <div class="text-[10px] font-bold mt-1 uppercase text-slate-500">SPEED: <span class="text-white"><%= pkg.speed %></span></div>
+                            </td>
+                            <td class="px-4 py-4 text-center">
+                                <% if(pkg.billing_type === 'dynamic') { %>
+                                    <span class="px-2 py-1 rounded text-[9px] font-black bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 uppercase"><i class="bi bi-lightning-fill"></i> Dynamic (<%= pkg.active_period || 30 %> Hari)</span>
+                                <% } else { %>
+                                    <span class="px-2 py-1 rounded text-[9px] font-black bg-blue-500/10 text-blue-400 border border-blue-500/20 uppercase"><i class="bi bi-calendar-check-fill"></i> Fixed (PSB)</span>
+                                <% } %>
+                            </td>
+                            <td class="px-4 py-4 text-center font-mono text-xs font-black text-emerald-400">Rp <%= parseFloat(pkg.price).toLocaleString('id-ID') %></td>
+                            <td class="px-4 py-4 text-center">
+                                <span class="px-2 py-1 rounded text-[10px] font-black bg-purple-500/10 text-purple-400 border border-purple-500/20 uppercase"><%= pkg.pppoe_profile || 'default' %></span>
+                            </td>
+                            <td class="px-4 py-4 text-right">
+                                <div class="flex justify-end gap-2">
+                                    <button onclick="editPackage('<%= pkg.id %>')" class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-500 hover:bg-amber-500 hover:text-white transition-all flex items-center justify-center border border-amber-500/20">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </button>
+                                    <button onclick="deletePackage('<%= pkg.id %>', '<%= pkg.name %>')" class="w-8 h-8 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center border border-red-500/20">
+                                        <i class="bi bi-trash3"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <% }); %>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<div id="addPackageModal" class="fixed inset-0 z-[70] hidden bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="glass-card w-full max-w-2xl border border-white/5 shadow-2xl overflow-hidden rounded-[2rem]">
+        <div class="bg-gray-900/50 p-6 border-b border-gray-800 flex justify-between items-center">
+            <h3 class="text-white font-black uppercase tracking-tighter text-lg flex items-center gap-2"><i class="bi bi-plus-circle text-blue-500"></i> Tambah Paket</h3>
+            <button onclick="closeModal('addPackageModal')" class="text-gray-500 hover:text-white text-2xl">&times;</button>
+        </div>
+        <form id="addPackageForm" class="p-8 space-y-5">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div><label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Nama Paket</label><input type="text" name="name" class="batman-input w-full p-3 font-bold" placeholder="Contoh: Gaming 20Mbps" required></div>
+                <div><label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Harga (Rp)</label><input type="text" name="price" onkeyup="formatRupiah(this)" class="batman-input w-full p-3 font-black text-emerald-400" required></div>
+                <div><label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Kecepatan</label><input type="text" name="speed" class="batman-input w-full p-3 font-bold" placeholder="20 Mbps" required></div>
+                <div>
+                    <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Profile Radius</label>
+                    <select name="pppoe_profile" class="batman-input w-full p-3 font-bold" required>
+                        <option value="">-- Pilih Profile --</option>
+                        <% if (typeof radiusProfiles !== 'undefined') { radiusProfiles.forEach(function(prof) { %><option value="<%= prof %>"><%= prof %></option><% }); } else { %><option value="default">Default</option><% } %>
+                    </select>
+                </div>
+                
+                <div class="md:col-span-2">
+                    <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Sistem Tagihan</label>
+                    <input type="hidden" id="add_billing_type" name="billing_type" value="fixed">
+                    <div class="grid grid-cols-2 gap-2 p-1 bg-gray-900 rounded-xl border border-gray-700">
+                        <button type="button" id="btn-add-fixed" onclick="setAddBillingType('fixed')" class="py-2 px-4 rounded-lg text-sm font-bold transition-all bg-blue-600 text-white shadow-lg"><i class="bi bi-calendar-check me-1"></i> FIXED (Tgl Tetap)</button>
+                        <button type="button" id="btn-add-dynamic" onclick="setAddBillingType('dynamic')" class="py-2 px-4 rounded-lg text-sm font-bold transition-all text-gray-400 hover:text-white"><i class="bi bi-lightning me-1"></i> DYNAMIC (Masa Aktif)</button>
+                    </div>
+                </div>
+                <div id="wrap-add-active-period" class="hidden md:col-span-2 p-3 bg-gray-900/50 border border-yellow-700/50 rounded-xl">
+                    <label class="block text-[10px] font-black text-yellow-500 uppercase tracking-widest mb-2">Masa Aktif (Hari)</label>
+                    <input type="number" id="add_active_period" name="active_period" value="30" class="batman-input w-full p-3 font-bold text-yellow-400 text-center text-lg" placeholder="30">
+                </div>
+
+                <div class="md:col-span-2"><label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Deskripsi</label><textarea name="description" class="batman-input w-full p-3" rows="2"></textarea></div>
+            </div>
+            <div class="flex justify-end gap-3 pt-4 border-t border-gray-800">
+                <button type="button" onclick="closeModal('addPackageModal')" class="px-5 py-2.5 rounded-xl text-[10px] font-bold text-slate-400 hover:text-white hover:bg-slate-800 uppercase">Batal</button>
+                <button type="submit" class="px-6 py-2.5 rounded-xl text-[10px] font-black text-white bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/20 uppercase tracking-widest">Simpan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="editPackageModal" class="fixed inset-0 z-[70] hidden bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="glass-card w-full max-w-2xl border border-white/5 shadow-2xl overflow-hidden rounded-[2rem]">
+        <div class="bg-gray-900/50 p-6 border-b border-gray-800 flex justify-between items-center">
+            <h3 class="text-white font-black uppercase tracking-tighter text-lg flex items-center gap-2"><i class="bi bi-pencil-square text-amber-500"></i> Edit Paket</h3>
+            <button onclick="closeModal('editPackageModal')" class="text-gray-500 hover:text-white text-2xl">&times;</button>
+        </div>
+        <form id="editPackageForm" class="p-8 space-y-5">
+            <input type="hidden" id="edit_package_id" name="id">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div><label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Nama Paket</label><input type="text" id="edit_name" name="name" class="batman-input w-full p-3 font-bold" required></div>
+                <div><label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Harga (Rp)</label><input type="text" id="edit_price" name="price" onkeyup="formatRupiah(this)" class="batman-input w-full p-3 font-black text-emerald-400" required></div>
+                <div><label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Kecepatan</label><input type="text" id="edit_speed" name="speed" class="batman-input w-full p-3 font-bold" required></div>
+                <div>
+                    <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Profile Radius</label>
+                    <select id="edit_pppoe_profile" name="pppoe_profile" class="batman-input w-full p-3 font-bold" required>
+                        <option value="">-- Pilih Profile --</option>
+                        <% if (typeof radiusProfiles !== 'undefined') { radiusProfiles.forEach(function(prof) { %><option value="<%= prof %>"><%= prof %></option><% }); } else { %><option value="default">Default</option><% } %>
+                    </select>
+                </div>
+
+                <div class="md:col-span-2">
+                    <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Sistem Tagihan</label>
+                    <input type="hidden" id="edit_billing_type" name="billing_type" value="fixed">
+                    <div class="grid grid-cols-2 gap-2 p-1 bg-gray-900 rounded-xl border border-gray-700">
+                        <button type="button" id="btn-edit-fixed" onclick="setEditBillingType('fixed')" class="py-2 px-4 rounded-lg text-sm font-bold transition-all bg-blue-600 text-white shadow-lg"><i class="bi bi-calendar-check me-1"></i> FIXED (Tgl Tetap)</button>
+                        <button type="button" id="btn-edit-dynamic" onclick="setEditBillingType('dynamic')" class="py-2 px-4 rounded-lg text-sm font-bold transition-all text-gray-400 hover:text-white"><i class="bi bi-lightning me-1"></i> DYNAMIC (Masa Aktif)</button>
+                    </div>
+                </div>
+                <div id="wrap-edit-active-period" class="hidden md:col-span-2 p-3 bg-gray-900/50 border border-yellow-700/50 rounded-xl">
+                    <label class="block text-[10px] font-black text-yellow-500 uppercase tracking-widest mb-2">Masa Aktif (Hari)</label>
+                    <input type="number" id="edit_active_period" name="active_period" class="batman-input w-full p-3 font-bold text-yellow-400 text-center text-lg">
+                </div>
+
+                <div class="md:col-span-2"><label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Deskripsi</label><textarea id="edit_description" name="description" class="batman-input w-full p-3" rows="2"></textarea></div>
+            </div>
+            <div class="flex justify-end gap-3 pt-4 border-t border-gray-800">
+                <button type="button" onclick="closeModal('editPackageModal')" class="px-5 py-2.5 rounded-xl text-[10px] font-bold text-slate-400 hover:text-white hover:bg-slate-800 uppercase">Batal</button>
+                <button type="submit" class="px-6 py-2.5 rounded-xl text-[10px] font-black text-white bg-amber-600 hover:bg-amber-700 shadow-lg shadow-amber-500/20 uppercase tracking-widest">Update</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<%- include('../../partials/footer') %>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    $(document).ready(function() {
+        $('#packagesTable').DataTable({
+            responsive: true, pageLength: 25,
+            language: { search: "", searchPlaceholder: "Cari paket...", zeroRecords: "Data tidak ditemukan", info: "SHOWING _TOTAL_ PACKAGES", paginate: { next: ">", previous: "<" } }
+        });
+    });
+
+    // --- SULTAN FIX: Fungsi Format Rupiah ---
+    function formatRupiah(obj) {
+        let angka = obj.value.replace(/[^0-9]/g, '');
+        if (!angka) { obj.value = ''; return; }
+        obj.value = parseInt(angka).toLocaleString('id-ID');
+    }
+
+    function openModal(id) { $(`#${id}`).removeClass('hidden').addClass('flex'); }
+    function closeModal(id) { $(`#${id}`).addClass('hidden').removeClass('flex'); }
+
+    function openAddModal() {
+        $('#addPackageForm')[0].reset();
+        setAddBillingType('fixed'); 
+        openModal('addPackageModal');
+    }
+
+    function setAddBillingType(type) {
+        $('#add_billing_type').val(type);
+        $('#btn-add-fixed, #btn-add-dynamic').removeClass('bg-blue-600 bg-yellow-600 text-white shadow-lg').addClass('text-gray-400 hover:text-white');
+        $('#wrap-add-active-period').addClass('hidden');
+
+        if(type === 'fixed') {
+            $('#btn-add-fixed').addClass('bg-blue-600 text-white shadow-lg').removeClass('text-gray-400 hover:text-white');
+        } else {
+            $('#btn-add-dynamic').addClass('bg-yellow-600 text-white shadow-lg').removeClass('text-gray-400 hover:text-white');
+            $('#wrap-add-active-period').removeClass('hidden');
+        }
+    }
+
+    function setEditBillingType(type) {
+        $('#edit_billing_type').val(type);
+        $('#btn-edit-fixed, #btn-edit-dynamic').removeClass('bg-blue-600 bg-yellow-600 text-white shadow-lg').addClass('text-gray-400 hover:text-white');
+        $('#wrap-edit-active-period').addClass('hidden');
+
+        if(type === 'fixed') {
+            $('#btn-edit-fixed').addClass('bg-blue-600 text-white shadow-lg').removeClass('text-gray-400 hover:text-white');
+        } else {
+            $('#btn-edit-dynamic').addClass('bg-yellow-600 text-white shadow-lg').removeClass('text-gray-400 hover:text-white');
+            $('#wrap-edit-active-period').removeClass('hidden');
+        }
+    }
+
+    // --- CREATE PACKAGE ---
+    $('#addPackageForm').submit(function(e) {
+        e.preventDefault();
+        const btn = $(this).find('button[type="submit"]');
+        btn.prop('disabled', true).text('Menyimpan...');
+
+        const data = {
+            name: $(this).find('[name="name"]').val(),
+            speed: $(this).find('[name="speed"]').val(),
+            // SULTAN FIX: Hapus titik sebelum dikirim ke backend
+            price: $(this).find('[name="price"]').val().replace(/[^0-9]/g, ''), 
+            description: $(this).find('[name="description"]').val(),
+            pppoe_profile: $(this).find('[name="pppoe_profile"]').val(),
+            billing_type: $('#add_billing_type').val(),
+            active_period: $('#add_active_period').val()
+        };
+
+        $.ajax({
+            url: '/admin/billing/packages', method: 'POST', contentType: 'application/json', data: JSON.stringify(data),
+            success: function(res) {
+                if(res.success) { Swal.fire({ icon: 'success', title: 'Berhasil', background: '#0a0f1e', color: '#fff' }).then(() => location.reload()); } 
+                else { Swal.fire({ icon: 'error', title: 'Gagal', text: res.message, background: '#0a0f1e', color: '#fff' }); btn.prop('disabled', false).text('Simpan'); }
+            }
+        });
+    });
+
+    // --- EDIT PACKAGE (FETCH) ---
+    function editPackage(id) {
+        $.get(`/admin/billing/api/packages/${id}`, function(res) {
+            if(res.success) {
+                const p = res.package;
+                $('#edit_package_id').val(p.id);
+                $('#edit_name').val(p.name);
+                $('#edit_speed').val(p.speed);
+                // SULTAN FIX: Kasih format titik saat buka modal edit
+                $('#edit_price').val(parseInt(p.price).toLocaleString('id-ID')); 
+                $('#edit_description').val(p.description);
+                $('#edit_pppoe_profile').val(p.pppoe_profile);
+                
+                const bType = p.billing_type || 'fixed';
+                setEditBillingType(bType);
+                $('#edit_active_period').val(p.active_period || 30);
+
+                openModal('editPackageModal');
+            } else {
+                Swal.fire({ icon: 'error', title: 'Error', text: 'Gagal mengambil data', background: '#0a0f1e', color: '#fff' });
+            }
+        });
+    }
+
+    // --- UPDATE PACKAGE ---
+    $('#editPackageForm').submit(function(e) {
+        e.preventDefault();
+        const id = $('#edit_package_id').val();
+        const btn = $(this).find('button[type="submit"]');
+        btn.prop('disabled', true).text('Updating...');
+
+        const data = {
+            name: $('#edit_name').val(),
+            speed: $('#edit_speed').val(),
+            // SULTAN FIX: Hapus titik sebelum update
+            price: $('#edit_price').val().replace(/[^0-9]/g, ''), 
+            description: $('#edit_description').val(),
+            pppoe_profile: $('#edit_pppoe_profile').val(),
+            billing_type: $('#edit_billing_type').val(),
+            active_period: $('#edit_active_period').val()
+        };
+
+        $.ajax({
+            url: `/admin/billing/packages/${id}`, method: 'PUT', contentType: 'application/json', data: JSON.stringify(data),
+            success: function(res) {
+                if(res.success) { Swal.fire({ icon: 'success', title: 'Berhasil', background: '#0a0f1e', color: '#fff' }).then(() => location.reload()); } 
+                else { Swal.fire({ icon: 'error', title: 'Gagal', text: res.message, background: '#0a0f1e', color: '#fff' }); btn.prop('disabled', false).text('Update'); }
+            }
+        });
+    });
+
+    // --- DELETE PACKAGE ---
+    function deletePackage(id, name) {
+        Swal.fire({
+            title: `Hapus ${name}?`, text: "Data yang dihapus tidak dapat dikembalikan!", icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444', background: '#0a0f1e', color: '#fff', confirmButtonText: 'Ya, Hapus!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({ url: `/admin/billing/packages/${id}`, method: 'DELETE', success: function(res) {
+                    if(res.success) { Swal.fire({ icon: 'success', title: 'Terhapus!', background: '#0a0f1e', color: '#fff' }).then(() => location.reload()); } 
+                    else { Swal.fire({ icon: 'error', title: 'Gagal', text: res.message, background: '#0a0f1e', color: '#fff' }); }
+                }});
+            }
+        });
+    }
+</script>
+
+</body>
+</html>

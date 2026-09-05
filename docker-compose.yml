@@ -1,0 +1,70 @@
+services:
+  pulsebill-core:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pulsebill-engine
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - DB_DIALECT=mysql
+      - DB_HOST=pulsebill-db
+      - DB_PORT=3306
+      - DB_NAME=pulsebill_db
+      - DB_USER=pulsebill
+      - DB_PASSWORD=pulsebill_secure_pass
+      - REDIS_HOST=pulsebill-redis
+      - REDIS_PORT=6379
+    depends_on:
+      pulsebill-db:
+        condition: service_healthy
+      pulsebill-redis:
+        condition: service_started
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    networks:
+      - pulsebill-network
+
+  pulsebill-db:
+    image: mysql:8.0
+    container_name: pulsebill-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root_secure_pass
+      MYSQL_DATABASE: pulsebill_db
+      MYSQL_USER: pulsebill
+      MYSQL_PASSWORD: pulsebill_secure_pass
+    volumes:
+      - pulsebill_mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - pulsebill-network
+
+  pulsebill-redis:
+    image: redis:7-alpine
+    container_name: pulsebill-cache
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - pulsebill_redis_data:/data
+    networks:
+      - pulsebill-network
+
+volumes:
+  pulsebill_mysql_data:
+  pulsebill_redis_data:
+
+networks:
+  pulsebill-network:
+    driver: bridge

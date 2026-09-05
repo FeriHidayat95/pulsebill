@@ -1,0 +1,374 @@
+<%- include('../../partials/header') %>
+<body class="bg-[#0f172a] text-slate-300 font-sans antialiased selection:bg-blue-500 selection:text-white">
+
+<%- include('../../partials/admin-header') %>
+
+<%- include('../../partials/billing-sidebar', { page: 'service-suspension', settings: settings }) %>
+
+<main class="p-4 sm:ml-64 pt-20 min-h-screen">
+
+    <div class="bg-gradient-to-r from-red-600 to-red-900 border border-red-500/30 rounded-2xl p-6 mb-8 shadow-2xl shadow-red-900/20 relative overflow-hidden group">
+        <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-700">
+            <i class="bi bi-shield-lock-fill text-8xl text-white"></i>
+        </div>
+        
+        <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
+                <h1 class="text-3xl font-black text-white tracking-tighter uppercase leading-none">
+                    Service <span class="text-white/80">Suspension</span>
+                </h1>
+                <p class="text-[10px] font-bold text-white/70 uppercase tracking-[4px] mt-2">Otomatisasi Isolir (Suspend) & Restore Pelanggan</p>
+            </div>
+            
+            <div>
+                <span class="inline-flex items-center px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white text-xs font-black uppercase tracking-widest backdrop-blur-sm shadow-xl">
+                    <i class="bi bi-clock-history me-2"></i> Grace Period: <%= settings.suspension_grace_period_days || '7' %> Hari
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+        <div class="bg-[#1e293b] border border-slate-700/60 rounded-2xl p-5 shadow-lg group hover:border-blue-500/50 transition-all">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Pelanggan Aktif</p>
+                    <h3 class="text-2xl font-black text-white" id="activeCustomers">-</h3>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500 border border-blue-500/20">
+                    <i class="bi bi-people-fill text-lg"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-[#1e293b] border border-slate-700/60 rounded-2xl p-5 shadow-lg group hover:border-red-500/50 transition-all">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-[10px] font-black text-red-500/80 uppercase tracking-widest mb-1">Sedang Diisolir</p>
+                    <h3 class="text-2xl font-black text-red-400" id="suspendedCustomers">-</h3>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center text-red-500 border border-red-500/20">
+                    <i class="bi bi-person-x-fill text-lg"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-[#1e293b] border border-slate-700/60 rounded-2xl p-5 shadow-lg group hover:border-amber-500/50 transition-all">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-[10px] font-black text-amber-500 uppercase tracking-widest mb-1">Tagihan Overdue</p>
+                    <h3 class="text-2xl font-black text-amber-400" id="overdueInvoices">-</h3>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500 border border-amber-500/20">
+                    <i class="bi bi-receipt text-lg"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-[#1e293b] border border-slate-700/60 rounded-2xl p-5 shadow-lg group hover:border-cyan-500/50 transition-all">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Profile Isolir Aktif</p>
+                    <h3 id="activeIsolirProfileDisplay" class="text-sm font-black text-cyan-400 uppercase tracking-tight font-mono"><%= appSettings.isolir_profile || 'isolir' %></h3>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center text-cyan-500 border border-cyan-500/20">
+                    <i class="bi bi-router-fill text-lg"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8">
+        
+        <div class="bg-[#1e293b] border border-slate-700/60 rounded-3xl shadow-2xl overflow-hidden">
+            <div class="px-6 py-5 border-b border-slate-700 bg-[#111827]/50">
+                <h3 class="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
+                    <i class="bi bi-gear-wide-connected text-red-500"></i> Konfigurasi Profile
+                </h3>
+            </div>
+            <div class="p-6">
+                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-6 leading-relaxed">
+                    Tentukan nama Profile di Radius yang akan digunakan saat pelanggan nunggak/diisolir.
+                </p>
+
+                <form id="isolirConfigForm" class="space-y-4">
+                    <div>
+                        <label class="block mb-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">Pilih Profile Radius</label>
+                        <div class="flex gap-2">
+                            <div class="relative w-full">
+                                <select id="isolirProfileSelect" name="isolir_profile" class="w-full bg-[#0f172a] border border-slate-700 text-white text-sm rounded-xl p-3 font-bold uppercase tracking-widest focus:ring-red-500 focus:border-red-500 appearance-none cursor-pointer">
+                                    <option value="">-- Pilih Profile --</option>
+                                    <% if(radiusProfiles && radiusProfiles.length > 0) { %>
+                                        <% radiusProfiles.forEach(p => { %>
+                                            <option value="<%= p %>" <%= appSettings.isolir_profile == p ? 'selected' : '' %>><%= p %></option>
+                                        <% }) %>
+                                    <% } else { %>
+                                        <option value="isolir" selected>isolir (Default)</option>
+                                    <% } %>
+                                </select>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-500">
+                                    <i class="bi bi-chevron-down"></i>
+                                </div>
+                            </div>
+                            <button type="button" onclick="location.reload()" class="px-4 bg-[#0f172a] border border-slate-700 text-slate-400 rounded-xl hover:text-white transition-all"><i class="bi bi-arrow-clockwise"></i></button>
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full py-4 bg-red-600 hover:bg-red-700 text-white text-xs font-black rounded-2xl transition-all uppercase tracking-widest shadow-lg shadow-red-900/20">
+                        <i class="bi bi-save2 me-2"></i> Simpan Pengaturan
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="bg-[#1e293b] border border-slate-700/60 rounded-3xl shadow-2xl overflow-hidden">
+            <div class="px-6 py-5 border-b border-slate-700 bg-[#111827]/50">
+                <h3 class="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
+                    <i class="bi bi-lightning-charge-fill text-amber-500"></i> Eksekusi Sistem Manual
+                </h3>
+            </div>
+            <div class="p-6 flex flex-col gap-4 h-full">
+                <button id="btnCheckOverdue" class="group flex items-center p-4 bg-[#0f172a] border border-slate-700 rounded-2xl hover:border-red-500 transition-all text-left relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 transition-transform">
+                        <i class="bi bi-person-x-fill text-5xl"></i>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center text-red-500 border border-red-500/20 me-4">
+                        <i class="bi bi-lock-fill"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-black text-white uppercase tracking-tight">Cek Pelanggan Nunggak</p>
+                        <p class="text-[10px] text-slate-500 font-bold mt-1">Sistem akan mengisolir pelanggan yang lewat jatuh tempo.</p>
+                    </div>
+                </button>
+
+                <button id="btnCheckPaid" class="group flex items-center p-4 bg-[#0f172a] border border-slate-700 rounded-2xl hover:border-emerald-500 transition-all text-left relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 transition-transform">
+                        <i class="bi bi-person-check-fill text-5xl"></i>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 border border-emerald-500/20 me-4">
+                        <i class="bi bi-unlock-fill"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-black text-white uppercase tracking-tight">Cek Pelanggan Lunas</p>
+                        <p class="text-[10px] text-slate-500 font-bold mt-1">Sistem akan merestore pelanggan yang sudah membayar.</p>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="bg-[#1e293b] border border-slate-700/60 rounded-3xl shadow-2xl overflow-hidden mb-10">
+        <div class="px-6 py-5 border-b border-slate-700 bg-[#111827]/50 flex justify-between items-center">
+            <h3 class="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
+                <i class="bi bi-list-ul text-red-500 text-lg"></i> Daftar Pelanggan Terisolir
+            </h3>
+            <button onclick="loadSuspendedCustomers()" class="px-3 py-1.5 bg-[#0f172a] border border-slate-700 text-slate-400 hover:text-white text-[10px] font-black rounded-lg uppercase tracking-tighter transition-all">
+                <i class="bi bi-arrow-clockwise me-1"></i> Refresh Data
+            </button>
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table id="suspendedTable" class="w-full text-left text-slate-400">
+                <thead class="text-[10px] text-slate-500 uppercase bg-[#111827]/30 border-b border-slate-700">
+                    <tr>
+                        <th class="px-6 py-4 font-black">Username</th>
+                        <th class="px-6 py-4 font-black">Nama Pelanggan</th>
+                        <th class="px-6 py-4 font-black">Kontak</th>
+                        <th class="px-6 py-4 font-black">Paket</th>
+                        <th class="px-6 py-4 font-black">Status</th>
+                        <th class="px-6 py-4 font-black text-right">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-700/50">
+                    <tr><td colspan="6" class="px-6 py-10 text-center text-slate-500 font-bold uppercase tracking-widest text-[10px]">Memuat data dari server...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="toast-container" class="fixed top-24 right-5 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
+
+</main>
+
+<%- include('../../partials/footer') %>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<script>
+    // --- Batman Toast Function ---
+    function showToast(type, title, message) {
+        const colors = {
+            success: 'bg-emerald-600 border-emerald-500',
+            error: 'bg-red-600 border-red-500',
+            warning: 'bg-amber-600 border-amber-500'
+        };
+        const icons = {
+            success: 'bi-check-circle-fill',
+            error: 'bi-exclamation-triangle-fill',
+            warning: 'bi-info-circle-fill'
+        };
+        
+        const id = 'toast-' + Math.random().toString(36).substr(2, 9);
+        const html = `
+            <div id="${id}" class="toast-item flex items-center w-full max-w-xs p-4 text-white ${colors[type] || 'bg-slate-800'} rounded-2xl shadow-2xl border transition-all duration-500 pointer-events-auto transform translate-x-0" role="alert">
+                <div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-white rounded-lg bg-white/20">
+                    <i class="bi ${icons[type] || 'bi-bell'}"></i>
+                </div>
+                <div class="ml-3">
+                    <span class="text-[10px] font-black uppercase tracking-widest opacity-70 block">${title}</span>
+                    <div class="text-xs font-bold">${message}</div>
+                </div>
+                <button type="button" class="ml-auto -mx-1.5 -my-1.5 p-1.5 inline-flex h-8 w-8 text-white hover:text-slate-200" onclick="this.parentElement.remove()">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>`;
+            
+        $('#toast-container').append(html);
+        setTimeout(() => {
+            $(`#${id}`).addClass('translate-x-full opacity-0');
+            setTimeout(() => $(`#${id}`).remove(), 500);
+        }, 5000);
+    }
+
+    // --- 1. Load Statistik ---
+    function loadStats() {
+        $.get('/admin/billing/api/suspension-stats', function(data) {
+            $('#activeCustomers').text(data.active_customers || 0);
+            $('#suspendedCustomers').text(data.suspended_customers || 0);
+            $('#overdueInvoices').text(data.overdue_invoices || 0);
+            console.log("Statistik dimuat:", data);
+        }).fail(function() {
+            $('#activeCustomers, #suspendedCustomers, #overdueInvoices').text('0');
+        });
+    }
+
+    // --- 2. Load Tabel Terisolir ---
+    function loadSuspendedCustomers() {
+        const tbody = $('#suspendedTable tbody');
+        tbody.html('<tr><td colspan="6" class="px-6 py-10 text-center"><div class="animate-spin inline-block w-8 h-8 border-4 border-red-500 border-t-transparent rounded-full" role="status"></div></td></tr>');
+    
+        $.get('/admin/billing/service-suspension/data', function(response) {
+            const suspended = response.data; 
+            tbody.empty();
+    
+            if(!suspended || suspended.length === 0) {
+                tbody.html('<tr><td colspan="6" class="px-6 py-10 text-center text-slate-600 font-bold uppercase tracking-widest text-[10px]">Tidak ada pelanggan yang sedang diisolir.</td></tr>');
+                return;
+            }
+    
+            suspended.forEach(c => {
+                const row = `
+                    <tr class="hover:bg-slate-800/50 transition-colors">
+                        <td class="px-6 py-4 font-mono text-xs font-black text-blue-400">${c.username}</td>
+                        <td class="px-6 py-4 font-bold text-white text-sm">${c.name}</td>
+                        <td class="px-6 py-4 text-xs font-bold text-slate-400">${c.kontak || '-'}</td>
+                        <td class="px-6 py-4"><span class="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 text-[10px] font-bold text-slate-400 uppercase">${c.package_name || '-'}</span></td>
+                        <td class="px-6 py-4"><span class="px-2.5 py-0.5 rounded-full text-[9px] font-black bg-red-500/10 text-red-500 border border-red-500/20 uppercase tracking-wide">ISOLIR</span></td>
+                        <td class="px-6 py-4 text-right">
+                            <button onclick="restoreCustomer('${c.username}')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-black rounded-xl transition-all uppercase tracking-widest shadow-lg shadow-emerald-500/20">
+                                <i class="bi bi-unlock-fill me-1"></i> Restore
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                tbody.append(row);
+            });
+        }).fail(function() {
+            tbody.html('<tr><td colspan="6" class="px-6 py-10 text-center text-red-500 font-bold uppercase text-[10px]">Gagal memuat data dari server</td></tr>');
+        });
+    }
+
+    // --- 3. Actions ---
+    
+    // Simpan Config Profile
+    $('#isolirConfigForm').submit(function(e) {
+        e.preventDefault();
+        const btn = $(this).find('button');
+        const selectedProfile = $('#isolirProfileSelect').val(); // Sultan: Ambil value yang dipilih
+        const originalText = btn.html();
+        btn.prop('disabled', true).text('MENYIMPAN...');
+
+        $.post('/admin/billing/service-suspension/isolir-profile', { 
+            isolir_profile: selectedProfile 
+        })
+        .done(res => {
+            showToast('success', 'Berhasil', 'Profile isolir sudah diperbarui.');
+            // SULTAN UPDATE: Ganti teks kartu secara realtime tanpa reload
+            $('#activeIsolirProfileDisplay').text(selectedProfile);
+        })
+        .fail(err => {
+            showToast('error', 'Gagal', err.responseJSON?.message || 'Gagal menyimpan konfigurasi.');
+        })
+        .always(() => {
+            btn.prop('disabled', false).html(originalText);
+        });
+    });
+
+    // A. Cek Overdue Manual (Gembok Masal)
+    $('#btnCheckOverdue').click(function() {
+        if(!confirm("?? JALANKAN GEMBOK MASSAL?\nSistem akan mengisolir semua pelanggan yang telat bayar.")) return;
+        
+        const btn = $(this);
+        btn.prop('disabled', true);
+        showToast('warning', 'Processing', 'Sedang menyisir tagihan nunggak...');
+
+        $.post('/admin/billing/service-suspension/check-overdue')
+        .done(res => {
+            // Kita tampilkan jumlah yang berhasil diisolir biar Bos mantau enak
+            const count = res.suspended || 0;
+            showToast('success', 'Selesai', `Eksekusi berhasil! ${count} pelanggan telah diisolir.`);
+            loadStats();
+            loadSuspendedCustomers();
+        })
+        .fail((err) => {
+            showToast('error', 'Gagal', err.responseJSON?.message || 'Terjadi kesalahan sistem di Backend.');
+        })
+        .always(() => btn.prop('disabled', false));
+    });
+
+    // B. Cek Paid Manual (Restore Masal) - FIX URL & MESSAGE
+    $('#btnCheckPaid').click(function() {
+        if(!confirm("?? JALANKAN RESTORE MASSAL?\nSistem akan mengaktifkan kembali layanan pelanggan yang sudah lunas.")) return;
+        
+        const btn = $(this);
+        btn.prop('disabled', true);
+        showToast('warning', 'Processing', 'Mengecek pembayaran lunas...');
+
+        // ?? PERBAIKAN: Ubah endpoint ke check-paid (Sesuai fungsi Restore)
+        $.post('/admin/billing/service-suspension/check-paid') 
+        .done(res => {
+            const count = res.restored || 0;
+            showToast('success', 'Selesai', `Berhasil memulihkan ${count} layanan pelanggan lunas.`);
+            loadStats();
+            loadSuspendedCustomers();
+        })
+        .fail((err) => {
+            showToast('error', 'Gagal', err.responseJSON?.message || 'Gagal menjalankan auto-restore.');
+        })
+        .always(() => btn.prop('disabled', false));
+    });
+
+    // Restore Manual per User
+    window.restoreCustomer = function(username) {
+        if(!confirm(`Buka gembok layanan pelanggan ${username} secara manual?`)) return;
+        
+        $.post(`/admin/billing/service-suspension/restore/${username}`)
+        .done(res => {
+            showToast('success', 'Berhasil', `Layanan ${username} dipulihkan.`);
+            loadSuspendedCustomers();
+            loadStats();
+        })
+        .fail(err => {
+            showToast('error', 'Gagal', err.responseJSON?.message || 'Gagal restore user.');
+        });
+    };
+
+    // --- Init ---
+    $(document).ready(function() {
+        loadStats();
+        loadSuspendedCustomers();
+    });
+</script>
+
+</body>
+</html>

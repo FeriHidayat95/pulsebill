@@ -1,0 +1,202 @@
+<%- include('../partials/header') %>
+<%- include('../partials/admin-header') %>
+<%- include('../partials/admin-sidebar', { page: 'trouble' }) %>
+
+<style>
+    /* STYLE SAMA PERSIS DENGAN HOTSPOT.EJS */
+    .dataTables_wrapper .dataTables_length,
+    .dataTables_wrapper .dataTables_filter,
+    .dataTables_wrapper .dataTables_info,
+    .dataTables_wrapper .dataTables_paginate {
+        color: #9ca3af !important; font-weight: 600; font-size: 0.8rem; padding-top: 10px;
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+        color: #d1d5db !important; border-radius: 0.5rem !important; border: 1px solid transparent !important;
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+        background: #374151 !important; color: #ffffff !important; border: 1px solid #4b5563 !important;
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+        background: #0ea5e9 !important; color: #ffffff !important; border: 1px solid #0ea5e9 !important;
+    }
+    .dataTables_wrapper input {
+        background-color: #111827 !important; border: 1px solid #374151 !important; color: #ffffff !important; border-radius: 0.5rem; padding: 5px 10px;
+    }
+</style>
+
+<main class="p-4 sm:ml-64 pt-20 bg-gray-900 min-h-screen text-gray-300">
+    
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 border-b border-gray-800 pb-4">
+        <div>
+            <h1 class="text-2xl font-black text-white tracking-tight">MANAJEMEN GANGGUAN</h1>
+            <p class="text-sm text-gray-400 font-bold uppercase tracking-wider">Tiket Keluhan Pelanggan</p>
+        </div>
+        
+        <button onclick="location.reload()" class="bg-gray-800 hover:bg-gray-700 text-white text-xs font-black px-5 py-2.5 rounded-xl shadow-lg transition-all border border-gray-700 flex items-center">
+            <i class="bi bi-arrow-clockwise me-2 text-lg"></i> REFRESH DATA
+        </button>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div class="p-5 bg-gray-800 border border-gray-700 rounded-2xl shadow-lg flex items-center justify-between group hover:border-blue-500/50 transition-all relative overflow-hidden">
+            <div class="z-10">
+                <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest">Total Laporan</p>
+                <p class="text-3xl font-black text-white"><%= stats.total %></p>
+            </div>
+            <div class="w-12 h-12 bg-gray-700 rounded-xl flex items-center justify-center text-blue-400 shadow-inner">
+                <i class="bi bi-folder2-open text-2xl"></i>
+            </div>
+        </div>
+
+        <div class="p-5 bg-gray-800 border border-gray-700 rounded-2xl shadow-lg flex items-center justify-between group hover:border-red-500/50 transition-all relative overflow-hidden">
+            <div class="z-10">
+                <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest">Belum Ditangani</p>
+                <p class="text-3xl font-black text-red-400"><%= stats.open %></p>
+            </div>
+            <div class="w-12 h-12 bg-gray-700 rounded-xl flex items-center justify-center text-red-500 shadow-inner">
+                <i class="bi bi-exclamation-octagon text-2xl animate-pulse"></i>
+            </div>
+        </div>
+
+        <div class="p-5 bg-gray-800 border border-gray-700 rounded-2xl shadow-lg flex items-center justify-between group hover:border-yellow-500/50 transition-all relative overflow-hidden">
+            <div class="z-10">
+                <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest">Sedang Proses</p>
+                <p class="text-3xl font-black text-yellow-400"><%= stats.inProgress %></p>
+            </div>
+            <div class="w-12 h-12 bg-gray-700 rounded-xl flex items-center justify-center text-yellow-500 shadow-inner">
+                <i class="bi bi-tools text-2xl"></i>
+            </div>
+        </div>
+
+        <div class="p-5 bg-gray-800 border border-gray-700 rounded-2xl shadow-lg flex items-center justify-between group hover:border-green-500/50 transition-all relative overflow-hidden">
+            <div class="z-10">
+                <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest">Selesai</p>
+                <p class="text-3xl font-black text-green-400"><%= stats.resolved + stats.closed %></p>
+            </div>
+            <div class="w-12 h-12 bg-gray-700 rounded-xl flex items-center justify-center text-green-500 shadow-inner">
+                <i class="bi bi-check-circle text-2xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-gray-800 border border-gray-700 rounded-2xl shadow-2xl overflow-hidden mb-10">
+        <div class="p-4 bg-gray-900/50 border-b border-gray-700 flex justify-between items-center">
+            <div class="flex items-center text-gray-300 font-bold text-sm tracking-widest uppercase">
+                <i class="bi bi-list-task me-2 text-blue-500"></i> Data Tiket Gangguan
+            </div>
+        </div>
+        
+        <div class="p-4 overflow-x-auto">
+            <table class="w-full text-sm text-left text-gray-300" id="troubleTable">
+                <thead class="text-[10px] text-gray-400 uppercase bg-gray-900 border-b border-gray-700 font-black">
+                    <tr>
+                        <th class="px-4 py-4">ID Tiket</th>
+                        <th class="px-4 py-4">Pelanggan</th>
+                        <th class="px-4 py-4">Kategori</th>
+                        <th class="px-4 py-4">Waktu</th>
+                        <th class="px-4 py-4 text-center">Status</th>
+                        <th class="px-4 py-4 text-right">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-700">
+                    <% if(reports && reports.length > 0) { %>
+                        <% reports.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).forEach(function(report) { %>
+                        <tr class="hover:bg-gray-700/50 transition-all group">
+                            <td class="px-4 py-4">
+                                <span class="font-mono text-blue-400 font-black text-xs">#<%= report.id %></span>
+                            </td>
+                            <td class="px-4 py-4">
+                                <span class="font-black text-white block text-sm"><%= report.name %></span>
+                                <span class="text-[10px] text-gray-500 font-mono"><%= report.phone %></span>
+                            </td>
+                            <td class="px-4 py-4">
+                                <span class="text-[10px] font-black text-gray-300 bg-gray-900 px-2 py-1 rounded border border-gray-700 uppercase">
+                                    <%= report.category %>
+                                </span>
+                            </td>
+                            <td class="px-4 py-4">
+                                <div class="text-[11px] font-bold text-gray-400"><%= new Date(report.createdAt).toLocaleDateString('id-ID') %></div>
+                                <div class="text-[9px] text-gray-600 font-mono"><%= new Date(report.createdAt).toLocaleTimeString('id-ID') %></div>
+                            </td>
+                            <td class="px-4 py-4 text-center">
+                                <% if(report.status === 'open') { %>
+                                    <span class="bg-red-900/30 text-red-400 border border-red-900/50 px-3 py-1 rounded-full text-[9px] font-black uppercase">ANTRIAN</span>
+                                <% } else if(report.status === 'in_progress') { %>
+                                    <span class="bg-yellow-900/30 text-yellow-400 border border-yellow-900/50 px-3 py-1 rounded-full text-[9px] font-black uppercase">PROSES</span>
+                                <% } else { %>
+                                    <span class="bg-green-900/30 text-green-400 border border-green-900/50 px-3 py-1 rounded-full text-[9px] font-black uppercase">SELESAI</span>
+                                <% } %>
+                            </td>
+                            <td class="px-4 py-4 text-right">
+                                <div class="flex justify-end gap-2">
+                                    <a href="/admin/trouble/detail/<%= report.id %>" class="bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white border border-blue-600/30 px-3 py-1.5 rounded-lg text-[10px] font-black transition-all">
+                                        DETAIL
+                                    </a>
+                                    <a href="https://wa.me/<%= report.phone.replace(/^0/, '62') %>" target="_blank" class="bg-green-600/20 hover:bg-green-600 text-green-400 hover:text-white border border-green-600/30 px-3 py-1.5 rounded-lg text-[10px] font-black transition-all">
+                                        WA
+                                    </a>
+                                    <button class="delete-btn bg-red-900/20 hover:bg-red-600 text-red-400 hover:text-white border border-red-900/30 px-3 py-1.5 rounded-lg text-[10px] font-black transition-all" data-id="<%= report.id %>">
+                                        HAPUS
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <% }) %>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<%- include('../partials/footer') %>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    $(document).ready(function() {
+        // Init DataTable Dark Mode (SAMA PERSIS DENGAN HOTSPOT)
+        $('#troubleTable').DataTable({ 
+            pageLength: 25,
+            dom: '<"flex flex-col md:flex-row justify-between items-center p-4 gap-4"f>rt<"p-4 flex justify-between items-center text-gray-500 font-bold text-xs"ip>',
+            language: { 
+                search: "", 
+                searchPlaceholder: "Cari Tiket / Nama...",
+                zeroRecords: "Tidak ada laporan gangguan.",
+                info: "Hal _PAGE_ dari _PAGES_",
+                paginate: { next: "Maju >", previous: "< Mundur" }
+            },
+            order: [[ 3, "desc" ]] // Urut berdasarkan Waktu Lapor
+        });
+
+        // Styling Search Input
+        $('.dataTables_filter input').addClass('bg-gray-900 border border-gray-700 text-white rounded-xl text-sm px-4 py-2 focus:ring-blue-500 w-full md:w-64 outline-none');
+
+        // Logic Delete Tiket
+        $(document).on('click', '.delete-btn', function() {
+            const id = $(this).data('id');
+            Swal.fire({
+                title: 'Hapus Tiket?',
+                text: "Data tidak bisa dikembalikan!",
+                icon: 'warning',
+                background: '#1f2937', color: '#fff',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444', cancelButtonColor: '#374151',
+                confirmButtonText: 'Ya, Hapus'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch('/admin/trouble/delete/' + id, { method: 'DELETE' })
+                    .then(res => res.json())
+                    .then(data => {
+                        if(data.success) {
+                            Swal.fire({ title:'Terhapus!', icon:'success', background:'#1f2937', color:'#fff', timer:1000, showConfirmButton:false })
+                            .then(() => location.reload());
+                        }
+                    });
+                }
+            });
+        });
+    });
+</script>

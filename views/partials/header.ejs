@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="id" class="dark"> 
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= typeof title !== 'undefined' ? title : 'INETKU ADMIN' %></title>
+  
+  <link rel="icon" type="image/png" href="/img/<%= typeof settings !== 'undefined' && settings.logo_filename ? settings.logo_filename : 'logo.png' %>?v=Sultan">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet" />
+  
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            // Skema Warna Batman (Ultra Dark)
+            gray: {
+              50: '#f9fafb',
+              100: '#f3f4f6',
+              200: '#e5e7eb',
+              300: '#d1d5db',
+              400: '#9ca3af',
+              500: '#6b7280',
+              600: '#4b5563',
+              700: '#374151',
+              800: '#1f2937', // Warna Card
+              900: '#111827', // Warna Sidebar/Header
+              950: '#0f172a', // Warna Background Utama
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* ========================================= */
+    /* ?? BATMAN CORE GLOBAL RESET ??             */
+    /* ========================================= */
+    :root {
+        --bg-main: #0f172a;
+        --bg-side: #111827;
+        --bg-card: #1f2937;
+        --text-main: #f1f5f9;
+        --accent: #3b82f6;
+    }
+    
+    /* 1. Paksa Background Hitam Total */
+    html, body { 
+        background-color: var(--bg-main) !important;
+        color: var(--text-main) !important;
+        font-family: 'Inter', sans-serif;
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        -webkit-font-smoothing: antialiased;
+    }
+
+    /* 2. Reset untuk elemen Bootstrap agar tidak "Bocor" Putih */
+    .card, .modal-content, .dropdown-menu {
+        background-color: var(--bg-card) !important;
+        border-color: #374151 !important;
+        color: var(--text-main) !important;
+    }
+
+    /* 3. Global Table Batman Style */
+    table { color: var(--text-main) !important; }
+    thead th { background-color: rgba(15, 23, 42, 0.5) !important; color: #94a3af !important; }
+
+    /* 4. Scrollbar Mewah */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg-main); }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+    /* 5. Utility untuk Animasi Bel Radar */
+    @keyframes ring {
+        0% { transform: rotate(0); }
+        10% { transform: rotate(20deg); }
+        20% { transform: rotate(-18deg); }
+        30% { transform: rotate(22deg); }
+        40% { transform: rotate(-20deg); }
+        100% { transform: rotate(0); }
+    }
+    .ringing { animation: ring 0.8s infinite ease-in-out; display: inline-block; color: #00ff00 !important; }
+  </style>
+</head>
+<body class="bg-[#0f172a] text-slate-200 antialiased selection:bg-blue-500/30 selection:text-blue-200">

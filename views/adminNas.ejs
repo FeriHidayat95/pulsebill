@@ -1,0 +1,254 @@
+<%- include('partials/header') %>
+<%- include('partials/admin-header') %>
+<%- include('partials/admin-sidebar', { page: 'nas' }) %>
+
+<style>
+    /* Paksa background Body & Main jadi Hitam */
+    body, main {
+        background-color: #111827 !important; /* Hitam Pekat */
+        color: #d1d5db !important; /* Teks Abu */
+    }
+
+    /* Paksa Card & Table jadi Abu Gelap */
+    .bg-gray-800, .table-container, .card, .modal-content {
+        background-color: #1f2937 !important; 
+        color: white !important;
+        border: 1px solid #374151 !important;
+        box-shadow: none !important;
+    }
+
+    /* Paksa Input Form Gelap */
+    input, select, textarea {
+        background-color: #111827 !important;
+        border-color: #4b5563 !important;
+        color: white !important;
+    }
+
+    /* Paksa DataTables Gelap */
+    table.dataTable tbody tr { background-color: #1f2937 !important; color: #d1d5db !important; }
+    table.dataTable thead th { background-color: #111827 !important; color: #9ca3af !important; border-bottom: 1px solid #374151 !important; }
+    
+    /* Tombol-tombol */
+    .btn-edit, .btn-delete { border: none !important; }
+    
+    /* Hapus bayangan putih Bootstrap lama */
+    .shadow-sm, .shadow, .shadow-lg { box-shadow: none !important; }
+</style>
+
+<main class="p-4 sm:ml-64 pt-20 min-h-screen">
+    
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 border-b border-gray-700 pb-4">
+        <div>
+            <h1 class="text-2xl font-black text-white tracking-tight">MANAJEMEN MULTI NAS</h1>
+            <p class="text-sm text-gray-400 font-bold uppercase tracking-wider">Daftar Router Mikrotik Terhubung</p>
+        </div>
+        
+        <button data-modal-target="addNasModal" data-modal-toggle="addNasModal" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-black px-5 py-2.5 rounded-lg transition-all shadow-lg border border-blue-500 flex items-center">
+            <i class="bi bi-plus-circle-fill me-2 text-lg"></i> TAMBAH MIKROTIK
+        </button>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div class="p-5 bg-gray-800 rounded-2xl shadow-lg flex items-center justify-between border border-gray-700 relative overflow-hidden">
+            <div class="z-10">
+                <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest">Total Router</p>
+                <p class="text-4xl font-black text-white"><%= nasList ? nasList.length : 0 %></p>
+            </div>
+            <div class="w-14 h-14 bg-gray-700 rounded-2xl flex items-center justify-center text-blue-400 shadow-inner">
+                <i class="bi bi-hdd-stack-fill text-3xl"></i>
+            </div>
+        </div>
+        <div class="p-5 bg-gray-800 rounded-2xl shadow-lg flex items-center justify-between border border-gray-700 relative overflow-hidden">
+            <div class="z-10">
+                <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest">ACS Devices</p>
+                <p class="text-4xl font-black text-white">244</p>
+            </div>
+            <div class="w-14 h-14 bg-gray-700 rounded-2xl flex items-center justify-center text-cyan-400 shadow-inner">
+                <i class="bi bi-modem-fill text-3xl"></i>
+            </div>
+        </div>
+        <div class="p-5 bg-gray-800 rounded-2xl shadow-lg flex items-center justify-between border border-gray-700 relative overflow-hidden">
+            <div class="z-10">
+                <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest">Router Online</p>
+                <% let onlineCount = nasList ? nasList.filter(n => n.isOnline).length : 0; %>
+                <p class="text-4xl font-black text-white"><%= onlineCount %></p>
+            </div>
+            <div class="w-14 h-14 bg-gray-700 rounded-2xl flex items-center justify-center text-green-400 shadow-inner">
+                <i class="bi bi-wifi text-3xl animate-pulse"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-gray-800 rounded-2xl shadow-2xl overflow-hidden mb-10 border border-gray-700">
+        <div class="p-4 bg-gray-900 border-b border-gray-700 flex justify-between items-center">
+            <div class="flex items-center text-gray-300 font-bold text-sm tracking-widest uppercase">
+                <i class="bi bi-router-fill me-2 text-purple-500"></i> Daftar Router Terdaftar
+            </div>
+        </div>
+        
+        <div class="p-4 overflow-x-auto">
+            <table class="w-full text-sm text-left text-gray-300" id="nasTable">
+                <thead class="text-[10px] text-gray-400 uppercase bg-gray-900 font-black">
+                    <tr>
+                        <th class="px-6 py-4">Nama Router</th>
+                        <th class="px-6 py-4">IP Address</th>
+                        <th class="px-6 py-4">Status</th>
+                        <th class="px-6 py-4">API Port</th>
+                        <th class="px-6 py-4">API User</th>
+                        <th class="px-6 py-4">Secret</th>
+                        <th class="px-6 py-4 text-right">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% nasList.forEach(function(nas) { %>
+                    <tr class="hover:bg-gray-700 border-b border-gray-700 transition-all group">
+                        <td class="px-6 py-4 font-bold text-white"><%= nas.shortname %></td>
+                        <td class="px-6 py-4"><span class="bg-gray-900 border border-gray-600 px-2 py-1 rounded text-xs font-mono text-white"><%= nas.nasname %></span></td>
+                        <td class="px-6 py-4">
+                            <% if (nas.isOnline) { %>
+                                <span class="bg-green-900/30 text-green-400 px-2 py-1 rounded-full text-[10px] font-black border border-green-800">
+                                    <i class="bi bi-wifi me-1"></i> CONNECTED
+                                </span>
+                            <% } else { %>
+                                <span class="bg-red-900/30 text-red-400 px-2 py-1 rounded-full text-[10px] font-black border border-red-800">
+                                    <i class="bi bi-wifi-off me-1"></i> OFFLINE
+                                </span>
+                            <% } %>
+                        </td>
+                        <td class="px-6 py-4 text-gray-400"><%= nas.api_port || '8728' %></td>
+                        <td class="px-6 py-4 text-gray-400"><%= nas.api_user %></td>
+                        <td class="px-6 py-4 font-mono text-xs text-yellow-500">****</td>
+                        <td class="px-6 py-4 text-right">
+                            <div class="inline-flex shadow-sm rounded-lg overflow-hidden border border-gray-600">
+                                <button class="edit-nas-btn p-2 bg-gray-800 hover:bg-yellow-900/50 text-yellow-500 border-r border-gray-600" 
+                                        data-id="<%= nas.id %>" 
+                                        data-shortname="<%= nas.shortname %>"
+                                        data-nasname="<%= nas.nasname %>"
+                                        data-apiport="<%= nas.api_port %>"
+                                        data-apiuser="<%= nas.api_user %>"
+                                        data-secret="<%= nas.secret %>">
+                                    <i class="bi bi-pencil-square"></i>
+                                </button>
+                                <a href="/admin/nas/delete/<%= nas.id %>" class="p-2 bg-gray-800 hover:bg-red-900/50 text-red-500" onclick="return confirm('Hapus Router <%= nas.shortname %>?')">
+                                    <i class="bi bi-trash3-fill"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<div id="addNasModal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-[100] justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full backdrop-blur-sm bg-black/80">
+    <div class="relative p-4 w-full max-w-md max-h-full">
+        <div class="relative bg-gray-800 rounded-2xl shadow-2xl border border-gray-600">
+            <div class="flex items-center justify-between p-4 border-b border-gray-700 bg-gray-900 rounded-t-2xl">
+                <h3 class="text-lg font-black text-white">TAMBAH MIKROTIK</h3>
+                <button type="button" class="text-gray-400 hover:text-white closeModalBtn" data-modal-hide="addNasModal">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <form action="/admin/nas/add" method="POST" class="p-5 space-y-4">
+                <div><label class="block mb-1 text-xs font-black text-gray-500 uppercase">Nama Router</label><input type="text" name="shortname" class="w-full bg-gray-900 border border-gray-600 rounded-lg p-2.5 text-white text-sm" required></div>
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="col-span-2"><label class="block mb-1 text-xs font-black text-gray-500 uppercase">IP Address</label><input type="text" name="nasname" class="w-full bg-gray-900 border border-gray-600 rounded-lg p-2.5 text-white text-sm font-mono" required></div>
+                    <div><label class="block mb-1 text-xs font-black text-gray-500 uppercase">Port API</label><input type="number" name="api_port" value="8728" class="w-full bg-gray-900 border border-gray-600 rounded-lg p-2.5 text-white text-sm font-mono" required></div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div><label class="block mb-1 text-xs font-black text-gray-500 uppercase">API User</label><input type="text" name="api_user" class="w-full bg-gray-900 border border-gray-600 rounded-lg p-2.5 text-white text-sm" required></div>
+                    <div><label class="block mb-1 text-xs font-black text-gray-500 uppercase">API Pass</label><input type="password" name="api_password" class="w-full bg-gray-900 border border-gray-600 rounded-lg p-2.5 text-white text-sm" required></div>
+                </div>
+                <div><label class="block mb-1 text-xs font-black text-gray-500 uppercase">Radius Secret</label><input type="text" name="secret" value="testing123" class="w-full bg-gray-900 border border-gray-600 rounded-lg p-2.5 text-white text-sm font-mono" required></div>
+                <div class="pt-2 flex justify-end">
+                    <button type="submit" class="bg-blue-600 text-white font-black py-2 px-6 rounded-lg hover:bg-blue-500 shadow-lg w-full">SIMPAN ROUTER</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div id="editNasModal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-[100] justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full backdrop-blur-sm bg-black/80">
+    <div class="relative p-4 w-full max-w-md max-h-full">
+        <div class="relative bg-gray-800 rounded-2xl shadow-2xl border border-gray-600">
+            <div class="flex items-center justify-between p-4 border-b border-gray-700 bg-gray-900 rounded-t-2xl">
+                <h3 class="text-lg font-black text-white">EDIT MIKROTIK</h3>
+                <button type="button" class="text-gray-400 hover:text-white closeModalBtn">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <form action="/admin/nas/edit" method="POST" class="p-5 space-y-4">
+                <input type="hidden" name="id" id="edit_id">
+                <div><label class="block mb-1 text-xs font-black text-gray-500 uppercase">Nama Router</label><input type="text" name="shortname" id="edit_shortname" class="w-full bg-gray-900 border border-gray-600 rounded-lg p-2.5 text-white text-sm" required></div>
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="col-span-2"><label class="block mb-1 text-xs font-black text-gray-500 uppercase">IP Address</label><input type="text" name="nasname" id="edit_nasname" class="w-full bg-gray-900 border border-gray-600 rounded-lg p-2.5 text-white text-sm font-mono" required></div>
+                    <div><label class="block mb-1 text-xs font-black text-gray-500 uppercase">Port API</label><input type="number" name="api_port" id="edit_api_port" class="w-full bg-gray-900 border border-gray-600 rounded-lg p-2.5 text-white text-sm font-mono" required></div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div><label class="block mb-1 text-xs font-black text-gray-500 uppercase">API User</label><input type="text" name="api_user" id="edit_api_user" class="w-full bg-gray-900 border border-gray-600 rounded-lg p-2.5 text-white text-sm" required></div>
+                    <div><label class="block mb-1 text-xs font-black text-gray-500 uppercase">API Pass (Opsional)</label><input type="password" name="api_password" class="w-full bg-gray-900 border border-gray-600 rounded-lg p-2.5 text-white text-sm" placeholder="Ubah Password"></div>
+                </div>
+                <div><label class="block mb-1 text-xs font-black text-gray-500 uppercase">Radius Secret</label><input type="text" name="secret" id="edit_secret" class="w-full bg-gray-900 border border-gray-600 rounded-lg p-2.5 text-white text-sm font-mono" required></div>
+                <div class="pt-2 flex justify-end">
+                    <button type="submit" class="bg-yellow-600 text-white font-black py-2 px-6 rounded-lg hover:bg-yellow-500 shadow-lg w-full">UPDATE DATA</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<%- include('partials/footer') %>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<script>
+    // Helper Modal Flowbite Manual
+    function openModal(id) { document.getElementById(id).classList.remove('hidden'); document.getElementById(id).classList.add('flex'); }
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); document.getElementById(id).classList.remove('flex'); }
+    
+    // Tombol Close Universal
+    document.querySelectorAll('.closeModalBtn, [data-modal-hide]').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const target = this.getAttribute('data-modal-hide');
+            if(target) closeModal(target);
+            else { // Fallback cari parent modal
+                this.closest('.fixed').classList.add('hidden');
+                this.closest('.fixed').classList.remove('flex');
+            }
+        });
+    });
+    
+    // Tombol Open Universal
+    document.querySelectorAll('[data-modal-toggle]').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const target = this.getAttribute('data-modal-target');
+            openModal(target);
+        });
+    });
+
+    $(document).ready(function() {
+        // Init DataTable Dark Mode
+        $('#nasTable').DataTable({
+            responsive: true,
+            dom: '<"flex flex-col md:flex-row justify-between items-center p-4 gap-4"f>rt<"p-4 flex justify-between items-center text-gray-500 font-bold text-xs"ip>',
+            language: { search: "", searchPlaceholder: "Cari Router...", zeroRecords: "Belum ada router." }
+        });
+        $('.dataTables_filter input').addClass('bg-gray-900 border border-gray-700 text-white rounded-xl text-sm px-4 py-2 focus:ring-blue-500 w-full md:w-64 outline-none');
+
+        // Edit Logic
+        $(document).on('click', '.edit-nas-btn', function() {
+            const d = $(this).data();
+            $('#edit_id').val(d.id);
+            $('#edit_shortname').val(d.shortname);
+            $('#edit_nasname').val(d.nasname);
+            $('#edit_api_port').val(d.apiport);
+            $('#edit_api_user').val(d.apiuser);
+            $('#edit_secret').val(d.secret);
+            
+            openModal('editNasModal');
+        });
+    });
+</script>

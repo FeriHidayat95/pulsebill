@@ -1,0 +1,173 @@
+<nav class="fixed top-0 z-50 w-full bg-[#111827] border-b border-slate-800 h-[65px] flex items-center shadow-2xl">
+  <div class="px-4 w-full flex items-center justify-between">
+    
+    <div class="flex items-center">
+      <button id="btnToggleSidebar" data-drawer-target="logo-sidebar" data-drawer-toggle="logo-sidebar" aria-controls="logo-sidebar" type="button" class="inline-flex items-center p-2 text-sm text-slate-400 rounded-lg hover:bg-slate-800 focus:outline-none transition-all">
+          <i class="bi bi-list text-2xl"></i>
+      </button>
+      
+      <a href="/admin/dashboard" class="flex ms-2 md:me-24 items-center no-underline group">
+        <img src="/img/<%= typeof settings !== 'undefined' && settings.logo_filename ? settings.logo_filename : 'logo.png' %>?ts=<%= Date.now() %>" 
+             class="h-9 w-auto object-contain me-3 rounded shadow-lg transition-transform group-hover:scale-105" 
+             alt="Logo">
+        <span class="self-center text-xl font-black whitespace-nowrap text-white tracking-tighter hidden lg:block">
+            INETKU <span class="text-blue-500">NETWORK</span>
+        </span>
+      </a>
+    </div>
+
+    <div class="flex items-center gap-3">
+        
+        <button id="globalRadarBtnHeader" onclick="toggleGlobalRadar()" 
+                class="flex items-center justify-center w-11 h-11 rounded-full bg-slate-800 border border-slate-700 hover:border-blue-500/50 transition-all duration-300 shadow-xl group" 
+                title="Global Radar Alarm">
+            <i class="bi bi-bell-slash-fill text-red-500 text-xl group-hover:scale-110"></i>
+        </button>
+
+        <div class="h-8 w-[1px] bg-slate-800 mx-2 hidden md:block"></div>
+
+        <div class="flex items-center">
+            <button type="button" class="flex items-center gap-3 bg-slate-800 p-1 pr-3 rounded-full border border-slate-700 focus:ring-4 focus:ring-slate-700 transition-all" aria-expanded="false" data-dropdown-toggle="dropdown-user">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-blue-800 flex items-center justify-center text-white font-black shadow-lg border border-slate-600 text-xs">
+                    <%= typeof user !== 'undefined' && user.name ? user.name.substring(0,3).toUpperCase() : 'ADM' %>
+                </div>
+                <span class="text-slate-200 text-xs font-bold uppercase tracking-widest hidden md:block">
+                    <%= typeof user !== 'undefined' && user.name ? user.name : 'Administrator' %>
+                </span>
+            </button>
+            
+            <div class="z-50 hidden my-4 text-base list-none bg-slate-800 divide-y divide-slate-700 rounded-2xl shadow-2xl border border-slate-700 overflow-hidden" id="dropdown-user">
+              <div class="px-5 py-4" role="none">
+                <p class="text-sm font-black text-white uppercase tracking-tighter" role="none">
+                    <%= typeof user !== 'undefined' && user.name ? user.name : 'Administrator' %>
+                </p>
+                <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-1" role="none">
+                  <span class="<%= typeof user !== 'undefined' && user.role === 'superadmin' ? 'text-blue-400' : 'text-emerald-400' %>">
+                      <%= typeof user !== 'undefined' && user.role === 'superadmin' ? '?? SUPERADMIN' : '?? KASIR' %> 
+                  </span>
+                  • <%= typeof settings !== 'undefined' ? settings.company_name : 'Control Panel' %>
+                </p>
+              </div>
+              <ul class="py-1" role="none">
+                
+                <% if (typeof user !== 'undefined' && user.role === 'superadmin') { %>
+                <li>
+                  <a href="/admin/users" class="flex items-center px-4 py-3 text-sm text-slate-300 hover:bg-slate-700 hover:text-white transition-colors border-b border-slate-700/50" role="menuitem">
+                    <i class="bi bi-shield-lock-fill me-3 text-purple-400 text-lg"></i> Manajemen Hak Akses
+                  </a>
+                </li>
+                <% } %>
+
+                <% if (typeof user !== 'undefined' && user.role === 'superadmin') { %>
+                <li>
+                  <a href="/admin/setting" class="flex items-center px-4 py-3 text-sm text-slate-300 hover:bg-slate-700 hover:text-white transition-colors" role="menuitem">
+                    <i class="bi bi-gear-fill me-3 text-blue-400"></i> Pengaturan
+                  </a>
+                </li>
+                <% } %>
+
+                <li>
+                  <a href="/admin/logout" class="flex items-center px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 transition-colors font-bold" role="menuitem">
+                    <i class="bi bi-box-arrow-right me-3"></i> Keluar Sistem
+                  </a>
+                </li>
+              </ul>
+            </div>
+        </div>
+    </div>
+
+  </div>
+</nav>
+
+<style>
+    /* ?? ANIMASI BELL RADAR ?? */
+    @keyframes ring {
+        0% { transform: rotate(0); }
+        10% { transform: rotate(30deg); }
+        30% { transform: rotate(-28deg); }
+        50% { transform: rotate(34deg); }
+        70% { transform: rotate(-32deg); }
+        100% { transform: rotate(0); }
+    }
+    .ringing { 
+        animation: ring 0.8s infinite ease-in-out; 
+        display: inline-block; 
+        color: #00ff00 !important; /* Hijau Neon */
+        text-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+    }
+    .text-neon-green { color: #00ff00 !important; }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const notificationSound = new Audio('/sounds/alert.mp3'); 
+    let isRadarOn = (localStorage.getItem('globalRadarStatus') === 'ON');
+    let radarInterval = null;
+    let lastSoundTime = 0;
+    const CEREWET_INTERVAL = 60000; 
+
+    window.toggleGlobalRadar = function() {
+        isRadarOn = !isRadarOn;
+        localStorage.setItem('globalRadarStatus', isRadarOn ? 'ON' : 'OFF');
+        updateBellUI();
+        if (isRadarOn) {
+            startRadar();
+            notificationSound.play().catch(e => console.log("User Interaction Required"));
+        } else {
+            stopRadar();
+        }
+    }
+
+    function updateBellUI() {
+        const btn = document.getElementById('globalRadarBtnHeader');
+        if(!btn) return;
+        if (isRadarOn) {
+            btn.innerHTML = '<i class="bi bi-bell-fill text-neon-green text-xl"></i>';
+            btn.classList.add('border-green-500/50');
+            btn.classList.remove('border-slate-700');
+        } else {
+            btn.innerHTML = '<i class="bi bi-bell-slash-fill text-red-500 text-lg"></i>';
+            btn.classList.remove('border-green-500/50');
+            btn.classList.add('border-slate-700');
+        }
+    }
+
+    async function checkTickets() {
+        if (!isRadarOn) return;
+        try {
+            const [resTrouble, resReg] = await Promise.all([
+                fetch('/admin/trouble/api/unresolved-count').then(r => r.json()),
+                fetch('/admin/pendaftaran/api/check-pending').then(r => r.json())
+            ]);
+            
+            const total = (resTrouble.count || 0) + (resReg.count || 0);
+            const bellIcon = document.querySelector('#globalRadarBtnHeader i');
+
+            if (total > 0) {
+                if(bellIcon) bellIcon.classList.add('ringing');
+                if (Date.now() - lastSoundTime >= CEREWET_INTERVAL) {
+                    notificationSound.play();
+                    lastSoundTime = Date.now();
+                }
+            } else {
+                if(bellIcon) bellIcon.classList.remove('ringing');
+            }
+        } catch (e) { console.error("Radar sync failed"); }
+    }
+
+    function startRadar() {
+        if (radarInterval) clearInterval(radarInterval);
+        radarInterval = setInterval(checkTickets, 10000); 
+        checkTickets();
+    }
+
+    function stopRadar() {
+        if (radarInterval) clearInterval(radarInterval);
+        const bellIcon = document.querySelector('#globalRadarBtnHeader i');
+        if(bellIcon) bellIcon.classList.remove('ringing');
+    }
+
+    updateBellUI();
+    if(isRadarOn) startRadar();
+});
+</script>

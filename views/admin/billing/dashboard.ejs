@@ -1,0 +1,293 @@
+<%- include('../../partials/header') %>
+<body class="bg-[#0f172a] text-slate-300 font-sans antialiased">
+
+<%- include('../../partials/admin-header') %>
+
+<%- include('../../partials/billing-sidebar', { page: 'dashboard', settings: settings }) %>
+
+<main class="p-4 sm:ml-64 pt-20 min-h-screen">
+    
+    <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+        <div>
+            <h1 class="text-3xl font-black text-white tracking-tighter uppercase leading-none">
+                Dashboard <span class="text-blue-500">Billing</span>
+            </h1>
+            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-[4px] mt-2">Real-time Financial Monitor</p>
+        </div>
+        
+        <a href="/admin/billing/payment-settings" class="group relative inline-flex items-center justify-center px-6 py-2.5 text-xs font-black text-white transition-all duration-200 bg-blue-600 rounded-full hover:bg-blue-700 shadow-lg shadow-blue-500/30">
+            <i class="bi bi-gear-wide-connected text-lg me-2 group-hover:rotate-90 transition-transform"></i> SETTINGS
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+        
+        <div class="bg-[#1e293b] border border-slate-700 rounded-2xl p-5 shadow-lg relative group hover:-translate-y-1 transition-all duration-300">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Total Pelanggan</p>
+                    <h3 class="text-3xl font-black text-white" id="stat-total-customers"><%= stats.total_customers || 0 %></h3>
+                    <div class="mt-2 text-emerald-400 text-xs font-bold flex items-center">
+                        <span class="w-2 h-2 bg-emerald-500 rounded-full me-2 animate-pulse"></span>
+                        <%= stats.active_customers || 0 %> Aktif
+                    </div>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500 border border-blue-500/20">
+                    <i class="bi bi-people-fill text-lg"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-[#1e293b] border-l-4 border-l-emerald-500 border-y border-r border-slate-700 rounded-2xl p-5 shadow-lg hover:-translate-y-1 transition-all">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-[10px] font-black text-emerald-500/80 uppercase tracking-widest mb-1">Pendapatan (Bln Ini)</p>
+                    <h3 class="text-2xl font-black text-emerald-400 font-mono tracking-tight" id="stat-revenue">
+                        Rp <%= (stats.total_revenue || 0).toLocaleString('id-ID') %>
+                    </h3>
+                    <p class="text-[10px] text-slate-500 font-bold mt-1 uppercase"><%= stats.paid_invoices || 0 %> Transaksi Lunas</p>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 border border-emerald-500/20">
+                    <i class="bi bi-cash-stack text-lg"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-[#1e293b] border-l-4 border-l-red-500 border-y border-r border-slate-700 rounded-2xl p-5 shadow-lg hover:-translate-y-1 transition-all">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-[10px] font-black text-red-500/80 uppercase tracking-widest mb-1">Belum Lunas</p>
+                    <h3 class="text-2xl font-black text-red-400 font-mono tracking-tight" id="stat-unpaid">
+                        Rp <%= (stats.total_unpaid || 0).toLocaleString('id-ID') %>
+                    </h3>
+                    <p class="text-[10px] text-red-400/60 font-bold mt-1 uppercase"><%= stats.unpaid_invoices || 0 %> Tagihan Pending</p>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center text-red-500 border border-red-500/20">
+                    <i class="bi bi-exclamation-diamond-fill text-lg"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-[#1e293b] border border-slate-700 rounded-2xl p-5 shadow-lg hover:-translate-y-1 transition-all">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Total Tagihan</p>
+                    <h3 class="text-3xl font-black text-white" id="stat-invoices"><%= stats.total_invoices || 0 %></h3>
+                    <p class="text-[10px] text-slate-500 font-bold mt-1 uppercase">Generated</p>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center text-cyan-500 border border-cyan-500/20">
+                    <i class="bi bi-receipt text-lg"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        
+        <div class="xl:col-span-2 bg-[#1e293b] border border-slate-700 rounded-3xl shadow-2xl overflow-hidden">
+            <div class="px-6 py-5 border-b border-slate-700 bg-[#111827]/50 flex justify-between items-center">
+                <h3 class="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
+                    <i class="bi bi-clock-history text-blue-500 text-lg"></i> Tagihan Terbaru
+                </h3>
+                <a href="/admin/billing/invoices" class="text-[10px] font-bold text-blue-400 hover:text-white bg-blue-500/10 hover:bg-blue-600 px-3 py-1.5 rounded-lg transition-all uppercase">
+                    Lihat Semua
+                </a>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-slate-400">
+                    <thead class="text-[10px] text-slate-500 uppercase bg-[#111827]/30 border-b border-slate-700">
+                        <tr>
+                            <th class="px-6 py-4 font-black">No. Tagihan</th>
+                            <th class="px-6 py-4 font-black">Pelanggan</th>
+                            <th class="px-6 py-4 font-black">Paket</th>
+                            <th class="px-6 py-4 font-black">Jumlah</th>
+                            <th class="px-6 py-4 text-center font-black">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-700/50">
+                        <% if (recentInvoices && recentInvoices.length > 0) { %>
+                            <% recentInvoices.forEach(function(inv) { %>
+                            <tr class="hover:bg-slate-800/50 transition-colors group">
+                                <td class="px-6 py-4">
+                                    <a href="/admin/billing/invoices/<%= inv.id %>" class="font-mono text-xs font-bold text-blue-400 hover:underline">
+                                        #<%= inv.invoice_number %>
+                                    </a>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="font-bold text-white text-sm"><%= inv.customer_name %></div>
+                                    <div class="text-[10px] text-slate-500"><%= inv.customer_phone %></div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="px-2 py-1 rounded bg-slate-800 border border-slate-700 text-[10px] font-bold text-slate-300">
+                                        <%= inv.package_name %>
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 font-mono text-xs font-bold text-white">
+                                    Rp <%= parseFloat(inv.amount).toLocaleString('id-ID') %>
+                                </td>
+                                <td class="px-6 py-4 text-center">
+                                    <% if (inv.status === 'paid') { %>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">LUNAS</span>
+                                    <% } else if (new Date(inv.due_date) < new Date()) { %>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black bg-red-500/10 text-red-400 border border-red-500/20">TELAT</span>
+                                    <% } else { %>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-500/10 text-amber-400 border border-amber-500/20">BELUM</span>
+                                    <% } %>
+                                </td>
+                            </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr><td colspan="5" class="px-6 py-8 text-center text-xs text-slate-500 uppercase font-bold">Belum ada tagihan terbaru</td></tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="bg-[#1e293b] border border-slate-700 rounded-3xl shadow-2xl overflow-hidden h-full">
+            <div class="px-6 py-5 border-b border-red-900/30 bg-red-900/10 flex justify-between items-center">
+                <h3 class="text-xs font-black text-red-400 uppercase tracking-widest flex items-center gap-2">
+                    <i class="bi bi-bell-fill text-lg"></i> Jatuh Tempo
+                </h3>
+                <span class="bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-lg shadow-red-500/50">
+                    <%= overdueInvoices.length %>
+                </span>
+            </div>
+            <div class="p-0 overflow-y-auto" style="max-height: 500px;">
+                <table class="w-full text-left">
+                    <tbody class="divide-y divide-slate-700/50">
+                        <% if (overdueInvoices && overdueInvoices.length > 0) { %>
+                            <% overdueInvoices.forEach(function(inv) { %>
+                            <tr class="hover:bg-slate-800/50 transition-colors">
+                                <td class="px-6 py-4">
+                                    <div class="font-bold text-white text-sm"><%= inv.customer_name %></div>
+                                    <div class="flex items-center gap-2 mt-1">
+                                        <span class="text-[10px] font-black text-red-400 bg-red-500/10 px-2 py-0.5 rounded border border-red-500/20">
+                                            <%= new Date(inv.due_date).toLocaleDateString('id-ID') %>
+                                        </span>
+                                        <span class="text-[10px] font-mono font-bold text-slate-400">
+                                            Rp <%= parseFloat(inv.amount).toLocaleString('id-ID') %>
+                                        </span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-right align-middle">
+                                    <div class="flex justify-end gap-2">
+                                        <button onclick="sendWaReminder('<%= inv.id %>')" class="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/20 p-2 rounded-lg transition-all" title="WA Reminder">
+                                            <i class="bi bi-whatsapp text-lg"></i>
+                                        </button>
+                                        <button onclick="isolirCepat('<%= inv.id %>')" class="text-red-400 hover:text-red-300 hover:bg-red-500/20 p-2 rounded-lg transition-all" title="Isolir">
+                                            <i class="bi bi-slash-circle text-lg"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="2" class="px-6 py-12 text-center">
+                                    <i class="bi bi-shield-check text-4xl text-emerald-500/50 mb-3 block"></i>
+                                    <span class="text-xs font-black text-emerald-500 uppercase tracking-widest">Aman Terkendali</span>
+                                </td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+</main>
+
+<%- include('../../partials/footer') %>
+
+<div id="toast-container" class="fixed top-20 right-5 z-[9999] flex flex-col gap-3 w-full max-w-xs"></div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    // 1. Auto Refresh Stats
+    setInterval(function() {
+        fetch('/admin/billing/api/stats')
+            .then(response => response.json())
+            .then(data => {
+                $('#stat-total-customers').text(data.total_customers || 0);
+                $('#stat-revenue').text('Rp ' + (data.total_revenue || 0).toLocaleString('id-ID'));
+                $('#stat-unpaid').text('Rp ' + (data.total_unpaid || 0).toLocaleString('id-ID'));
+                $('#stat-invoices').text(data.total_invoices || 0);
+            })
+            .catch(err => console.error('Gagal refresh stats'));
+    }, 30000);
+
+    function sendWaReminder(invoiceId) {
+        if(!invoiceId) return;
+        
+        // Cari tombol yang diklik (biar bisa kasih efek loading)
+        const btn = event.currentTarget;
+        const originalIcon = btn.innerHTML;
+        
+        // Efek loading
+        btn.disabled = true;
+        btn.innerHTML = '<i class="bi bi-hourglass-split animate-spin"></i>';
+        
+        showToast('info', 'Proses', 'Sedang mengirim instruksi ke Bot WA...');
+    
+        $.post(`/admin/billing/invoices/${invoiceId}/reminder`, function(res) {
+            if(res.success) {
+                showToast('success', 'Sultan Berhasil', res.message);
+            } else {
+                showToast('error', 'Gagal', res.message);
+            }
+        }).fail(() => {
+            showToast('error', 'Koneksi Error', 'Server atau Bot WA tidak merespon!');
+        }).always(() => {
+            // Balikin tombol ke semula
+            btn.disabled = false;
+            btn.innerHTML = originalIcon;
+        });
+    }
+
+    // 3. Isolir Cepat
+    function isolirCepat(invoiceId) {
+        if(!confirm("Yakin ingin mengisolir pelanggan ini?")) return;
+        $.post(`/admin/billing/invoices/${invoiceId}/isolir`, { reason: 'Telat Bayar' })
+         .done(res => {
+             if(res.success) showToast('success', 'Berhasil', 'Pelanggan diisolir');
+             else showToast('error', 'Gagal', res.message);
+         }).fail(() => showToast('error', 'Error', 'Gagal menghubungi server'));
+    }
+
+    // 4. Helper Toast (Tailwind Style)
+    function showToast(type, title, message) {
+        let colors = {
+            success: 'bg-emerald-600',
+            error: 'bg-red-600',
+            info: 'bg-blue-600'
+        };
+        let icons = {
+            success: 'bi-check-circle',
+            error: 'bi-exclamation-triangle',
+            info: 'bi-info-circle'
+        };
+        
+        const html = `
+            <div class="toast-item flex items-center w-full max-w-xs p-4 mb-4 text-white ${colors[type] || 'bg-gray-800'} rounded-lg shadow-lg" role="alert">
+                <div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-white rounded-lg bg-white/20">
+                    <i class="bi ${icons[type] || 'bi-bell'}"></i>
+                </div>
+                <div class="ml-3 text-sm font-normal">
+                    <span class="font-bold block">${title}</span>
+                    <span class="text-xs opacity-90">${message}</span>
+                </div>
+                <button type="button" class="ml-auto -mx-1.5 -my-1.5 bg-transparent text-white rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-white/10 inline-flex h-8 w-8" onclick="this.parentElement.remove()">
+                    <i class="bi bi-x text-lg"></i>
+                </button>
+            </div>`;
+            
+        $('#toast-container').append(html);
+        setTimeout(() => $('.toast-item').first().fadeOut(500, function(){ $(this).remove(); }), 4000);
+    }
+</script>
+
+</body>
+</html>

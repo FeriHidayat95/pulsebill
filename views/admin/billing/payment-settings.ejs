@@ -1,0 +1,424 @@
+<%- include('../../partials/header') %>
+<body class="bg-[#0f172a] text-slate-300 font-sans antialiased selection:bg-blue-500 selection:text-white">
+
+<%- include('../../partials/admin-header') %>
+
+<%- include('../../partials/billing-sidebar', { page: 'payment-settings', settings: settings }) %>
+
+<main class="p-4 sm:ml-64 pt-20 min-h-screen">
+
+    <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+        <div>
+            <h1 class="text-3xl font-black text-white tracking-tighter uppercase leading-none">
+                Payment <span class="text-blue-500">Gateway</span>
+            </h1>
+            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-[4px] mt-2">Konfigurasi Midtrans, Xendit, dan Tripay</p>
+        </div>
+    </div>
+
+    <div class="bg-[#1e293b] border border-blue-500/30 rounded-3xl shadow-2xl overflow-hidden mb-8 group hover:border-blue-500/50 transition-all duration-500">
+        <div class="px-6 py-5 border-b border-slate-700 bg-[#111827]/50 flex items-center justify-between">
+            <h3 class="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
+                <i class="bi bi-bullseye text-blue-500 text-lg"></i> Gateway Aktif Utama
+            </h3>
+        </div>
+        <div class="p-8">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                <div class="lg:col-span-5">
+                    <label class="block mb-2 text-[10px] font-black text-slate-500 uppercase tracking-widest">Pilih Gateway Utama</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-emerald-500">
+                            <i class="bi bi-check-circle-fill"></i>
+                        </div>
+                        <select id="activeGateway" class="w-full bg-[#111827] border border-slate-700 text-white text-sm rounded-2xl p-4 pl-12 font-black uppercase tracking-tighter focus:ring-blue-500 focus:border-blue-500 appearance-none cursor-pointer">
+                            <option value="midtrans" <%= settings.payment_gateway.active === 'midtrans' ? 'selected' : '' %>>Midtrans</option>
+                            <option value="xendit" <%= settings.payment_gateway.active === 'xendit' ? 'selected' : '' %>>Xendit</option>
+                            <option value="tripay" <%= settings.payment_gateway.active === 'tripay' ? 'selected' : '' %>>Tripay</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-slate-500">
+                            <i class="bi bi-chevron-down"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-7 border-slate-700 lg:border-l lg:pl-8">
+                    <label class="block mb-3 text-[10px] font-black text-slate-500 uppercase tracking-widest">Status Saat Ini:</label>
+                    <div id="gatewayStatus" class="flex flex-wrap gap-2">
+                        <span class="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-500 text-[10px] font-black uppercase border border-slate-700 animate-pulse">Memuat status...</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-8 pt-6 border-t border-slate-700/50">
+                <button onclick="updateActiveGateway()" class="px-8 py-3.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-black rounded-2xl transition-all uppercase tracking-widest shadow-lg shadow-blue-500/20 active:scale-95">
+                    <i class="bi bi-save2 me-2"></i> Simpan Gateway Aktif
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
+        
+        <div class="bg-[#1e293b] border border-slate-700/60 rounded-3xl shadow-xl overflow-hidden flex flex-col group hover:border-blue-400/30 transition-all duration-300">
+            <div class="px-6 py-4 border-b border-slate-700 bg-[#111827]/50 flex justify-between items-center">
+                <h3 class="text-[11px] font-black text-white uppercase tracking-widest flex items-center gap-2">
+                    <i class="bi bi-wallet2 text-cyan-400"></i> Midtrans
+                </h3>
+                <span class="px-2 py-0.5 rounded-full text-[9px] font-black <%= settings.payment_gateway.midtrans.enabled ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-slate-700 text-slate-400' %> uppercase">
+                    <%= settings.payment_gateway.midtrans.enabled ? 'ON' : 'OFF' %>
+                </span>
+            </div>
+            <form id="midtransForm" class="p-6 flex-grow space-y-4">
+                <div class="space-y-2">
+                    <label class="flex items-center justify-between p-3 bg-[#0f172a] border border-slate-700 rounded-xl cursor-pointer group/toggle">
+                        <span class="text-[11px] font-black text-slate-400 uppercase">Aktifkan Midtrans</span>
+                        <div class="relative inline-flex items-center">
+                            <input type="checkbox" id="midtransEnabled" class="sr-only peer" <%= settings.payment_gateway.midtrans.enabled ? 'checked' : '' %>>
+                            <div class="w-11 h-6 bg-slate-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                        </div>
+                    </label>
+                    <label class="flex items-center justify-between p-3 bg-[#0f172a] border border-slate-700 rounded-xl cursor-pointer">
+                        <span class="text-[11px] font-black text-slate-400 uppercase">Mode Produksi (Live)</span>
+                        <div class="relative inline-flex items-center">
+                            <input type="checkbox" id="midtransProduction" class="sr-only peer" <%= settings.payment_gateway.midtrans.production ? 'checked' : '' %>>
+                            <div class="w-11 h-6 bg-slate-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
+                        </div>
+                    </label>
+                </div>
+                <div class="space-y-3">
+                    <div>
+                        <label class="block mb-1 text-[10px] font-black text-slate-500 uppercase tracking-widest">Server Key</label>
+                        <input type="text" id="midtransServerKey" value="<%= settings.payment_gateway.midtrans.server_key %>" class="w-full bg-[#111827] border border-slate-700 text-white text-xs rounded-xl p-2.5 font-mono">
+                    </div>
+                    <div>
+                        <label class="block mb-1 text-[10px] font-black text-slate-500 uppercase tracking-widest">Client Key</label>
+                        <input type="text" id="midtransClientKey" value="<%= settings.payment_gateway.midtrans.client_key %>" class="w-full bg-[#111827] border border-slate-700 text-white text-xs rounded-xl p-2.5 font-mono">
+                    </div>
+                    <div>
+                        <label class="block mb-1 text-[10px] font-black text-slate-500 uppercase tracking-widest">Merchant ID</label>
+                        <input type="text" id="midtransMerchantId" value="<%= settings.payment_gateway.midtrans.merchant_id %>" class="w-full bg-[#111827] border border-slate-700 text-white text-xs rounded-xl p-2.5 font-mono">
+                    </div>
+                    <div>
+                        <label class="block mb-1 text-[10px] font-black text-slate-500 uppercase tracking-widest">Base URL (Callback)</label>
+                        <input type="text" id="midtransBaseUrl" value="<%= (settings.payment_gateway.midtrans && settings.payment_gateway.midtrans.base_url) ? settings.payment_gateway.midtrans.base_url : '' %>" placeholder="https://domain.com" class="w-full bg-[#111827] border border-slate-700 text-white text-xs rounded-xl p-2.5 font-mono">
+                    </div>
+                </div>
+                <div class="pt-4 grid grid-cols-2 gap-2">
+                    <button type="submit" class="py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black rounded-xl transition-all uppercase tracking-widest">Simpan</button>
+                    <button type="button" onclick="testGateway('midtrans')" class="py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-cyan-400 text-[10px] font-black rounded-xl transition-all uppercase tracking-widest">Test</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="bg-[#1e293b] border border-slate-700/60 rounded-3xl shadow-xl overflow-hidden flex flex-col group hover:border-blue-400/30 transition-all duration-300">
+            <div class="px-6 py-4 border-b border-slate-700 bg-[#111827]/50 flex justify-between items-center">
+                <h3 class="text-[11px] font-black text-white uppercase tracking-widest flex items-center gap-2">
+                    <i class="bi bi-box-seam text-blue-500"></i> Xendit
+                </h3>
+                <span class="px-2 py-0.5 rounded-full text-[9px] font-black <%= settings.payment_gateway.xendit.enabled ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-slate-700 text-slate-400' %> uppercase">
+                    <%= settings.payment_gateway.xendit.enabled ? 'ON' : 'OFF' %>
+                </span>
+            </div>
+            <form id="xenditForm" class="p-6 flex-grow space-y-4">
+                <div class="space-y-2">
+                    <label class="flex items-center justify-between p-3 bg-[#0f172a] border border-slate-700 rounded-xl cursor-pointer">
+                        <span class="text-[11px] font-black text-slate-400 uppercase">Aktifkan Xendit</span>
+                        <div class="relative inline-flex items-center">
+                            <input type="checkbox" id="xenditEnabled" class="sr-only peer" <%= settings.payment_gateway.xendit.enabled ? 'checked' : '' %>>
+                            <div class="w-11 h-6 bg-slate-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                        </div>
+                    </label>
+                    <label class="flex items-center justify-between p-3 bg-[#0f172a] border border-slate-700 rounded-xl cursor-pointer">
+                        <span class="text-[11px] font-black text-slate-400 uppercase">Mode Produksi (Live)</span>
+                        <div class="relative inline-flex items-center">
+                            <input type="checkbox" id="xenditProduction" class="sr-only peer" <%= settings.payment_gateway.xendit.production ? 'checked' : '' %>>
+                            <div class="w-11 h-6 bg-slate-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
+                        </div>
+                    </label>
+                </div>
+                <div class="space-y-3">
+                    <div>
+                        <label class="block mb-1 text-[10px] font-black text-slate-500 uppercase tracking-widest">API Key</label>
+                        <input type="text" id="xenditApiKey" value="<%= settings.payment_gateway.xendit.api_key %>" class="w-full bg-[#111827] border border-slate-700 text-white text-xs rounded-xl p-2.5 font-mono">
+                    </div>
+                    <div>
+                        <label class="block mb-1 text-[10px] font-black text-slate-500 uppercase tracking-widest">Callback Token</label>
+                        <input type="text" id="xenditCallbackToken" value="<%= settings.payment_gateway.xendit.callback_token %>" class="w-full bg-[#111827] border border-slate-700 text-white text-xs rounded-xl p-2.5 font-mono">
+                    </div>
+                    <div>
+                        <label class="block mb-1 text-[10px] font-black text-slate-500 uppercase tracking-widest">Base URL (Redirect)</label>
+                        <input type="text" id="xenditBaseUrl" value="<%= (settings.payment_gateway.xendit && settings.payment_gateway.xendit.base_url) ? settings.payment_gateway.xendit.base_url : '' %>" placeholder="https://domain.com" class="w-full bg-[#111827] border border-slate-700 text-white text-xs rounded-xl p-2.5 font-mono">
+                    </div>
+                </div>
+                <div class="pt-4 grid grid-cols-2 gap-2">
+                    <button type="submit" class="py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black rounded-xl transition-all uppercase tracking-widest">Simpan</button>
+                    <button type="button" onclick="testGateway('xendit')" class="py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-cyan-400 text-[10px] font-black rounded-xl transition-all uppercase tracking-widest">Test</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="bg-[#1e293b] border border-slate-700/60 rounded-3xl shadow-xl overflow-hidden flex flex-col group hover:border-blue-400/30 transition-all duration-300">
+            <div class="px-6 py-4 border-b border-slate-700 bg-[#111827]/50 flex justify-between items-center">
+                <h3 class="text-[11px] font-black text-white uppercase tracking-widest flex items-center gap-2">
+                    <i class="bi bi-bag-check text-amber-400"></i> Tripay
+                </h3>
+                <span class="px-2 py-0.5 rounded-full text-[9px] font-black <%= settings.payment_gateway.tripay.enabled ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-slate-700 text-slate-400' %> uppercase">
+                    <%= settings.payment_gateway.tripay.enabled ? 'ON' : 'OFF' %>
+                </span>
+            </div>
+            <form id="tripayForm" class="p-6 flex-grow space-y-4">
+                <div class="space-y-2">
+                    <label class="flex items-center justify-between p-3 bg-[#0f172a] border border-slate-700 rounded-xl cursor-pointer">
+                        <span class="text-[11px] font-black text-slate-400 uppercase">Aktifkan Tripay</span>
+                        <div class="relative inline-flex items-center">
+                            <input type="checkbox" id="tripayEnabled" class="sr-only peer" <%= settings.payment_gateway.tripay.enabled ? 'checked' : '' %>>
+                            <div class="w-11 h-6 bg-slate-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                        </div>
+                    </label>
+                    <label class="flex items-center justify-between p-3 bg-[#0f172a] border border-slate-700 rounded-xl cursor-pointer">
+                        <span class="text-[11px] font-black text-slate-400 uppercase">Mode Produksi (Live)</span>
+                        <div class="relative inline-flex items-center">
+                            <input type="checkbox" id="tripayProduction" class="sr-only peer" <%= settings.payment_gateway.tripay.production ? 'checked' : '' %>>
+                            <div class="w-11 h-6 bg-slate-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
+                        </div>
+                    </label>
+                </div>
+                <div class="space-y-3">
+                    <div>
+                        <label class="block mb-1 text-[10px] font-black text-slate-500 uppercase tracking-widest">API Key</label>
+                        <input type="text" id="tripayApiKey" value="<%= settings.payment_gateway.tripay.api_key %>" class="w-full bg-[#111827] border border-slate-700 text-white text-xs rounded-xl p-2.5 font-mono">
+                    </div>
+                    <div>
+                        <label class="block mb-1 text-[10px] font-black text-slate-500 uppercase tracking-widest">Private Key</label>
+                        <input type="text" id="tripayPrivateKey" value="<%= settings.payment_gateway.tripay.private_key %>" class="w-full bg-[#111827] border border-slate-700 text-white text-xs rounded-xl p-2.5 font-mono">
+                    </div>
+                    <div>
+                        <label class="block mb-1 text-[10px] font-black text-slate-500 uppercase tracking-widest">Merchant Code</label>
+                        <input type="text" id="tripayMerchantCode" value="<%= settings.payment_gateway.tripay.merchant_code %>" class="w-full bg-[#111827] border border-slate-700 text-white text-xs rounded-xl p-2.5 font-mono">
+                    </div>
+                    <div>
+                        <label class="block mb-1 text-[10px] font-black text-slate-500 uppercase tracking-widest">Base URL</label>
+                        <input type="text" id="tripayBaseUrl" value="<%= (settings.payment_gateway.tripay && settings.payment_gateway.tripay.base_url) ? settings.payment_gateway.tripay.base_url : '' %>" placeholder="https://domain.com" class="w-full bg-[#111827] border border-slate-700 text-white text-xs rounded-xl p-2.5 font-mono">
+                    </div>
+                </div>
+                <div class="pt-4 grid grid-cols-2 gap-2">
+                    <button type="submit" class="py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black rounded-xl transition-all uppercase tracking-widest">Simpan</button>
+                    <button type="button" onclick="testGateway('tripay')" class="py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-cyan-400 text-[10px] font-black rounded-xl transition-all uppercase tracking-widest">Test</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="toast-container" class="fixed top-24 right-5 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
+
+</main>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<script>
+    // 1. FUNGSI TOAST (BATMAN STYLE)
+    function showAlert(type, message) {
+        const colors = {
+            success: 'bg-emerald-600 border-emerald-500',
+            danger: 'bg-red-600 border-red-500',
+            info: 'bg-blue-600 border-blue-500'
+        };
+        const icons = {
+            success: 'bi-check-circle-fill',
+            danger: 'bi-exclamation-triangle-fill',
+            info: 'bi-plug-fill'
+        };
+        
+        const id = 'toast-' + Math.random().toString(36).substr(2, 9);
+        const html = `
+            <div id="${id}" class="toast-item flex items-center w-full max-w-xs p-4 text-white ${colors[type] || 'bg-slate-800'} rounded-2xl shadow-2xl border transition-all duration-500 pointer-events-auto transform translate-x-0" role="alert">
+                <div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-white rounded-lg bg-white/20">
+                    <i class="bi ${icons[type] || 'bi-bell'}"></i>
+                </div>
+                <div class="ml-3">
+                    <div class="text-xs font-black uppercase tracking-widest">${type === 'success' ? 'BERHASIL' : 'INFO'}</div>
+                    <div class="text-[11px] font-bold opacity-90">${message}</div>
+                </div>
+                <button type="button" class="ml-auto -mx-1.5 -my-1.5 p-1.5 inline-flex h-8 w-8 text-white hover:text-slate-200" onclick="this.parentElement.remove()">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>`;
+            
+        $('#toast-container').append(html);
+        setTimeout(() => {
+            $(`#${id}`).addClass('translate-x-full opacity-0');
+            setTimeout(() => $(`#${id}`).remove(), 500);
+        }, 4000);
+    }
+
+    // 2. FUNGSI UPDATE STATUS DINAMIS (TAILWIND STYLE)
+    function updateGatewayStatus() {
+        const active = document.getElementById('activeGateway').value;
+        const gateways = ['midtrans', 'xendit', 'tripay'];
+        let html = '';
+
+        gateways.forEach(gw => {
+            const isEnabled = document.getElementById(gw + 'Enabled').checked;
+            const isActive = (gw === active);
+            
+            let badgeClass = isEnabled 
+                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
+                : 'bg-slate-800 text-slate-500 border-slate-700';
+            
+            let icon = isEnabled ? 'bi-toggle-on' : 'bi-toggle-off';
+            
+            if (isActive) {
+                badgeClass = 'bg-blue-600 text-white border-blue-500 shadow-lg shadow-blue-500/20';
+                icon = 'bi-star-fill';
+            }
+
+            html += `
+                <span class="inline-flex items-center px-3 py-1.5 rounded-xl border text-[10px] font-black uppercase tracking-widest transition-all ${badgeClass}">
+                    <i class="bi ${icon} me-2 text-xs"></i>
+                    ${gw}
+                    ${isActive ? ' (Utama)' : ''}
+                </span>
+            `;
+        });
+
+        document.getElementById('gatewayStatus').innerHTML = html;
+    }
+
+    // 3. FUNGSI SIMPAN GATEWAY AKTIF
+    async function updateActiveGateway() {
+        const activeGateway = document.getElementById('activeGateway').value;
+        const btn = document.querySelector('button[onclick="updateActiveGateway()"]');
+        const originalHtml = btn.innerHTML;
+        
+        btn.disabled = true;
+        btn.innerHTML = '<i class="bi bi-arrow-repeat animate-spin me-2"></i>Menyimpan...';
+
+        try {
+            const response = await fetch('/admin/billing/payment-gateway/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ active_gateway: activeGateway })
+            });
+            const result = await response.json();
+            if (result.success) {
+                showAlert('success', 'Gateway utama berhasil diperbarui!');
+                updateGatewayStatus();
+            } else {
+                showAlert('danger', result.message);
+            }
+        } catch (e) {
+            showAlert('danger', 'Error: Gagal koneksi ke server.');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalHtml;
+        }
+    }
+
+    // 4. FUNGSI SIMPAN CONFIG MASING-MASING GATEWAY
+    async function saveGatewayConfig(gateway) {
+        const btn = document.querySelector(`#${gateway}Form button[type="submit"]`);
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="bi bi-hourglass-split animate-pulse"></i>';
+
+        let data = {
+            enabled: document.getElementById(`${gateway}Enabled`).checked,
+            production: document.getElementById(`${gateway}Production`).checked
+        };
+        let payload = {};
+        payload[gateway] = data; 
+
+        if (gateway === 'midtrans') {
+            data.server_key = document.getElementById('midtransServerKey').value;
+            data.client_key = document.getElementById('midtransClientKey').value;
+            data.merchant_id = document.getElementById('midtransMerchantId').value;
+            data.base_url = document.getElementById('midtransBaseUrl').value;
+        } else if (gateway === 'tripay') {
+            data.api_key = document.getElementById('tripayApiKey').value;
+            data.private_key = document.getElementById('tripayPrivateKey').value;
+            data.merchant_code = document.getElementById('tripayMerchantCode').value;
+            data.base_url = document.getElementById('tripayBaseUrl').value;
+        } else if (gateway === 'xendit') {
+            data.api_key = document.getElementById('xenditApiKey').value;
+            data.callback_token = document.getElementById('xenditCallbackToken').value;
+            data.base_url = document.getElementById('xenditBaseUrl').value;
+        }
+
+        try {
+            const response = await fetch('/admin/billing/payment-gateway/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const result = await response.json();
+            if (result.success) {
+                showAlert('success', `Konfigurasi ${gateway.toUpperCase()} disimpan!`);
+                updateGatewayStatus();
+            } else {
+                showAlert('danger', result.message);
+            }
+        } catch (e) {
+            showAlert('danger', 'Gagal lapor ke server');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
+    }
+
+    // 5. FUNGSI TEST KONEKSI GATEWAY
+    async function testGateway(gateway) {
+        const btn = event.currentTarget; 
+        const originalHtml = btn.innerHTML;
+        
+        btn.disabled = true;
+        btn.innerHTML = '<i class="bi bi-arrow-repeat animate-spin"></i>';
+
+        let data = { gateway: gateway };
+
+        if (gateway === 'midtrans') {
+            data.serverKey = document.getElementById('midtransServerKey').value;
+            data.clientKey = document.getElementById('midtransClientKey').value;
+        } 
+        else if (gateway === 'tripay') {
+            data.apiKey = document.getElementById('tripayApiKey').value;
+            data.privateKey = document.getElementById('tripayPrivateKey').value;
+            data.merchantCode = document.getElementById('tripayMerchantCode').value;
+        }
+        else if (gateway === 'xendit') {
+            data.apiKey = document.getElementById('xenditApiKey').value;
+        }
+
+        try {
+            const response = await fetch('/admin/billing/payment-gateway/test', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const result = await response.json();
+            
+            if (result.success) showAlert('success', result.message);
+            else showAlert('danger', result.message);
+        } catch (e) {
+            showAlert('danger', 'Error: Jaringan terputus.');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalHtml;
+        }
+    }
+
+    // --- EVENT LISTENERS ---
+    document.getElementById('midtransForm').addEventListener('submit', (e) => { e.preventDefault(); saveGatewayConfig('midtrans'); });
+    document.getElementById('xenditForm').addEventListener('submit', (e) => { e.preventDefault(); saveGatewayConfig('xendit'); });
+    document.getElementById('tripayForm').addEventListener('submit', (e) => { e.preventDefault(); saveGatewayConfig('tripay'); });
+    
+    document.getElementById('activeGateway').addEventListener('change', updateGatewayStatus);
+    document.getElementById('midtransEnabled').addEventListener('change', updateGatewayStatus);
+    document.getElementById('xenditEnabled').addEventListener('change', updateGatewayStatus);
+    document.getElementById('tripayEnabled').addEventListener('change', updateGatewayStatus);
+
+    // INIT SAAT HALAMAN DIBUKA
+    document.addEventListener('DOMContentLoaded', updateGatewayStatus);
+</script>
+
+</body>
+</html>

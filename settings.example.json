@@ -1,0 +1,86 @@
+{
+  "company_header": "PULSEBILL TELECOM",
+  "company_slogan": "Autonomous FTTH Billing & Network Automation",
+  "company_website": "https://billing.pulsebill.io",
+  "contact_phone": "+1 (555) 019-2834",
+  "contact_email": "noc@pulsebill.io",
+  "contact_address": "742 Evergreen Terrace, Sector 4, Silicon Valley, CA",
+  "contact_whatsapp": "+1 (555) 019-2834",
+  "server_host": "127.0.0.1",
+  "server_port": "3001",
+  "logo_filename": "logo.png",
+  "user_auth_mode": "radius",
+  
+  "admin_username": "admin",
+  "admin_password": "change_me_immediately",
+  "admin_number": "+15550192834",
+  "technician_numbers.0": "+15550192835",
+  "technician_numbers.1": "+15550192836",
+  "technician_group_id": "",
+  
+  "genieacs_url": "http://127.0.0.1:7557",
+  "genieacs_username": "admin",
+  "genieacs_password": "change_me_immediately",
+  
+  "mikrotik_host": "192.168.1.1",
+  "mikrotik_port": "8728",
+  "mikrotik_user": "admin",
+  "mikrotik_password": "change_me_immediately",
+  "main_interface": "ether1-WAN",
+  "default_pppoe_profile": "default",
+  "isolir_profile": "isolir",
+  "isolir_pool": "pool-isolir",
+  
+  "auto_invoice_enabled": true,
+  "invoice_day": "1",
+  "due_date_days": "30",
+  "auto_suspension_enabled": true,
+  "suspension_grace_period_days": "3",
+  "send_notification": true,
+  
+  "rx_power_warning": "-25",
+  "rx_power_critical": "-27",
+  "rx_power_notification_enable": true,
+  "rx_power_warning_interval": "36000000",
+  "rxpower_recap_enable": true,
+  "rxpower_recap_interval": "21600000",
+  "offline_notification_enable": true,
+  "offline_notification_interval": "43200000",
+  
+  "pppoe_notifications": {
+    "enabled": true,
+    "loginNotifications": false,
+    "logoutNotifications": false,
+    "includeOfflineList": true,
+    "maxOfflineListCount": "20"
+  },
+  
+  "trouble_report": {
+    "enabled": true,
+    "categories": "Degraded Speed,DNS Resolution Issue,Optical LOS Alarm,Intermittent Packet Drop,Other",
+    "auto_ticket": true
+  },
+  
+  "payment_gateway": {
+    "active": "stripe",
+    "stripe": {
+      "enabled": true,
+      "production": false,
+      "publishable_key": "pk_test_sample",
+      "secret_key": "sk_test_sample"
+    },
+    "midtrans": {
+      "enabled": false,
+      "production": false,
+      "server_key": "SB-Mid-server-sample",
+      "client_key": "SB-Mid-client-sample",
+      "merchant_id": "G000000000"
+    },
+    "xendit": {
+      "enabled": false,
+      "production": false,
+      "api_key": "xnd_development_sample",
+      "callback_token": "callback_token_sample"
+    }
+  }
+}

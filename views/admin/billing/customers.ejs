@@ -1,0 +1,665 @@
+<%- include('../../partials/header') %>
+<body class="bg-[#0f172a] text-slate-300 font-sans antialiased selection:bg-blue-500 selection:text-white">
+
+<%- include('../../partials/admin-header') %>
+
+<%- include('../../partials/billing-sidebar', { page: 'customers', settings: settings }) %>
+
+<main class="p-4 sm:ml-64 pt-24 min-h-screen">
+
+    <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+        <div>
+            <h1 class="text-3xl font-black text-white tracking-tighter uppercase leading-none">
+                Data <span class="text-blue-500">Pelanggan</span>
+            </h1>
+            <p class="text-xs font-bold text-slate-500 uppercase tracking-[4px] mt-2">Sinkronisasi Radius & Full Roaming</p>
+        </div>
+        
+        <div class="flex flex-wrap gap-2 justify-center">
+            <a href="/admin/billing/template-excel" class="px-5 py-2.5 text-xs font-black text-emerald-400 border border-emerald-500/30 rounded-xl hover:bg-emerald-600 hover:text-white transition-all uppercase tracking-widest">
+                <i class="bi bi-download me-1 text-lg"></i> Template
+            </a>
+            
+            <button class="px-5 py-2.5 text-xs font-black text-white bg-emerald-600 rounded-xl hover:bg-emerald-700 shadow-lg shadow-emerald-500/20 transition-all uppercase tracking-widest" onclick="document.getElementById('excelFile').click()">
+                <i class="bi bi-file-earmark-excel me-1 text-lg"></i> Import Excel
+            </button>
+            <input type="file" id="excelFile" class="hidden" accept=".xlsx, .xls" onchange="prosesImport(this)">
+
+            <button class="px-5 py-2.5 text-xs font-black text-white bg-blue-600 rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-500/20 transition-all uppercase tracking-widest" onclick="openModalTambah()">
+                <i class="bi bi-person-plus-fill me-1 text-lg"></i> Tambah Pelanggan
+            </button>
+        </div>
+    </div>
+
+    <div class="bg-[#1e293b] border border-slate-700/60 rounded-3xl shadow-2xl overflow-hidden mb-10">
+        <div class="px-6 py-5 border-b border-slate-700 bg-[#111827]/50 flex flex-col md:flex-row justify-between items-center gap-4">
+            <h3 class="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2">
+                <i class="bi bi-people text-blue-500 text-xl"></i> Database Pelanggan
+            </h3>
+            
+            <div class="relative w-full md:w-72">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-500">
+                    <i class="bi bi-search text-lg"></i>
+                </div>
+                <input type="text" id="customSearch" class="block w-full p-3 pl-10 text-sm font-bold text-white border border-slate-700 rounded-xl bg-[#1e293b] focus:ring-blue-500 focus:border-blue-500 placeholder-slate-600 uppercase tracking-wider" placeholder="Cari Nama/User...">
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table id="customersTable" class="w-full text-left text-slate-400">
+                <thead class="text-xs text-slate-500 uppercase bg-[#111827]/30 border-b border-slate-700">
+                    <tr>
+                        <th class="px-6 py-5 font-black tracking-wider">Nama Pelanggan</th>
+                        <th class="px-6 py-5 font-black tracking-wider">Tgl Pasang</th>
+                        <th class="px-6 py-5 font-black tracking-wider">Username PPPoE</th>
+                        <th class="px-6 py-5 font-black tracking-wider">Paket</th>
+                        <th class="px-6 py-5 font-black tracking-wider text-center">Status</th>
+                        <th class="px-6 py-5 font-black tracking-wider">Kontak</th>
+                        <th class="px-6 py-5 font-black tracking-wider text-right">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-700/50">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="toast-container" class="fixed top-24 right-5 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
+
+</main>
+
+<%- include('../../partials/footer') %>
+
+<div id="addCustomerModal" tabindex="-1" aria-hidden="true" class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto inset-0 h-full bg-black/80 backdrop-blur-sm transition-opacity">
+    <div class="relative w-full max-w-2xl max-h-full mx-auto mt-10">
+        <div class="relative bg-[#1e293b] rounded-2xl shadow-2xl border border-slate-700">
+            <div class="flex items-center justify-between p-6 border-b border-slate-700 bg-[#111827] rounded-t-2xl">
+                <h3 class="text-xl font-black text-white uppercase tracking-tight flex items-center gap-2"><i class="bi bi-person-plus text-blue-500"></i> Tambah Pelanggan</h3>
+                <button onclick="closeModal('addCustomerModal')" type="button" class="text-slate-400 hover:text-white transition-colors"><i class="bi bi-x-lg text-xl"></i></button>
+            </div>
+            <form id="addCustomerForm" class="p-5 sm:p-8 space-y-5">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="col-span-1 lg:col-span-2 border-b border-slate-700 pb-2">
+                        <p class="text-xs font-black text-blue-500 uppercase tracking-widest">Informasi Dasar</p>
+                    </div>
+                    
+                    <div class="col-span-1">
+                        <label class="block mb-2 text-xs font-black text-slate-400 uppercase tracking-widest">Nama Lengkap</label>
+                        <input type="text" name="name" required class="bg-[#111827] border border-slate-700 text-white text-sm rounded-xl focus:ring-blue-500 block w-full p-3.5 font-bold">
+                    </div>
+                    
+                    <div class="col-span-1">
+                        <label class="block mb-2 text-xs font-black text-slate-400 uppercase tracking-widest">WhatsApp (628xxx)</label>
+                        <input type="text" name="phone" placeholder="628123456789" required class="bg-[#111827] border border-slate-700 text-white text-sm rounded-xl focus:ring-blue-500 block w-full p-3.5 font-mono font-bold">
+                    </div>
+                    
+                    <div class="col-span-1 lg:col-span-2">
+                        <label class="block mb-2 text-xs font-black text-slate-400 uppercase tracking-widest">Alamat Pemasangan</label>
+                        <textarea name="address" rows="2" class="bg-[#111827] border border-slate-700 text-white text-sm rounded-xl focus:ring-blue-500 block w-full p-3.5"></textarea>
+                    </div>
+                    
+                    <div class="col-span-1">
+                        <label class="block mb-2 text-xs font-black text-blue-400 uppercase tracking-widest">Tanggal Pasang</label>
+                        <input type="date" id="add_installation_date" name="installation_date" onchange="syncBillingDay(this.value)" required class="bg-[#111827] border border-slate-700 text-white text-sm rounded-xl focus:ring-blue-500 block w-full p-3.5 font-bold">
+                    </div>
+                    
+                    <div class="col-span-1">
+                        <label class="block mb-2 text-xs font-black text-slate-400 uppercase tracking-widest">Jatuh Tempo (Auto)</label>
+                        <input type="text" id="add_billing_day_display" readonly class="bg-[#0f172a] border border-slate-700 text-blue-400 text-sm rounded-xl block w-full p-3.5 font-black cursor-not-allowed">
+                        <input type="hidden" id="add_billing_day" name="billing_day">
+                    </div>
+
+                    <div class="col-span-1 lg:col-span-2 border-b border-slate-700 pt-2 pb-2 mt-2">
+                        <p class="text-xs font-black text-amber-500 uppercase tracking-widest">Layanan & Radius</p>
+                    </div>
+                    
+                    <div class="col-span-1">
+                        <label class="block mb-2 text-xs font-black text-slate-400 uppercase tracking-widest">Pilih Paket</label>
+                        <select name="package_id" required class="bg-[#111827] border border-slate-700 text-white text-sm rounded-xl focus:ring-blue-500 block w-full p-3.5 font-bold uppercase tracking-tighter cursor-pointer">
+                            <option value="">-- Pilih --</option>
+                            <% if(packages) { packages.forEach(p => { %>
+                                <option value="<%= p.id %>"><%= p.name %> - <%= p.speed %></option>
+                            <% }); } %>
+                        </select>
+                    </div>
+                    
+                    <div class="col-span-1 py-2 flex items-center">
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="createRadius" name="create_pppoe_user" value="1" class="sr-only peer" checked>
+                            <div class="w-11 h-6 bg-slate-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600 shadow-inner"></div>
+                            <span class="ml-3 text-xs font-black text-slate-300 uppercase tracking-widest">Daftarkan Radius</span>
+                        </label>
+                    </div>
+                    
+                    <div class="col-span-1 radius-field">
+                        <label class="block mb-2 text-xs font-black text-slate-400 uppercase tracking-widest">Username PPPoE</label>
+                        <input type="text" name="pppoe_username" class="bg-[#111827] border border-slate-700 text-white text-sm rounded-xl focus:ring-blue-500 block w-full p-3.5 font-mono font-bold">
+                    </div>
+                    
+                    <div class="col-span-1 radius-field">
+                        <label class="block mb-2 text-xs font-black text-slate-400 uppercase tracking-widest">Password PPPoE</label>
+                        <input type="text" name="pppoe_password" class="bg-[#111827] border border-slate-700 text-white text-sm rounded-xl focus:ring-blue-500 block w-full p-3.5 font-mono font-bold">
+                    </div>
+                </div>
+                
+                <div class="pt-6 border-t border-slate-700 flex flex-col sm:flex-row justify-end gap-3">
+                    <button type="button" onclick="closeModal('addCustomerModal')" class="w-full sm:w-auto px-6 py-3 text-xs font-black text-slate-400 hover:text-white uppercase transition-colors text-center">Batal</button>
+                    <button type="submit" class="w-full sm:w-auto px-8 py-3 text-xs font-black text-white bg-blue-600 rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-500/20 uppercase tracking-widest transition-all text-center">Simpan Data</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div id="editCustomerModal" tabindex="-1" aria-hidden="true" class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto inset-0 h-full bg-black/80 backdrop-blur-sm transition-opacity">
+    <div class="relative w-full max-w-2xl max-h-full mx-auto mt-10">
+        <div class="relative bg-[#1e293b] rounded-2xl shadow-2xl border border-slate-700">
+            <div class="flex items-center justify-between p-6 border-b border-slate-700 bg-[#111827] rounded-t-2xl">
+                <h3 class="text-xl font-black text-white uppercase tracking-tight flex items-center gap-2"><i class="bi bi-pencil-square text-amber-500"></i> Edit Detail & Radius</h3>
+                <button onclick="closeModal('editCustomerModal')" type="button" class="text-slate-400 hover:text-white transition-colors"><i class="bi bi-x-lg text-xl"></i></button>
+            </div>
+            <form id="editCustomerForm" class="p-5 sm:p-8 space-y-5">
+                <input type="hidden" name="id" id="edit_id">
+                <input type="hidden" name="original_phone" id="edit_original_phone">
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="col-span-1 lg:col-span-2 border-b border-slate-700 pb-2">
+                        <p class="text-xs font-black text-blue-500 uppercase tracking-widest">Data Diri</p>
+                    </div>
+                    
+                    <div class="col-span-1">
+                        <label class="block mb-2 text-xs font-black text-slate-500 uppercase tracking-widest">Nama Lengkap</label>
+                        <input type="text" name="name" id="edit_name" required class="bg-[#111827] border border-slate-700 text-white text-sm rounded-xl focus:ring-blue-500 block w-full p-3.5 font-bold">
+                    </div>
+                    
+                    <div class="col-span-1">
+                        <label class="block mb-2 text-xs font-black text-slate-500 uppercase tracking-widest">No. WhatsApp/HP</label>
+                        <input type="text" name="phone" id="edit_phone" required class="bg-[#111827] border border-slate-700 text-white text-sm rounded-xl focus:ring-blue-500 block w-full p-3.5 font-mono font-bold">
+                    </div>
+                    
+                    <div class="col-span-1 lg:col-span-2">
+                        <label class="block mb-2 text-xs font-black text-slate-500 uppercase tracking-widest">Alamat</label>
+                        <textarea name="address" id="edit_address" rows="2" class="bg-[#111827] border border-slate-700 text-white text-sm rounded-xl focus:ring-blue-500 block w-full p-3.5"></textarea>
+                    </div>
+                    
+                    <div class="col-span-1">
+                        <label class="block mb-2 text-xs font-black text-blue-400 uppercase tracking-widest">Tanggal Pemasangan</label>
+                        <input type="date" name="installation_date" id="edit_installation_date" onchange="syncBillingDayEdit(this.value)" class="bg-[#111827] border border-slate-700 text-white text-sm rounded-xl p-3.5 font-bold w-full cursor-pointer">
+                    </div>
+                    
+                    <div class="col-span-1">
+                        <label class="block mb-2 text-xs font-black text-slate-500 uppercase tracking-widest">Paket Internet</label>
+                        <select name="package_id" id="edit_package_id" class="bg-[#111827] border border-slate-700 text-white text-sm rounded-xl focus:ring-blue-500 block w-full p-3.5 font-bold cursor-pointer">
+                            <% if(packages) { packages.forEach(p => { %>
+                                <option value="<%= p.id %>"><%= p.name %></option>
+                            <% }); } %>
+                        </select>
+                    </div>
+
+                    <div class="col-span-1 lg:col-span-2 pt-2 border-t border-slate-700 mt-2">
+                        <p class="text-xs font-black text-red-500 uppercase tracking-widest">Radius Connection</p>
+                    </div>
+                    
+                    <div class="col-span-1">
+                        <label class="block mb-2 text-xs font-black text-slate-500 uppercase tracking-widest">Username PPPoE</label>
+                        <input type="text" name="pppoe_username" id="edit_pppoe_username" required class="bg-[#0f172a] border border-slate-700 text-white text-sm rounded-xl p-3.5 font-mono font-bold w-full focus:outline-none">
+                    </div>
+                    
+                    <div class="col-span-1">
+                        <label class="block mb-2 text-xs font-black text-slate-500 uppercase tracking-widest">Password PPPoE</label>
+                        <input type="text" name="pppoe_password" id="edit_pppoe_password" required class="bg-[#0f172a] border border-slate-700 text-white text-sm rounded-xl p-3.5 font-mono font-bold w-full focus:outline-none">
+                    </div>
+                    
+                    <div class="col-span-1">
+                        <label class="block mb-2 text-xs font-black text-slate-500 uppercase tracking-widest">Billing Day & Expired</label>
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <div class="relative w-full sm:w-28 shrink-0">
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-500 text-xs font-black">TGL</span>
+                                <input type="number" name="billing_day" id="edit_billing_day" min="1" max="28" required class="bg-[#111827] border border-slate-700 text-white text-sm rounded-xl p-3.5 pl-12 font-black w-full text-center" readonly>
+                            </div>
+                            <input type="hidden" name="expired_date" id="edit_expired_date">
+                            <input type="date" id="billing_day_picker" class="bg-[#111827] border border-slate-700 text-white text-sm rounded-xl p-3.5 flex-1 cursor-pointer font-bold w-full" onchange="updateBillingDay(this.value)">
+                        </div>
+                    </div>
+                    
+                    <div class="col-span-1">
+                        <label class="block mb-2 text-xs font-black text-slate-500 uppercase tracking-widest">Status Akun</label>
+                        <select name="status" id="edit_status" class="bg-[#111827] border border-slate-700 text-white text-sm rounded-xl p-3.5 font-black w-full cursor-pointer">
+                            <option value="active">AKTIF</option>
+                            <option value="suspended">ISOLIR (SUSPEND)</option>
+                            <option value="inactive">NONAKTIF</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="pt-6 border-t border-slate-700 flex flex-col sm:flex-row justify-end gap-3 mt-6">
+                    <button type="button" onclick="closeModal('editCustomerModal')" class="w-full sm:w-auto px-6 py-3 text-xs font-black text-slate-400 hover:text-white uppercase transition-all text-center">Batal</button>
+                    <button type="submit" class="w-full sm:w-auto px-8 py-3 text-xs font-black text-white bg-amber-600 rounded-xl hover:bg-amber-700 shadow-lg shadow-amber-500/20 uppercase tracking-widest transition-all text-center">Perbarui Data</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+
+<style>
+    /* SEMBUNYIKAN BAWAAN DATATABLES */
+    .dataTables_wrapper .dataTables_filter { display: none; }
+    .dataTables_wrapper .dataTables_length { display: none; }
+    
+    /* MERAPIKAN FOOTER: INFO & PAGINATION */
+    .dataTables_info { 
+        color: #64748b !important; 
+        font-size: 0.75rem; 
+        font-weight: 800; 
+        text-transform: uppercase; 
+        letter-spacing: 1px;
+        padding-top: 0 !important;
+    }
+    
+    .dataTables_paginate { 
+        display: flex; 
+        gap: 6px; 
+        padding-top: 0 !important;
+        margin: 0 !important;
+    }
+    
+    .paginate_button { 
+        padding: 6px 14px !important; 
+        border-radius: 8px !important; 
+        background: #1e293b !important; 
+        color: #94a3b8 !important; 
+        cursor: pointer; 
+        border: 1px solid #334151 !important; 
+        font-size: 0.75rem; 
+        font-weight: 800; 
+        transition: all 0.3s ease;
+    }
+    
+    .paginate_button:hover {
+        background: #334155 !important;
+        color: white !important;
+    }
+    
+    .paginate_button.current, .paginate_button.current:hover { 
+        background: #3b82f6 !important; 
+        color: white !important; 
+        border-color: #3b82f6 !important; 
+        box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
+    }
+    
+    .paginate_button.disabled {
+        opacity: 0.3 !important;
+        cursor: not-allowed !important;
+    }
+
+    /* MENGHILANGKAN BORDER BAWAAN TABEL AGAR LEBIH CLEAN */
+    table.dataTable { border-collapse: collapse !important; margin-top: 0 !important; margin-bottom: 0 !important; }
+    table.dataTable tbody tr { border-bottom: 1px solid rgba(51, 65, 81, 0.5); }
+    table.dataTable tbody tr:last-child { border-bottom: none; }
+    
+    ::-webkit-calendar-picker-indicator {
+        filter: invert(1);
+        cursor: pointer;
+    }
+</style>
+
+<script>
+    $(document).ready(function() {
+        
+        // ==============================================================
+        // DATATABLES SERVER-SIDE (DENGAN UI SULTAN YANG SUDAH DIRAPIKAN)
+        // ==============================================================
+        const table = $('#customersTable').DataTable({
+            responsive: true,
+            pageLength: 20,
+            processing: true, 
+            serverSide: true, 
+            ajax: {
+                url: '/admin/billing/customers/datatable', 
+                type: 'POST'
+            },
+            order: [[1, 'desc']], 
+            // MERAPIKAN TATA LETAK INFO & PAGINATION (Memakai Flexbox Tailwind)
+            dom: '<"min-h-[400px]"tr><"flex flex-col md:flex-row justify-between items-center p-5 bg-[#111827]/50 border-t border-slate-700/50"ip>',
+            language: { 
+                search: "", 
+                zeroRecords: "Belum ada data pelanggan.",
+                processing: "<div class='text-blue-500 font-black uppercase tracking-widest p-4 bg-[#111827] rounded-xl border border-slate-700 shadow-2xl'><i class='bi bi-arrow-repeat animate-spin text-xl inline-block me-2'></i> Memuat Data...</div>"
+            },
+            columns: [
+                { 
+                    data: 'name', 
+                    name: 'name',
+                    // ?? CABUT whitespace-nowrap, pasang min-w agar proporsional
+                    className: 'px-4 py-4 align-middle min-w-[200px] md:min-w-[250px]', 
+                    render: function(data, type, row) {
+                        const safeAddress = row.address ? row.address.replace(/"/g, '&quot;') : '-';
+                        const safeName = row.name ? row.name.replace(/"/g, '&quot;') : '-';
+                        return `
+                            <div class="font-black text-white text-sm md:text-base group-hover:text-blue-400 transition-colors break-words whitespace-normal line-clamp-2" title="${safeName}">${row.name}</div>
+                            <div class="text-[10px] md:text-xs text-slate-500 font-bold italic mt-1 break-words whitespace-normal line-clamp-2" title="${safeAddress}">
+                                <i class="bi bi-geo-alt-fill text-red-500/80 me-1"></i>${row.address || '-'}
+                            </div>
+                        `;
+                    }
+                },
+                { 
+                    data: 'installation_date', 
+                    name: 'installation_date',
+                    className: 'px-4 py-4 align-middle whitespace-nowrap',
+                    render: function(data, type, row) {
+                        const tgl = row.installation_date ? new Date(row.installation_date).toLocaleDateString('id-ID') : '-';
+                        return `
+                            <div class="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                <div class="p-1.5 rounded-lg bg-blue-500/10 text-blue-400"><i class="bi bi-calendar-check"></i></div>
+                                ${tgl}
+                            </div>
+                        `;
+                    }
+                },
+                { 
+                    data: 'pppoe_username', 
+                    name: 'pppoe_username',
+                    // ?? Pasang max-w dan truncate agar username super panjang tidak menjebol tabel
+                    className: 'px-4 py-4 align-middle whitespace-nowrap',
+                    render: function(data, type, row) {
+                        const safeUser = row.pppoe_username ? row.pppoe_username.replace(/"/g, '&quot;') : '-';
+                        return `<div class="inline-block truncate max-w-[120px] md:max-w-[160px] px-3 py-1.5 rounded-lg bg-[#111827] border border-slate-700/80 text-xs font-bold text-blue-400 font-mono shadow-inner" title="${safeUser}">${row.pppoe_username || '-'}</div>`;
+                    }
+                },
+                { 
+                    data: 'package_name', 
+                    name: 'package_name',
+                    className: 'px-4 py-4 align-middle whitespace-nowrap',
+                    render: function(data, type, row) {
+                        const safePkg = row.package_name ? row.package_name.replace(/"/g, '&quot;') : '-';
+                        return `<div class="inline-block truncate max-w-[120px] md:max-w-[150px] text-xs font-black text-slate-300 uppercase tracking-widest" title="${safePkg}">${row.package_name || '-'}</div>`;
+                    }
+                },
+                { 
+                    data: 'status', 
+                    name: 'status',
+                    className: 'px-4 py-4 align-middle text-center whitespace-nowrap',
+                    render: function(data, type, row) {
+                        let badge = '';
+                        if (row.status === 'active') {
+                            badge = `<span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase tracking-widest">AKTIF</span>`;
+                        } else if (row.status === 'suspended') {
+                            badge = `<span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black bg-red-500/10 text-red-400 border border-red-500/20 uppercase tracking-widest">ISOLIR</span>`;
+                        } else {
+                            badge = `<span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black bg-slate-700 text-slate-400 border border-slate-600 uppercase tracking-widest">OFF</span>`;
+                        }
+
+                        let expStr = '';
+                        if (row.expired_date) {
+                            const exp = new Date(row.expired_date).toLocaleDateString('id-ID');
+                            expStr = `<div class="text-slate-500 font-bold mt-1.5 text-[9px] tracking-widest uppercase">EXP: ${exp}</div>`;
+                        }
+                        return `<div>${badge}${expStr}</div>`;
+                    }
+                },
+                { 
+                    data: 'phone', 
+                    name: 'phone',
+                    className: 'px-4 py-4 align-middle whitespace-nowrap',
+                    render: function(data, type, row) {
+                        return `
+                            <div class="text-xs font-bold text-slate-400 flex items-center gap-2 font-mono tracking-tighter">
+                                <div class="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400"><i class="bi bi-whatsapp"></i></div>
+                                ${row.phone || '-'}
+                            </div>
+                        `;
+                    }
+                },
+                { 
+                    data: 'id', 
+                    orderable: false, 
+                    searchable: false, 
+                    className: 'px-4 py-4 align-middle text-right whitespace-nowrap',
+                    render: function(data, type, row) {
+                        const safeName = (row.name || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                        const safeAddress = (row.address || '').replace(/(\r\n|\n|\r)/gm, " ").replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                        const safePkg = row.package_id || '';
+                        
+                        return `
+                            <div class="flex justify-end gap-1.5 items-center">
+                                <button onclick="syncUser('${row.id}')" class="p-2 rounded-xl text-cyan-400 bg-cyan-500/5 hover:bg-cyan-500 hover:text-white transition-all border border-transparent hover:border-cyan-400/50" title="Sinkron Radius">
+                                    <i class="bi bi-arrow-repeat text-lg"></i>
+                                </button>
+                                
+                                <a href="/admin/billing/customers/${row.phone}" class="p-2 rounded-xl text-blue-400 bg-blue-500/5 hover:bg-blue-500 hover:text-white transition-all border border-transparent hover:border-blue-400/50" title="Lihat Detail">
+                                    <i class="bi bi-eye text-lg"></i>
+                                </a>
+
+                                <button onclick="editCustomer(
+                                    '${row.id}', '${safeName}', '${row.phone}', 
+                                    '${safeAddress}', 
+                                    '${safePkg}', '${row.status}',
+                                    '${row.pppoe_username}', '${row.pppoe_password || ''}', '${row.billing_day}',
+                                    '${row.installation_date || ''}', '${row.expired_date || ''}'
+                                )" class="p-2 rounded-xl text-amber-400 bg-amber-500/5 hover:bg-amber-500 hover:text-white transition-all border border-transparent hover:border-amber-400/50" title="Edit Data">
+                                    <i class="bi bi-pencil text-lg"></i>
+                                </button>
+
+                                <button onclick="deleteCustomer('${row.id}')" class="p-2 rounded-xl text-red-400 bg-red-500/5 hover:bg-red-500 hover:text-white transition-all border border-transparent hover:border-red-400/50" title="Hapus">
+                                    <i class="bi bi-trash text-lg"></i>
+                                </button>
+                            </div>
+                        `;
+                    }
+                }
+            ],
+            createdRow: function(row, data, dataIndex) {
+                $(row).addClass('hover:bg-slate-800/50 transition-colors group');
+            }
+        });
+
+        // Hubungkan Input Kolom Custom Pencarian ke DataTables AJAX
+        $('#customSearch').on('keyup', function() { 
+            table.search(this.value).draw(); 
+        });
+
+        // ==============================================================
+
+        $('#createRadius').change(function() {
+            if($(this).is(':checked')) {
+                $('.radius-field').slideDown();
+                $('.radius-field input').prop('required', true);
+            } else {
+                $('.radius-field').slideUp();
+                $('.radius-field input').prop('required', false);
+                $('.radius-field input').val('');
+            }
+        });
+        
+        $('input[name="name"]').on('input', function() {
+            $('input[name="pppoe_username"]').val($(this).val());
+        });
+
+        $('input[name="pppoe_username"]').prop('readonly', true).css({
+            'background-color': '#0f172a',
+            'cursor': 'not-allowed',
+            'opacity': '0.7'
+        });
+        
+        $('#edit_name').on('input', function() {
+            $('#edit_pppoe_username').val($(this).val());
+        });
+        
+        $('#edit_pppoe_username').prop('readonly', true).css({
+            'background-color': '#0f172a',
+            'cursor': 'not-allowed',
+            'opacity': '0.7'
+        });
+
+        $('#addCustomerForm').submit(function(e) {
+            e.preventDefault();
+            const btn = $(this).find('button[type="submit"]');
+            btn.prop('disabled', true).text('MENYIMPAN...');
+            $.post('/admin/billing/customers', $(this).serialize()).done((res) => { 
+                if(res.success) { showToast('success', 'Berhasil', res.message); setTimeout(() => location.reload(), 1000); }
+                else { showToast('error', 'Gagal', res.message); btn.prop('disabled', false).text('Simpan Pelanggan'); }
+            }).fail((err) => { showToast('error', 'Gagal', 'Terputus dari server'); btn.prop('disabled', false).text('Simpan Pelanggan'); });
+        });
+
+        $('#editCustomerForm').submit(function(e) {
+            e.preventDefault();
+            const btn = $(this).find('button[type="submit"]');
+            btn.prop('disabled', true).text('UPDATING...');
+            $.post('/admin/billing/customers/update', $(this).serialize()).done((res) => {
+                if(res.success) { showToast('success', 'Berhasil', 'Data diperbarui'); setTimeout(() => location.reload(), 1000); }
+                else { showToast('error', 'Gagal', res.message); btn.prop('disabled', false).text('Perbarui Data'); }
+            }).fail(() => { showToast('error', 'Gagal', 'Server Error'); btn.prop('disabled', false).text('Perbarui Data'); });
+        });
+    });
+
+    function openModalTambah() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const todayStr = `${year}-${month}-${day}`;
+
+        document.getElementById('add_installation_date').value = todayStr;
+        syncBillingDay(todayStr);
+        openModal('addCustomerModal');
+    }
+
+    function openModal(id) { document.getElementById(id).classList.remove('hidden'); document.getElementById(id).classList.add('flex'); }
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); document.getElementById(id).classList.remove('flex'); }
+
+    function syncBillingDay(dateString) {
+        if (!dateString) return;
+        const date = new Date(dateString);
+        let dueDate = new Date(date);
+        dueDate.setMonth(date.getMonth() + 1);
+        const d = String(dueDate.getDate()).padStart(2, '0');
+        const m = String(dueDate.getMonth() + 1).padStart(2, '0');
+        const y = dueDate.getFullYear();
+        const rinciStr = `${d}/${m}/${y}`;
+        document.getElementById('add_billing_day_display').value = rinciStr;
+        let dayNum = dueDate.getDate();
+        if(dayNum > 28) dayNum = 28;
+        document.getElementById('add_billing_day').value = dayNum;
+    }
+
+    function syncBillingDayEdit(dateString) {
+        if (!dateString) return;
+        const parts = dateString.split('-');
+        const d = parseInt(parts[2]);
+        let day = d > 28 ? 28 : d;
+        
+        document.getElementById('edit_billing_day').value = day;
+        
+        const date = new Date(dateString);
+        let nextMonth = new Date(date);
+        nextMonth.setMonth(date.getMonth() + 1);
+        const yStr = nextMonth.getFullYear();
+        const mStr = String(nextMonth.getMonth() + 1).padStart(2, '0');
+        const dStr = String(nextMonth.getDate()).padStart(2, '0');
+        
+        document.getElementById('billing_day_picker').value = `${yStr}-${mStr}-${dStr}`;
+        document.getElementById('edit_expired_date').value = `${yStr}-${mStr}-${dStr}`;
+    }
+
+    function updateBillingDay(dateString) {
+        if (!dateString) return;
+        const date = new Date(dateString);
+        let day = date.getDate(); 
+        if(day > 28) {
+            alert('Maksimal tanggal tagihan adalah tgl 28 agar aman setiap bulan!');
+            day = 28;
+        }
+        document.getElementById('edit_billing_day').value = day;
+        const hiddenInput = document.getElementById('edit_expired_date');
+        if (hiddenInput) {
+            hiddenInput.value = dateString;
+        }
+    }
+
+    async function prosesImport(input) {
+        if (!input.files || input.files.length === 0) return;
+        const formData = new FormData();
+        formData.append('excelFile', input.files[0]);
+        showToast('warning', 'Proses', 'Mengunggah file...');
+        try {
+            const response = await fetch('/admin/billing/import-excel', { method: 'POST', body: formData });
+            const res = await response.json();
+            if (res.success) { showToast('success', 'Berhasil', res.message); setTimeout(() => location.reload(), 2000); }
+            else { alert('Gagal: ' + res.message); input.value = ''; }
+        } catch (err) { showToast('error', 'Gagal', 'Koneksi error'); }
+    }
+
+    function syncUser(id) {
+        showToast('warning', 'Sync', 'Sinkronisasi ke Mikrotik...');
+        $.post(`/admin/billing/sync-user/${id}`).done((res) => {
+            if(res.success) showToast('success', 'Berhasil', 'User disinkronkan!');
+            else showToast('error', 'Gagal', res.message);
+        });
+    }
+
+    function editCustomer(id, name, phone, address, packageId, status, pppoeUser, pppoePass, billDay, instDate, expDate) {
+        $('#editCustomerForm')[0].reset();
+        $('#edit_id').val(id);
+        $('#edit_name').val(name);
+        $('#edit_phone').val(phone);
+        $('#edit_original_phone').val(phone); 
+        $('#edit_address').val(address);
+        $('#edit_package_id').val(packageId);
+        $('#edit_status').val(status);
+        $('#edit_pppoe_username').val(pppoeUser);
+        $('#edit_pppoe_password').val(pppoePass);
+        
+        $('#edit_billing_day').val(billDay);
+        
+        if(instDate && instDate !== 'null' && instDate !== '') {
+            const d = new Date(instDate);
+            const yyyy = d.getFullYear();
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const dd = String(d.getDate()).padStart(2, '0');
+            $('#edit_installation_date').val(`${yyyy}-${mm}-${dd}`);
+        }
+        
+        if(expDate && expDate !== 'null' && expDate !== '') {
+            const e = new Date(expDate);
+            const ey = e.getFullYear();
+            const em = String(e.getMonth() + 1).padStart(2, '0');
+            const ed = String(e.getDate()).padStart(2, '0');
+            const fullDateStr = `${ey}-${em}-${ed}`;
+            $('#billing_day_picker').val(fullDateStr);
+            $('#edit_expired_date').val(fullDateStr);
+        } else {
+            const today = new Date();
+            const dayStr = String(billDay).padStart(2, '0');
+            const monthStr = String(today.getMonth() + 1).padStart(2, '0');
+            const fallback = `${today.getFullYear()}-${monthStr}-${dayStr}`;
+            $('#billing_day_picker').val(fallback);
+            $('#edit_expired_date').val(fallback);
+        }
+
+        openModal('editCustomerModal');
+    }
+
+    function deleteCustomer(id) {
+        if(confirm('Yakin hapus pelanggan ini permanen?')) {
+            $.ajax({
+                url: `/admin/billing/customers/${id}`,
+                type: 'DELETE',
+                success: (res) => { if(res.success) { showToast('success', 'Terhapus', 'Data dibersihkan'); setTimeout(() => location.reload(), 1000); } else { showToast('error', 'Gagal', res.message); } }
+            });
+        }
+    }
+
+    function showToast(type, title, message) {
+        const colors = { success: 'bg-emerald-600', error: 'bg-red-600', warning: 'bg-amber-600' };
+        const id = 'toast-' + Math.random().toString(36).substr(2, 9);
+        const html = `<div id="${id}" class="flex items-center w-full max-w-xs p-4 text-white ${colors[type]} rounded-2xl shadow-2xl border transition-all duration-500 transform translate-x-0"><div class="ml-3 text-xs font-black uppercase tracking-widest">${title}<div class="text-[11px] font-bold opacity-100 normal-case">${message}</div></div></div>`;
+        $('#toast-container').append(html);
+        setTimeout(() => { $(`#${id}`).addClass('translate-x-full opacity-0'); setTimeout(() => $(`#${id}`).remove(), 500); }, 4000);
+    }
+</script>
+
+</body>
+</html>

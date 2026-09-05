@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Login Pelanggan | INETKU WiFi</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <link rel="manifest" href="/manifest-customer.json">
+    <meta name="theme-color" content="#6f42c1"> 
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="/icons/icon-cust-192.png">
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                .then(reg => console.log('? PWA Pelanggan Ready!'))
+                .catch(err => console.log('? PWA Pelanggan Gagal:', err));
+            });
+        }
+    </script>
+    <style>
+        body {
+            background-color: #f0f2f5; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 420px;
+            background: #ffffff;
+            padding: 45px 30px;
+            border: 2px solid #6f42c1; 
+            border-radius: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            margin: 20px;
+            position: relative;
+        }
+
+        .logo-box {
+            width: 140px;
+            height: 140px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: -115px auto 30px; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+            border: 6px solid #ffffff;
+            position: relative;
+            z-index: 5;
+        }
+
+        .logo-box img {
+            width: 85%;
+            height: auto;
+            border-radius: 50%;
+        }
+
+        .input-group-custom {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 15px;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            transition: 0.3s;
+        }
+
+        .input-group-custom:focus-within {
+            border-color: #6f42c1;
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(111, 66, 193, 0.1);
+        }
+
+        .input-group-custom i {
+            color: #6f42c1;
+            font-size: 1.2rem;
+            margin-right: 15px;
+        }
+
+        .input-group-custom input {
+            border: none;
+            outline: none;
+            width: 100%;
+            background: transparent;
+            font-size: 16px;
+            color: #333;
+        }
+
+        /* Styling Khusus Checkbox Biar Rapi */
+        .remember-container {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            margin-bottom: 20px;
+            padding-left: 5px;
+        }
+        .remember-container .form-check-input {
+            cursor: pointer;
+            border-color: #6f42c1;
+        }
+        .remember-container .form-check-input:checked {
+            background-color: #6f42c1;
+            border-color: #6f42c1;
+        }
+        .remember-container label {
+            cursor: pointer;
+            font-size: 14px;
+            color: #6c757d;
+            margin-left: 8px;
+            margin-top: 2px;
+        }
+
+        .btn-purple {
+            background-color: #6f42c1;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 15px;
+            width: 100%;
+            font-size: 18px;
+            font-weight: 700;
+            margin-top: 5px;
+            transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-purple:hover {
+            background-color: #5a32a3;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(111, 66, 193, 0.4);
+        }
+
+        .footer-text {
+            margin-top: 30px;
+            font-size: 13px;
+            color: #6c757d;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-card">
+    <div class="logo-box">
+        <img src="/img/Customer.png" alt="Logo" onerror="this.src='/icons/icon-cust-192.png'">
+    </div>
+
+    <h3 class="fw-bold mb-4" style="color: #333;">LOGIN MEMBER</h3>
+
+    <form id="loginForm">
+        <div class="input-group-custom">
+            <i class="bi bi-person-fill"></i>
+            <input type="text" id="username" placeholder="Masukkan Username" required>
+        </div>
+
+        <div class="input-group-custom">
+            <i class="bi bi-lock-fill"></i>
+            <input type="password" id="password" placeholder="Masukan Password" required>
+        </div>
+
+        <div class="input-group-custom" style="margin-bottom: 12px;">
+            <i class="bi bi-whatsapp"></i>
+            <input type="text" id="phone" placeholder="No Whatsapp (08xxx)" required>
+        </div>
+
+        <div class="remember-container">
+            <input class="form-check-input shadow-none" type="checkbox" id="rememberMe" checked>
+            <label class="form-check-label" for="rememberMe">Ingat Saya (Tetap Login)</label>
+        </div>
+
+        <button type="submit" class="btn-purple" id="loginBtn">
+            <span class="btn-text">MASUK</span>
+            <span class="spinner-border spinner-border-sm d-none" id="loadingIcon"></span>
+        </button>
+    </form>
+
+    <div class="footer-text">
+        &copy; <%= new Date().getFullYear() %> <strong>INETKU NETWORK</strong><br>
+        <span class="opacity-75 text-uppercase" style="font-size: 10px;">Fast & Reliable Connection</span>
+    </div>
+</div>
+
+<div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
+
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script>
+    function showToast(type, title, message) {
+        const bgClass = type === 'success' ? 'bg-success' : 'bg-danger';
+        const html = `
+            <div class="toast align-items-center text-white ${bgClass} border-0 show" role="alert" style="margin-bottom: 10px;">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <strong>${title}</strong><br>${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            </div>`;
+        $('#toast-container').append(html);
+        
+        setTimeout(() => {
+            $('.toast').first().fadeOut(500, function() { $(this).remove(); });
+        }, 4000);
+    }
+
+    $('#loginForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        // Ambil data dari input, TERMASUK status checkbox
+        const loginData = {
+            username: $('#username').val(),
+            password: $('#password').val(),
+            phone: $('#phone').val(),
+            remember: $('#rememberMe').is(':checked') // SUNTIKAN SAKTI ANTI LOGOUT
+        };
+
+        const $btn = $('#loginBtn');
+        $btn.prop('disabled', true);
+        $('.btn-text').addClass('d-none');
+        $('#loadingIcon').removeClass('d-none');
+
+        $.ajax({
+            url: '/customer/login',
+            method: 'POST',
+            data: loginData,
+            success: function(res) {
+                if (res.success) {
+                    showToast('success', 'Berhasil', 'Login sukses! Mengalihkan...');
+                    setTimeout(() => {
+                        window.location.href = res.redirect || "/customer/dashboard";
+                    }, 800);
+                } else {
+                    showToast('error', 'Gagal', res.message || 'Data tidak cocok!');
+                    resetButton();
+                }
+            },
+            error: function(xhr) {
+                const errMsg = xhr.responseJSON?.message || 'Koneksi server bermasalah!';
+                showToast('error', 'Error', errMsg);
+                resetButton();
+            }
+        });
+    });
+
+    function resetButton() {
+        const $btn = $('#loginBtn');
+        $btn.prop('disabled', false);
+        $('.btn-text').removeClass('d-none');
+        $('#loadingIcon').addClass('d-none');
+    }
+</script>
+
+</body>
+</html>

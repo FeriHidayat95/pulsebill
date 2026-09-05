@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="id" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title><%= title %> | Portal ISP</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/theme.css?v=1">
+    
+    <style>
+    /* ========================================== */
+    /* ROOT & DESKTOP STYLES (Bawaan Asli Lu)     */
+    /* ========================================== */
+    :root {
+      --primary-color: #4361ee;
+      --bg-color: #f8f9fa;
+      --surface-color: #ffffff;
+      --text-main: #212529;
+      --text-muted: #6c757d;
+      --border-color: rgba(0,0,0,0.08);
+      font-family: 'Inter', sans-serif;
+    }
+
+    [data-bs-theme="dark"] {
+      --bg-color: #0f172a;
+      --surface-color: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-color: rgba(255,255,255,0.1);
+      --primary-color: #3b82f6;
+    }
+
+    body { font-family: var(--font-family); background-color: var(--bg-color); color: var(--text-main); transition: background-color 0.3s ease; }
+    
+    .desktop-layout .navbar { backdrop-filter: blur(10px); border-bottom: 1px solid transparent; box-shadow: none; }
+    .desktop-layout .card { border: none; border-radius: 16px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); transition: all 0.3s ease; margin-bottom: 25px; background: var(--surface-color); border: 1px solid var(--border-color); }
+    .desktop-layout .card:hover { transform: translateY(-3px); box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2); }
+    .desktop-layout .btn-back { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; border-radius: 50px; color: white; padding: 10px 20px; font-weight: 600; transition: all 0.3s ease; }
+    .desktop-layout .btn-back:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3); color: white; }
+    .desktop-layout .customer-info { border-radius: 16px; padding: 25px; margin-bottom: 25px; background: var(--surface-color); border: 1px solid var(--border-color); }
+    .desktop-layout .invoice-card { border-left: 4px solid #667eea; transition: all 0.3s ease; }
+    .desktop-layout .invoice-card:hover { border-left-color: #764ba2; transform: translateX(5px); }
+    .desktop-layout .invoice-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .desktop-layout .status-badge { font-size: 1rem; padding: 0.5rem 1rem; }
+    .desktop-layout .badge-paid, .desktop-layout .badge-unpaid, .desktop-layout .badge-overdue { color: inherit; }
+    </style>
+
+    <style id="mobile-ui-styles">
+        @media (max-width: 767.98px) {
+            /* KUNCI LAYAR ANTI BOCOR SAMPING */
+            html, body {
+                overflow-x: hidden !important; 
+                width: 100% !important;
+                max-width: 100vw !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            body { padding-bottom: 90px; min-height: 100vh; }
+            html[data-bs-theme="dark"] body { background: #1e1e2d !important; }
+            html[data-bs-theme="light"] body { background: #f9fbfd !important; }
+            
+            .mobile-layout { 
+                color: var(--text-main); 
+                width: 100% !important;
+                max-width: 100vw !important;
+                box-sizing: border-box !important;
+                overflow-x: hidden !important;
+            }
+            .mobile-layout[data-theme="dark"] { background: #1e1e2d !important; color: #f8fafc; --card-bg: #2a2a3c; --border-color: #3b3b54; --text-muted: #a1a1aa; }
+            .mobile-layout[data-theme="light"] { --card-bg: #ffffff; --border-color: #f1f5f9; --text-muted: #64748b; }
+            
+            .mob-top-footer { display: none !important; }
+            
+            /* HEADER MELAYANG (STICKY) */
+            .mob-header { 
+                position: sticky !important; 
+                top: 0; 
+                left: 0;
+                width: 100%;
+                z-index: 1020; 
+                padding: 15px 20px; 
+                display: flex; 
+                justify-content: space-between; 
+                align-items: center; 
+                background-color: #f9fbfd; 
+                box-sizing: border-box !important;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.03); 
+                transition: background-color 0.3s ease;
+                margin-bottom: 10px;
+            }
+
+            html[data-bs-theme="dark"] .mob-header,
+            .mobile-layout[data-theme="dark"] .mob-header {
+                background-color: #1e1e2d !important;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            }
+
+            .mob-wifi-icon { background: var(--card-bg); color: #667eea; border-radius: 12px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 20px; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.15); border: 1px solid var(--border-color); }
+            
+            /* Invoice Header Card */
+            .mob-profile-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px 20px; border-radius: 20px; margin: 0 20px 20px 20px; position: relative; text-align: center; color: white; box-shadow: 0 10px 25px rgba(102, 126, 234, 0.2); overflow: hidden; }
+            .mob-profile-header::after { content: ''; position: absolute; right: -20px; bottom: -20px; width: 100px; height: 100px; background: rgba(255,255,255,0.1); border-radius: 50%; }
+            
+            /* Card General */
+            .mob-card { background: var(--card-bg); border-radius: 20px; padding: 20px; margin: 0 20px 20px 20px; position: relative; z-index: 10; box-shadow: 0 5px 20px rgba(0,0,0,0.03); border: 1px solid var(--border-color); }
+            .mob-info-item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border-color); font-size: 13px; }
+            .mob-info-item:last-child { border-bottom: none; padding-bottom: 0; }
+            .mob-info-label { color: var(--text-muted); font-size: 12px; }
+            .mob-info-val { font-weight: 600; text-align: right; }
+            
+            /* Bottom Nav */
+            .mob-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card-bg); display: flex; justify-content: space-around; align-items: center; padding: 10px 5px 15px 5px; box-shadow: 0 -5px 25px rgba(0,0,0,0.05); z-index: 1000; border-top: 1px solid var(--border-color); }
+            .mob-nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-muted); font-size: 10px; text-decoration: none; flex: 1; font-weight: 500; transition: color 0.3s; }
+            .mob-nav-item.active { color: #667eea; font-weight: 700; }
+            .mob-nav-fab { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; transform: translateY(-22px); box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4); border: 5px solid #f9fbfd; transition: border-color 0.3s ease; }
+            .mobile-layout[data-theme="dark"] .mob-nav-fab { border-color: #1e1e2d; }
+        }
+    </style>
+</head>
+<body>
+
+  <div class="desktop-layout d-none d-md-block">
+      <nav class="navbar navbar-expand-lg navbar-dark bg-primary" style="background: linear-gradient(135deg, #4361ee, #3f37c9) !important;">
+          <div class="container">
+              <a class="navbar-brand" href="/customer">
+                  <img src="/img/<%= appSettings.logoFilename %>" alt="Logo" class="me-2">
+                  <%= appSettings.companyHeader %>
+              </a>
+              <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                  <span class="navbar-toggler-icon"></span>
+              </button>
+              <div class="collapse navbar-collapse" id="navbarNav">
+                  <ul class="navbar-nav me-auto">
+                      <li class="nav-item"><a class="nav-link" href="/customer">Dashboard</a></li>
+                      <li class="nav-item"><a class="nav-link" href="/customer/billing/dashboard">Billing</a></li>
+                      <li class="nav-item"><a class="nav-link" href="/customer/billing/invoices">Tagihan</a></li>
+                      <li class="nav-item"><a class="nav-link" href="/customer/billing/payments">Pembayaran</a></li>
+                      <li class="nav-item"><a class="nav-link" href="/customer/billing/profile">Profil</a></li>
+                  </ul>
+                  <div class="d-flex align-items-center">
+                      <button class="btn btn-light btn-sm me-3" onclick="toggleTheme()" title="Ganti Mode">
+                          <i class="bi bi-moon-stars-fill text-primary" id="themeIconDesk"></i>
+                      </button>
+                  </div>
+              </div>
+          </div>
+      </nav>
+
+      <div class="container mt-4">
+          <div class="row mb-4">
+              <div class="col-12">
+                  <div class="d-flex justify-content-between align-items-center">
+                      <div>
+                          <h2 class="mb-1">Detail Tagihan</h2>
+                          <p class="text-muted mb-0">Informasi lengkap tagihan Anda</p>
+                      </div>
+                      <div>
+                          <a href="/customer/billing/invoices" class="btn btn-outline-primary me-2">
+                              <i class="bi bi-arrow-left"></i> Kembali
+                          </a>
+                          <a href="/customer/billing/invoices/<%= invoice.id %>/print" class="btn btn-primary" target="_blank">
+                              <i class="bi bi-printer"></i> Print
+                          </a>
+                      </div>
+                  </div>
+              </div>
+          </div>
+
+          <div class="row">
+              <div class="col-lg-8">
+                  <div class="card invoice-header text-white mb-4">
+                      <div class="card-body">
+                          <div class="row align-items-center">
+                              <div class="col-md-8">
+                                  <h3 class="mb-2">Tagihan #<%= invoice.invoice_number %></h3>
+                                  <p class="mb-0">
+                                      <strong>Status:</strong>
+                                      <% if (invoice.status === 'paid') { %>
+                                          <span class="badge bg-success status-badge">LUNAS</span>
+                                      <% } else if (invoice.status === 'unpaid') { %>
+                                          <% if (new Date(invoice.due_date) < new Date()) { %>
+                                              <span class="badge bg-danger status-badge">TERLAMBAT</span>
+                                          <% } else { %>
+                                              <span class="badge bg-warning text-dark status-badge">BELUM LUNAS</span>
+                                          <% } %>
+                                      <% } %>
+                                  </p>
+                              </div>
+                              <div class="col-md-4 text-end">
+                                  <h4 class="mb-0">Rp <%= parseFloat(invoice.amount).toLocaleString('id-ID') %></h4>
+                                  <small>Total Tagihan</small>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+
+                  <div class="card mb-4">
+                      <div class="card-header bg-transparent border-bottom">
+                          <h5 class="mb-0 py-2"><i class="bi bi-info-circle text-primary"></i> Informasi Tagihan</h5>
+                      </div>
+                      <div class="card-body">
+                          <div class="row">
+                              <div class="col-md-6">
+                                  <table class="table table-borderless">
+                                      <tr><td><strong>No. Tagihan:</strong></td><td><%= invoice.invoice_number %></td></tr>
+                                      <tr><td><strong>Paket:</strong></td><td><%= invoice.package_name %></td></tr>
+                                      <tr><td><strong>Kecepatan:</strong></td><td><%= invoice.speed || 'Unlimited' %></td></tr>
+                                      <tr><td><strong>Jumlah:</strong></td><td class="fw-bold text-primary">Rp <%= parseFloat(invoice.amount).toLocaleString('id-ID') %></td></tr>
+                                  </table>
+                              </div>
+                              <div class="col-md-6">
+                                  <table class="table table-borderless">
+                                      <tr><td><strong>Tanggal Dibuat:</strong></td><td><%= new Date(invoice.created_at).toLocaleDateString('id-ID') %></td></tr>
+                                      <tr>
+                                          <td><strong>Jatuh Tempo:</strong></td>
+                                          <td>
+                                              <% if (new Date(invoice.due_date) < new Date() && invoice.status === 'unpaid') { %>
+                                                  <span class="text-danger fw-bold"><%= new Date(invoice.due_date).toLocaleDateString('id-ID') %></span>
+                                              <% } else { %>
+                                                  <%= new Date(invoice.due_date).toLocaleDateString('id-ID') %>
+                                              <% } %>
+                                          </td>
+                                      </tr>
+                                      <tr>
+                                          <td><strong>Status:</strong></td>
+                                          <td>
+                                              <% if (invoice.status === 'paid') { %>
+                                                  <span class="badge bg-success">Lunas</span>
+                                              <% } else if (invoice.status === 'unpaid') { %>
+                                                  <% if (new Date(invoice.due_date) < new Date()) { %>
+                                                      <span class="badge bg-danger">Terlambat</span>
+                                                  <% } else { %>
+                                                      <span class="badge bg-warning text-dark">Belum Lunas</span>
+                                                  <% } %>
+                                              <% } %>
+                                          </td>
+                                      </tr>
+                                      <% if (invoice.payment_date) { %>
+                                          <tr><td><strong>Tanggal Bayar:</strong></td><td><%= new Date(invoice.payment_date).toLocaleDateString('id-ID') %></td></tr>
+                                      <% } %>
+                                  </table>
+                              </div>
+                          </div>
+                          <% if (invoice.notes) { %>
+                              <div class="mt-3 p-3 bg-light rounded border">
+                                  <strong>Catatan Admin:</strong>
+                                  <p class="mb-0 text-muted"><%= invoice.notes %></p>
+                              </div>
+                          <% } %>
+                      </div>
+                  </div>
+
+                  <% if (typeof payments !== 'undefined' && payments && payments.length > 0) { %>
+                      <div class="card">
+                          <div class="card-header bg-transparent border-bottom">
+                              <h5 class="mb-0 py-2"><i class="bi bi-cash-stack text-success"></i> Riwayat Pembayaran</h5>
+                          </div>
+                          <div class="card-body">
+                              <div class="table-responsive">
+                                  <table class="table table-hover align-middle">
+                                      <thead class="table-light">
+                                          <tr>
+                                              <th>Tanggal</th>
+                                              <th>Jumlah</th>
+                                              <th>Metode</th>
+                                              <th>Referensi</th>
+                                              <th>Catatan</th>
+                                          </tr>
+                                      </thead>
+                                      <tbody>
+                                          <% payments.forEach(function(payment) { %>
+                                              <tr>
+                                                  <td><%= new Date(payment.payment_date).toLocaleDateString('id-ID') %></td>
+                                                  <td class="fw-bold">Rp <%= parseFloat(payment.amount).toLocaleString('id-ID') %></td>
+                                                  <td>
+                                                      <% if (payment.payment_method === 'cash') { %>
+                                                          <span class="badge bg-success">Tunai</span>
+                                                      <% } else if (payment.payment_method === 'transfer') { %>
+                                                          <span class="badge bg-primary">Transfer</span>
+                                                      <% } else if (payment.payment_method === 'qris') { %>
+                                                          <span class="badge bg-info">QRIS</span>
+                                                      <% } else if (payment.payment_method === 'ewallet') { %>
+                                                          <span class="badge bg-warning text-dark">E-Wallet</span>
+                                                      <% } else { %>
+                                                          <span class="badge bg-secondary"><%= payment.payment_method %></span>
+                                                      <% } %>
+                                                  </td>
+                                                  <td><small class="font-monospace text-muted"><%= payment.reference_number || '-' %></small></td>
+                                                  <td><small><%= payment.notes || '-' %></small></td>
+                                              </tr>
+                                          <% }); %>
+                                      </tbody>
+                                  </table>
+                              </div>
+                          </div>
+                      </div>
+                  <% } %>
+              </div>
+
+              <div class="col-lg-4">
+                  <div class="card mb-4">
+                      <div class="card-header bg-transparent border-bottom">
+                          <h5 class="mb-0 py-2"><i class="bi bi-person text-primary"></i> Info Pelanggan</h5>
+                      </div>
+                      <div class="card-body">
+                          <p class="mb-2"><strong>Nama:</strong><br><%= invoice.customer_name %></p>
+                          <p class="mb-2"><strong>Username:</strong><br><span class="badge bg-light text-dark border"><%= invoice.customer_username %></span></p>
+                          <p class="mb-0"><strong>Telepon:</strong><br><%= invoice.customer_phone || '-' %></p>
+                      </div>
+                  </div>
+
+                  <% if (invoice.status === 'unpaid') { %>
+                  <div class="card mb-4 border-success">
+                      <div class="card-header bg-success text-white">
+                          <h5 class="mb-0 py-1"><i class="bi bi-wallet2"></i> Aksi Pembayaran</h5>
+                      </div>
+                      <div class="card-body text-center p-4">
+                          <div class="mb-3 text-muted small">Klik tombol di bawah untuk membayar tagihan ini secara online.</div>
+                          <a href="/customer/billing/pay-online/<%= invoice.id %>" class="btn btn-success btn-lg w-100 shadow-sm py-3 rounded-pill fw-bold">
+                              <i class="bi bi-credit-card pe-2"></i> BAYAR SEKARANG
+                          </a>
+                          
+                          <div id="payment-methods-container" class="mt-3 text-start"></div>
+                          <div id="payment-processing" style="display:none;" class="text-center mt-3">
+                              <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                              <span class="ms-2 small">Memproses...</span>
+                          </div>
+                      </div>
+                  </div>
+                  <% } %>
+
+                  <div class="card mb-4">
+                      <div class="card-header bg-warning text-dark border-bottom-0">
+                          <h5 class="mb-0 py-1"><i class="bi bi-info-circle"></i> Bayar Manual</h5>
+                      </div>
+                      <div class="card-body bg-light">
+                          <ul class="list-unstyled mb-0 small">
+                              <li class="mb-3">
+                                  <i class="bi bi-cash text-success me-2"></i> <strong>Tunai:</strong><br>
+                                  <span class="text-muted ms-4"><%= appSettings.payment_cash_address %></span><br>
+                                  <span class="text-muted ms-4">Jam: <%= appSettings.payment_cash_hours %></span>
+                              </li>
+                              <li class="mb-3">
+                                  <i class="bi bi-bank text-primary me-2"></i> <strong>Transfer Bank:</strong><br>
+                                  <span class="text-muted ms-4"><%= appSettings.payment_bank_name %> - <%= appSettings.payment_account_number %></span><br>
+                                  <span class="text-muted ms-4">A/N: <%= appSettings.payment_account_holder %></span>
+                              </li>
+                              <li>
+                                  <i class="bi bi-whatsapp text-success me-2"></i> <strong>Konfirmasi WA:</strong><br>
+                                  <a href="https://wa.me/62<%= appSettings.contact_whatsapp.replace(/^0/, '') %>" target="_blank" class="ms-4 text-decoration-none fw-bold">
+                                      <%= appSettings.contact_whatsapp %>
+                                  </a>
+                              </li>
+                          </ul>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+
+      <footer class="bg-white border-top mt-5 py-4">
+          <div class="container text-center">
+              <p class="mb-0 text-muted small"><%= appSettings.footerInfo %></p>
+          </div>
+      </footer>
+  </div>
+
+
+  <div class="mobile-layout d-block d-md-none" data-theme="light">
+      
+      <div class="mob-header">
+          <div class="d-flex align-items-center gap-3">
+              <div class="mob-wifi-icon"><i class="bi bi-receipt"></i></div>
+              <div>
+                  <div class="mob-text-muted" style="font-size: 10px;">Portal Pelanggan</div>
+                  <div style="font-weight: 800; font-size: 14px; letter-spacing: 0.5px;">DETAIL TAGIHAN</div>
+              </div>
+          </div>
+          <div class="d-flex align-items-center gap-3">
+              <button onclick="toggleTheme()" style="background:none; border:none; color:inherit; position: relative; z-index: 9999; cursor: pointer; padding: 5px;">
+                  <i class="bi bi-moon-stars-fill fs-5" id="themeIconMob"></i>
+              </button>
+              <form method="POST" action="/customer/logout" class="m-0">
+                  <button type="submit" style="background:none; border:none; color:#dc3545; position: relative; z-index: 9999; cursor: pointer; padding: 5px;"><i class="bi bi-box-arrow-right fs-4"></i></button>
+              </form>
+          </div>
+      </div>
+
+      <div class="mob-profile-header">
+          <div style="font-size: 12px; opacity: 0.8; margin-bottom: 5px; position: relative; z-index: 2;">No. Invoice: <%= invoice.invoice_number %></div>
+          <h2 class="fw-bold mb-3" style="font-size: 32px; position: relative; z-index: 2;">
+              Rp <%= parseFloat(invoice.amount).toLocaleString('id-ID') %>
+          </h2>
+          <div style="position: relative; z-index: 2;">
+              <% if (invoice.status === 'paid') { %>
+                  <span class="badge bg-success rounded-pill px-4 py-2 shadow-sm"><i class="bi bi-check-circle-fill me-1"></i> LUNAS</span>
+              <% } else if (invoice.status === 'unpaid') { %>
+                  <% if (new Date(invoice.due_date) < new Date()) { %>
+                      <span class="badge bg-danger rounded-pill px-4 py-2 shadow-sm"><i class="bi bi-exclamation-triangle-fill me-1"></i> TERLAMBAT</span>
+                  <% } else { %>
+                      <span class="badge bg-warning text-dark rounded-pill px-4 py-2 shadow-sm"><i class="bi bi-clock-fill me-1"></i> BELUM LUNAS</span>
+                  <% } %>
+              <% } %>
+          </div>
+      </div>
+
+      <% if (invoice.status === 'unpaid') { %>
+          <div class="mx-4 mb-4 position-relative" style="z-index: 20;">
+              <a href="/customer/billing/pay-online/<%= invoice.id %>" class="btn btn-success w-100 rounded-pill py-3 fw-bold shadow" style="font-size: 15px; letter-spacing: 0.5px;">
+                  <i class="bi bi-credit-card me-2"></i> BAYAR SEKARANG
+              </a>
+          </div>
+      <% } %>
+
+      <div class="mob-card">
+          <h6 class="fw-bold mb-3" style="font-size: 14px;"><i class="bi bi-person text-primary me-2"></i>Info Pelanggan</h6>
+          <div class="mob-info-item">
+              <span class="mob-info-label">Nama</span>
+              <span class="mob-info-val"><%= invoice.customer_name %></span>
+          </div>
+          <div class="mob-info-item">
+              <span class="mob-info-label">ID User</span>
+              <span class="mob-info-val text-primary"><%= invoice.customer_username %></span>
+          </div>
+          <div class="mob-info-item">
+              <span class="mob-info-label">Paket</span>
+              <span class="mob-info-val"><%= invoice.package_name %></span>
+          </div>
+      </div>
+
+      <div class="mob-card">
+          <h6 class="fw-bold mb-3" style="font-size: 14px;"><i class="bi bi-calendar-check text-primary me-2"></i>Detail Tagihan</h6>
+          <div class="mob-info-item">
+              <span class="mob-info-label">Tgl Dibuat</span>
+              <span class="mob-info-val"><%= new Date(invoice.created_at).toLocaleDateString('id-ID') %></span>
+          </div>
+          <div class="mob-info-item">
+              <span class="mob-info-label">Jatuh Tempo</span>
+              <% if (new Date(invoice.due_date) < new Date() && invoice.status === 'unpaid') { %>
+                  <span class="mob-info-val text-danger"><%= new Date(invoice.due_date).toLocaleDateString('id-ID') %></span>
+              <% } else { %>
+                  <span class="mob-info-val"><%= new Date(invoice.due_date).toLocaleDateString('id-ID') %></span>
+              <% } %>
+          </div>
+          <% if (invoice.payment_date) { %>
+              <div class="mob-info-item">
+                  <span class="mob-info-label">Tgl Lunas</span>
+                  <span class="mob-info-val text-success"><%= new Date(invoice.payment_date).toLocaleDateString('id-ID') %></span>
+              </div>
+          <% } %>
+      </div>
+
+      <% if (typeof payments !== 'undefined' && payments && payments.length > 0) { %>
+          <div class="mob-card p-0 overflow-hidden">
+              <div class="p-3 border-bottom" style="background: rgba(16, 185, 129, 0.05);">
+                  <h6 class="fw-bold text-success mb-0" style="font-size: 14px;"><i class="bi bi-cash-stack me-2"></i>Riwayat Pembayaran</h6>
+              </div>
+              <div class="p-3">
+                  <% payments.forEach(function(payment) { %>
+                      <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom border-dashed">
+                          <div>
+                              <div style="font-size: 12px; font-weight: 700;"><%= new Date(payment.payment_date).toLocaleDateString('id-ID') %></div>
+                              <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">
+                                  Metode: 
+                                  <% if (payment.payment_method === 'cash') { %> Tunai
+                                  <% } else if (payment.payment_method === 'transfer') { %> Transfer
+                                  <% } else { %> <%= payment.payment_method.toUpperCase() %> <% } %>
+                              </div>
+                          </div>
+                          <div class="text-end">
+                              <div class="fw-bold text-primary" style="font-size: 13px;">Rp <%= parseFloat(payment.amount).toLocaleString('id-ID') %></div>
+                              <div style="font-size: 9px; color: var(--text-muted);">Ref: <%= payment.reference_number || '-' %></div>
+                          </div>
+                      </div>
+                  <% }); %>
+              </div>
+          </div>
+      <% } %>
+
+      <div class="mob-card" style="border: 1px solid rgba(245, 158, 11, 0.3);">
+          <h6 class="fw-bold text-warning-emphasis mb-3" style="font-size: 13px;"><i class="bi bi-info-circle me-2"></i>Info Pembayaran Manual</h6>
+          
+          <div class="mb-3">
+              <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 2px;">Transfer Bank</div>
+              <div style="font-size: 13px; font-weight: 600;"><%= appSettings.payment_bank_name %> - <%= appSettings.payment_account_number %></div>
+              <div style="font-size: 11px; opacity: 0.8;">A/N: <%= appSettings.payment_account_holder %></div>
+          </div>
+          
+          <div class="mb-3 pt-2" style="border-top: 1px dashed var(--border-color);">
+              <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 2px;">Pembayaran Tunai</div>
+              <div style="font-size: 12px;"><%= appSettings.payment_cash_address %> (<%= appSettings.payment_cash_hours %>)</div>
+          </div>
+
+          <a href="https://wa.me/62<%= appSettings.contact_whatsapp.replace(/^0/, '') %>" target="_blank" class="btn w-100 rounded-pill py-2 text-success fw-bold shadow-sm mt-2" style="background: rgba(16, 185, 129, 0.1); font-size: 12px; border: 1px solid rgba(16, 185, 129, 0.2);">
+              <i class="bi bi-whatsapp me-1"></i> Konfirmasi via Admin
+          </a>
+      </div>
+
+      <div style="height: 100px; opacity: 0; pointer-events: none;"></div>
+
+      <div class="mob-nav">
+          <a href="/customer/dashboard" class="mob-nav-item"><i class="bi bi-house-door fs-4 mb-1"></i>Home</a>
+          <a href="/customer/billing/invoices" class="mob-nav-item"><i class="bi bi-ticket-perforated fs-4 mb-1"></i>Tagihan</a>
+          <a href="/customer/billing/pay-online/<%= invoice.id %>" class="mob-nav-item" style="flex: 0.8; text-decoration: none;">
+              <div class="mob-nav-fab"><i class="bi bi-credit-card"></i></div>
+          </a>
+          <a href="/customer/trouble/report" class="mob-nav-item"><i class="bi bi-hdd-network fs-4 mb-1"></i>Komplain</a>
+          <a href="/customer/billing/profile" class="mob-nav-item"><i class="bi bi-person fs-4 mb-1"></i>Profil</a>
+      </div>
+  </div>
+
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <script>
+      const htmlEl = document.documentElement;
+      const mobLayout = document.querySelector('.mobile-layout');
+      const savedTheme = localStorage.getItem('appTheme') || 'light';
+      
+      setTheme(savedTheme);
+
+      window.toggleTheme = function() {
+          const currentTheme = htmlEl.getAttribute('data-bs-theme');
+          setTheme(currentTheme === 'light' ? 'dark' : 'light');
+      };
+
+      function setTheme(theme) {
+          htmlEl.setAttribute('data-bs-theme', theme);
+          if (mobLayout) mobLayout.setAttribute('data-theme', theme);
+          localStorage.setItem('appTheme', theme);
+          
+          const iconDesk = document.getElementById('themeIconDesk');
+          if(iconDesk) iconDesk.className = theme === 'dark' ? 'bi bi-sun-fill text-warning' : 'bi bi-moon-stars-fill text-light';
+          
+          const iconMob = document.getElementById('themeIconMob');
+          if(iconMob) iconMob.className = theme === 'dark' ? 'bi bi-sun-fill text-warning fs-5' : 'bi bi-moon-stars-fill fs-5';
+      }
+  </script>
+
+  <script>
+        async function loadPaymentMethods() {
+            try {
+                const response = await fetch('/customer/billing/api/payment-methods');
+                const result = await response.json();
+                
+                if (result.success && result.methods) {
+                    renderPaymentMethods(result.methods);
+                } else {
+                    showPaymentMethodsError('Gagal memuat metode pembayaran: ' + (result.message || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error loading payment methods:', error);
+                showPaymentMethodsError('Terjadi kesalahan saat memuat metode pembayaran');
+            }
+        }
+        
+        function renderPaymentMethods(methods) {
+            const container = document.getElementById('payment-methods-container');
+            if(!container) return; // Mencegah error jika elemen gak ketemu
+            
+            if (!methods || methods.length === 0) {
+                container.innerHTML = `
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        Tidak ada metode pembayaran yang tersedia saat ini.
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '<div class="row g-2 mb-3">';
+            
+            methods.forEach(method => {
+                const invoiceAmount = <%= invoice.amount %>;
+                const isDisabled = method.minimum_amount && invoiceAmount < method.minimum_amount;
+                const disabledClass = isDisabled ? 'disabled' : '';
+                const disabledTitle = isDisabled ? `Minimal pembayaran: Rp ${method.minimum_amount?.toLocaleString('id-ID')}` : '';
+                
+                html += `
+                    <div class="col-md-6">
+                        <button class="btn btn-outline-${method.color} w-100 payment-method ${disabledClass}" 
+                                data-gateway="${method.gateway}" 
+                                data-method="${method.method}"
+                                ${isDisabled ? 'disabled' : ''}
+                                title="${disabledTitle}">
+                            <i class="${method.icon}"></i><br>
+                            <small>${method.name}</small>
+                            <br><small class="text-muted">Fee: ${method.fee_customer || 'Gratis'}</small>
+                            ${isDisabled ? `<br><small class="text-danger">Min: Rp ${method.minimum_amount?.toLocaleString('id-ID')}</small>` : ''}
+                        </button>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
+            
+            bindPaymentMethodEvents();
+        }
+        
+        function showPaymentMethodsError(message) {
+            const container = document.getElementById('payment-methods-container');
+            if(!container) return;
+            container.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-circle"></i>
+                    ${message}
+                </div>
+                <button class="btn btn-outline-primary w-100" onclick="loadPaymentMethods()">
+                    <i class="bi bi-arrow-clockwise"></i> Coba Lagi
+                </button>
+            `;
+        }
+        
+        function bindPaymentMethodEvents() {
+            document.querySelectorAll('.payment-method').forEach(button => {
+                button.addEventListener('click', async function() {
+                    if (this.disabled) return;
+                    
+                    const gateway = this.dataset.gateway;
+                    const method = this.dataset.method;
+                    const invoiceId = <%= invoice.id %>;
+                    
+                    const processingEl = document.getElementById('payment-processing');
+                    if(processingEl) processingEl.style.display = 'block';
+                    this.disabled = true;
+                    
+                    try {
+                        const response = await fetch('/customer/billing/create-payment', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                invoice_id: invoiceId,
+                                gateway: gateway,
+                                method: method
+                            })
+                        });
+                        
+                        const result = await response.json();
+                        
+                        if (result.success) {
+                            if (result.data && result.data.payment_url) {
+                                window.open(result.data.payment_url, '_blank');
+                                setTimeout(() => {
+                                    window.location.reload();
+                                }, 3000);
+                            } else {
+                                alert('Error: Payment URL tidak ditemukan');
+                            }
+                        } else {
+                            alert('Error: ' + (result.message || 'Gagal membuat pembayaran'));
+                        }
+                    } catch (error) {
+                        console.error('Payment error:', error);
+                        alert('Terjadi kesalahan saat membuat pembayaran: ' + error.message);
+                    } finally {
+                        if(processingEl) processingEl.style.display = 'none';
+                        this.disabled = false;
+                    }
+                });
+            });
+        }
+        
+        <% if (invoice.status === 'unpaid') { %>
+        document.addEventListener('DOMContentLoaded', function() {
+            loadPaymentMethods();
+        });
+        <% } %>
+  </script>
+</body>
+</html>

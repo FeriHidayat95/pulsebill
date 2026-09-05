@@ -1,0 +1,211 @@
+<%- include('partials/header') %>
+<%- include('partials/admin-header') %>
+<%- include('partials/admin-sidebar', { page: 'hotspot' }) %>
+
+<style>
+    .dataTables_wrapper .dataTables_length,
+    .dataTables_wrapper .dataTables_filter,
+    .dataTables_wrapper .dataTables_info,
+    .dataTables_wrapper .dataTables_paginate {
+        color: #9ca3af !important; font-weight: 600; font-size: 0.8rem; padding-top: 10px;
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+        color: #d1d5db !important; border-radius: 0.5rem !important; border: 1px solid transparent !important;
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+        background: #374151 !important; color: #ffffff !important; border: 1px solid #4b5563 !important;
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+        background: #0ea5e9 !important; color: #ffffff !important; border: 1px solid #0ea5e9 !important;
+    }
+    .dataTables_wrapper input {
+        background-color: #111827 !important; border: 1px solid #374151 !important; color: #ffffff !important; border-radius: 0.5rem; padding: 5px 10px;
+    }
+</style>
+
+<main class="p-4 sm:ml-64 pt-20 bg-gray-900 min-h-screen text-gray-300">
+    
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 border-b border-gray-800 pb-4">
+        <div>
+            <h1 class="text-2xl font-black text-white tracking-tight">MONITORING HOTSPOT</h1>
+            <p class="text-sm text-gray-400 font-bold uppercase tracking-wider">Real-time User Activity & Traffic</p>
+        </div>
+        
+        <button onclick="location.reload()" class="bg-gray-800 hover:bg-gray-700 text-white text-xs font-black px-5 py-2.5 rounded-xl shadow-lg transition-all border border-gray-700 flex items-center">
+            <i class="bi bi-arrow-clockwise me-2 text-lg"></i> REFRESH DATA
+        </button>
+    </div>
+
+    <% 
+        let totalDownload = 0;
+        let totalUpload = 0;
+        let uniqueRouters = [];
+        
+        if(typeof users !== 'undefined' && users.length > 0) {
+            users.forEach(u => {
+                totalDownload += parseInt(u.bytes_out || 0);
+                totalUpload += parseInt(u.bytes_in || 0);
+                if(u.router_name && !uniqueRouters.includes(u.router_name)) {
+                    uniqueRouters.push(u.router_name);
+                }
+            });
+        }
+
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+        }
+    %>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div class="p-5 bg-gray-800 border border-gray-700 rounded-2xl shadow-lg flex items-center justify-between group hover:border-blue-500/50 transition-all relative overflow-hidden">
+            <div class="z-10">
+                <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest">User Online</p>
+                <p class="text-3xl font-black text-white"><%= users.length %></p>
+            </div>
+            <div class="w-12 h-12 bg-gray-700 rounded-xl flex items-center justify-center text-blue-400 shadow-inner">
+                <i class="bi bi-people-fill text-2xl"></i>
+            </div>
+        </div>
+
+        <div class="p-5 bg-gray-800 border border-gray-700 rounded-2xl shadow-lg flex items-center justify-between group hover:border-green-500/50 transition-all relative overflow-hidden">
+            <div class="z-10">
+                <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest">Total Download</p>
+                <p class="text-3xl font-black text-green-400"><%= formatBytes(totalDownload) %></p>
+            </div>
+            <div class="w-12 h-12 bg-gray-700 rounded-xl flex items-center justify-center text-green-500 shadow-inner">
+                <i class="bi bi-cloud-arrow-down-fill text-2xl animate-bounce"></i>
+            </div>
+        </div>
+
+        <div class="p-5 bg-gray-800 border border-gray-700 rounded-2xl shadow-lg flex items-center justify-between group hover:border-red-500/50 transition-all relative overflow-hidden">
+            <div class="z-10">
+                <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest">Total Upload</p>
+                <p class="text-3xl font-black text-red-400"><%= formatBytes(totalUpload) %></p>
+            </div>
+            <div class="w-12 h-12 bg-gray-700 rounded-xl flex items-center justify-center text-red-500 shadow-inner">
+                <i class="bi bi-cloud-arrow-up-fill text-2xl"></i>
+            </div>
+        </div>
+
+        <div class="p-5 bg-gray-800 border border-gray-700 rounded-2xl shadow-lg flex items-center justify-between group hover:border-orange-500/50 transition-all relative overflow-hidden">
+            <div class="z-10">
+                <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest">Router Aktif</p>
+                <p class="text-3xl font-black text-orange-400"><%= uniqueRouters.length %></p>
+            </div>
+            <div class="w-12 h-12 bg-gray-700 rounded-xl flex items-center justify-center text-orange-500 shadow-inner">
+                <i class="bi bi-router-fill text-2xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-gray-800 border border-gray-700 rounded-2xl shadow-2xl overflow-hidden mb-10">
+        <div class="p-4 bg-gray-900/50 border-b border-gray-700 flex justify-between items-center">
+            <div class="flex items-center text-gray-300 font-bold text-sm tracking-widest uppercase">
+                <i class="bi bi-broadcast me-2 text-blue-500"></i> Active Connections
+            </div>
+        </div>
+        
+        <div class="p-4 overflow-x-auto">
+            <table class="w-full text-sm text-left text-gray-300" id="hotspotTable">
+                <thead class="text-[10px] text-gray-400 uppercase bg-gray-900 border-b border-gray-700 font-black">
+                    <tr>
+                        <th class="px-4 py-4 text-center">No</th>
+                        <th class="px-4 py-4">Username / Router</th>
+                        <th class="px-4 py-4">IP Address / MAC</th>
+                        <th class="px-4 py-4">Profile</th>
+                        <th class="px-4 py-4">Uptime</th>
+                        <th class="px-4 py-4">Traffic (Live)</th>
+                        <th class="px-4 py-4 text-right">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-700">
+                    <% if(typeof users !== 'undefined' && users.length > 0) { %>
+                        <% users.forEach(function(user, i) { %>
+                        <tr class="hover:bg-gray-700/50 transition-all group">
+                            <td class="px-4 py-4 text-center text-gray-500 font-mono font-bold"><%= i+1 %></td>
+                            <td class="px-4 py-4">
+                                <span class="font-black text-white block text-base"><%= user.name %></span>
+                                <span class="text-[10px] text-gray-400 font-bold bg-gray-900 px-1.5 rounded border border-gray-700">
+                                    <i class="bi bi-router me-1"></i><%= user.router_name %>
+                                </span>
+                            </td>
+                            <td class="px-4 py-4">
+                                <div class="text-blue-300 font-mono text-xs mb-1"><%= user.ip %></div>
+                                <div class="text-gray-500 font-mono text-[10px] uppercase"><%= user.mac %></div>
+                            </td>
+                            <td class="px-4 py-4">
+                                <span class="bg-gray-700 text-gray-300 text-[10px] font-black px-2 py-1 rounded border border-gray-600 uppercase">
+                                    <%= user.profile || 'Default' %>
+                                </span>
+                            </td>
+                            <td class="px-4 py-4">
+                                <span class="text-yellow-400 font-mono text-xs">
+                                    <i class="bi bi-clock me-1"></i><%= user.uptime %>
+                                </span>
+                            </td>
+                            <td class="px-4 py-4">
+                                <div class="flex flex-col gap-1">
+                                    <span class="text-[10px] font-bold text-green-400 flex items-center">
+                                        <i class="bi bi-arrow-down me-1"></i> <%= formatBytes(user.bytes_out) %>
+                                    </span>
+                                    <span class="text-[10px] font-bold text-red-400 flex items-center">
+                                        <i class="bi bi-arrow-up me-1"></i> <%= formatBytes(user.bytes_in) %>
+                                    </span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-4 text-right">
+                                <button class="kick-btn bg-red-900/30 hover:bg-red-600 text-red-400 hover:text-white border border-red-900/50 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-sm flex items-center justify-end ms-auto gap-1"
+                                    data-router="<%= user.router_name %>"
+                                    data-user="<%= user.name %>">
+                                    <i class="bi bi-power"></i> KICK
+                                </button>
+                            </td>
+                        </tr>
+                        <% }) %>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<%- include('partials/footer') %>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        // Init DataTable Dark Mode
+        $('#hotspotTable').DataTable({ 
+            pageLength: 25,
+            dom: '<"flex flex-col md:flex-row justify-between items-center p-4 gap-4"f>rt<"p-4 flex justify-between items-center text-gray-500 font-bold text-xs"ip>',
+            language: { 
+                search: "", 
+                searchPlaceholder: "Cari User Hotspot...",
+                zeroRecords: "Tidak ada user hotspot online.",
+                info: "Hal _PAGE_ dari _PAGES_",
+                paginate: { next: "Maju >", previous: "< Mundur" }
+            },
+            order: [[ 4, "desc" ]] // Urut berdasarkan Uptime
+        });
+
+        // Styling Search Input
+        $('.dataTables_filter input').addClass('bg-gray-900 border border-gray-700 text-white rounded-xl text-sm px-4 py-2 focus:ring-blue-500 w-full md:w-64 outline-none');
+
+        // Logic Kick User (Tetap menggunakan Redirect seperti file asli Bos)
+        $(document).on('click', '.kick-btn', function() {
+            const user = $(this).data('user');
+            const router = $(this).data('router');
+            
+            if(confirm(`Tendang user "${user}" dari router ${router}?`)) {
+                // Redirect ke route kick yang sudah ada di backend
+                window.location.href = `/admin/hotspot/kick/${encodeURIComponent(router)}/${encodeURIComponent(user)}`;
+            }
+        });
+    });
+</script>

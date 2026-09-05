@@ -1,0 +1,20 @@
+{
+  "user_auth_mode": "radius",
+  "radius_secret": "sample_radius_secret",
+  "radius_auth_port": 1812,
+  "radius_acct_port": 1813,
+  "mikrotik_host": "192.168.1.1",
+  "mikrotik_user": "admin",
+  "mikrotik_password": "change_me_immediately",
+  "mikrotik_port": 8728,
+  "mikrotik_interface": "ether1-WAN",
+  "radius_mode": "api",
+  "whatsapp_session_path": "./whatsapp-session",
+  "admin_number": "+15550192834",
+  "pppoe_monitoring": "enabled",
+  "app_port": "3001",
+  "db_host": "localhost",
+  "db_user": "pulsebill",
+  "db_password": "change_me_immediately",
+  "db_name": "pulsebill_db"
+}

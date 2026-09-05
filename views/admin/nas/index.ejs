@@ -1,0 +1,57 @@
+<%- include('../../partials/header') %>
+<div class="content-wrapper">
+    <div class="container-fluid pt-3">
+        <div class="card card-primary card-outline shadow">
+            <div class="card-header">
+                <h3 class="card-title">Manajemen NAS Radius</h3>
+                <div class="card-tools">
+                    <button class="btn btn-success btn-sm" data-toggle="modal" data-target="#addNAS">
+                        <i class="fas fa-plus"></i> Tambah NAS
+                    </button>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-hover text-nowrap">
+                    <thead>
+                        <tr>
+                            <th>Nama Router</th>
+                            <th>IP Address</th>
+                            <th>RADIUS Secret</th>
+                            <th>Keterangan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (nasList && nasList.length > 0) { %>
+                            <% nasList.forEach(nas => { %>
+                                <tr>
+                                    <td><strong><%= nas.shortname %></strong></td>
+                                    <td><%= nas.nasname %></td>
+                                    <td><code><%= nas.secret %></code></td>
+                                    <td><%= nas.description %></td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr><td colspan="4" class="text-center">Belum ada data NAS.</td></tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addNAS">
+    <div class="modal-dialog">
+        <form action="/admin/nas/add" method="POST" class="modal-content">
+            <div class="modal-header"><h4>Tambah NAS Baru</h4></div>
+            <div class="modal-body">
+                <div class="form-group"><label>Nama Router</label><input type="text" name="shortname" class="form-control" required></div>
+                <div class="form-group"><label>IP Address</label><input type="text" name="nasname" class="form-control" required></div>
+                <div class="form-group"><label>Secret RADIUS</label><input type="text" name="secret" class="form-control" required></div>
+                <div class="form-group"><label>Keterangan</label><input type="text" name="description" class="form-control"></div>
+            </div>
+            <div class="modal-footer"><button type="submit" class="btn btn-primary w-100">Simpan NAS</button></div>
+        </form>
+    </div>
+</div>
+<%- include('../../partials/footer') %>

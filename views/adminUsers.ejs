@@ -1,0 +1,200 @@
+<%- include('partials/header') %>
+<%- include('partials/admin-header') %>
+<%- include('partials/admin-sidebar', { page: 'users' }) %>
+
+<style>
+    body, main { background-color: #111827 !important; color: #d1d5db !important; }
+    .bg-gray-800, .table-container, .card, .modal-content { background-color: #1f2937 !important; color: white !important; border: 1px solid #374151 !important; box-shadow: none !important; }
+    input, select, textarea { background-color: #111827 !important; border-color: #4b5563 !important; color: white !important; }
+    table.dataTable tbody tr { background-color: #1f2937 !important; color: #d1d5db !important; }
+    table.dataTable thead th { background-color: #111827 !important; color: #9ca3af !important; border-bottom: 1px solid #374151 !important; }
+    .btn-edit, .btn-delete { border: none !important; }
+    .shadow-sm, .shadow, .shadow-lg { box-shadow: none !important; }
+</style>
+
+<main class="p-4 sm:ml-64 pt-20 min-h-screen">
+    
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 border-b border-gray-700 pb-4">
+        <div>
+            <h1 class="text-2xl font-black text-white tracking-tight">HAK AKSES SISTEM</h1>
+            <p class="text-sm text-gray-400 font-bold uppercase tracking-wider">Manajemen Superadmin & Kasir</p>
+        </div>
+        
+        <button data-modal-target="addUserModal" data-modal-toggle="addUserModal" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-black px-5 py-2.5 rounded-lg transition-all shadow-lg border border-blue-500 flex items-center">
+            <i class="bi bi-person-plus-fill me-2 text-lg"></i> TAMBAH USER
+        </button>
+    </div>
+
+    <div class="bg-gray-800 rounded-2xl shadow-2xl overflow-hidden mb-10 border border-gray-700">
+        <div class="p-4 bg-gray-900 border-b border-gray-700 flex justify-between items-center">
+            <div class="flex items-center text-gray-300 font-bold text-sm tracking-widest uppercase">
+                <i class="bi bi-shield-lock-fill me-2 text-purple-500"></i> Daftar Pengguna Sistem
+            </div>
+        </div>
+        
+        <div class="p-4 overflow-x-auto">
+            <table class="w-full text-sm text-left text-gray-300" id="userTable">
+                <thead class="text-[10px] text-gray-400 uppercase bg-gray-900 font-black">
+                    <tr>
+                        <th class="px-6 py-4">Nama User</th>
+                        <th class="px-6 py-4">Username Login</th>
+                        <th class="px-6 py-4">Level Akses</th>
+                        <th class="px-6 py-4 text-right">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% usersList.forEach(function(u) { %>
+                    <tr class="hover:bg-gray-700 border-b border-gray-700 transition-all group">
+                        <td class="px-6 py-4 font-bold text-white uppercase"><%= u.name %></td>
+                        <td class="px-6 py-4"><span class="bg-gray-900 border border-gray-600 px-3 py-1 rounded text-xs font-mono text-blue-400">@<%= u.username %></span></td>
+                        <td class="px-6 py-4">
+                            <% if (u.role === 'superadmin') { %>
+                                <span class="bg-purple-900/30 text-purple-400 px-3 py-1 rounded-full text-[10px] font-black border border-purple-800"><i class="bi bi-award me-1"></i> SUPERADMIN</span>
+                            <% } else { %>
+                                <span class="bg-emerald-900/30 text-emerald-400 px-3 py-1 rounded-full text-[10px] font-black border border-emerald-800"><i class="bi bi-person-badge me-1"></i> KASIR</span>
+                            <% } %>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <div class="inline-flex shadow-sm rounded-lg overflow-hidden border border-gray-600">
+                                <button class="edit-user-btn p-2 bg-gray-800 hover:bg-yellow-900/50 text-yellow-500 border-r border-gray-600" 
+                                        data-id="<%= u.id %>" 
+                                        data-name="<%= u.name %>"
+                                        data-username="<%= u.username %>"
+                                        data-role="<%= u.role %>">
+                                    <i class="bi bi-pencil-square"></i>
+                                </button>
+                                <% if (u.id !== 1) { %>
+                                <a href="/admin/users/delete/<%= u.id %>" class="p-2 bg-gray-800 hover:bg-red-900/50 text-red-500" onclick="return confirm('Hapus Akun <%= u.username %>?')">
+                                    <i class="bi bi-trash3-fill"></i>
+                                </a>
+                                <% } else { %>
+                                <div class="p-2 bg-gray-800 text-gray-600 opacity-50 cursor-not-allowed" title="Sultan tidak boleh dihapus"><i class="bi bi-trash3-fill"></i></div>
+                                <% } %>
+                            </div>
+                        </td>
+                    </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<div id="addUserModal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-[100] justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full backdrop-blur-sm bg-black/80">
+    <div class="relative p-4 w-full max-w-md max-h-full">
+        <div class="relative bg-gray-800 rounded-2xl shadow-2xl border border-gray-600">
+            <div class="flex items-center justify-between p-4 border-b border-gray-700 bg-gray-900 rounded-t-2xl">
+                <h3 class="text-lg font-black text-white">TAMBAH AKSES BARU</h3>
+                <button type="button" class="text-gray-400 hover:text-white closeModalBtn" data-modal-hide="addUserModal">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <form action="/admin/users/add" method="POST" class="p-5 space-y-4">
+                <div><label class="block mb-1 text-xs font-black text-gray-500 uppercase">Nama Lengkap</label>
+                    <input type="text" name="name" class="w-full bg-gray-900 border border-gray-600 rounded-lg p-2.5 text-white text-sm" required placeholder="Budi Kasir">
+                </div>
+                <div><label class="block mb-1 text-xs font-black text-gray-500 uppercase">Username Login</label>
+                    <input type="text" name="username" class="w-full bg-gray-900 border border-gray-600 rounded-lg p-2.5 text-white text-sm font-mono lowercase" required placeholder="budi">
+                </div>
+                <div><label class="block mb-1 text-xs font-black text-gray-500 uppercase">Level Hak Akses</label>
+                    <select name="role" class="w-full bg-gray-900 border border-gray-600 rounded-lg p-2.5 text-white text-sm font-bold uppercase" required>
+                        <option value="kasir">🥈 KASIR SYSTEM</option>
+                        <option value="superadmin">🥇 SUPERADMIN</option>
+                    </select>
+                </div>
+                <div><label class="block mb-1 text-xs font-black text-gray-500 uppercase">Password Baru</label>
+                    <input type="password" name="password" class="w-full bg-gray-900 border border-gray-600 rounded-lg p-2.5 text-white text-sm" required>
+                </div>
+                <div class="pt-2 flex justify-end">
+                    <button type="submit" class="bg-blue-600 text-white font-black py-2 px-6 rounded-lg hover:bg-blue-500 shadow-lg w-full">SIMPAN AKUN</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div id="editUserModal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-[100] justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full backdrop-blur-sm bg-black/80">
+    <div class="relative p-4 w-full max-w-md max-h-full">
+        <div class="relative bg-gray-800 rounded-2xl shadow-2xl border border-gray-600">
+            <div class="flex items-center justify-between p-4 border-b border-gray-700 bg-gray-900 rounded-t-2xl">
+                <h3 class="text-lg font-black text-white">EDIT HAK AKSES</h3>
+                <button type="button" class="text-gray-400 hover:text-white closeModalBtn">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <form action="/admin/users/edit" method="POST" class="p-5 space-y-4">
+                <input type="hidden" name="id" id="edit_id">
+                <div><label class="block mb-1 text-xs font-black text-gray-500 uppercase">Nama Lengkap</label>
+                    <input type="text" name="name" id="edit_name" class="w-full bg-gray-900 border border-gray-600 rounded-lg p-2.5 text-white text-sm" required>
+                </div>
+                <div><label class="block mb-1 text-xs font-black text-gray-500 uppercase">Username Login</label>
+                    <input type="text" name="username" id="edit_username" class="w-full bg-gray-900 border border-gray-600 rounded-lg p-2.5 text-white text-sm font-mono lowercase" required>
+                </div>
+                <div><label class="block mb-1 text-xs font-black text-gray-500 uppercase">Level Hak Akses</label>
+                    <select name="role" id="edit_role" class="w-full bg-gray-900 border border-gray-600 rounded-lg p-2.5 text-white text-sm font-bold uppercase" required>
+                        <option value="kasir">🥈 KASIR SYSTEM</option>
+                        <option value="superadmin">🥇 SUPERADMIN</option>
+                    </select>
+                </div>
+                <div><label class="block mb-1 text-xs font-black text-gray-500 uppercase">Ubah Password (Opsional)</label>
+                    <input type="password" name="password" class="w-full bg-gray-900 border border-gray-600 rounded-lg p-2.5 text-white text-sm" placeholder="Kosongkan jika tidak ingin diubah">
+                </div>
+                <div class="pt-2 flex justify-end">
+                    <button type="submit" class="bg-yellow-600 text-white font-black py-2 px-6 rounded-lg hover:bg-yellow-500 shadow-lg w-full">UPDATE AKUN</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<%- include('partials/footer') %>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<script>
+    function openModal(id) { document.getElementById(id).classList.remove('hidden'); document.getElementById(id).classList.add('flex'); }
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); document.getElementById(id).classList.remove('flex'); }
+    
+    document.querySelectorAll('.closeModalBtn, [data-modal-hide]').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const target = this.getAttribute('data-modal-hide');
+            if(target) closeModal(target);
+            else { 
+                this.closest('.fixed').classList.add('hidden');
+                this.closest('.fixed').classList.remove('flex');
+            }
+        });
+    });
+    
+    document.querySelectorAll('[data-modal-toggle]').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const target = this.getAttribute('data-modal-target');
+            openModal(target);
+        });
+    });
+
+    $(document).ready(function() {
+        $('#userTable').DataTable({
+            responsive: true,
+            dom: '<"flex flex-col md:flex-row justify-between items-center p-4 gap-4"f>rt<"p-4 flex justify-between items-center text-gray-500 font-bold text-xs"ip>',
+            language: { search: "", searchPlaceholder: "Cari Akun...", zeroRecords: "Belum ada akun lain." }
+        });
+        $('.dataTables_filter input').addClass('bg-gray-900 border border-gray-700 text-white rounded-xl text-sm px-4 py-2 focus:ring-blue-500 w-full md:w-64 outline-none');
+
+        // Edit Logic
+        $(document).on('click', '.edit-user-btn', function() {
+            const d = $(this).data();
+            $('#edit_id').val(d.id);
+            $('#edit_name').val(d.name);
+            $('#edit_username').val(d.username);
+            $('#edit_role').val(d.role);
+            
+            // Cegah edit Role Superadmin Utama (id 1)
+            if(d.id == 1) { $('#edit_role').attr('disabled', true); } 
+            else { $('#edit_role').removeAttr('disabled'); }
+
+            openModal('editUserModal');
+        });
+    });
+</script>

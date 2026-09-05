@@ -1,0 +1,244 @@
+<%- include('../../partials/header') %>
+<body class="bg-[#0f172a] text-slate-300 font-sans antialiased selection:bg-rose-500 selection:text-white">
+
+<%- include('../../partials/admin-header') %>
+<%- include('../../partials/billing-sidebar', { page: 'customer-nunggak', settings: settings }) %>
+
+<main class="p-4 sm:ml-64 pt-24 min-h-screen">
+    <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+        <div>
+            <h1 class="text-3xl font-black text-white tracking-tighter uppercase leading-none">
+                Customer <span class="text-rose-500">Nunggak</span>
+            </h1>
+            <p class="text-xs font-bold text-slate-500 uppercase tracking-[4px] mt-2">Daftar Tagihan Lewat Jatuh Tempo</p>
+        </div>
+        
+        <div class="flex gap-2">
+            <button id="btnHapusMassal" class="hidden px-5 py-2.5 text-xs font-black text-white bg-rose-600 rounded-xl hover:bg-rose-700 shadow-lg shadow-rose-500/20 transition-all uppercase tracking-widest" onclick="hapusMassal()">
+                <i class="bi bi-trash-fill me-1 text-lg"></i> Hapus Terpilih
+            </button>
+        </div>
+    </div>
+
+    <div class="bg-[#1e293b] border border-slate-700/60 rounded-3xl shadow-2xl overflow-hidden mb-10">
+        <div class="px-6 py-5 border-b border-slate-700 bg-[#111827]/50 flex flex-col md:flex-row justify-between items-center gap-4">
+            <h3 class="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2">
+                <i class="bi bi-exclamation-octagon text-rose-500 text-xl"></i> DAFTAR CUSTOMER YANG NUNGGAK
+            </h3>
+            <div id="dt-buttons-container" class="flex gap-2"></div>
+        </div>
+
+        <div class="p-4 overflow-x-auto">
+            <table id="nunggakTable" class="w-full text-left text-slate-400">
+                <thead class="text-xs text-slate-500 uppercase bg-[#111827]/30 border-b border-slate-700">
+                    <tr>
+                        <th class="px-4 py-4 w-10 text-center">
+                            <input type="checkbox" id="checkAll" class="w-4 h-4 text-rose-600 bg-slate-800 border-slate-600 rounded cursor-pointer">
+                        </th>
+                        <th class="px-4 py-4 font-black tracking-wider text-center">NO</th>
+                        <th class="px-4 py-4 font-black tracking-wider">NAMA</th>
+                        <th class="px-4 py-4 font-black tracking-wider">ALAMAT</th>
+                        <th class="px-4 py-4 font-black tracking-wider">NO WHATSAPP</th>
+                        <th class="px-4 py-4 font-black tracking-wider">PAKET</th>
+                        <th class="px-4 py-4 font-black tracking-wider text-center">EXPIRED</th>
+                        <th class="px-4 py-4 font-black tracking-wider text-right">AKSI</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-700/50">
+                    <% if(pelanggan && pelanggan.length > 0) { %>
+                        <% pelanggan.forEach(function(p, index) { %>
+                            <tr class="hover:bg-slate-800/50 transition-colors">
+                                <td class="px-4 py-3 align-middle text-center">
+                                    <input type="checkbox" value="<%= p.id %>" class="checkItem w-4 h-4 text-rose-600 bg-slate-800 border-slate-600 rounded cursor-pointer">
+                                </td>
+                                <td class="px-4 py-3 align-middle text-center text-xs font-black text-slate-500"><%= index + 1 %></td>
+                                
+                                <td class="px-4 py-3 align-middle text-xs font-bold text-white uppercase"><%= p.name %></td>
+                                
+                                <td class="px-4 py-3 align-middle text-xs font-medium text-slate-300 whitespace-normal break-words max-w-[200px]"><%= p.address || '-' %></td>
+                                
+                                <td class="px-4 py-3 align-middle font-mono text-emerald-400 text-xs font-bold"><%= p.phone || '-' %></td>
+                                <td class="px-4 py-3 align-middle text-xs font-black text-slate-300 uppercase"><%= p.package_name || '-' %></td>
+                                <td class="px-4 py-3 align-middle text-center whitespace-nowrap">
+                                    <span class="px-2 py-1 bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded text-[10px] font-black tracking-widest">
+                                        <%= p.expired_date ? new Date(p.expired_date).toLocaleDateString('id-ID') : '-' %>
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3 align-middle text-right whitespace-nowrap">
+                                    <button onclick="hapusPelanggan('<%= p.id %>')" class="p-2 rounded-xl text-red-400 bg-red-500/5 hover:bg-red-500 hover:text-white transition-all border border-transparent hover:border-red-400/50" title="Hapus Permanen">
+                                        <i class="bi bi-trash text-lg"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="8" class="px-4 py-8 text-center text-sm font-bold text-slate-500 uppercase tracking-widest">
+                                <i class="bi bi-emoji-sunglasses text-2xl block mb-2 text-emerald-500"></i>
+                                Mantap! Tidak ada customer yang nunggak.
+                            </td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<%- include('../../partials/footer') %>
+
+<style>
+    /* ============================================================== */
+    /* STYLING BAWAAN DATATABLES AGAR NYATU DENGAN TEMA SULTAN (DARK) */
+    /* ============================================================== */
+    
+    /* Teks Label "Search:" / Pencarian */
+    .dataTables_wrapper .dataTables_filter label {
+        color: #94a3b8 !important; /* Warna abu-abu redup agar tidak mencolok */
+        font-size: 0.75rem;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    /* Kolom Input Pencarian */
+    .dataTables_wrapper .dataTables_filter input {
+        background-color: #111827 !important; /* Warna gelap sama dengan header tabel */
+        border: 1px solid #334155 !important; /* Garis tepi senada */
+        border-radius: 0.5rem;
+        color: #f8fafc !important; /* Teks ketikan warna putih */
+        padding: 0.4rem 0.75rem;
+        outline: none;
+        font-weight: 700;
+        transition: all 0.3s ease;
+    }
+
+    /* Efek saat Kolom Pencarian diklik (Glow warna merah rose) */
+    .dataTables_wrapper .dataTables_filter input:focus {
+        border-color: #f43f5e !important; 
+        box-shadow: 0 0 0 2px rgba(244, 63, 94, 0.2) !important;
+    }
+
+    /* Hilangkan border bawaan DataTables yang bikin berantakan */
+    table.dataTable { border-collapse: collapse !important; border-bottom: 1px solid #334155 !important; }
+    
+    /* Merapikan Footer (Tulisan Info & Tombol Next/Prev) */
+    .dataTables_info { 
+        color: #64748b !important; 
+        font-size: 0.75rem; 
+        font-weight: 800; 
+        text-transform: uppercase; 
+    }
+    .dataTables_paginate { margin-top: 0 !important; display: flex; gap: 4px; }
+    .paginate_button { 
+        padding: 4px 12px !important; 
+        border-radius: 6px !important; 
+        background: #1e293b !important; 
+        color: #94a3b8 !important; 
+        border: 1px solid #334151 !important; 
+        font-size: 0.75rem; 
+        font-weight: 800; 
+        cursor: pointer; 
+        transition: all 0.2s; 
+    }
+    .paginate_button:hover { background: #334155 !important; color: white !important; }
+    
+    /* Warna tombol Pagination Aktif (Merah Rose) */
+    .paginate_button.current, .paginate_button.current:hover { 
+        background: #f43f5e !important; 
+        color: white !important; 
+        border-color: #f43f5e !important; 
+    }
+    .paginate_button.disabled { opacity: 0.3 !important; cursor: not-allowed !important; }
+</style>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        var table = $('#nunggakTable').DataTable({
+            pageLength: 50,
+            dom: 'frt<"flex justify-between items-center p-4"ip>',
+            buttons: [
+                { 
+                    extend: 'excelHtml5', 
+                    text: '<i class="bi bi-file-earmark-excel"></i> Excel', 
+                    className: 'px-4 py-2 bg-emerald-600 text-white rounded-lg text-xs font-bold uppercase border-none', 
+                    title: 'Daftar_Customer_Nunggak_' + new Date().toISOString().slice(0,10),
+                    exportOptions: { columns: [1, 2, 3, 4, 5, 6] } 
+                },
+                { 
+                    extend: 'print', 
+                    text: '<i class="bi bi-printer"></i> Print', 
+                    className: 'px-4 py-2 bg-blue-600 text-white rounded-lg text-xs font-bold uppercase border-none', 
+                    title: '<h2 style="text-align:center; font-family:sans-serif; color:#000000; font-weight:900; margin-bottom:20px; text-transform:uppercase;">DAFTAR CUSTOMER YANG NUNGGAK</h2>',
+                    exportOptions: { columns: [1, 2, 3, 4, 5, 6] },
+                    customize: function (win) {
+                        // 1. Paksa background kertas putih dan font hitam murni
+                        $(win.document.body)
+                            .css('background', '#ffffff')
+                            .css('color', '#000000')
+                            .css('font-family', 'Arial, sans-serif');
+                        
+                        // 2. Setting tabel agar tidak pudar
+                        $(win.document.body).find('table')
+                            .css('color', '#000000')
+                            .css('border-collapse', 'collapse')
+                            .css('width', '100%');
+                        
+                        // 3. Tinta Hitam Pekat untuk isi data & Garis tebal hitam
+                        $(win.document.body).find('table th, table td')
+                            .css('border', '1px solid #000000') // Garis tabel hitam solid
+                            .css('color', '#000000') // Font hitam solid
+                            .css('padding', '8px')
+                            .css('font-size', '12px'); // Ukuran font proporsional kertas
+                            
+                        // 4. Khusus Header (Judul Kolom) di-Bold dan dikasih warna abu muda biar rapi
+                        $(win.document.body).find('table th')
+                            .css('font-weight', '900')
+                            .css('background-color', '#e5e7eb');
+                    }
+                }
+            ]
+        });
+        table.buttons().container().appendTo('#dt-buttons-container');
+
+        $('#checkAll').on('click', function() {
+            $('.checkItem').prop('checked', this.checked);
+            toggleBtnHapus();
+        });
+
+        $('.checkItem').on('change', function() { toggleBtnHapus(); });
+
+        function toggleBtnHapus() {
+            if ($('.checkItem:checked').length > 0) $('#btnHapusMassal').removeClass('hidden');
+            else $('#btnHapusMassal').addClass('hidden');
+        }
+    });
+
+    function hapusPelanggan(id) {
+        if(confirm('Hapus data pelanggan ini?')) {
+            fetch(`/admin/billing/customers/${id}`, { method: 'DELETE' })
+            .then(r => r.json()).then(res => { location.reload(); });
+        }
+    }
+
+    function hapusMassal() {
+        const ids = $('.checkItem:checked').map(function() { return $(this).val(); }).get();
+        if(confirm(`Hapus ${ids.length} pelanggan?`)) {
+            Promise.all(ids.map(id => fetch(`/admin/billing/customers/${id}`, { method: 'DELETE' })))
+            .then(() => location.reload());
+        }
+    }
+</script>
+</body>
+</html>

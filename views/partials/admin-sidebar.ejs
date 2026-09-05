@@ -1,0 +1,259 @@
+<aside id="logo-sidebar" class="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full border-r sm:translate-x-0 bg-[#111827] border-gray-800" aria-label="Sidebar">
+   <div class="h-full px-3 pb-4 overflow-y-auto bg-[#111827]">
+      
+      <ul class="space-y-2 font-medium mt-2">
+         
+         <li>
+            <a href="/admin/dashboard" class="flex items-center p-2 rounded-xl group transition-all duration-200 
+               <%= (typeof page !== 'undefined' && page === 'dashboard') 
+               ? 'bg-[#1f2937] text-blue-400 border-l-4 border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.1)]' 
+               : 'text-gray-400 hover:bg-gray-800 hover:text-white' %>">
+               <i class="bi bi-house text-xl <%= (typeof page !== 'undefined' && page === 'dashboard') ? 'text-blue-400' : 'text-gray-500 group-hover:text-blue-400' %>"></i>
+               <span class="ms-3">Dashboard</span>
+            </a>
+         </li>
+
+         <li>
+            <a href="/admin/billing/dashboard" class="flex items-center p-2 rounded-xl group transition-all duration-200
+               <%= (typeof page !== 'undefined' && page === 'billing') 
+               ? 'bg-[#1f2937] text-blue-400 border-l-4 border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.1)]' 
+               : 'text-gray-400 hover:bg-gray-800 hover:text-white' %>">
+               <i class="bi bi-receipt text-xl <%= (typeof page !== 'undefined' && page === 'billing') ? 'text-blue-400' : 'text-gray-500 group-hover:text-blue-400' %>"></i>
+               <span class="ms-3 text-sm font-bold uppercase tracking-tight">Billing System</span>
+            </a>
+         </li>
+
+         <% if (typeof user !== 'undefined' && user.role === 'superadmin') { %>
+         
+            <li>
+               <button type="button" class="flex items-center w-full p-2 text-base transition duration-75 rounded-xl group text-gray-400 hover:bg-gray-800 hover:text-white" 
+                  aria-controls="dropdown-pppoe" data-collapse-toggle="dropdown-pppoe">
+                     <i class="bi bi-router text-xl text-gray-500 group-hover:text-blue-400"></i>
+                     <span class="flex-1 ms-3 text-left whitespace-nowrap">Layanan PPPoE</span>
+                     <i class="bi bi-chevron-down text-xs"></i>
+               </button>
+               <ul id="dropdown-pppoe" class="<%= (typeof page !== 'undefined' && (page === 'mikrotik' || page === 'mikrotik-profiles')) ? '' : 'hidden' %> py-2 space-y-1">
+                     <li>
+                        <a href="/admin/mikrotik" class="flex items-center w-full p-2 transition duration-75 rounded-lg pl-11 group 
+                           <%= (typeof page !== 'undefined' && page === 'mikrotik') 
+                           ? 'text-blue-400 font-black bg-gray-800' 
+                           : 'text-gray-500 hover:text-white hover:bg-gray-800' %>">
+                           Data PPPoE
+                        </a>
+                     </li>
+                     <li>
+                        <a href="/admin/mikrotik/profiles" class="flex items-center w-full p-2 transition duration-75 rounded-lg pl-11 group 
+                           <%= (typeof page !== 'undefined' && page === 'mikrotik-profiles') 
+                           ? 'text-blue-400 font-black bg-gray-800' 
+                           : 'text-gray-500 hover:text-white hover:bg-gray-800' %>">
+                           Profile PPPoE
+                        </a>
+                     </li>
+               </ul>
+            </li>
+
+            <li>
+               <button type="button" class="flex items-center w-full p-2 text-base transition duration-75 rounded-xl group text-gray-400 hover:bg-gray-800 hover:text-white" 
+                  aria-controls="dropdown-hotspot" data-collapse-toggle="dropdown-hotspot">
+                     <i class="bi bi-wifi text-xl text-gray-500 group-hover:text-orange-400"></i>
+                     <span class="flex-1 ms-3 text-left whitespace-nowrap">Layanan Hotspot</span>
+                     <i class="bi bi-chevron-down text-xs"></i>
+               </button>
+               <ul id="dropdown-hotspot" class="<%= (typeof page !== 'undefined' && (page === 'hotspot' || page === 'hotspot-profiles' || page === 'voucher' || page === 'voucher-monitor')) ? '' : 'hidden' %> py-2 space-y-1">
+                     <li>
+                        <a href="/admin/hotspot" class="flex items-center w-full p-2 transition duration-75 rounded-lg pl-11 group 
+                           <%= (typeof page !== 'undefined' && page === 'hotspot') 
+                           ? 'text-orange-400 font-black bg-gray-800' 
+                           : 'text-gray-500 hover:text-white' %>">
+                           Dashboard Hotspot
+                        </a>
+                     </li>
+                     <li>
+                        <a href="/admin/hotspot/voucher" class="flex items-center w-full p-2 transition duration-75 rounded-lg pl-11 group 
+                           <%= (typeof page !== 'undefined' && page === 'voucher') 
+                           ? 'text-orange-400 font-black bg-gray-800' 
+                           : 'text-gray-500 hover:text-white' %>">
+                           Voucher Hotspot
+                        </a>
+                     </li>
+                     <li>
+                        <a href="/adminVoucherMonitor" class="flex items-center w-full p-2 transition duration-75 rounded-lg pl-11 group 
+                           <%= (typeof page !== 'undefined' && page === 'voucher-monitor') 
+                           ? 'text-orange-400 font-black bg-gray-800' 
+                           : 'text-gray-500 hover:text-white' %>">
+                           Monitoring Voucher
+                        </a>
+                     </li>
+                     <li>
+                        <a href="/admin/hotspot/profiles" class="flex items-center w-full p-2 transition duration-75 rounded-lg pl-11 group 
+                           <%= (typeof page !== 'undefined' && page === 'hotspot-profiles') 
+                           ? 'text-orange-400 font-black bg-gray-800' 
+                           : 'text-gray-500 hover:text-white' %>">
+                           Profile Hotspot
+                        </a>
+                     </li>
+               </ul>
+            </li>
+
+            <li class="pt-4 pb-2 text-center border-t border-gray-800">
+               <span class="px-2 text-[10px] font-black text-gray-600 uppercase tracking-[2px]">Infrastructure</span>
+            </li>
+
+            <li>
+               <a href="/admin/radius" class="flex items-center p-2 rounded-xl group transition-all duration-200
+                  <%= (typeof page !== 'undefined' && page === 'radius') 
+                  ? 'bg-[#1f2937] text-blue-400 border-l-4 border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.1)]' 
+                  : 'text-gray-400 hover:bg-gray-800 hover:text-white' %>">
+                  <i class="bi bi-shield-check text-xl <%= (typeof page !== 'undefined' && page === 'radius') ? 'text-blue-400' : 'text-gray-500 group-hover:text-blue-400' %>"></i>
+                  <span class="ms-3 text-xs uppercase font-bold">RADIUS Server</span>
+               </a>
+            </li>
+
+            <li>
+               <a href="/admin/nas" class="flex items-center p-2 rounded-xl group transition-all duration-200
+                  <%= (typeof page !== 'undefined' && page === 'nas') 
+                  ? 'bg-[#1f2937] text-blue-400 border-l-4 border-blue-500' 
+                  : 'text-gray-400 hover:bg-gray-800 hover:text-white' %>">
+                  <i class="bi bi-server text-xl <%= (typeof page !== 'undefined' && page === 'nas') ? 'text-blue-400' : 'text-gray-500' %>"></i>
+                  <span class="ms-3 text-xs uppercase font-bold">Manajemen NAS</span>
+               </a>
+            </li>
+
+            <li>
+               <a href="/admin/genieacs" class="flex items-center p-2 rounded-xl group transition-all duration-200
+                  <%= (typeof page !== 'undefined' && page === 'genieacs') 
+                  ? 'bg-[#1f2937] text-blue-400 border-l-4 border-blue-500' 
+                  : 'text-gray-400 hover:bg-gray-800 hover:text-white' %>">
+                  <i class="bi bi-hdd-network text-xl <%= (typeof page !== 'undefined' && page === 'genieacs') ? 'text-blue-400' : 'text-gray-500' %>"></i>
+                  <span class="ms-3 text-xs uppercase font-bold">GenieACS</span>
+               </a>
+            </li>
+
+            <li class="pt-4 pb-2 text-center border-t border-gray-800">
+               <span class="px-2 text-[10px] font-black text-gray-600 uppercase tracking-[2px]">Support & Audit</span>
+            </li>
+
+            <li>
+               <a href="/admin/trouble" class="flex items-center p-2 rounded-xl group transition-all duration-200
+                  <%= (typeof page !== 'undefined' && page === 'trouble') 
+                  ? 'bg-red-900/20 text-red-400 border-l-4 border-red-500' 
+                  : 'text-gray-400 hover:bg-red-900/10 hover:text-red-400' %>">
+                  <i class="bi bi-exclamation-triangle text-xl <%= (typeof page !== 'undefined' && page === 'trouble') ? 'text-red-400' : 'text-gray-500' %>"></i>
+                  <span class="ms-3 text-xs uppercase font-bold">Trouble Report</span>
+               </a>
+            </li>
+
+            <li>
+               <a href="/admin/logs" class="flex items-center p-2 rounded-xl group transition-all duration-200
+                  <%= (typeof page !== 'undefined' && page === 'logs') 
+                  ? 'bg-[#1f2937] text-blue-400 border-l-4 border-blue-500' 
+                  : 'text-gray-400 hover:bg-gray-800 hover:text-white' %>">
+                  <i class="bi bi-clock-history text-xl <%= (typeof page !== 'undefined' && page === 'logs') ? 'text-blue-400' : 'text-gray-500 group-hover:text-blue-400' %>"></i>
+                  <span class="ms-3 text-xs uppercase font-bold">Log Aktivasi</span>
+               </a>
+            </li>
+            
+            <li>
+               <a href="/admin/setting" class="flex items-center p-2 rounded-xl group transition-all duration-200
+                  <%= (typeof page !== 'undefined' && page === 'setting') 
+                  ? 'bg-[#1f2937] text-blue-400 border-l-4 border-blue-500' 
+                  : 'text-gray-400 hover:bg-gray-800 hover:text-white' %>">
+                  <i class="bi bi-gear text-xl <%= (typeof page !== 'undefined' && page === 'setting') ? 'text-blue-400' : 'text-gray-500' %>"></i>
+                  <span class="ms-3 text-xs uppercase font-bold">Setting</span>
+               </a>
+            </li>
+
+            <li class="mt-4 space-y-1 border-t border-gray-800 pt-4">
+               <button id="restartMikrotikBtn" class="flex items-center w-full p-2 text-orange-500 rounded-xl hover:bg-orange-500/10 transition-colors">
+                  <i class="bi bi-arrow-repeat text-xl"></i>
+                  <span class="ms-3 text-xs font-black uppercase">Restart Mikrotik</span>
+               </button>
+            </li>
+
+         <% } %>
+         <li class="<% if (typeof user !== 'undefined' && user.role !== 'superadmin') { %> mt-4 border-t border-gray-800 pt-4 <% } %>">
+            <a href="/admin/logout" class="flex items-center p-2 text-red-500 rounded-xl hover:bg-red-500/10 transition-colors">
+               <i class="bi bi-box-arrow-right text-xl"></i>
+               <span class="ms-3 text-xs font-black uppercase">Logout System</span>
+            </a>
+         </li>
+
+      </ul>
+   </div>
+</aside>
+
+<style>
+   /* Transisi Global Tetap Utuh */
+   #logo-sidebar { transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important; }
+   main, footer { transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important; }
+   
+   /* Animasi default untuk teks (saat sidebar terbuka) */
+   #logo-sidebar span, #logo-sidebar i.bi-chevron-down { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); transform: translateX(0); opacity: 1; visibility: visible; }
+   #logo-sidebar a, #logo-sidebar button { overflow: hidden; white-space: nowrap; }
+   
+   /* STATE: MINI SIDEBAR */
+   body.sidebar-mini #logo-sidebar { width: 5rem !important; }
+   
+   /* Efek Teks Menghilang: Transparan, Lebar 0, dan Geser ke kiri (Slide out) */
+   body.sidebar-mini #logo-sidebar span,
+   body.sidebar-mini #logo-sidebar i.bi-chevron-down { opacity: 0; width: 0; margin-left: 0 !important; visibility: hidden; transform: translateX(-15px); }
+   
+   /* Paksa Sembunyikan Dropdown jika Sidebar Mini */
+   body.sidebar-mini ul[id^="dropdown-"] { display: none !important; }
+   
+   /* Sentralisasi icon saat mode mini */
+   body.sidebar-mini #logo-sidebar a, body.sidebar-mini #logo-sidebar button { justify-content: center; padding-left: 0.5rem; padding-right: 0.5rem; }
+   
+   /* Geser Konten Utama dan Footer agar melebar memenuhi layar */
+   @media (min-width: 640px) {
+       body.sidebar-mini main, body.sidebar-mini footer { margin-left: 5rem !important; }
+   }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const toggleBtn = document.getElementById('btnToggleSidebar');
+    const body = document.body;
+    const sidebar = document.getElementById('logo-sidebar');
+    const dropdownParents = document.querySelectorAll('[data-collapse-toggle]');
+
+    // 1. Cek memory (localStorage)
+    if (localStorage.getItem('miniSidebar') === 'true') {
+        body.classList.add('sidebar-mini');
+    }
+
+    // 2. Logika klik tombol garis tiga (JURUS CLONE ANTI-NABRAK)
+    if (toggleBtn) {
+        // Hapus paksa event listener bawaan template dengan cara diclone
+        const newToggleBtn = toggleBtn.cloneNode(true);
+        toggleBtn.parentNode.replaceChild(newToggleBtn, toggleBtn);
+        
+        newToggleBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            if (window.innerWidth >= 640) {
+                // LOGIKA DESKTOP: Bikin Sidebar Minimalis
+                body.classList.toggle('sidebar-mini');
+                localStorage.setItem('miniSidebar', body.classList.contains('sidebar-mini'));
+            } else {
+                // LOGIKA MOBILE (HP): Geser Sidebar Masuk/Keluar
+                if (sidebar) {
+                    sidebar.classList.toggle('-translate-x-full');
+                }
+            }
+        });
+    }
+
+    // 3. Logika Pintar: Buka sidebar otomatis jika ikon dropdown diklik saat mode mini
+    dropdownParents.forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (body.classList.contains('sidebar-mini')) {
+                body.classList.remove('sidebar-mini');
+                localStorage.setItem('miniSidebar', 'false');
+                // Flowbite akan otomatis membuka dropdownnya
+            }
+        });
+    });
+});
+</script>

@@ -1,0 +1,104 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-gray-900 shadow-lg mb-4 border-b border-gray-700">
+    <div class="container-fluid">
+        <div class="navbar-brand">
+            <img src="/img/GEMBOK-Bill.png" alt="GEMBOK Bill Logo" height="40" style="filter: drop-shadow(0 0 5px rgba(255,255,255,0.1));">
+        </div>
+        
+        <div class="navbar-nav me-auto">
+            <a class="nav-link" href="/admin/billing/dashboard"><i class="bi bi-graph-up me-1"></i> Dashboard Billing</a>
+            <a class="nav-link" href="/admin/billing/customers"><i class="bi bi-people me-1"></i> Pelanggan</a>
+            <a class="nav-link" href="/admin/billing/packages"><i class="bi bi-box me-1"></i> Paket</a>
+            <a class="nav-link" href="/admin/billing/invoices"><i class="bi bi-receipt me-1"></i> Invoice</a>
+            <a class="nav-link" href="/admin/billing/payments"><i class="bi bi-credit-card me-1"></i> Pembayaran</a>
+            <a class="nav-link" href="/admin/billing/auto-invoice"><i class="bi bi-calendar-check me-1"></i> Auto Invoice</a>
+            <a class="nav-link" href="/admin/billing/payment-settings"><i class="bi bi-gear me-1"></i> Payment Settings</a>
+            <a class="nav-link" href="/admin/billing/whatsapp-settings"><i class="bi bi-chat-dots me-1"></i> WhatsApp Settings</a>
+            <a class="nav-link" href="/admin/billing/service-suspension"><i class="bi bi-pause-circle me-1"></i> Service Suspension</a>
+            <a class="nav-link" href="/admin/genieacs"><i class="bi bi-wifi me-1"></i> GenieACS</a>
+        </div>
+        
+        <div class="navbar-nav">
+            <div class="nav-item">
+                <a class="nav-link text-yellow-400 font-bold" href="/admin/dashboard">
+                    <i class="bi bi-house-door-fill me-1"></i> Dashboard Utama
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<style>
+/* Reset & Dark Mode Styling */
+.navbar {
+    border-bottom: 1px solid #374151 !important; /* border-gray-700 */
+    background-color: #111827 !important; /* bg-gray-900 */
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3) !important;
+    padding: 0.75rem 1rem;
+}
+
+.navbar-nav .nav-link {
+    color: #9ca3af !important; /* text-gray-400 */
+    font-weight: 600;
+    font-size: 0.85rem;
+    padding: 0.6rem 1rem !important;
+    border-radius: 0.75rem;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Hover Effect: Abu-abu Gelap */
+.navbar-nav .nav-link:hover {
+    color: #ffffff !important;
+    background-color: #1f2937; /* bg-gray-800 */
+    transform: translateY(-1px);
+}
+
+/* Active Effect: Biru menyala khas Dark Mode */
+.navbar-nav .nav-link.active {
+    color: #3b82f6 !important; /* text-blue-500 */
+    background-color: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+/* Penegasan warna Dashboard Utama (Yellow) */
+.text-yellow-400 {
+    color: #fbbf24 !important;
+}
+.text-yellow-400:hover {
+    color: #f59e0b !important;
+    background-color: rgba(245, 158, 11, 0.1) !important;
+}
+
+/* Fix for Bootstrap Icons Dark */
+.bi {
+    vertical-align: middle;
+    font-size: 1.1rem;
+}
+
+/* Ensure navbar is visible and overrides Bootstrap White defaults */
+.navbar-dark .navbar-nav .nav-link {
+    color: #9ca3af;
+}
+
+/* Responsive Mobile Handling */
+@media (max-width: 991.98px) {
+    .navbar-nav {
+        flex-direction: column !important;
+        background-color: #1f2937; /* bg-gray-800 */
+        padding: 10px;
+        border-radius: 12px;
+        margin-top: 15px;
+        border: 1px solid #374151;
+    }
+    
+    .navbar-nav .nav-link {
+        padding: 0.8rem 1rem !important;
+        border-bottom: 1px solid #374151;
+        border-radius: 0;
+    }
+    .navbar-nav .nav-link:last-child {
+        border-bottom: none;
+    }
+}
+</style>

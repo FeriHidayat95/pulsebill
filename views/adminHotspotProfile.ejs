@@ -1,0 +1,255 @@
+<%- include('partials/header') %>
+<%- include('partials/admin-header') %>
+<%- include('partials/admin-sidebar', { page: 'hotspot-profiles' }) %>
+
+<style>
+    /* Paksa background body jadi gelap */
+    body, main {
+        background-color: #111827 !important; /* Hitam Abu */
+        color: #d1d5db !important; /* Teks Abu Terang */
+    }
+    
+    /* Paksa Card & Modal Gelap */
+    .bg-gray-800, .modal-content {
+        background-color: #1f2937 !important;
+        color: #fff !important;
+        border: 1px solid #374151 !important;
+    }
+
+    /* Paksa Input Form Gelap */
+    input, select, textarea {
+        background-color: #111827 !important;
+        border: 1px solid #4b5563 !important;
+        color: #fff !important;
+    }
+
+    /* Paksa DataTables Gelap */
+    table.dataTable tbody tr { background-color: #1f2937 !important; color: #d1d5db !important; }
+    table.dataTable thead th { background-color: #111827 !important; color: #9ca3af !important; border-bottom: 1px solid #374151 !important; }
+    
+    /* Tombol Navigasi Tabel */
+    .dataTables_wrapper .dataTables_paginate .paginate_button { color: #d1d5db !important; }
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current { background: #f59e0b !important; color: #fff !important; border: 1px solid #f59e0b !important; }
+    .dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_info { color: #9ca3af !important; }
+</style>
+
+<main class="p-4 sm:ml-64 pt-20 min-h-screen">
+    
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 border-b border-gray-700 pb-4">
+        <div>
+            <h1 class="text-2xl font-black text-white tracking-tight">PROFILE VOUCHER HOTSPOT</h1>
+            <p class="text-sm text-gray-400 font-bold uppercase tracking-wider">Pengaturan Paket & Masa Aktif Voucher</p>
+        </div>
+        
+        <button id="btnAdd" class="bg-blue-600 hover:bg-blue-500 text-white text-sm font-black px-5 py-2.5 rounded-xl shadow-lg transition-all border border-blue-500 flex items-center">
+            <i class="bi bi-plus-lg me-2 text-lg"></i> BUAT PROFILE BARU
+        </button>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div class="p-5 bg-gray-800 rounded-2xl shadow-lg flex items-center justify-between border border-gray-700 relative overflow-hidden">
+            <div class="z-10">
+                <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest">Total Profile</p>
+                <p class="text-4xl font-black text-white" id="countTotal">0</p>
+            </div>
+            <div class="w-14 h-14 bg-gray-700 rounded-2xl flex items-center justify-center text-blue-400 shadow-inner">
+                <i class="bi bi-hdd-rack text-3xl"></i>
+            </div>
+        </div>
+        <div class="p-5 bg-gray-800 rounded-2xl shadow-lg flex items-center justify-between border border-gray-700 relative overflow-hidden">
+            <div class="z-10">
+                <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest">Aktif Limitasi</p>
+                <p class="text-4xl font-black text-white" id="countLimit">0</p>
+            </div>
+            <div class="w-14 h-14 bg-gray-700 rounded-2xl flex items-center justify-center text-green-400 shadow-inner">
+                <i class="bi bi-speedometer2 text-3xl"></i>
+            </div>
+        </div>
+        <div class="p-5 bg-gray-800 rounded-2xl shadow-lg flex items-center justify-between border border-gray-700 relative overflow-hidden">
+            <div class="z-10">
+                <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest">Multi-Login</p>
+                <p class="text-4xl font-black text-white" id="countShared">0</p>
+            </div>
+            <div class="w-14 h-14 bg-gray-700 rounded-2xl flex items-center justify-center text-orange-400 shadow-inner">
+                <i class="bi bi-people text-3xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-gray-800 rounded-2xl shadow-2xl overflow-hidden mb-10 border border-gray-700">
+        <div class="p-4 bg-gray-900 border-b border-gray-700 flex justify-between items-center">
+            <div class="flex items-center text-gray-300 font-bold text-sm tracking-widest uppercase">
+                <i class="bi bi-list-stars me-2 text-yellow-500"></i> Daftar Paket Voucher
+            </div>
+        </div>
+        
+        <div class="p-4 overflow-x-auto">
+            <table class="w-full text-sm text-left text-gray-300" id="profileTable">
+                <thead class="text-[10px] text-gray-400 uppercase bg-gray-900 font-black">
+                    <tr>
+                        <th class="px-4 py-4 text-center">No</th>
+                        <th class="px-4 py-4">Nama Profile</th>
+                        <th class="px-4 py-4">Rate Limit</th>
+                        <th class="px-4 py-4 text-center">Shared</th>
+                        <th class="px-4 py-4 text-blue-400">Durasi Pakai</th>
+                        <th class="px-4 py-4 text-red-400">Masa Aktif</th>
+                        <th class="px-4 py-4">Harga Jual</th>
+                        <th class="px-4 py-4 text-right">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<div id="modalProfile" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-[100] justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full backdrop-blur-sm bg-black/80">
+    <div class="relative p-4 w-full max-w-2xl max-h-full">
+        <div class="relative bg-gray-800 rounded-2xl shadow-2xl border border-gray-600">
+            <div class="flex items-center justify-between p-4 border-b border-gray-700 bg-gray-900 rounded-t-2xl">
+                <h3 class="text-lg font-black text-white" id="modalTitle">Konfigurasi Profile</h3>
+                <button type="button" class="text-gray-400 hover:text-white closeModalBtn">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            
+            <form id="formProfile" class="p-6 space-y-5">
+                <input type="hidden" id="oldName" name="oldName">
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block mb-1 text-xs font-black text-gray-500 uppercase">Nama Profile</label>
+                        <input type="text" id="name" name="name" class="w-full p-2.5 rounded-lg bg-gray-900 border border-gray-600 text-white font-bold" placeholder="Contoh: 3JAM_2K" required>
+                    </div>
+                    <div>
+                        <label class="block mb-1 text-xs font-black text-gray-500 uppercase">Harga (Rp)</label>
+                        <input type="number" id="price" name="price" class="w-full p-2.5 rounded-lg bg-gray-900 border border-gray-600 text-white font-mono text-right" placeholder="0">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="p-3 bg-blue-900/20 border border-blue-800 rounded-xl">
+                        <label class="block mb-1 text-[10px] font-black text-blue-400 uppercase"><i class="bi bi-hourglass-split"></i> Durasi Pakai (Limit Uptime)</label>
+                        <input type="text" id="validity" name="validity" class="w-full p-2 rounded-lg bg-gray-900 border border-gray-600 text-white text-sm" placeholder="Contoh: 3h">
+                    </div>
+                    <div class="p-3 bg-red-900/20 border border-red-800 rounded-xl">
+                        <label class="block mb-1 text-[10px] font-black text-red-400 uppercase"><i class="bi bi-calendar-x"></i> Masa Aktif (Validity)</label>
+                        <input type="text" id="validityPeriod" name="validityPeriod" class="w-full p-2 rounded-lg bg-gray-900 border border-gray-600 text-white text-sm" placeholder="Contoh: 1d">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block mb-1 text-xs font-black text-gray-500 uppercase">Rate Limit (UP/DL)</label>
+                        <input type="text" id="rateLimit" name="rateLimit" class="w-full p-2.5 rounded-lg bg-gray-900 border border-gray-600 text-white text-sm" placeholder="1M/2M">
+                    </div>
+                    <div>
+                        <label class="block mb-1 text-xs font-black text-gray-500 uppercase">Shared Users</label>
+                        <input type="number" id="sharedUsers" name="sharedUsers" class="w-full p-2.5 rounded-lg bg-gray-900 border border-gray-600 text-white text-sm" value="1">
+                    </div>
+                </div>
+
+                <div>
+                    <button type="button" onclick="$('#burstSettings').toggleClass('hidden')" class="text-xs font-bold text-yellow-500 hover:text-yellow-400 underline decoration-dashed mb-2">
+                        + Konfigurasi Burst (Lanjutan)
+                    </button>
+                    <div id="burstSettings" class="hidden grid grid-cols-3 gap-2 bg-gray-900/50 p-3 rounded-xl border border-gray-700">
+                        <div><label class="text-[9px] text-gray-500 uppercase">Burst Limit</label><input type="text" id="burstLimit" name="burstLimit" class="bg-gray-800 border-gray-600 text-white text-xs rounded p-1.5 w-full" placeholder="2M/4M"></div>
+                        <div><label class="text-[9px] text-gray-500 uppercase">Threshold</label><input type="text" id="burstThreshold" name="burstThreshold" class="bg-gray-800 border-gray-600 text-white text-xs rounded p-1.5 w-full" placeholder="1M/2M"></div>
+                        <div><label class="text-[9px] text-gray-500 uppercase">Time (s)</label><input type="text" id="burstTime" name="burstTime" class="bg-gray-800 border-gray-600 text-white text-xs rounded p-1.5 w-full" placeholder="8/8"></div>
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-gray-700 flex justify-end gap-2">
+                    <button type="button" class="bg-gray-700 text-gray-300 font-bold py-2 px-4 rounded-xl hover:bg-gray-600 closeModalBtn">BATAL</button>
+                    <button type="submit" class="bg-blue-600 text-white font-black py-2 px-6 rounded-xl hover:bg-blue-500 shadow-lg">SIMPAN PROFILE</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<%- include('partials/footer') %>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<script>
+    // Helper Modal Flowbite Manual
+    function openModal(id) { document.getElementById(id).classList.remove('hidden'); document.getElementById(id).classList.add('flex'); }
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); document.getElementById(id).classList.remove('flex'); }
+    
+    document.querySelectorAll('.closeModalBtn').forEach(btn => btn.addEventListener('click', () => closeModal('modalProfile')));
+
+    $(document).ready(function() {
+        let table = $('#profileTable').DataTable({
+            responsive: true,
+            dom: '<"flex flex-col md:flex-row justify-between items-center p-4 gap-4"f>rt<"p-4 flex justify-between items-center text-gray-500 font-bold text-xs"ip>',
+            language: { search: "", searchPlaceholder: "Cari Profile...", zeroRecords: "Belum ada profile." },
+            ajax: {
+                url: '/admin/hotspot/api/profiles',
+                dataSrc: function(json) {
+                    if(json.success) {
+                        const data = json.data;
+                        $('#countTotal').text(data.length);
+                        $('#countLimit').text(data.filter(x => x.rateLimit !== '').length);
+                        $('#countShared').text(data.filter(x => parseInt(x.sharedUsers) > 1).length);
+                        return data;
+                    }
+                    return [];
+                }
+            },
+            columns: [
+                { data: null, render: (d,t,r,m) => m.row + 1, className: "text-center text-gray-500 font-bold" },
+                { data: 'name', render: d => `<span class="fw-bold text-white font-black text-sm">${d}</span>` },
+                { data: 'rateLimit', render: d => d !== '' ? `<span class="bg-gray-700 text-green-400 px-2 py-1 rounded text-xs font-mono border border-gray-600">${d}</span>` : '-' },
+                { data: 'sharedUsers', className: "text-center text-gray-400" },
+                { data: 'validity', render: d => `<span class="text-blue-400 font-bold">${d || '-'}</span>` },
+                { data: 'validityPeriod', render: d => `<span class="text-red-400 font-bold">${d || '-'}</span>` },
+                { data: 'price', render: d => parseInt(d) > 0 ? `<b class="text-yellow-400">Rp ${parseInt(d).toLocaleString()}</b>` : '<span class="text-gray-600">Gratis</span>' },
+                { 
+                    data: null, className: "text-center",
+                    render: r => {
+                        const rowData = JSON.stringify(r).replace(/"/g, '&quot;');
+                        return `
+                        <div class="inline-flex shadow-sm rounded-lg overflow-hidden border border-gray-600">
+                            <button class="btn-edit p-2 bg-gray-800 hover:bg-yellow-900/50 text-yellow-500 border-r border-gray-600" data-json="${rowData}">
+                                <i class="bi bi-pencil-square"></i>
+                            </button>
+                            <button class="btn-delete p-2 bg-gray-800 hover:bg-red-900/50 text-red-500" data-name="${r.name}">
+                                <i class="bi bi-trash3-fill"></i>
+                            </button>
+                        </div>`;
+                    }
+                }
+            ]
+        });
+        
+        // CSS Tambahan via JS
+        $('.dataTables_filter input').addClass('bg-gray-900 border border-gray-700 text-white rounded-xl text-sm px-4 py-2 focus:ring-blue-500 w-full md:w-64 outline-none');
+
+        // Logic Edit/Add/Delete
+        $(document).on('click', '.btn-edit', function() {
+            const data = $(this).data('json');
+            $('#oldName').val(data.name); $('#name').val(data.name); $('#rateLimit').val(data.rateLimit); 
+            $('#burstLimit').val(data.burstLimit || ''); $('#burstThreshold').val(data.burstThreshold || ''); $('#burstTime').val(data.burstTime || '');
+            $('#sharedUsers').val(data.sharedUsers); $('#validity').val(data.validity !== '-' ? data.validity : ''); $('#validityPeriod').val(data.validityPeriod !== '-' ? data.validityPeriod : ''); $('#price').val(data.price);
+            $('#modalTitle').text('Edit Profile: ' + data.name); openModal('modalProfile');
+        });
+
+        $('#btnAdd').click(() => { $('#formProfile')[0].reset(); $('#oldName').val(''); $('#modalTitle').text('Buat Profile Baru'); openModal('modalProfile'); });
+
+        $('#formProfile').submit(function(e) {
+            e.preventDefault();
+            const btn = $(this).find('button[type="submit"]'); btn.prop('disabled', true).text('Menyimpan...');
+            $.post('/admin/hotspot/api/save-profile', $(this).serialize(), function(res) {
+                if(res.success) { closeModal('modalProfile'); table.ajax.reload(); } else alert('Error: ' + res.message);
+                btn.prop('disabled', false).text('SIMPAN PROFILE');
+            });
+        });
+
+        $(document).on('click', '.btn-delete', function() {
+            const name = $(this).data('name'); if(confirm(`Hapus profile "${name}"?`)) { $.post('/admin/hotspot/api/delete-profile', { name }, function() { table.ajax.reload(); }); }
+        });
+    });
+</script>

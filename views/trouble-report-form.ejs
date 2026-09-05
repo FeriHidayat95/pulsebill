@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laporan Gangguan - <%= typeof companyHeader !== 'undefined' ? companyHeader : 'Portal Pelanggan' %></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <style>
+        /* BATMAN MODE - CUSTOMER PORTAL STYLE */
+        :root {
+            --primary-color: #3b82f6;
+            --secondary-color: #1d4ed8;
+            --bg-dark: #111827;
+            --card-dark: #1f2937;
+            --border-dark: #374151;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --card-border-radius: 20px;
+            --btn-border-radius: 12px;
+            --transition-speed: 0.3s;
+        }
+        
+        body {
+            background-color: var(--bg-dark) !important;
+            color: var(--text-main) !important;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        
+        /* Navbar Dark Translucent */
+        .navbar {
+            background: rgba(31, 41, 55, 0.9) !important;
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-dark);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .navbar-brand {
+            font-weight: 800;
+            color: white !important;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .main-container {
+            padding: 40px 0;
+            min-height: calc(100vh - 80px);
+        }
+        
+        /* Card Mewah Gray-800 */
+        .form-card {
+            background: var(--card-dark);
+            border-radius: var(--card-border-radius);
+            box-shadow: 0 20px 30px rgba(0,0,0,0.4);
+            overflow: hidden;
+            border: 1px solid var(--border-dark);
+            margin-bottom: 30px;
+        }
+        
+        .form-header {
+            background: linear-gradient(135deg, #1e3a8a, #1e40af);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            border-bottom: 1px solid var(--border-dark);
+        }
+        
+        .form-header h2 {
+            margin: 0;
+            font-weight: 800;
+            font-size: 2rem;
+            text-transform: uppercase;
+        }
+        
+        .form-header p {
+            margin: 10px 0 0 0;
+            opacity: 0.8;
+            font-weight: 500;
+        }
+        
+        .form-body {
+            padding: 45px;
+        }
+        
+        .form-label {
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Input Batman Style */
+        .form-control, .form-select {
+            background-color: #111827 !important;
+            border: 2px solid var(--border-dark);
+            border-radius: 14px;
+            padding: 14px 18px;
+            font-size: 16px;
+            color: white !important;
+            transition: all var(--transition-speed) ease;
+        }
+        
+        /* Readonly Input Style */
+        .form-control[readonly] {
+            background-color: #0f172a !important;
+            color: #64748b !important; 
+            border-style: dashed;
+            cursor: not-allowed;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
+        .form-control::placeholder {
+            color: #4b5563;
+        }
+        
+        textarea.form-control {
+            min-height: 140px;
+        }
+        
+        /* Buttons */
+        .btn {
+            padding: 14px 28px;
+            border-radius: var(--btn-border-radius);
+            font-weight: 800;
+            transition: all var(--transition-speed) ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .btn-primary {
+            background: var(--primary-color);
+            border: none;
+            box-shadow: 0 4px 14px 0 rgba(59, 130, 246, 0.4);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            background: #2563eb;
+        }
+        
+        .btn-outline-secondary {
+            border: 2px solid var(--border-dark);
+            color: var(--text-muted);
+        }
+        
+        .btn-outline-secondary:hover {
+            background: var(--border-dark);
+            color: white;
+            border-color: var(--border-dark);
+        }
+        
+        .btn-outline-primary {
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .btn-outline-danger {
+            border: 2px solid #ef4444;
+            color: #ef4444;
+        }
+        
+        /* Quick Actions Section */
+        .quick-actions {
+            background: rgba(17, 24, 39, 0.5);
+            border-radius: 16px;
+            padding: 25px;
+            margin: 25px 0;
+            border: 1px solid var(--border-dark);
+        }
+        
+        .quick-actions h6 {
+            color: var(--primary-color);
+            font-weight: 800;
+            margin-bottom: 15px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+        }
+        
+        .category-badge {
+            display: inline-block;
+            padding: 10px 18px;
+            background: var(--card-dark);
+            border: 1px solid var(--border-dark);
+            border-radius: 50px;
+            margin: 5px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+        
+        .category-badge:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            transform: scale(1.05);
+        }
+        
+        .char-counter {
+            font-size: 12px;
+            color: #6b7280;
+            text-align: right;
+            margin-top: 8px;
+            font-weight: 600;
+        }
+        
+        .char-counter.warning {
+            color: #ef4444;
+        }
+        
+        /* Modal & Toast Styling */
+        .modal-content {
+            background: var(--card-dark);
+            border: 1px solid var(--border-dark);
+            border-radius: 24px;
+            color: white;
+        }
+        .modal-header { border-bottom: 1px solid var(--border-dark); }
+        .modal-footer { border-top: 1px solid var(--border-dark); }
+        .toast { background: var(--card-dark); color: white; border: 1px solid var(--border-dark); }
+
+        @media (max-width: 768px) {
+            .form-body { padding: 25px; }
+            .form-header h2 { font-size: 1.6rem; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="/customer/dashboard">
+                <img src="/img/<%= typeof settings !== 'undefined' && settings.logo_filename ? settings.logo_filename : 'logo.png' %>" alt="Logo" height="35">
+                <span>PORTAL PELANGGAN</span>
+            </a>
+            <div class="navbar-nav ms-auto d-flex flex-row gap-2">
+                <a href="/customer/dashboard" class="btn btn-outline-primary btn-sm rounded-pill"><i class="bi bi-house"></i></a>
+                <a href="/customer/logout" class="btn btn-outline-danger btn-sm rounded-pill">LOGOUT</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="form-card">
+                        <div class="form-header">
+                            <h2><i class="bi bi- megaphone me-2"></i>Laporan Gangguan</h2>
+                            <p>Ada kendala internet? Laporkan di sini, tim kami segera menangani.</p>
+                        </div>
+                        
+                        <div class="form-body">
+                            <form id="troubleReportForm">
+                                <div class="row">
+                                    <div class="col-md-6 mb-4">
+                                        <label for="name" class="form-label">Nama Lengkap</label>
+                                        <input type="text" class="form-control" id="name" value="<%= customerName %>" required>
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <label for="phone" class="form-label">Nomor Telepon</label>
+                                        <input type="text" class="form-control" id="phone" value="<%= phone %>" readonly>
+                                    </div>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label for="location" class="form-label">Lokasi / Alamat</label>
+                                    <input type="text" class="form-control" id="location" value="<%= location %>" placeholder="Masukkan alamat lengkap lokasi gangguan">
+                                </div>
+
+                                <div class="mb-4">
+                                    <label for="category" class="form-label">Kategori Gangguan *</label>
+                                    <select class="form-select" id="category" required>
+                                        <option value="">Pilih kategori...</option>
+                                        <% categories.forEach(function(cat) { %>
+                                        <option value="<%= cat %>"><%= cat %></option>
+                                        <% }); %>
+                                    </select>
+                                </div>
+
+                                <div class="quick-actions">
+                                    <h6><i class="bi bi-lightning-fill text-warning me-2"></i>Klik Cepat:</h6>
+                                    <% categories.forEach(function(cat) { %>
+                                    <span class="category-badge" onclick="selectCategory('<%= cat %>')">
+                                        <%= cat %>
+                                    </span>
+                                    <% }); %>
+                                </div>
+
+                                <div class="mb-5">
+                                    <label for="description" class="form-label">Deskripsi Masalah *</label>
+                                    <textarea class="form-control" id="description" rows="5" 
+                                              placeholder="Jelaskan kendala yang dialami secara detail agar tim teknis mudah mengidentifikasi..."
+                                              maxlength="500" required></textarea>
+                                    <div class="char-counter">
+                                        <span id="charCount">0</span>/500 karakter
+                                    </div>
+                                </div>
+
+                                <div class="d-flex flex-column flex-md-row gap-3 justify-content-end pt-4 border-top border-gray-700">
+                                    <a href="/customer/dashboard" class="btn btn-outline-secondary">
+                                        <i class="bi bi-arrow-left me-2"></i> KEMBALI
+                                    </a>
+                                    <button type="submit" class="btn btn-primary px-5">
+                                        <i class="bi bi-send-fill me-2"></i> KIRIM LAPORAN
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1055;">
+        <div id="successToast" class="toast" role="alert">
+            <div class="toast-header bg-success text-white">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                <strong class="me-auto">Berhasil!</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body" id="successMessage"></div>
+        </div>
+        
+        <div id="errorToast" class="toast" role="alert">
+            <div class="toast-header bg-danger text-white">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <strong class="me-auto">Gagal!</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body" id="errorMessage"></div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="successModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow-2xl">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title font-black uppercase"><i class="bi bi-check-circle-fill me-2"></i>Tiket Diterima</h5>
+                </div>
+                <div class="modal-body p-4 text-center">
+                    <div id="successModalBody" class="mb-4"></div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-primary w-100 py-3" id="modalOkButton">
+                        <i class="bi bi-check2-circle"></i> OK, SAYA MENGERTI
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('troubleReportForm');
+            const submitButton = form.querySelector('button[type="submit"]');
+            const textarea = document.getElementById('description');
+            const charCount = document.getElementById('charCount');
+            const charCounter = document.querySelector('.char-counter');
+            
+            const successToast = new bootstrap.Toast(document.getElementById('successToast'));
+            const errorToast = new bootstrap.Toast(document.getElementById('errorToast'));
+            const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+            
+            // Character counter logic
+            textarea.addEventListener('input', function() {
+                const length = this.value.length;
+                charCount.textContent = length;
+                if (length > 450) { charCounter.classList.add('warning'); } 
+                else { charCounter.classList.remove('warning'); }
+                this.style.height = 'auto';
+                this.style.height = Math.max(120, this.scrollHeight) + 'px';
+            });
+            
+            // Form submission logic (Utuh & Asli)
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = {
+                    name: document.getElementById('name').value.trim(),
+                    location: document.getElementById('location').value.trim(),
+                    category: document.getElementById('category').value,
+                    description: textarea.value.trim()
+                };
+                
+                if (!formData.category || !formData.description) {
+                    document.getElementById('errorMessage').textContent = 'Kategori dan deskripsi masalah wajib diisi';
+                    errorToast.show();
+                    return;
+                }
+                
+                const originalText = submitButton.innerHTML;
+                submitButton.disabled = true;
+                submitButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>MENGIRIM...';
+                
+                fetch('/customer/trouble/report', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                })
+                .then(response => {
+                    if (!response.ok) { throw new Error(`HTTP ${response.status}: ${response.statusText}`); }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('successMessage').textContent = 'Laporan gangguan berhasil dibuat';
+                        successToast.show();
+                        form.reset();
+                        
+                        // Menyiapkan Modal Sukses
+                        setTimeout(() => {
+                            document.getElementById('successModalBody').innerHTML = `
+                                <div class="bg-gray-900 border border-gray-700 p-4 rounded-3 mb-3">
+                                    <p class="text-primary font-bold mb-1 uppercase small">Nomor Tiket Anda:</p>
+                                    <h3 class="text-white font-black">#${data.reportId}</h3>
+                                </div>
+                                <p class="text-muted">Tim teknisi kami akan segera menindaklanjuti laporan Anda.</p>
+                                <div class="alert alert-info py-2 small border-0 bg-blue-900/20 text-blue-400">
+                                    <i class="bi bi-whatsapp me-2"></i>Update status perbaikan akan dikirim via WhatsApp.
+                                </div>
+                            `;
+                            
+                            document.getElementById('modalOkButton').onclick = function() {
+                                window.location.href = '/customer/dashboard';
+                            };
+                            successModal.show();
+                        }, 1000);
+                        
+                    } else {
+                        throw new Error(data.message || 'Gagal membuat laporan gangguan');
+                    }
+                })
+                .catch(error => {
+                    let errorMessage = 'Terjadi kesalahan sistem. Silakan coba lagi.';
+                    if (error.message.includes('HTTP 401')) { errorMessage = 'Sesi berakhir. Silakan login ulang.'; }
+                    document.getElementById('errorMessage').textContent = errorMessage;
+                    errorToast.show();
+                })
+                .finally(() => {
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = originalText;
+                });
+            });
+        });
+
+        // Helper untuk badge kategori
+        function selectCategory(category) {
+            document.getElementById('category').value = category;
+            document.getElementById('description').focus();
+        }
+    </script>
+</body>
+</html>

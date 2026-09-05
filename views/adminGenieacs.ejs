@@ -1,0 +1,417 @@
+<%- include('partials/header') %>
+<%- include('partials/admin-header') %>
+<%- include('partials/admin-sidebar', { page: 'genieacs' }) %>
+
+<style>
+    /* Paksa teks navigasi & info jadi terang */
+    .dataTables_wrapper .dataTables_length,
+    .dataTables_wrapper .dataTables_filter,
+    .dataTables_wrapper .dataTables_info,
+    .dataTables_wrapper .dataTables_processing,
+    .dataTables_wrapper .dataTables_paginate {
+        color: #9ca3af !important; /* text-gray-400 */
+        font-weight: 600;
+        font-size: 0.8rem;
+        padding-top: 10px;
+    }
+
+    /* Tombol Pagination (Next/Prev) */
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+        color: #d1d5db !important; /* text-gray-300 */
+        border-radius: 0.5rem !important;
+        border: 1px solid transparent !important;
+    }
+
+    /* Tombol Hover (Saat Kursor Nempel) */
+    .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+        background: #374151 !important; /* bg-gray-700 */
+        color: #ffffff !important;
+        border: 1px solid #4b5563 !important;
+    }
+
+    /* Tombol Halaman Aktif (Nomor yg sedang dibuka) */
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current, 
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+        background: #1d4ed8 !important; /* Blue-700 */
+        color: #ffffff !important;
+        border: 1px solid #1e40af !important;
+        font-weight: bold;
+    }
+
+    /* Input Search & Select Entries */
+    .dataTables_wrapper input, .dataTables_wrapper select {
+        background-color: #111827 !important; /* bg-gray-900 */
+        border: 1px solid #374151 !important; /* border-gray-700 */
+        color: #ffffff !important;
+        border-radius: 0.5rem;
+        padding: 5px 10px;
+    }
+</style>
+
+<main class="p-4 sm:ml-64 pt-20 bg-gray-900 min-h-screen text-gray-300">
+    
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 border-b border-gray-800 pb-4">
+        <div>
+            <h1 class="text-2xl font-black text-white tracking-tight">DEVICE MANAGER (ACS)</h1>
+            <p class="text-sm text-gray-400 font-bold uppercase tracking-wider">Monitoring Modem / ONU Pelanggan</p>
+        </div>
+        
+        <div class="flex items-center gap-2">
+            <span class="bg-blue-900/50 text-blue-300 text-xs font-black px-3 py-1.5 rounded-lg border border-blue-800 animate-pulse">
+                <i class="bi bi-broadcast me-1"></i> TR-069 ACTIVE
+            </span>
+            <button onclick="location.reload()" class="bg-gray-800 hover:bg-gray-700 text-white text-xs font-black px-4 py-2 rounded-lg transition-all shadow-lg uppercase border border-gray-700">
+                <i class="bi bi-arrow-clockwise me-2"></i> Refresh
+            </button>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div class="p-5 bg-gray-800 border border-gray-700 rounded-2xl shadow-lg flex items-center justify-between group hover:border-blue-500/50 transition-all relative overflow-hidden">
+            <div class="z-10">
+                <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest">Total Device</p>
+                <p class="text-3xl font-black text-white"><%= typeof genieacsTotal !== 'undefined' ? genieacsTotal : '-' %></p>
+            </div>
+            <i class="bi bi-hdd-network text-6xl text-gray-700 absolute -right-2 opacity-20 group-hover:scale-110 transition-transform"></i>
+        </div>
+        <div class="p-5 bg-gray-800 border border-gray-700 rounded-2xl shadow-lg flex items-center justify-between border-l-4 border-l-green-500 relative overflow-hidden">
+            <div class="z-10">
+                <p class="text-[10px] font-black text-green-400 uppercase tracking-widest">Online</p>
+                <p class="text-3xl font-black text-white"><%= typeof genieacsOnline !== 'undefined' ? genieacsOnline : '-' %></p>
+            </div>
+            <i class="bi bi-wifi text-6xl text-green-900 absolute -right-2 opacity-30 animate-pulse"></i>
+        </div>
+        <div class="p-5 bg-gray-800 border border-gray-700 rounded-2xl shadow-lg flex items-center justify-between border-l-4 border-l-red-500 relative overflow-hidden">
+            <div class="z-10">
+                <p class="text-[10px] font-black text-red-400 uppercase tracking-widest">Offline</p>
+                <p class="text-3xl font-black text-white"><%= typeof genieacsOffline !== 'undefined' ? genieacsOffline : '-' %></p>
+            </div>
+            <i class="bi bi-wifi-off text-6xl text-red-900 absolute -right-2 opacity-30"></i>
+        </div>
+    </div>
+
+    <div class="bg-gray-800 border border-gray-700 rounded-2xl shadow-2xl overflow-hidden mb-10">
+        <div class="p-4 bg-gray-900/50 border-b border-gray-700 flex justify-between items-center">
+            <div class="flex items-center text-gray-300 font-bold text-sm tracking-widest uppercase">
+                <i class="bi bi-router-fill me-2 text-purple-500"></i> Daftar Modem Pelanggan
+            </div>
+        </div>
+        
+        <div class="p-4 overflow-x-auto w-full">
+            <table class="w-full text-sm text-left text-gray-300 whitespace-nowrap" id="genieacsTable">
+                <thead class="text-[10px] text-gray-400 uppercase bg-gray-900 border-b border-gray-700 font-black">
+                    <tr>
+                        <th class="px-4 py-4 text-center">No</th>
+                        <th class="px-4 py-4">PPPoE User / Serial</th>
+                        <th class="px-4 py-4">SSID WiFi</th>
+                        <th class="px-4 py-4">Koneksi</th>
+                        <th class="px-4 py-4">No. Pelanggan</th>
+                        <th class="px-4 py-4 text-center">Sinyal (RX)</th>
+                        <th class="px-4 py-4 text-right">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-700">
+                    <% devices.forEach(function(device, i) { %>
+                    <tr class="hover:bg-gray-700/50 transition-all group">
+                        <td class="px-4 py-4 text-center text-gray-500 font-mono font-bold"><%= i+1 %></td>
+                        <td class="px-4 py-4">
+                            <span class="font-bold text-white block text-base"><%= device.pppoeUsername %></span>
+                            <span class="text-[10px] text-gray-500 font-mono bg-gray-900 px-1.5 rounded border border-gray-700"><%= device.serial %></span>
+                        </td>
+                        <td class="px-4 py-4">
+                            <div class="flex items-center gap-2">
+                                <i class="bi bi-wifi text-green-400"></i>
+                                <span class="font-medium text-gray-300 ssid-display"><%= device.ssid %></span>
+                            </div>
+                        </td>
+                        <td class="px-4 py-4">
+                            <span class="bg-gray-700 text-gray-300 text-[10px] font-black px-2 py-1 rounded border border-gray-600">
+                                <%= device.userKonek %> Device
+                            </span>
+                        </td>
+                        <td class="px-4 py-4 tag-display-container">
+                            <% if(device.tag) { %>
+                                <span class="bg-blue-900/30 text-blue-300 text-[10px] font-bold px-2 py-1 rounded border border-blue-800 tag-badge">
+                                    <%= device.tag %>
+                                </span>
+                            <% } else { %>
+                                <span class="text-gray-600 tag-badge">-</span>
+                            <% } %>
+                        </td>
+                        <td class="px-4 py-4 text-center">
+                            <% 
+                                let signalClass = 'text-green-400';
+                                let rx = parseFloat(device.rxPower);
+                                if(rx < -27) signalClass = 'text-red-500 font-black animate-pulse'; // Sinyal Jelek
+                                else if(rx < -23) signalClass = 'text-yellow-400 font-bold'; // Sinyal Sedang
+                            %>
+                            <span class="<%= signalClass %> font-mono text-xs">
+                                <%= typeof device.rxPower !== 'undefined' ? device.rxPower : '-' %> dBm
+                            </span>
+                        </td>
+                        <td class="px-4 py-4 text-right">
+                            <div class="inline-flex shadow-sm rounded-lg overflow-hidden border border-gray-600">
+                                <button class="edit-btn p-2 bg-gray-800 hover:bg-yellow-900/50 text-yellow-500 border-r border-gray-600" 
+                                        data-id="<%= device.id %>" 
+                                        data-ssid="<%= device.ssid %>" 
+                                        data-password="<%= device.password %>"
+                                        title="Edit WiFi">
+                                    <i class="bi bi-pencil-square"></i>
+                                </button>
+                                <button class="edit-tag-btn p-2 bg-gray-800 hover:bg-blue-900/50 text-blue-400 border-r border-gray-600" 
+                                        data-id="<%= device.id %>" 
+                                        data-tag="<%= device.tag || '' %>"
+                                        title="Edit Label">
+                                    <i class="bi bi-tag-fill"></i>
+                                </button>
+                                <button class="restart-onu-btn p-2 bg-gray-800 hover:bg-red-900/50 text-red-500" 
+                                        data-id="<%= device.id %>" 
+                                        data-serial="<%= device.serial %>"
+                                        title="Restart Modem">
+                                    <i class="bi bi-power"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<div id="editModal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-[100] justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full backdrop-blur-sm bg-black/80">
+    <div class="relative p-4 w-full max-w-md max-h-full">
+        <div class="relative bg-gray-800 rounded-2xl shadow-2xl border border-gray-600">
+            <div class="flex items-center justify-between p-4 border-b border-gray-700 bg-gray-900/50 rounded-t-2xl">
+                <h3 class="text-lg font-black text-white">Edit WiFi Modem</h3>
+                <button type="button" class="text-gray-400 hover:text-white closeModalBtn">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="p-4 space-y-4">
+                <input type="hidden" id="deviceId">
+                <div>
+                    <label class="block mb-1 text-xs font-black text-gray-500 uppercase">Nama WiFi (SSID)</label>
+                    <div class="flex">
+                        <input type="text" id="ssid" class="rounded-l-lg bg-gray-900 border border-gray-600 text-white text-sm focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                        <button id="saveSsidBtn" class="bg-green-600 hover:bg-green-700 text-white px-3 rounded-r-lg border border-green-700"><i class="bi bi-check-lg"></i></button>
+                    </div>
+                </div>
+                <div>
+                    <label class="block mb-1 text-xs font-black text-gray-500 uppercase">Password WiFi</label>
+                    <div class="flex">
+                        <input type="text" id="password" class="rounded-l-lg bg-gray-900 border border-gray-600 text-white text-sm focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                        <button id="savePasswordBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-3 rounded-r-lg border border-blue-700"><i class="bi bi-check-lg"></i></button>
+                    </div>
+                </div>
+                <div class="p-3 bg-blue-900/20 border border-blue-800 rounded-lg flex items-start gap-3">
+                    <i class="bi bi-info-circle text-blue-400 text-xl"></i>
+                    <p class="text-xs text-blue-200">Setelah simpan, tekan tombol <strong>Restart Modem</strong> di bawah agar perubahan diterapkan di rumah pelanggan.</p>
+                </div>
+            </div>
+            <div class="p-4 border-t border-gray-700 bg-gray-900/30 rounded-b-2xl">
+                <button id="rebootAfterEditBtn" class="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-black py-2.5 rounded-xl shadow-lg transition-all flex justify-center items-center gap-2">
+                    <i class="bi bi-arrow-clockwise"></i> RESTART MODEM SEKARANG
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="editTagModal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-[100] justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full backdrop-blur-sm bg-black/80">
+    <div class="relative p-4 w-full max-w-sm max-h-full">
+        <form id="editTagForm" class="relative bg-gray-800 rounded-2xl shadow-2xl border border-gray-600">
+            <div class="p-4 border-b border-gray-700 flex justify-between">
+                <h3 class="font-black text-white">Label Pelanggan</h3>
+                <button type="button" class="text-gray-400 hover:text-white closeModalBtn"><i class="bi bi-x-lg"></i></button>
+            </div>
+            <div class="p-4">
+                <input type="hidden" id="tagDeviceId">
+                <label class="block mb-2 text-xs font-black text-gray-500 uppercase">Nomor / Label</label>
+                <input type="text" id="newTag" class="bg-gray-900 border border-gray-600 text-white text-sm rounded-xl block w-full p-2.5" placeholder="Contoh: PLG-001" required>
+            </div>
+            <div class="p-4 border-t border-gray-700 flex justify-end">
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-xl shadow-lg">SIMPAN</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="restartOnuModal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-[100] justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full backdrop-blur-sm bg-black/80">
+    <div class="relative p-4 w-full max-w-sm max-h-full">
+        <div class="relative bg-gray-800 rounded-2xl shadow-2xl border border-gray-600 text-center p-6">
+            <div class="w-16 h-16 bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="bi bi-power text-3xl text-red-500"></i>
+            </div>
+            <h3 class="text-xl font-black text-white mb-2">RESTART MODEM?</h3>
+            <p class="text-sm text-gray-400 mb-2">SN: <span id="restartOnuSerial" class="font-mono text-white bg-gray-700 px-1 rounded"></span></p>
+            <p class="text-xs text-red-400 mb-6 font-bold">Internet pelanggan akan putus 1-2 menit.</p>
+            <div class="flex gap-2 justify-center">
+                <button type="button" class="bg-gray-700 text-gray-300 px-4 py-2 rounded-xl font-bold closeModalBtn">BATAL</button>
+                <button type="button" id="confirmRestartOnu" class="bg-red-600 text-white px-4 py-2 rounded-xl font-black shadow-lg hover:bg-red-700">YA, RESTART</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="toast-container" class="fixed top-20 right-5 z-[200] space-y-2"></div>
+
+<%- include('partials/footer') %>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<script>
+    // --- HELPER MODAL MANUAL ---
+    function openModal(id) { document.getElementById(id).classList.remove('hidden'); document.getElementById(id).classList.add('flex'); }
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); document.getElementById(id).classList.remove('flex'); }
+    
+    document.querySelectorAll('.closeModalBtn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            this.closest('.fixed').classList.add('hidden');
+            this.closest('.fixed').classList.remove('flex');
+        });
+    });
+
+    $(document).ready(function(){
+        // DataTable Dark Mode
+        $('#genieacsTable').DataTable({
+            pageLength: 20,
+            dom: '<"flex flex-col md:flex-row justify-between items-center p-4 gap-4"f>rt<"p-4 flex justify-between items-center text-gray-500 font-bold text-xs"ip>',
+            language: { search: "", searchPlaceholder: "Cari Serial / User...", zeroRecords: "Tidak ada device." }
+        });
+
+        // 1. Edit SSID
+        $(document).on('click', '.edit-btn', function(){
+            $('#deviceId').val($(this).data('id'));
+            $('#ssid').val($(this).data('ssid'));
+            $('#password').val($(this).data('password'));
+            openModal('editModal');
+        });
+
+        // 2. Edit Tag
+        $(document).on('click', '.edit-tag-btn', function() {
+            $('#tagDeviceId').val($(this).data('id'));
+            $('#newTag').val($(this).data('tag') !== '-' ? $(this).data('tag') : '');
+            openModal('editTagModal');
+        });
+
+        // 3. Restart Modal
+        $(document).on('click', '.restart-onu-btn', function() {
+            $('#restartOnuSerial').text($(this).data('serial'));
+            $('#confirmRestartOnu').data('id', $(this).data('id'));
+            openModal('restartOnuModal');
+        });
+
+        // --- AJAX LOGIC (DIOPTIMASI UNTUK REAL-TIME TANPA RELOAD) ---
+        
+        // Save SSID
+        $('#saveSsidBtn').click(function() {
+            const id = $('#deviceId').val();
+            const ssid = $('#ssid').val();
+            if(!ssid || ssid.length < 3) return showToast('error', 'SSID minimal 3 karakter');
+            
+            const btn = $(this); btn.html('<i class="bi bi-hourglass-split animate-spin"></i>');
+            $.post('/admin/genieacs/edit', { id, ssid }, function(res) {
+                btn.html('<i class="bi bi-check-lg"></i>');
+                if(res.success) { 
+                    showToast('success', 'SSID berhasil diubah'); 
+                    // Update DOM secara real-time
+                    const editBtn = $(`.edit-btn[data-id="${id}"]`);
+                    editBtn.data('ssid', ssid);
+                    editBtn.closest('tr').find('.ssid-display').text(ssid);
+                }
+                else showToast('error', res.message);
+            });
+        });
+
+        // Save Password
+        $('#savePasswordBtn').click(function() {
+            const id = $('#deviceId').val();
+            const password = $('#password').val();
+            if(!password || password.length < 8) return showToast('error', 'Password minimal 8 karakter');
+            
+            const btn = $(this); btn.html('<i class="bi bi-hourglass-split animate-spin"></i>');
+            $.post('/admin/genieacs/edit', { id, password }, function(res) {
+                btn.html('<i class="bi bi-check-lg"></i>');
+                if(res.success) {
+                    showToast('success', 'Password berhasil diubah');
+                    // Update atribut data password secara real-time
+                    $(`.edit-btn[data-id="${id}"]`).data('password', password);
+                }
+                else showToast('error', res.message);
+            });
+        });
+
+        // Save Tag
+        $('#editTagForm').submit(function(e) {
+            e.preventDefault();
+            const id = $('#tagDeviceId').val();
+            const tag = $('#newTag').val();
+            
+            const btn = $(this).find('button[type="submit"]'); 
+            const originalText = btn.text();
+            btn.prop('disabled', true).text('Menyimpan...');
+
+            $.post('/admin/genieacs/edit-tag', { id, tag }, function(res) {
+                btn.prop('disabled', false).text(originalText);
+                if(res.success) {
+                    showToast('success', 'Label berhasil diperbarui');
+                    closeModal('editTagModal');
+                    // Update DOM Tag secara real-time
+                    const tagBtn = $(`.edit-tag-btn[data-id="${id}"]`);
+                    tagBtn.data('tag', tag);
+                    
+                    const tagContainer = tagBtn.closest('tr').find('.tag-display-container');
+                    if (tag && tag.trim() !== '') {
+                        tagContainer.html(`<span class="bg-blue-900/30 text-blue-300 text-[10px] font-bold px-2 py-1 rounded border border-blue-800 tag-badge">${tag}</span>`);
+                    } else {
+                        tagContainer.html(`<span class="text-gray-600 tag-badge">-</span>`);
+                    }
+                } else {
+                    showToast('error', res.message);
+                }
+            });
+        });
+
+        // Confirm Restart
+        $('#confirmRestartOnu').click(function() {
+            const id = $(this).data('id');
+            const btn = $(this); btn.prop('disabled', true).text('Proses...');
+            
+            $.post('/admin/genieacs/restart-onu', { id }, function(res) {
+                closeModal('restartOnuModal');
+                btn.prop('disabled', false).text('YA, RESTART');
+                if(res.success) showToast('success', 'Perintah restart dikirim.');
+                else showToast('error', res.message);
+            });
+        });
+        
+        // Restart After Edit
+        $('#rebootAfterEditBtn').click(function() {
+            const id = $('#deviceId').val();
+            if(confirm("Restart modem sekarang?")) {
+                $.post('/admin/genieacs/restart-onu', { id }, function(res) {
+                    if(res.success) { showToast('success', 'Restart dikirim.'); closeModal('editModal'); }
+                    else showToast('error', res.message);
+                });
+            }
+        });
+    });
+
+    // Custom Toast Notification
+    function showToast(type, message) {
+        const color = type === 'success' ? 'bg-green-600' : 'bg-red-600';
+        const icon = type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill';
+        const html = `
+            <div class="flex items-center w-full max-w-xs p-4 text-white ${color} rounded-lg shadow dark:text-gray-200" role="alert">
+                <div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-lg bg-white/20">
+                    <i class="bi ${icon}"></i>
+                </div>
+                <div class="ml-3 text-sm font-bold">${message}</div>
+            </div>`;
+        $('#toast-container').append(html);
+        setTimeout(() => $('#toast-container').children().first().remove(), 3000);
+    }
+</script>

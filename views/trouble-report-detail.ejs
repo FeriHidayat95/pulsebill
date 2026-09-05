@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detail Tiket #<%= report.id %> - <%= typeof companyHeader !== 'undefined' ? companyHeader : 'Portal Pelanggan' %></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <style>
+        /* CSS HARDCORE DARK MODE - RADIUS STYLE */
+        :root {
+            --bg-dark: #111827;
+            --card-dark: #1f2937;
+            --border-dark: #374151;
+            --text-main: #d1d5db;
+            --primary-blue: #3b82f6;
+            --status-open: #ef4444;
+            --status-progress: #f59e0b;
+            --status-resolved: #10b981;
+            --status-closed: #6b7280;
+        }
+
+        body {
+            background-color: var(--bg-dark) !important;
+            color: var(--text-main) !important;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+        }
+
+        /* Navbar Style */
+        .navbar {
+            background: rgba(31, 41, 55, 0.9) !important;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-dark);
+            padding: 15px 0;
+        }
+        .navbar-brand { font-weight: 800; color: white !important; display: flex; align-items: center; gap: 12px; }
+
+        /* Report Detail Card */
+        .report-detail-card {
+            background-color: var(--card-dark);
+            border-radius: 24px;
+            border: 1px solid var(--border-dark);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        /* Status Badge */
+        .status-badge {
+            font-size: 11px;
+            font-weight: 800;
+            padding: 6px 15px;
+            border-radius: 50px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .status-open { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+        .status-in_progress { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+        .status-resolved { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .status-closed { background: rgba(107, 114, 128, 0.2); color: #9ca3af; border: 1px solid rgba(107, 114, 128, 0.3); }
+
+        /* Timeline Style */
+        .timeline-container {
+            position: relative;
+            padding-left: 35px;
+            margin-top: 30px;
+        }
+        .timeline-container:before {
+            content: '';
+            position: absolute;
+            left: 10px;
+            top: 5px;
+            bottom: 5px;
+            width: 2px;
+            background: var(--border-dark);
+        }
+        .timeline-item { position: relative; margin-bottom: 30px; }
+        .timeline-dot {
+            position: absolute;
+            left: -31px;
+            top: 5px;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--primary-blue);
+            border: 3px solid var(--bg-dark);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+            z-index: 2;
+        }
+        .timeline-content {
+            background: rgba(17, 24, 39, 0.5);
+            border: 1px solid var(--border-dark);
+            border-radius: 16px;
+            padding: 20px;
+        }
+        .timeline-time { font-size: 10px; font-weight: 800; color: #6b7280; text-transform: uppercase; margin-bottom: 8px; display: block; }
+
+        /* Form Controls */
+        .form-control {
+            background-color: var(--bg-dark) !important;
+            border: 1px solid var(--border-dark) !important;
+            color: white !important;
+            border-radius: 12px;
+            padding: 15px;
+        }
+        .form-control:focus { border-color: var(--primary-blue) !important; box-shadow: none !important; }
+
+        /* Typography */
+        .label-text { font-size: 11px; font-weight: 800; color: #6b7280; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 4px; }
+        .info-value { color: white; font-weight: 600; margin-bottom: 15px; }
+        h4, h5, h6 { color: white; font-weight: 800; }
+
+        /* Buttons */
+        .btn-primary { background: var(--primary-blue); border: none; font-weight: 700; border-radius: 12px; padding: 12px 25px; }
+        .btn-success { background: var(--status-resolved); border: none; font-weight: 700; border-radius: 12px; }
+        .btn-outline-secondary { border: 1px solid var(--border-dark); color: #9ca3af; font-weight: 700; border-radius: 12px; }
+
+        /* Modal Dark */
+        .modal-content { background-color: var(--card-dark); border: 1px solid var(--border-dark); border-radius: 20px; color: white; }
+        .modal-header { border-bottom: 1px solid var(--border-dark); }
+        .modal-footer { border-top: 1px solid var(--border-dark); }
+
+        @media (max-width: 768px) {
+            .report-detail-card { padding: 15px; }
+            .form-body { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="/customer/dashboard">
+                <img src="/img/<%= typeof settings !== 'undefined' && settings.logo_filename ? settings.logo_filename : 'logo.png' %>" alt="Logo" height="35">
+                <span>PORTAL PELANGGAN</span>
+            </a>
+            <div class="ms-auto">
+                <a href="/customer/trouble/list" class="btn btn-outline-secondary btn-sm px-3">
+                    <i class="bi bi-list-task me-1"></i> DAFTAR TIKET
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-5">
+        <div class="row justify-content-center">
+            <div class="col-md-10 col-lg-9">
+                
+                <div class="report-detail-card">
+                    <div class="p-4 bg-gray-900/50 border-b border-gray-700 d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="label-text">Nomor Tiket</span>
+                            <h4 class="m-0 text-primary">#<%= report.id %></h4>
+                        </div>
+                        <span class="status-badge status-<%= report.status %>">
+                            <%= report.status === 'open' ? 'Antrian' : 
+                               report.status === 'in_progress' ? 'Diproses' : 
+                               report.status === 'resolved' ? 'Selesai' : 'Ditutup' %>
+                        </span>
+                    </div>
+
+                    <div class="p-4">
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <span class="label-text">Pelapor</span>
+                                <p class="info-value"><%= report.name %></p>
+                                
+                                <span class="label-text">WhatsApp</span>
+                                <p class="info-value font-mono"><%= report.phone %></p>
+                                
+                                <span class="label-text">Alamat Pemasangan</span>
+                                <p class="info-value"><%= report.location %></p>
+                            </div>
+                            <div class="col-md-6 text-md-end">
+                                <span class="label-text">Kategori Masalah</span>
+                                <p class="info-value"><span class="badge bg-primary/20 text-primary border border-primary/30 px-3"><%= report.category %></span></p>
+                                
+                                <span class="label-text">Tanggal Laporan</span>
+                                <p class="info-value small text-gray-400"><%= new Date(report.createdAt).toLocaleString('id-ID', { day:'2-digit', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit' }) %></p>
+                                
+                                <span class="label-text">Update Terakhir</span>
+                                <p class="info-value small text-gray-400"><%= new Date(report.updatedAt).toLocaleString('id-ID', { day:'2-digit', month:'long', hour:'2-digit', minute:'2-digit' }) %></p>
+                            </div>
+                        </div>
+
+                        <div class="p-4 bg-gray-900/50 rounded-2xl border border-gray-800 mb-5">
+                            <h6 class="label-text text-white mb-3">Deskripsi Keluhan Pelanggan:</h6>
+                            <p class="m-0 text-gray-300 italic">"<%= report.description %>"</p>
+                        </div>
+
+                        <h5 class="mb-4 d-flex align-items-center">
+                            <i class="bi bi-chat-left-dots-fill text-primary me-2"></i> Riwayat Aktivitas & Balasan
+                        </h5>
+
+                        <div class="timeline-container">
+                            <div class="timeline-item">
+                                <div class="timeline-dot bg-primary"></div>
+                                <div class="timeline-content">
+                                    <span class="timeline-time"><%= new Date(report.createdAt).toLocaleString('id-ID') %></span>
+                                    <h6 class="text-white mb-1">Tiket Berhasil Dibuat</h6>
+                                    <p class="small text-gray-500 m-0">Laporan Anda telah masuk ke sistem dan dalam antrian pemeriksaan tim teknis.</p>
+                                </div>
+                            </div>
+
+                            <% if (report.notes && report.notes.length > 0) { %>
+                                <% report.notes.forEach(note => { %>
+                                    <div class="timeline-item">
+                                        <div class="timeline-dot <%= note.status === 'resolved' ? 'bg-success' : note.status === 'in_progress' ? 'bg-warning' : 'bg-primary' %>"></div>
+                                        <div class="timeline-content">
+                                            <span class="timeline-time"><%= new Date(note.timestamp).toLocaleString('id-ID') %></span>
+                                            <div class="d-flex justify-content-between">
+                                                <h6 class="text-white mb-2">Update: <%= note.status === 'open' ? 'Tiket Dibuka' : 
+                                                    note.status === 'in_progress' ? 'Sedang Ditangani' : 
+                                                    note.status === 'resolved' ? 'Masalah Selesai' : 'Tiket Ditutup' %></h6>
+                                            </div>
+                                            <p class="text-gray-300 small m-0"><%= note.content %></p>
+                                        </div>
+                                    </div>
+                                <% }); %>
+                            <% } %>
+                        </div>
+
+                        <% if (report.status !== 'closed') { %>
+                            <div class="mt-5 pt-4 border-t border-gray-700">
+                                <h6 class="mb-3 d-flex align-items-center">
+                                    <i class="bi bi-reply-fill text-primary me-2"></i> Tambahkan Informasi Tambahan
+                                </h6>
+                                <form id="commentForm">
+                                    <div class="mb-3">
+                                        <textarea class="form-control" id="comment" name="comment" rows="3" placeholder="Tulis pesan atau update di sini jika masalah belum selesai..." required></textarea>
+                                    </div>
+                                    <div class="text-end">
+                                        <button type="submit" class="btn btn-primary px-4">
+                                            <i class="bi bi-send-fill me-2"></i> KIRIM BALASAN
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        <% } %>
+
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mt-5 gap-3">
+                            <a href="/customer/trouble/list" class="btn btn-outline-secondary w-100 w-md-auto">
+                                <i class="bi bi-arrow-left me-2"></i> KEMBALI KE DAFTAR
+                            </a>
+                            
+                            <% if (report.status === 'resolved') { %>
+                                <button id="closeReportBtn" class="btn btn-success px-5 w-100 w-md-auto shadow-lg shadow-green-900/20">
+                                    <i class="bi bi-check-circle-fill me-2"></i> MASALAH SELESAI & TUTUP TIKET
+                                </button>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center opacity-50 pb-5">
+                    <p class="small text-gray-600 m-0"><%= typeof footerInfo !== 'undefined' ? footerInfo : 'Powered by Billing System' %></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="notificationModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow-2xl">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title font-black uppercase text-xs tracking-widest text-primary">Sistem Notifikasi</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4" id="notificationMessage"></div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-primary w-100" data-bs-dismiss="modal" id="modalOkButton">OK, MENGERTI</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const notificationModal = new bootstrap.Modal(document.getElementById('notificationModal'));
+            const notificationMessage = document.getElementById('notificationMessage');
+            const modalOkButton = document.getElementById('modalOkButton');
+            
+            // LOGIKA KIRIM KOMENTAR
+            const commentForm = document.getElementById('commentForm');
+            if (commentForm) {
+                commentForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const commentBtn = this.querySelector('button[type="submit"]');
+                    const originalText = commentBtn.innerHTML;
+                    
+                    const comment = document.getElementById('comment').value.trim();
+                    if(!comment) return;
+
+                    commentBtn.disabled = true;
+                    commentBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>MENGIRIM...';
+                    
+                    fetch('/customer/trouble/comment/<%= report.id %>', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ comment })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            notificationMessage.innerHTML = `<div class="text-center py-3"><i class="bi bi-check-circle text-success fs-1"></i><p class="mt-3 fw-bold">${data.message}</p></div>`;
+                            commentForm.reset();
+                            modalOkButton.onclick = () => window.location.reload();
+                        } else {
+                            notificationMessage.innerHTML = `<div class="alert alert-danger mb-0">${data.message}</div>`;
+                        }
+                        notificationModal.show();
+                    })
+                    .catch(err => {
+                        console.error('Error:', err);
+                        notificationMessage.innerHTML = `<div class="alert alert-danger mb-0">Gagal mengirim komentar. Periksa koneksi Anda.</div>`;
+                        notificationModal.show();
+                    })
+                    .finally(() => {
+                        commentBtn.disabled = false;
+                        commentBtn.innerHTML = originalText;
+                    });
+                });
+            }
+            
+            // LOGIKA TUTUP LAPORAN
+            const closeReportBtn = document.getElementById('closeReportBtn');
+            if (closeReportBtn) {
+                closeReportBtn.addEventListener('click', function() {
+                    if(!confirm('Konfirmasi bahwa masalah internet Anda sudah benar-benar selesai?')) return;
+
+                    closeReportBtn.disabled = true;
+                    closeReportBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>CLOSING...';
+
+                    fetch('/customer/trouble/close/<%= report.id %>', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            notificationMessage.innerHTML = `<div class="text-center py-3"><i class="bi bi-shield-check text-success fs-1"></i><p class="mt-3 fw-bold">${data.message}</p><p class="small text-muted">Terima kasih atas konfirmasinya.</p></div>`;
+                            modalOkButton.onclick = () => window.location.reload();
+                        } else {
+                            notificationMessage.innerHTML = `<div class="alert alert-danger mb-0">${data.message}</div>`;
+                        }
+                        notificationModal.show();
+                    })
+                    .catch(err => {
+                        console.error('Error:', err);
+                        notificationMessage.innerHTML = `<div class="alert alert-danger mb-0">Terjadi kesalahan sistem saat menutup laporan.</div>`;
+                        notificationModal.show();
+                    })
+                    .finally(() => {
+                        closeReportBtn.disabled = false;
+                        closeReportBtn.innerHTML = '<i class="bi bi-check-circle-fill me-2"></i> MASALAH SELESAI & TUTUP TIKET';
+                    });
+                });
+            }
+        });
+    </script>
+</body>
+</html>

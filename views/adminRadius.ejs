@@ -1,0 +1,431 @@
+<%- include('partials/header') %>
+<body class="bg-[#05080f] text-slate-300 font-sans antialiased selection:bg-blue-500 selection:text-white no-scrollbar">
+
+<%- include('partials/admin-header') %>
+<%- include('partials/admin-sidebar', { page: 'radius' }) %>
+
+<style>
+    /* ?? BATMAN STYLE SYSTEM ?? */
+    :root { --bg-deep: #05080f; --bg-matte: #0a0f1e; }
+    
+    /* GLASS CARD */
+    .glass-card {
+        background: rgba(30, 41, 59, 0.7);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    /* CSS NUKLIR: PAKSA INPUT GELAP (ANTI SILAU) */
+    input, select, textarea, .batman-input {
+        background-color: #020617 !important;
+        border: 1px solid #1e293b !important;
+        color: #f1f5f9 !important;
+        border-radius: 0.5rem !important;
+        padding: 0.6rem 1rem !important;
+        outline: none !important;
+    }
+    
+    /* MATIKAN AUTOFILL PUTIH */
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover, 
+    input:-webkit-autofill:focus, 
+    input:-webkit-autofill:active {
+        -webkit-box-shadow: 0 0 0 30px #020617 inset !important;
+        -webkit-text-fill-color: white !important;
+        transition: background-color 5000s ease-in-out 0s;
+    }
+
+    /* LIS WARNA */
+    .lis-blue { border-left: 4px solid #3b82f6; }
+    .lis-green { border-left: 4px solid #10b981; }
+    .lis-purple { border-left: 4px solid #a855f7; }
+    .lis-orange { border-left: 4px solid #f97316; }
+
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+</style>
+
+<main class="p-4 sm:ml-64 pt-24 min-h-screen transition-all duration-300">
+    
+    <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+        <div>
+            <h1 class="text-3xl font-black text-white tracking-tighter uppercase leading-none">
+                Radius <span class="text-blue-500">Manager</span>
+            </h1>
+            <div class="flex items-center gap-2 mt-2">
+                <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-[4px]">AAA Server Control</p>
+            </div>
+        </div>
+        
+        <div class="flex gap-2">
+            <button onclick="refreshData()" class="px-5 py-2.5 text-[10px] font-black text-slate-400 border border-slate-700 rounded-xl hover:bg-slate-800 hover:text-white transition-all uppercase tracking-widest">
+                <i class="bi bi-arrow-clockwise text-lg"></i>
+            </button>
+            <button onclick="openModal('scriptGeneratorModal')" class="px-6 py-2.5 text-[10px] font-black text-white bg-purple-600 rounded-xl hover:bg-purple-700 shadow-lg shadow-purple-500/20 transition-all uppercase tracking-widest flex items-center gap-2">
+                <i class="bi bi-terminal-fill"></i> Script Gen
+            </button>
+        </div>
+    </div>
+
+    <div class="glass-card rounded-2xl p-5 mb-8 flex flex-col md:flex-row justify-between items-center gap-4 shadow-lg border border-white/5">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl flex items-center justify-center bg-gray-900 border border-gray-700 text-2xl">
+                <i class="bi bi-hdd-rack-fill <%= radiusStatus.running ? 'text-emerald-500' : 'text-red-500' %>"></i>
+            </div>
+            <div>
+                <h6 class="font-black text-white uppercase tracking-wider text-sm">Radius Service</h6>
+                <div class="flex items-center gap-2">
+                    <span class="text-[10px] font-bold text-slate-500 uppercase">Status:</span>
+                    <% if (radiusStatus.running) { %>
+                        <span class="text-xs font-black text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">RUNNING</span>
+                    <% } else { %>
+                        <span class="text-xs font-black text-red-400 bg-red-500/10 px-2 py-0.5 rounded border border-red-500/20">STOPPED</span>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+        <div>
+            <% if (radiusStatus.running) { %>
+                <button onclick="stopRadiusServer()" class="px-6 py-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 font-black text-xs hover:bg-red-500 hover:text-white transition-all uppercase tracking-widest shadow-lg">
+                    <i class="bi bi-power me-2"></i> Shutdown Server
+                </button>
+            <% } else { %>
+                <button onclick="startRadiusServer()" class="px-6 py-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 font-black text-xs hover:bg-emerald-500 hover:text-white transition-all uppercase tracking-widest shadow-lg">
+                    <i class="bi bi-play-fill me-2"></i> Start Server
+                </button>
+            <% } %>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+        <div class="glass-card rounded-2xl p-5 shadow-lg lis-blue relative overflow-hidden group">
+            <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Active Sessions</p>
+            <h3 class="text-3xl font-black text-white"><%= activeSessions.length %></h3>
+            <i class="bi bi-people-fill absolute right-4 top-6 text-4xl opacity-10 text-blue-500 group-hover:scale-110 transition-transform"></i>
+        </div>
+
+        <div class="glass-card rounded-2xl p-5 shadow-lg lis-purple relative overflow-hidden group">
+            <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">NAS Clients</p>
+            <h3 class="text-3xl font-black text-white"><%= nasClients ? nasClients.length : 0 %></h3>
+            <i class="bi bi-router-fill absolute right-4 top-6 text-4xl opacity-10 text-purple-500 group-hover:scale-110 transition-transform"></i>
+        </div>
+
+        <div class="glass-card rounded-2xl p-5 shadow-lg lis-orange relative overflow-hidden group">
+            <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Port Auth/Acct</p>
+            <h3 class="text-2xl font-black text-white font-mono"><%= radiusStatus.port %> / <%= radiusStatus.acctPort %></h3>
+            <i class="bi bi-ethernet absolute right-4 top-6 text-4xl opacity-10 text-orange-500 group-hover:scale-110 transition-transform"></i>
+        </div>
+    </div>
+
+    <div class="glass-card rounded-3xl shadow-2xl overflow-hidden mb-8">
+        <div class="px-6 py-5 border-b border-slate-700 bg-black/20 flex flex-col md:flex-row justify-between items-center gap-4">
+            <h3 class="text-[10px] font-black text-white uppercase tracking-widest flex items-center gap-2">
+                <i class="bi bi-router text-blue-500"></i> Daftar Router (NAS)
+            </h3>
+            <button onclick="openModal('addNASModal')" class="bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-black px-4 py-2 rounded-xl shadow-lg shadow-blue-500/20 uppercase tracking-widest transition-all">
+                <i class="bi bi-plus-lg me-1"></i> Tambah NAS
+            </button>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-slate-400">
+                <thead class="text-[9px] text-slate-500 uppercase bg-black/30 border-b border-slate-700">
+                    <tr>
+                        <th class="px-6 py-4 font-black tracking-wider">Nama Router</th>
+                        <th class="px-6 py-4 font-black tracking-wider">IP Address</th>
+                        <th class="px-6 py-4 font-black tracking-wider">Secret</th>
+                        <th class="px-6 py-4 font-black tracking-wider text-right">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-700/50">
+                    <% if (nasClients && nasClients.length > 0) { %>
+                        <% nasClients.forEach(function(client) { %>
+                        <tr class="hover:bg-white/[0.02] transition-colors group">
+                            <td class="px-6 py-4 font-bold text-white text-sm uppercase"><%= client.name || 'Unnamed' %></td>
+                            <td class="px-6 py-4 font-mono text-xs text-blue-400"><%= client.ip %></td>
+                            <td class="px-6 py-4 font-mono text-xs text-slate-500 group-hover:text-white transition-colors"><%= client.secret %></td>
+                            <td class="px-6 py-4 text-right">
+                                <button onclick="openEditModal('<%= client.ip %>', '<%= client.name %>', '<%= client.secret %>')" class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-500 hover:bg-amber-500 hover:text-white transition-all border border-amber-500/20"><i class="bi bi-pencil-square"></i></button>
+                                <button onclick="removeNASClient('<%= client.ip %>')" class="w-8 h-8 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all border border-red-500/20"><i class="bi bi-trash3"></i></button>
+                            </td>
+                        </tr>
+                        <% }); %>
+                    <% } else { %>
+                        <tr><td colspan="4" class="px-6 py-10 text-center text-xs font-black text-slate-600 uppercase tracking-widest">Belum ada router terdaftar</td></tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="glass-card rounded-3xl shadow-2xl overflow-hidden">
+        <div class="px-6 py-5 border-b border-slate-700 bg-black/20">
+            <h3 class="text-[10px] font-black text-white uppercase tracking-widest flex items-center gap-2">
+                <i class="bi bi-clock-history text-amber-500"></i> Sesi Aktif (Live)
+            </h3>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-slate-400">
+                <thead class="text-[9px] text-slate-500 uppercase bg-black/30 border-b border-slate-700">
+                    <tr>
+                        <th class="px-6 py-4 font-black tracking-wider">Username</th>
+                        <th class="px-6 py-4 font-black tracking-wider">IP Address</th>
+                        <th class="px-6 py-4 font-black tracking-wider">Router</th>
+                        <th class="px-6 py-4 font-black tracking-wider">Waktu</th>
+                        <th class="px-6 py-4 font-black tracking-wider">Traffic</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-700/50">
+                    <% if (activeSessions && activeSessions.length > 0) { %>
+                        <% activeSessions.forEach(function(session) { %>
+                        <tr class="hover:bg-white/[0.02] transition-colors">
+                            <td class="px-6 py-4 font-bold text-white text-sm"><%= session.username %></td>
+                            <td class="px-6 py-4 font-mono text-xs text-slate-400"><%= session.ip_address || session.framedIP || '-' %></td>
+                            <td class="px-6 py-4 font-mono text-xs text-slate-400"><%= session.router || session.nasIP || '-' %></td>
+                            <td class="px-6 py-4">
+                                <div class="text-[10px] font-bold text-white"><%= session.startTime ? new Date(session.startTime).toLocaleTimeString('id-ID') : session.login_time %></div>
+                                <div class="text-[9px] text-slate-600 font-bold mt-0.5"><%= Math.floor((session.duration || 0) / 60) %> min ago</div>
+                            </td>
+                            <td class="px-6 py-4 text-xs font-mono">
+                                <span class="text-emerald-400 me-2">? <%= ((session.outputOctets || 0) / 1024 / 1024).toFixed(1) %> MB</span>
+                                <span class="text-blue-400">? <%= ((session.inputOctets || 0) / 1024 / 1024).toFixed(1) %> MB</span>
+                            </td>
+                        </tr>
+                        <% }); %>
+                    <% } else { %>
+                        <tr><td colspan="5" class="px-6 py-10 text-center text-xs font-black text-slate-600 uppercase tracking-widest">Tidak ada user online</td></tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<div id="addNASModal" class="fixed inset-0 z-[100] hidden justify-center items-center w-full h-full backdrop-blur-md bg-black/90">
+    <div class="relative w-full max-w-md p-4">
+        <div class="glass-card border border-white/10 rounded-[2rem] shadow-2xl overflow-hidden">
+            <div class="flex items-center justify-between p-6 border-b border-gray-800 bg-gray-900/50">
+                <h3 class="text-lg font-black text-white uppercase tracking-tight">Tambah NAS Client</h3>
+                <button onclick="closeModal('addNASModal')" class="w-8 h-8 rounded-full bg-gray-800 text-gray-500 hover:text-white flex items-center justify-center transition-all">&times;</button>
+            </div>
+            <form id="addNASForm" class="p-8 space-y-5">
+                <div>
+                    <label class="block mb-2 text-[10px] font-black text-gray-500 uppercase tracking-widest">Nama Router</label>
+                    <input type="text" id="nasName" name="name" class="batman-input font-bold" placeholder="Contoh: MIKROTIK-UTAMA" required>
+                </div>
+                <div>
+                    <label class="block mb-2 text-[10px] font-black text-gray-500 uppercase tracking-widest">IP Address</label>
+                    <input type="text" id="nasIP" name="ip" class="batman-input font-mono text-blue-400" placeholder="192.168.x.x" required>
+                </div>
+                <div>
+                    <label class="block mb-2 text-[10px] font-black text-gray-500 uppercase tracking-widest">Radius Secret</label>
+                    <input type="text" id="nasSecret" name="secret" class="batman-input font-mono text-emerald-400" placeholder="secret123" required>
+                </div>
+                <div class="pt-4 flex justify-end gap-3 border-t border-gray-800">
+                    <button type="button" onclick="closeModal('addNASModal')" class="px-5 py-2.5 rounded-xl text-[10px] font-bold text-slate-400 hover:text-white hover:bg-slate-800 transition-all uppercase">Batal</button>
+                    <button type="submit" class="px-6 py-2.5 rounded-xl text-[10px] font-black text-white bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/20 transition-all uppercase tracking-widest">Simpan NAS</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div id="editNASModal" class="fixed inset-0 z-[100] hidden justify-center items-center w-full h-full backdrop-blur-md bg-black/90">
+    <div class="relative w-full max-w-md p-4">
+        <div class="glass-card border border-white/10 rounded-[2rem] shadow-2xl overflow-hidden">
+            <div class="flex items-center justify-between p-6 border-b border-gray-800 bg-gray-900/50">
+                <h3 class="text-lg font-black text-white uppercase tracking-tight">Edit NAS Client</h3>
+                <button onclick="closeModal('editNASModal')" class="w-8 h-8 rounded-full bg-gray-800 text-gray-500 hover:text-white flex items-center justify-center transition-all">&times;</button>
+            </div>
+            <form id="editNASForm" class="p-8 space-y-5">
+                <input type="hidden" id="editOldIP" name="oldIp">
+                <div>
+                    <label class="block mb-2 text-[10px] font-black text-gray-500 uppercase tracking-widest">Nama Router</label>
+                    <input type="text" id="editNASName" name="name" class="batman-input font-bold" required>
+                </div>
+                <div>
+                    <label class="block mb-2 text-[10px] font-black text-gray-500 uppercase tracking-widest">IP Address</label>
+                    <input type="text" id="editNASIP" name="ip" class="batman-input font-mono text-blue-400" required>
+                </div>
+                <div>
+                    <label class="block mb-2 text-[10px] font-black text-gray-500 uppercase tracking-widest">Radius Secret</label>
+                    <input type="text" id="editNASSecret" name="secret" class="batman-input font-mono text-emerald-400" required>
+                </div>
+                <div class="pt-4 flex justify-end gap-3 border-t border-gray-800">
+                    <button type="button" onclick="closeModal('editNASModal')" class="px-5 py-2.5 rounded-xl text-[10px] font-bold text-slate-400 hover:text-white hover:bg-slate-800 transition-all uppercase">Batal</button>
+                    <button type="submit" class="px-6 py-2.5 rounded-xl text-[10px] font-black text-white bg-amber-600 hover:bg-amber-700 shadow-lg shadow-amber-500/20 transition-all uppercase tracking-widest">Update</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div id="scriptGeneratorModal" class="fixed inset-0 z-[100] hidden justify-center items-center w-full h-full backdrop-blur-md bg-black/90">
+    <div class="relative w-full max-w-4xl p-4">
+        <div class="glass-card border border-white/10 rounded-[2rem] shadow-2xl overflow-hidden">
+            <div class="flex items-center justify-between p-6 border-b border-gray-800 bg-gray-900/50">
+                <h3 class="text-lg font-black text-white uppercase tracking-tight flex items-center gap-2">
+                    <i class="bi bi-terminal-fill text-green-500"></i> Script Generator
+                </h3>
+                <button onclick="closeModal('scriptGeneratorModal')" class="w-8 h-8 rounded-full bg-gray-800 text-gray-500 hover:text-white flex items-center justify-center transition-all">&times;</button>
+            </div>
+            <div class="p-8">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
+                    <div><label class="block mb-2 text-[10px] text-gray-500 uppercase font-black">IP Radius Server</label><input type="text" id="serverIP" value="192.168.1.100" class="batman-input font-mono"></div>
+                    <div><label class="block mb-2 text-[10px] text-gray-500 uppercase font-black">IP Mikrotik</label><input type="text" id="mikrotikIP" value="192.168.1.1" class="batman-input font-mono"></div>
+                    <div><label class="block mb-2 text-[10px] text-gray-500 uppercase font-black">Secret</label><input type="text" id="radiusSecret" value="123456" class="batman-input font-mono"></div>
+                </div>
+                
+                <div class="grid grid-cols-3 gap-4 mb-6">
+                    <button class="script-type-btn bg-gray-800 hover:bg-gray-700 text-blue-400 border border-gray-700 rounded-xl py-4 font-bold text-xs uppercase tracking-widest transition-all" data-type="basic"><i class="bi bi-hdd-network d-block text-2xl mb-2"></i> PPPoE Only</button>
+                    <button class="script-type-btn bg-gray-800 hover:bg-gray-700 text-yellow-400 border border-gray-700 rounded-xl py-4 font-bold text-xs uppercase tracking-widest transition-all" data-type="hotspot"><i class="bi bi-wifi d-block text-2xl mb-2"></i> Hotspot Only</button>
+                    <button class="script-type-btn bg-gray-800 hover:bg-gray-700 text-green-400 border border-gray-700 rounded-xl py-4 font-bold text-xs uppercase tracking-widest transition-all" data-type="complete"><i class="bi bi-collection-fill d-block text-2xl mb-2"></i> Complete</button>
+                </div>
+
+                <div id="scriptOutput" class="hidden">
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="text-xs text-slate-400 font-bold uppercase tracking-widest">Result:</span>
+                        <button onclick="copyScript()" class="text-[10px] font-black text-white bg-gray-700 hover:bg-gray-600 px-3 py-1.5 rounded-lg border border-gray-600 uppercase"><i class="bi bi-clipboard me-1"></i> Copy Code</button>
+                    </div>
+                    <pre class="bg-black text-green-400 p-5 rounded-xl border border-gray-800 font-mono text-xs overflow-auto max-h-64 shadow-inner" id="generatedScript"></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="toast-container" class="fixed top-24 right-5 z-[200] space-y-3"></div>
+
+<%- include('partials/footer') %>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    // ??? MODAL ENGINE
+    function openModal(id) { $('#' + id).removeClass('hidden').addClass('flex'); }
+    function closeModal(id) { 
+        $('#' + id).addClass('hidden').removeClass('flex');
+        $('#' + id).find('form').trigger('reset'); // Auto Clear Form
+    }
+
+    // TOAST NOTIFIKASI MEWAH
+    function showToast(message, type = 'info') {
+        const color = type === 'success' ? 'bg-emerald-600' : (type === 'error' ? 'bg-red-600' : 'bg-blue-600');
+        const icon = type === 'success' ? 'bi-check-circle-fill' : (type === 'error' ? 'bi-exclamation-triangle-fill' : 'bi-info-circle-fill');
+        const html = `
+            <div class="flex items-center w-80 p-4 text-white ${color} rounded-2xl shadow-2xl border border-white/10 transition-all transform hover:scale-105 backdrop-blur-md">
+                <div class="inline-flex items-center justify-center flex-shrink-0 w-10 h-10 rounded-xl bg-white/20 text-lg">
+                    <i class="bi ${icon}"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-[10px] font-black uppercase tracking-widest opacity-70">${type}</p>
+                    <p class="text-sm font-bold">${message}</p>
+                </div>
+            </div>`;
+        $('#toast-container').append(html);
+        setTimeout(() => $('#toast-container').children().first().remove(), 4000);
+    }
+
+    function refreshData() { showToast('Menyinkronkan data...', 'info'); setTimeout(() => location.reload(), 1000); }
+
+    // SERVER CONTROL
+    function startRadiusServer() {
+        Swal.fire({
+            title: 'Nyalakan Server?',
+            text: "Service Radius akan dijalankan.",
+            icon: 'question',
+            background: '#0a0f1e', color: '#fff',
+            showCancelButton: true, confirmButtonColor: '#10b981', cancelButtonColor: '#374151', confirmButtonText: 'Ya, Jalankan!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.post('/admin/radius/start', function(res) {
+                    if(res.success) { showToast(res.message, 'success'); setTimeout(()=>location.reload(), 2000); }
+                    else showToast(res.message, 'error');
+                });
+            }
+        });
+    }
+
+    function stopRadiusServer() {
+        Swal.fire({
+            title: 'Matikan Server?',
+            text: "User tidak akan bisa login hotspot/pppoe!",
+            icon: 'warning',
+            background: '#0a0f1e', color: '#fff',
+            showCancelButton: true, confirmButtonColor: '#ef4444', cancelButtonColor: '#374151', confirmButtonText: 'Matikan!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.post('/admin/radius/stop', function(res) {
+                    if(res.success) { showToast(res.message, 'success'); setTimeout(()=>location.reload(), 2000); }
+                    else showToast(res.message, 'error');
+                });
+            }
+        });
+    }
+
+    // NAS CRUD
+    $('#addNASForm').submit(function(e) {
+        e.preventDefault();
+        $.post('/admin/radius/nas/add', {
+            ip: $('#nasIP').val(), secret: $('#nasSecret').val(), name: $('#nasName').val()
+        }, function(res) {
+            if(res.success) { 
+                showToast('NAS Client Berhasil Disimpan', 'success'); 
+                closeModal('addNASModal');
+                setTimeout(()=>location.reload(), 1000);
+            } else showToast(res.message, 'error');
+        });
+    });
+
+    window.removeNASClient = function(ip) {
+        Swal.fire({
+            title: 'Hapus NAS?',
+            text: `IP: ${ip} akan dihapus dari daftar.`,
+            icon: 'warning',
+            background: '#0a0f1e', color: '#fff',
+            showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: 'Hapus'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.post('/admin/radius/nas/remove', {ip}, function(res) {
+                    if(res.success) { showToast('Terhapus', 'success'); location.reload(); }
+                    else showToast(res.message, 'error');
+                });
+            }
+        });
+    };
+
+    window.openEditModal = function(ip, name, secret) {
+        $('#editOldIP').val(ip); $('#editNASIP').val(ip); $('#editNASName').val(name); $('#editNASSecret').val(secret);
+        openModal('editNASModal');
+    };
+
+    $('#editNASForm').submit(function(e) {
+        e.preventDefault();
+        $.post('/admin/radius/nas/update', $(this).serialize(), function(res) {
+            if(res.success) { showToast('Data NAS Diupdate!', 'success'); location.reload(); }
+            else showToast(res.message, 'error');
+        });
+    });
+
+    // SCRIPT GENERATOR
+    $('.script-type-btn').click(function() {
+        const type = $(this).data('type');
+        const sIP = $('#serverIP').val(); const mIP = $('#mikrotikIP').val(); const sec = $('#radiusSecret').val();
+        if(!sIP || !mIP || !sec) return showToast("Semua field harus diisi!", "error");
+
+        $.get(`/admin/radius/mikrotik-script/${type}?serverIP=${sIP}&mikrotikIP=${mIP}&secret=${sec}`, function(res) {
+            if(res.success) {
+                $('#generatedScript').text(res.script);
+                $('#scriptOutput').removeClass('hidden');
+                $('.script-type-btn').removeClass('border-green-500 ring-2 ring-green-500 bg-gray-700');
+                $(this).addClass('border-green-500 ring-2 ring-green-500 bg-gray-700');
+            } else showToast(res.message, 'error');
+        }.bind(this));
+    });
+
+    window.copyScript = function() {
+        navigator.clipboard.writeText($('#generatedScript').text()).then(() => showToast("Script disalin ke clipboard!", "success"));
+    };
+</script>
+</body>
+</html>

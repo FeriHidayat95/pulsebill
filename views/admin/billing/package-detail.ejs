@@ -1,0 +1,181 @@
+<%- include('../../partials/header') %>
+<body class="bg-[#0f172a] text-slate-300 font-sans antialiased selection:bg-blue-500 selection:text-white">
+
+<%- include('../../partials/admin-header') %>
+
+<%- include('../../partials/billing-sidebar', { page: 'packages', settings: settings }) %>
+
+<main class="p-4 sm:ml-64 pt-20 min-h-screen">
+
+    <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+        <div>
+            <nav class="flex mb-1" aria-label="Breadcrumb">
+                <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                    <li class="inline-flex items-center">
+                        <a href="/admin/billing/packages" class="inline-flex items-center text-xs font-bold text-slate-500 hover:text-blue-500 uppercase tracking-widest transition-colors">
+                            <i class="bi bi-box-seam me-2"></i> Paket
+                        </a>
+                    </li>
+                    <li>
+                        <div class="flex items-center">
+                            <i class="bi bi-chevron-right text-slate-600 mx-1"></i>
+                            <span class="text-xs font-bold text-slate-300 uppercase tracking-widest"><%= package.name %></span>
+                        </div>
+                    </li>
+                </ol>
+            </nav>
+            <h1 class="text-3xl font-black text-white tracking-tighter uppercase leading-none">
+                Detail <span class="text-blue-500">Paket</span>
+            </h1>
+        </div>
+        
+        <a href="/admin/billing/packages" class="group relative inline-flex items-center justify-center px-5 py-2.5 text-xs font-black text-slate-400 border border-slate-700 rounded-xl hover:bg-slate-800 hover:text-white transition-all uppercase tracking-widest">
+            <i class="bi bi-arrow-left text-lg me-2 group-hover:-translate-x-1 transition-transform"></i> KEMBALI
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <div class="md:col-span-1">
+            <div class="bg-[#1e293b] border border-slate-700/60 rounded-3xl shadow-2xl overflow-hidden h-full">
+                <div class="px-6 py-5 border-b border-slate-700 bg-[#111827]/50">
+                    <h3 class="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
+                        <i class="bi bi-box-seam-fill text-blue-500 text-lg"></i> Informasi Paket
+                    </h3>
+                </div>
+                <div class="p-6 space-y-6">
+                    
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">NAMA PAKET</label>
+                        <span class="text-xl font-black text-white block"><%= package.name %></span>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">KECEPATAN</label>
+                        <span class="inline-flex items-center px-3 py-1 rounded-lg text-xs font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                            <i class="bi bi-speedometer2 me-2"></i> <%= package.speed %>
+                        </span>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">HARGA BULANAN</label>
+                        <span class="text-2xl font-mono font-black text-emerald-400">
+                            Rp <%= parseFloat(package.price).toLocaleString('id-ID') %>
+                        </span>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">PROFILE RADIUS (PPPoE)</label>
+                        <code class="px-2 py-1 rounded bg-[#111827] border border-slate-700 text-purple-400 font-mono text-sm font-bold block w-fit">
+                            <%= package.pppoe_profile || 'default' %>
+                        </code>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">DESKRIPSI</label>
+                        <p class="text-sm text-slate-400 leading-relaxed"><%= package.description || '-' %></p>
+                    </div>
+
+                    <div class="pt-4 border-t border-slate-700">
+                        <div class="w-full py-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-center">
+                            <span class="text-xs font-black text-emerald-400 uppercase tracking-widest flex items-center justify-center gap-2">
+                                <i class="bi bi-check-circle-fill"></i> STATUS AKTIF
+                            </span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="md:col-span-2">
+            <div class="bg-[#1e293b] border border-slate-700/60 rounded-3xl shadow-2xl overflow-hidden h-full">
+                
+                <div class="px-6 py-5 border-b border-slate-700 bg-[#111827]/50 flex justify-between items-center">
+                    <h3 class="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
+                        <i class="bi bi-people-fill text-emerald-500 text-lg"></i> Pelanggan Paket Ini
+                    </h3>
+                    <span class="px-3 py-1 rounded-full bg-slate-700 text-slate-300 text-[10px] font-black border border-slate-600">
+                        <%= customers ? customers.length : 0 %> Orang
+                    </span>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-slate-400">
+                        <thead class="text-[10px] text-slate-500 uppercase bg-[#111827]/30 border-b border-slate-700">
+                            <tr>
+                                <th class="px-6 py-4 font-black tracking-wider">Nama / Username</th>
+                                <th class="px-6 py-4 font-black tracking-wider">Kontak</th>
+                                <th class="px-6 py-4 font-black tracking-wider">Status</th>
+                                <th class="px-6 py-4 font-black tracking-wider">Bergabung</th>
+                                <th class="px-6 py-4 font-black tracking-wider text-right">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-700/50">
+                            <% if (customers && customers.length > 0) { %>
+                                <% customers.forEach(function(c) { %>
+                                <tr class="hover:bg-slate-800/50 transition-colors group">
+                                    
+                                    <td class="px-6 py-4">
+                                        <div class="font-bold text-white text-sm mb-1 group-hover:text-blue-400 transition-colors"><%= c.name %></div>
+                                        <div class="text-[10px] font-bold text-slate-500 flex items-center gap-1">
+                                            <i class="bi bi-person text-amber-500"></i> <%= c.username %>
+                                        </div>
+                                    </td>
+
+                                    <td class="px-6 py-4">
+                                        <div class="text-xs font-bold text-slate-400 flex items-center gap-2">
+                                            <i class="bi bi-telephone text-emerald-500"></i> <%= c.phone %>
+                                        </div>
+                                    </td>
+
+                                    <td class="px-6 py-4">
+                                        <% if(c.status === 'active') { %>
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-black bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase tracking-wide">
+                                                AKTIF
+                                            </span>
+                                        <% } else if(c.status === 'suspended') { %>
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-black bg-red-500/10 text-red-400 border border-red-500/20 uppercase tracking-wide">
+                                                ISOLIR
+                                            </span>
+                                        <% } else { %>
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-black bg-slate-700 text-slate-400 border border-slate-600 uppercase tracking-wide">
+                                                NON-AKTIF
+                                            </span>
+                                        <% } %>
+                                    </td>
+
+                                    <td class="px-6 py-4 text-xs font-bold text-slate-300 font-mono">
+                                        <%= new Date(c.created_at).toLocaleDateString('id-ID') %>
+                                    </td>
+
+                                    <td class="px-6 py-4 text-right">
+                                        <a href="/admin/billing/customers/<%= c.phone %>" class="inline-flex items-center justify-center p-2 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500 hover:text-white transition-all" title="Lihat Detail">
+                                            <i class="bi bi-eye-fill text-lg"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                <% }) %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="5" class="px-6 py-12 text-center text-slate-500">
+                                        <i class="bi bi-person-x text-4xl mb-3 block opacity-30"></i>
+                                        <span class="text-xs font-bold uppercase tracking-widest">Belum ada pelanggan paket ini</span>
+                                    </td>
+                                </tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+</main>
+
+<%- include('../../partials/footer') %>
+
+</body>
+</html>

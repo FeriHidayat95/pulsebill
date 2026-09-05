@@ -1,0 +1,259 @@
+<%- include('partials/header') %>
+<%- include('partials/admin-header') %>
+<%- include('partials/admin-sidebar', { page: 'voucher-monitor' }) %>
+
+<style>
+    :root { --bg-carbon: #05080f; --border-soft: rgba(255, 255, 255, 0.05); }
+    .main-content-move { transition: all 0.3s ease; padding-top: 100px !important; min-height: 100vh; }
+    body.sidebar-mini .main-content-move { margin-left: 80px !important; }
+    
+    .stats-card { color: white; padding: 24px; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); position: relative; overflow: hidden; }
+    .stats-card.info { background: linear-gradient(135deg, #3494E6 0%, #EC6EAD 100%); }
+    .stats-card.success { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+    .stats-card.danger { background: linear-gradient(135deg, #f85032 0%, #e73827 100%); }
+    .stats-card.warning { background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); }
+    .stats-card.purple { background: linear-gradient(135deg, #8E2DE2 0%, #4A00E0 100%); }
+    
+    .stats-value { font-size: 36px; font-weight: 900; margin: 10px 0 0 0; line-height: 1; letter-spacing: -1px; }
+    .stats-label { font-size: 11px; opacity: 0.8; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; }
+    .stats-icon { position: absolute; right: -10px; bottom: -20px; font-size: 100px; opacity: 0.15; }
+
+    .glass-panel-monitor { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(15px); border: 1px solid var(--border-soft); border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.3); }
+    .kolom-no { width: 1% !important; white-space: nowrap !important; text-align: center !important; padding-left: 15px !important; padding-right: 15px !important; }
+    .table-sultan { border-collapse: collapse; width: 100%; }
+    .table-sultan th, .table-sultan td { border: 1px solid rgba(255, 255, 255, 0.12) !important; }
+</style>
+
+<main class="main-content-move sm:ml-64 px-6 pb-12">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <% 
+            const colorThemes = ['info', 'success', 'danger', 'warning', 'purple'];
+            stokData.forEach((stok, index) => { 
+                const theme = colorThemes[index % colorThemes.length];
+        %>
+            <div class="stats-card <%= theme %>">
+                <div class="stats-label">STOK <%= stok.groupname %></div>
+                <div class="stats-value"><%= stok.total %></div>
+                <i class="bi bi-ticket-detailed stats-icon"></i>
+            </div>
+        <% }) %>
+    </div>
+
+    <div class="glass-panel-monitor overflow-hidden">
+        
+        <div class="p-6 border-b border-[rgba(255,255,255,0.12)] bg-black/50">
+            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+                <div>
+                    <h3 class="text-2xl font-black text-white uppercase tracking-tighter">Inventory Control</h3>
+                    <p class="text-[11px] text-gray-400 font-bold tracking-widest uppercase mt-1">Sultan Voucher Management</p>
+                </div>
+                
+                <div class="flex flex-wrap items-center gap-2">
+                    <div class="relative">
+                        <input type="text" id="searchBox" value="<%= currentSearch %>" placeholder="Cari Kode..." class="bg-[#020617] text-gray-200 text-xs font-bold uppercase rounded-xl border border-[rgba(255,255,255,0.2)] focus:ring-blue-500 pl-8 p-3 w-40 placeholder-gray-600">
+                        <i class="bi bi-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
+                    </div>
+
+                    <select id="filterProfile" class="bg-[#020617] text-gray-200 text-xs font-bold uppercase rounded-xl border border-[rgba(255,255,255,0.2)] focus:ring-blue-500 p-3">
+                        <option value="">Semua Profil</option>
+                        <% stokData.forEach(stok => { %>
+                            <option value="<%= stok.groupname %>" <%= currentProfile == stok.groupname ? 'selected' : '' %>>
+                                Filter <%= stok.groupname %>
+                            </option>
+                        <% }) %>
+                    </select>
+
+                    <select id="filterStatus" class="bg-[#020617] text-gray-200 text-xs font-bold uppercase rounded-xl border border-[rgba(255,255,255,0.2)] focus:ring-blue-500 p-3">
+                        <option value="">Semua Status</option>
+                        <option value="ready" <%= currentStatus == 'ready' ? 'selected' : '' %>>??? Belum Terpakai</option>
+                        <option value="used" <%= currentStatus == 'used' ? 'selected' : '' %>>?? Sudah Terpakai</option>
+                    </select>
+
+                    <button onclick="applyFilters()" class="bg-gray-800 hover:bg-gray-700 text-white border border-gray-600 shadow-lg text-xs font-black uppercase py-3 px-4 rounded-xl transition-all">
+                        <i class="bi bi-funnel-fill"></i> Filter
+                    </button>
+                    
+                    <div class="w-px h-8 bg-gray-700 mx-2 hidden lg:block"></div>
+
+                    <button id="btnCetakMassal" class="hidden bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-900/30 text-xs font-black uppercase py-3 px-5 rounded-xl transition-all items-center">
+                        <i class="bi bi-printer-fill me-2"></i> Cetak (<span id="countCetak">0</span>)
+                    </button>
+
+                    <button id="btnHapusMassal" class="hidden bg-red-600 hover:bg-red-500 text-white shadow-lg shadow-red-900/30 text-xs font-black uppercase py-3 px-5 rounded-xl transition-all items-center">
+                        <i class="bi bi-trash3 me-2"></i> Musnahkan (<span id="countSelected">0</span>)
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto max-h-[600px] overflow-y-auto no-scrollbar p-1">
+            <table class="table-sultan text-left">
+                <thead class="sticky top-0 bg-[#0f172a] text-xs font-black text-gray-300 uppercase tracking-widest shadow-lg z-10">
+                    <tr>
+                        <th class="py-4 kolom-no text-center"><input type="checkbox" id="selectAll" class="w-5 h-5 rounded bg-[#020617] border-gray-500 text-blue-500 cursor-pointer"></th>
+                        <th class="px-6 py-4">Kode / Username</th>
+                        <th class="px-6 py-4">Password</th>
+                        <th class="px-6 py-4 text-center">Profile</th>
+                        <th class="px-6 py-4 text-center">Status</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-[#0a0f1e]/80">
+                    <% if (vouchers.length === 0) { %>
+                        <tr><td colspan="5" class="px-6 py-24 text-center text-gray-500 text-[13px] font-black uppercase tracking-[3px]">Data Tidak Ditemukan</td></tr>
+                    <% } else { %>
+                        <% vouchers.forEach(v => { %>
+                        <tr class="hover:bg-white/[0.05] transition-colors group cursor-pointer" onclick="toggleRow(this, event)">
+                            <td class="py-4 kolom-no text-center">
+                                <input type="checkbox" class="chkUser w-5 h-5 rounded bg-[#020617] border-gray-500 text-blue-500 cursor-pointer" 
+                                       value="<%= v.username %>" data-pass="<%= v.password %>" data-profile="<%= v.groupname %>">
+                            </td>
+                            <td class="px-6 py-4"><span class="font-mono text-white font-black text-base tracking-wider group-hover:text-blue-400 transition-colors"><%= v.username %></span></td>
+                            <td class="px-6 py-4"><span class="font-mono text-gray-300 font-bold text-[15px] tracking-wide"><%= v.password %></span></td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="px-4 py-2 rounded-lg bg-blue-500/10 text-blue-400 text-xs font-black uppercase border border-blue-500/30">
+                                    <%= v.groupname %>
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <% if (v.is_used > 0) { %>
+                                    <span class="px-4 py-2 rounded-lg bg-red-500/10 text-red-400 text-[11px] font-black uppercase tracking-widest border border-red-500/30"><i class="bi bi-wifi text-xs me-1"></i> Terpakai</span>
+                                <% } else { %>
+                                    <span class="px-4 py-2 rounded-lg bg-emerald-500/10 text-emerald-400 text-[11px] font-black uppercase tracking-widest border border-emerald-500/30"><i class="bi bi-shield-check text-xs me-1"></i> Ready</span>
+                                <% } %>
+                            </td>
+                        </tr>
+                        <% }) %>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<%- include('partials/footer') %>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function applyFilters() {
+        const search = document.getElementById('searchBox').value;
+        const profile = document.getElementById('filterProfile').value;
+        const status = document.getElementById('filterStatus').value;
+        
+        const params = new URLSearchParams();
+        if(search) params.append('search', search);
+        if(profile) params.append('profile', profile);
+        if(status) params.append('status', status);
+        
+        window.location.href = '?' + params.toString();
+    }
+
+    document.getElementById('searchBox').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') applyFilters();
+    });
+
+    const selectAll = document.getElementById('selectAll');
+    const chkUsers = document.querySelectorAll('.chkUser');
+    const btnHapus = document.getElementById('btnHapusMassal');
+    const btnCetak = document.getElementById('btnCetakMassal');
+    const countSpan = document.getElementById('countSelected');
+    const countCetak = document.getElementById('countCetak');
+
+    window.toggleRow = function(tr, e) {
+        if (e.target.tagName !== 'INPUT') {
+            const chk = tr.querySelector('.chkUser');
+            chk.checked = !chk.checked;
+            updateUI();
+        }
+    }
+
+    if (selectAll) { selectAll.addEventListener('change', (e) => { chkUsers.forEach(chk => chk.checked = e.target.checked); updateUI(); }); }
+    chkUsers.forEach(chk => chk.addEventListener('change', updateUI));
+
+    function updateUI() {
+        const checked = document.querySelectorAll('.chkUser:checked').length;
+        countSpan.innerText = checked; countCetak.innerText = checked;
+        if(checked > 0) {
+            btnHapus.classList.remove('hidden'); btnHapus.classList.add('inline-flex');
+            btnCetak.classList.remove('hidden'); btnCetak.classList.add('inline-flex');
+        } else {
+            btnHapus.classList.add('hidden'); btnHapus.classList.remove('inline-flex');
+            btnCetak.classList.add('hidden'); btnCetak.classList.remove('inline-flex');
+        }
+    }
+
+    if (btnHapus) {
+        btnHapus.addEventListener('click', () => {
+            const selected = Array.from(document.querySelectorAll('.chkUser:checked')).map(c => c.value);
+            Swal.fire({
+                title: 'MUSNAHKAN VOUCHER?',
+                text: `Yakin mau memusnahkan ${selected.length} voucher ini? Log pemakaiannya juga ikut terhapus permanen!`,
+                icon: 'warning', background: '#0a0f1e', color: '#cbd5e1',
+                showCancelButton: true, confirmButtonColor: '#ef4444', cancelButtonColor: '#1e293b',
+                confirmButtonText: 'Sikat Habis!', cancelButtonText: 'Batal'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({ title: 'Mengeksekusi...', background: '#0a0f1e', color: '#fff', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                    try {
+                        const res = await fetch('/adminVoucherMonitor/delete-bulk', {
+                            method: 'POST', headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ selectedVouchers: selected })
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                            Swal.fire({ icon: 'success', title: 'Berhasil!', text: data.message, background: '#0a0f1e', color: '#fff'}).then(() => location.reload());
+                        } else throw new Error(data.error);
+                    } catch (err) { Swal.fire({ icon: 'error', title: 'Error', text: err.message, background: '#0a0f1e', color: '#fff' }); }
+                }
+            });
+        });
+    }
+
+    if (btnCetak) {
+        btnCetak.addEventListener('click', () => {
+            const selectedVouchers = [];
+            document.querySelectorAll('.chkUser:checked').forEach(chk => {
+                selectedVouchers.push({ username: chk.value, password: chk.getAttribute('data-pass'), profile: chk.getAttribute('data-profile') });
+            });
+            if (selectedVouchers.length > 0) {
+                Swal.fire({
+                    title: 'Harga Cetak Ulang', input: 'number', inputLabel: 'Masukkan Nominal (Tanpa Titik)', inputValue: selectedVouchers[0].profile,
+                    showCancelButton: true, background: '#0a0f1e', color: '#cbd5e1', confirmButtonColor: '#3b82f6',
+                }).then((result) => { if (result.isConfirmed) printBatch(selectedVouchers, "<%= company_header %>", result.value || 0); });
+            }
+        });
+    }
+
+    function printBatch(vouchers, headerName, price) {
+        const nominal = parseInt(price) || 0;
+        const priceDisplay = nominal > 0 ? 'Rp ' + nominal.toLocaleString('id-ID') : 'Rp ' + price;
+        let theme = { head: '#475569', bg: '#f8fafc' }; 
+        if (nominal == 3000) { theme = { head: '#3b82f6', bg: '#eff6ff' }; } 
+        else if (nominal == 5000) { theme = { head: '#ef4444', bg: '#fef2f2' }; } 
+        else if (nominal == 10000) { theme = { head: '#10b981', bg: '#f0fdf4' }; }
+        else if (nominal > 10000) { theme = { head: '#8b5cf6', bg: '#f5f3ff' }; }
+        let html = `<html><head><style>
+            @page { size: A4 landscape; margin: 5mm; }
+            body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; background: #fff !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            .grid { display: grid; grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(5, 1fr); gap: 8px; width: 100%; height: 190mm; box-sizing: border-box; padding: 2mm; }
+            .card { border: 1px solid #000000 !important; text-align: center; height: 36mm; display: flex; flex-direction: column; justify-content: space-between; position: relative; border-radius: 10px; overflow: hidden; background-color: ${theme.bg} !important; }
+            .head { background-color: ${theme.head} !important; color: #ffffff !important; font-size: 10px; font-weight: 800; padding: 5px 0; text-transform: uppercase; letter-spacing: 1.5px; }
+            .price-tag { position: absolute; top: 22px; right: 5px; font-size: 7.5px; font-weight: 900; background-color: #000000 !important; color: #ffffff !important; padding: 2px 6px; border-radius: 4px; z-index: 10; }
+            .content { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 2px 5px; }
+            .box-code { border: 2px solid #000000 !important; padding: 4px 10px; border-radius: 8px; margin: 2px 0; background-color: #ffffff !important; min-width: 100px; }
+            .user-txt { font-size: 17px; font-weight: 900; color: #000000 !important; font-family: 'Courier New', monospace; line-height: 1; }
+            .pass-txt { font-size: 10px; font-weight: 800; color: #000000 !important; border-top: 1px solid #000; margin-top: 3px; padding-top: 2px; width: 100%; }
+            .lbl { font-size: 6px; font-weight: 800; color: #000000 !important; opacity: 0.7; margin-bottom: 2px; text-transform: uppercase; }
+            .foot { font-size: 6.5px; padding: 3px 0; font-weight: 800; color: #000 !important; background-color: rgba(0,0,0,0.04) !important; border-top: 1px solid #000; text-transform: uppercase; }
+            .page-break { page-break-after: always; }
+        </style></head><body>`;
+        for (let i = 0; i < vouchers.length; i += 25) {
+            html += '<div class="grid">';
+            vouchers.slice(i, i + 25).forEach(v => {
+                let body = (v.username == v.password) ? `<div class="lbl">KODE LOGIN</div><div class="box-code"><div class="user-txt">${v.username}</div></div>` : `<div class="lbl">LOGIN VOUCHER</div><div class="box-code" style="padding: 4px 10px;"><div class="user-txt" style="font-size:13px;">U: ${v.username}</div><div class="pass-txt">P: ${v.password}</div></div>`;
+                html += `<div class="card"><div class="head">${headerName}</div>${nominal > 0 ? `<div class="price-tag">${priceDisplay}</div>` : ''}<div class="content">${body}</div><div class="foot">Plan: ${v.profile} | Login: http://inetku.net</div></div>`;
+            });
+            html += '</div>' + (i + 25 < vouchers.length ? '<div class="page-break"></div>' : '');
+        }
+        const win = window.open('', '_blank'); win.document.write(html + '</body></html>'); win.document.close(); setTimeout(() => { win.print(); }, 1000);
+    }
+</script>

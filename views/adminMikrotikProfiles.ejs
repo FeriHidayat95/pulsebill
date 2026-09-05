@@ -1,0 +1,411 @@
+<%- include('partials/header') %>
+<%- include('partials/admin-header') %>
+<%- include('partials/admin-sidebar', { page: 'mikrotik-profiles' }) %>
+
+<style>
+    /* Styling DataTables agar pas dengan tema gelap */
+    .dataTables_wrapper .dataTables_length,
+    .dataTables_wrapper .dataTables_filter,
+    .dataTables_wrapper .dataTables_info,
+    .dataTables_wrapper .dataTables_paginate {
+        color: #9ca3af !important; font-weight: 600; font-size: 0.8rem; padding-top: 10px;
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+        color: #d1d5db !important; border-radius: 0.5rem !important; border: 1px solid transparent !important;
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+        background: #374151 !important; color: #ffffff !important; border: 1px solid #4b5563 !important;
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+        background: #2563eb !important; color: #ffffff !important; border: 1px solid #2563eb !important;
+    }
+    .dataTables_wrapper input {
+        background-color: #111827 !important; border: 1px solid #374151 !important; color: #ffffff !important; border-radius: 0.5rem; padding: 5px 10px;
+    }
+</style>
+
+<main class="p-4 sm:ml-64 pt-20 bg-gray-900 min-h-screen text-gray-300">
+    
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 border-b border-gray-800 pb-4">
+        <div>
+            <h1 class="text-2xl font-black text-white tracking-tight">PROFILE PAKET PPPoE</h1>
+            <p class="text-sm text-gray-400 font-bold uppercase tracking-wider">Manajemen Bandwidth & Harga Paket</p>
+        </div>
+        
+        <button id="btnAddProfile" class="bg-blue-600 hover:bg-blue-500 text-white text-sm font-black px-5 py-2.5 rounded-xl shadow-lg transition-all border border-blue-500 flex items-center">
+            <i class="bi bi-plus-lg me-2 text-lg"></i> TAMBAH PAKET
+        </button>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+        <div class="p-5 bg-gray-800 border border-gray-700 rounded-2xl shadow-lg flex items-center justify-between group hover:border-purple-500/50 transition-all relative overflow-hidden">
+            <div class="z-10">
+                <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest">Total Profile</p>
+                <p class="text-4xl font-black text-white"><%= profiles.length %></p>
+            </div>
+            <div class="w-14 h-14 bg-gray-700 rounded-2xl flex items-center justify-center text-purple-400 shadow-inner">
+                <i class="bi bi-router text-3xl"></i>
+            </div>
+        </div>
+        <div class="p-5 bg-gray-800 border border-gray-700 rounded-2xl shadow-lg flex items-center justify-between group hover:border-teal-500/50 transition-all relative overflow-hidden">
+            <div class="z-10">
+                <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest">Paket Berbayar</p>
+                <p class="text-4xl font-black text-white"><%= profiles.filter(p => p.price && parseInt(p.price) > 0).length %></p>
+            </div>
+            <div class="w-14 h-14 bg-gray-700 rounded-2xl flex items-center justify-center text-teal-400 shadow-inner">
+                <i class="bi bi-coin text-3xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-gray-800 border border-gray-700 rounded-2xl shadow-2xl overflow-hidden mb-10">
+        <div class="p-4 bg-gray-900/50 border-b border-gray-700 flex justify-between items-center">
+            <div class="flex items-center text-gray-300 font-bold text-sm tracking-widest uppercase">
+                <i class="bi bi-list-task me-2 text-blue-500"></i> Daftar Paket Internet
+            </div>
+        </div>
+        
+        <div class="p-4 overflow-x-auto">
+            <table class="w-full text-sm text-left text-gray-300" id="profileTable">
+                <thead class="text-[10px] text-gray-400 uppercase bg-gray-900 border-b border-gray-700 font-black">
+                    <tr>
+                        <th class="px-4 py-4 text-center">No</th>
+                        <th class="px-4 py-4">Nama Paket</th>
+                        <th class="px-4 py-4">Sistem Billing</th>
+                        <th class="px-4 py-4">Speed (UP/DL)</th>
+                        <th class="px-4 py-4 text-center">Prio</th>
+                        <th class="px-4 py-4">Harga Jual</th>
+                        <th class="px-4 py-4 text-right">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-700">
+                    <% profiles.forEach(function(profile, i) { 
+                        let isDynamic = (profile.active_period == '30' || profile.billing_type === 'dynamic');
+                    %>
+                    <tr class="hover:bg-gray-700/50 transition-all group">
+                        <td class="px-4 py-4 text-center text-gray-500 font-mono font-bold"><%= i+1 %></td>
+                        <td class="px-4 py-4">
+                            <span class="font-black text-white block text-base"><%= profile.name %></span>
+                        </td>
+                        <td class="px-4 py-4">
+                            <% if(isDynamic) { %>
+                                <span class="bg-yellow-900/30 text-yellow-400 text-[10px] font-black px-2 py-1 rounded border border-yellow-800">
+                                    <i class="bi bi-lightning-fill me-1"></i> DYNAMIC (30 Hari)
+                                </span>
+                            <% } else { %>
+                                <span class="bg-blue-900/30 text-blue-300 text-[10px] font-black px-2 py-1 rounded border border-blue-800">
+                                    <i class="bi bi-calendar-check-fill me-1"></i> FIXED (Tgl Pasang)
+                                </span>
+                            <% } %>
+                        </td>
+                        <td class="px-4 py-4">
+                            <span class="font-mono font-bold text-green-400"><%= profile.rateLimit %></span>
+                        </td>
+                        <td class="px-4 py-4 text-center">
+                            <span class="bg-gray-700 text-gray-300 px-2 py-0.5 rounded text-xs font-bold"><%= profile.priority || '8' %></span>
+                        </td>
+                        <td class="px-4 py-4 font-black text-blue-400">
+                            <%= (profile.price && parseInt(profile.price) > 0) ? 'Rp ' + parseInt(profile.price).toLocaleString() : 'Gratis' %>
+                        </td>
+                        <td class="px-4 py-4 text-right">
+                            <div class="inline-flex shadow-sm rounded-lg overflow-hidden border border-gray-600">
+                                <button class="edit-profile-btn p-2 bg-gray-800 hover:bg-yellow-900/50 text-yellow-500 border-r border-gray-600" 
+                                    data-name="<%= profile.name %>" 
+                                    data-price="<%= profile.price %>"
+                                    data-billingtype="<%= isDynamic ? 'dynamic' : 'fixed' %>"
+                                    data-ratelimit="<%= profile.rateLimit %>"
+                                    data-burstlimit="<%= profile.burstLimit %>"
+                                    data-burstthreshold="<%= profile.burstThreshold %>"
+                                    data-bursttime="<%= profile.burstTime %>"
+                                    data-priority="<%= profile.priority %>"
+                                    data-minrate="<%= profile.minRate %>"
+                                    data-localaddress="<%= profile.localAddress %>"
+                                    data-remoteaddress="<%= profile.remoteAddress %>">
+                                    <i class="bi bi-pencil-square"></i>
+                                </button>
+                                <button class="delete-profile-btn p-2 bg-gray-800 hover:bg-red-900/50 text-red-500" data-name="<%= profile.name %>">
+                                    <i class="bi bi-trash3-fill"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<div id="profileModal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-[100] justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full backdrop-blur-sm bg-black/80">
+    <div class="relative p-4 w-full max-w-2xl max-h-full">
+        <div class="relative bg-[#1A1E2E] rounded-xl shadow-2xl border border-[#2A314A]">
+            
+            <div class="flex items-center justify-between p-5 border-b border-[#2A314A]">
+                <h3 class="text-lg font-bold text-white tracking-wide" id="profileModalLabel">New Profile</h3>
+                <button type="button" class="text-gray-400 hover:text-white transition-colors closeModalBtn">
+                    <i class="bi bi-x-lg text-lg"></i>
+                </button>
+            </div>
+            
+            <form id="profileForm" class="p-6">
+                <input type="hidden" id="oldName" name="oldName">
+                <input type="hidden" id="billing_type" name="billing_type" value="fixed">
+                <input type="hidden" id="rateLimit" name="rateLimit">
+                <input type="hidden" id="burstLimit" name="burstLimit">
+                <input type="hidden" id="burstThreshold" name="burstThreshold">
+                <input type="hidden" id="burstTime" name="burstTime">
+                <input type="hidden" id="minRate" name="minRate">
+                <input type="hidden" id="localAddress" name="localAddress" value="">
+                <input type="hidden" id="remoteAddress" name="remoteAddress" value="">
+
+                <div class="space-y-5">
+                    <div class="flex gap-4">
+                        <input type="text" id="profileName" name="name" class="bg-[#24293D] border border-[#373E58] text-gray-200 text-sm rounded-lg focus:border-blue-500 block w-1/2 p-2.5 outline-none placeholder-gray-500 transition-all border-0 focus:ring-0 shadow-none" placeholder="Name" required>
+                        <input type="text" id="price" name="price" class="bg-[#24293D] border border-[#373E58] text-gray-200 text-sm rounded-lg focus:border-blue-500 block w-1/2 p-2.5 outline-none placeholder-gray-500 transition-all border-0 focus:ring-0 shadow-none" placeholder="Price (Rp)">
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <label class="text-gray-400 text-sm font-medium w-1/3">Rate Limit</label>
+                        <div class="flex gap-4 w-2/3">
+                            <div class="flex w-1/2 bg-[#24293D] rounded-lg border border-[#373E58] overflow-hidden focus-within:border-blue-500 transition-all">
+                                <input type="text" id="rlUp" placeholder="Upload" class="bg-transparent text-gray-200 p-2.5 w-full focus:outline-none text-sm placeholder-gray-500 border-0 focus:ring-0 shadow-none" required>
+                                <span class="bg-[#2A314A] text-gray-400 px-3 flex items-center text-xs border-l border-[#373E58]">bits/s</span>
+                            </div>
+                            <div class="flex w-1/2 bg-[#24293D] rounded-lg border border-[#373E58] overflow-hidden focus-within:border-blue-500 transition-all">
+                                <input type="text" id="rlDown" placeholder="Download" class="bg-transparent text-gray-200 p-2.5 w-full focus:outline-none text-sm placeholder-gray-500 border-0 focus:ring-0 shadow-none" required>
+                                <span class="bg-[#2A314A] text-gray-400 px-3 flex items-center text-xs border-l border-[#373E58]">bits/s</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <label class="text-gray-400 text-sm font-medium w-1/3">Burst Limit</label>
+                        <div class="flex gap-4 w-2/3">
+                            <div class="flex w-1/2 bg-[#24293D] rounded-lg border border-[#373E58] overflow-hidden focus-within:border-blue-500 transition-all">
+                                <input type="text" id="blUp" placeholder="Upload" class="bg-transparent text-gray-200 p-2.5 w-full focus:outline-none text-sm placeholder-gray-500 border-0 focus:ring-0 shadow-none">
+                                <span class="bg-[#2A314A] text-gray-400 px-3 flex items-center text-xs border-l border-[#373E58]">bits/s</span>
+                            </div>
+                            <div class="flex w-1/2 bg-[#24293D] rounded-lg border border-[#373E58] overflow-hidden focus-within:border-blue-500 transition-all">
+                                <input type="text" id="blDown" placeholder="Download" class="bg-transparent text-gray-200 p-2.5 w-full focus:outline-none text-sm placeholder-gray-500 border-0 focus:ring-0 shadow-none">
+                                <span class="bg-[#2A314A] text-gray-400 px-3 flex items-center text-xs border-l border-[#373E58]">bits/s</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <label class="text-gray-400 text-sm font-medium w-1/3">Burst Threshold</label>
+                        <div class="flex gap-4 w-2/3">
+                            <div class="flex w-1/2 bg-[#24293D] rounded-lg border border-[#373E58] overflow-hidden focus-within:border-blue-500 transition-all">
+                                <input type="text" id="btUp" placeholder="Upload" class="bg-transparent text-gray-200 p-2.5 w-full focus:outline-none text-sm placeholder-gray-500 border-0 focus:ring-0 shadow-none">
+                                <span class="bg-[#2A314A] text-gray-400 px-3 flex items-center text-xs border-l border-[#373E58]">bits/s</span>
+                            </div>
+                            <div class="flex w-1/2 bg-[#24293D] rounded-lg border border-[#373E58] overflow-hidden focus-within:border-blue-500 transition-all">
+                                <input type="text" id="btDown" placeholder="Download" class="bg-transparent text-gray-200 p-2.5 w-full focus:outline-none text-sm placeholder-gray-500 border-0 focus:ring-0 shadow-none">
+                                <span class="bg-[#2A314A] text-gray-400 px-3 flex items-center text-xs border-l border-[#373E58]">bits/s</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <label class="text-gray-400 text-sm font-medium w-1/3">Burst Time</label>
+                        <div class="flex gap-4 w-2/3">
+                            <div class="flex w-1/2 bg-[#24293D] rounded-lg border border-[#373E58] overflow-hidden focus-within:border-blue-500 transition-all">
+                                <input type="text" id="bTimeUp" placeholder="Upload" class="bg-transparent text-gray-200 p-2.5 w-full focus:outline-none text-sm placeholder-gray-500 border-0 focus:ring-0 shadow-none">
+                                <span class="bg-[#2A314A] text-gray-400 px-4 flex items-center text-xs border-l border-[#373E58]">s</span>
+                            </div>
+                            <div class="flex w-1/2 bg-[#24293D] rounded-lg border border-[#373E58] overflow-hidden focus-within:border-blue-500 transition-all">
+                                <input type="text" id="bTimeDown" placeholder="Download" class="bg-transparent text-gray-200 p-2.5 w-full focus:outline-none text-sm placeholder-gray-500 border-0 focus:ring-0 shadow-none">
+                                <span class="bg-[#2A314A] text-gray-400 px-4 flex items-center text-xs border-l border-[#373E58]">s</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <label class="text-gray-400 text-sm font-medium w-1/3">Min Rate & Priority</label>
+                        <div class="flex gap-4 w-2/3">
+                            <div class="flex w-1/2 bg-[#24293D] rounded-lg border border-[#373E58] overflow-hidden focus-within:border-blue-500 transition-all">
+                                <input type="text" id="minUp" placeholder="Min Rate (UP/DL)" class="bg-transparent text-gray-200 p-2.5 w-full focus:outline-none text-sm placeholder-gray-500 border-0 focus:ring-0 shadow-none">
+                            </div>
+                            <div class="flex w-1/2 bg-[#24293D] rounded-lg border border-[#373E58] overflow-hidden focus-within:border-blue-500 transition-all relative">
+                                <span class="absolute left-3 top-1 text-[10px] text-gray-500 pointer-events-none">Priority</span>
+                                <select id="priority" name="priority" class="bg-transparent text-gray-200 p-2.5 pt-5 w-full focus:outline-none text-sm appearance-none outline-none cursor-pointer border-0 focus:ring-0 shadow-none">
+                                    <option value="8" class="bg-[#1A1E2E]">8 (Normal)</option>
+                                    <option value="1" class="bg-[#1A1E2E]">1 (High)</option>
+                                    <option value="2" class="bg-[#1A1E2E]">2</option>
+                                    <option value="3" class="bg-[#1A1E2E]">3</option>
+                                </select>
+                                <div class="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-400">
+                                    <i class="bi bi-chevron-down text-xs"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-8 flex justify-end">
+                    <button type="submit" class="bg-[#3B82F6] text-white font-bold py-2 px-8 rounded-lg hover:bg-blue-600 transition-all shadow-lg shadow-blue-500/30 border-0">
+                        Create
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<%- include('partials/footer') %>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<script>
+    // --- HELPER UI ---
+    function openModal(id) { document.getElementById(id).classList.remove('hidden'); document.getElementById(id).classList.add('flex'); }
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); document.getElementById(id).classList.remove('flex'); }
+    
+    document.querySelectorAll('.closeModalBtn').forEach(btn => {
+        btn.addEventListener('click', () => closeModal('profileModal'));
+    });
+
+    function updateInfo(mode) {
+        // Cukup set hidden input saja, tidak perlu ubah warna karena tombolnya sudah dihapus
+        $('#billing_type').val(mode || 'fixed'); 
+    }
+
+    // Fungsi untuk memecah data dari DB ke Input Kiri/Kanan
+    function splitToInputs(val, upId, downId) {
+        if(val && val.includes('/')) {
+            let parts = val.split('/');
+            $('#' + upId).val(parts[0]);
+            $('#' + downId).val(parts[1]);
+        } else {
+            $('#' + upId).val(val || '');
+            $('#' + downId).val(val || '');
+        }
+    }
+
+    // Fungsi untuk menggabungkan Input Kiri/Kanan menjadi format DB
+    function mergeToHidden(upId, downId, hiddenId) {
+        let up = $('#' + upId).val();
+        let down = $('#' + downId).val();
+        if(up && down) {
+            $('#' + hiddenId).val(up + '/' + down);
+        } else {
+            $('#' + hiddenId).val('');
+        }
+    }
+
+    $(document).ready(function() {
+        // Init DataTable Dark Mode
+        $('#profileTable').DataTable({
+            responsive: true,
+            dom: '<"flex flex-col md:flex-row justify-between items-center p-4 gap-4"f>rt<"p-4 flex justify-between items-center text-gray-500 font-bold text-xs"ip>',
+            language: { search: "", searchPlaceholder: "Cari Paket...", zeroRecords: "Belum ada profile paket." }
+        });
+        $('.dataTables_filter input').addClass('bg-gray-900 border border-gray-700 text-white rounded-xl text-sm px-4 py-2 focus:ring-blue-500 w-full md:w-64 outline-none');
+
+        // Tombol Tambah
+        $('#btnAddProfile').click(function() {
+            $('#profileForm')[0].reset();
+            $('#oldName').val('');
+            $('#profileModalLabel').text('New Profile');
+            updateInfo('fixed');
+            openModal('profileModal');
+        });
+
+        // Tombol Edit
+        $(document).on('click', '.edit-profile-btn', function() {
+            const d = $(this).data();
+            $('#profileForm')[0].reset();
+            
+            $('#oldName').val(d.name);
+            $('#profileName').val(d.name);
+            $('#price').val(d.price);
+            $('#priority').val(d.priority || '8');
+            
+            // PEMOTONG STRING MIKROTIK
+            // Cek apakah rateLimit-nya panjang (mengandung spasi)?
+            let fullRateLimit = String(d.ratelimit || '');
+            let parts = fullRateLimit.split(' ');
+            
+            if (parts.length >= 2) {
+                // Format Panjang: RateLimit BurstLimit BurstThreshold BurstTime Priority MinRate
+                splitToInputs(parts[0], 'rlUp', 'rlDown');
+                splitToInputs(parts[1], 'blUp', 'blDown');
+                if (parts[2]) splitToInputs(parts[2], 'btUp', 'btDown');
+                if (parts[3]) splitToInputs(parts[3], 'bTimeUp', 'bTimeDown');
+                if (parts[4]) $('#priority').val(parts[4]);
+                if (parts[5]) splitToInputs(parts[5], 'minUp', 'minDown');
+            } else {
+                // Format Pendek: Cuma RateLimit (Contoh: 2M/2M)
+                splitToInputs(parts[0], 'rlUp', 'rlDown');
+                // Kosongkan sisanya
+                splitToInputs('', 'blUp', 'blDown');
+                splitToInputs('', 'btUp', 'btDown');
+                splitToInputs('', 'bTimeUp', 'bTimeDown');
+                splitToInputs('', 'minUp', 'minDown');
+            }
+            
+            $('#profileModalLabel').text('Edit Profile: ' + d.name);
+            updateInfo(d.billingtype);
+            openModal('profileModal');
+        });
+
+        // Proses Submit
+        $('#profileForm').on('submit', function(e) {
+            e.preventDefault();
+            
+            // 1. Gabungkan dulu Upload & Download masing-masing (Kiri/Kanan)
+            mergeToHidden('rlUp', 'rlDown', 'rateLimit');
+            mergeToHidden('blUp', 'blDown', 'burstLimit');
+            mergeToHidden('btUp', 'btDown', 'burstThreshold');
+            mergeToHidden('bTimeUp', 'bTimeDown', 'burstTime');
+            $('#minRate').val($('#minUp').val() || ''); 
+
+            // 2. PENJAHIT STRING MIKROTIK (SANGAT PENTING!)
+            // Kita gabungkan SEMUA nilai menjadi satu kalimat untuk MikroTik
+            let finalRateLimit = $('#rateLimit').val();
+            let bLimit = $('#burstLimit').val();
+            
+            // Cek apakah Admin mengisi Burst Limit?
+            if (bLimit && bLimit !== '/') {
+                // Jika ya, rangkai seluruh parameter menjadi 1 string dengan spasi
+                let bThresh = $('#burstThreshold').val() || '0/0';
+                if (bThresh === '/') bThresh = '0/0';
+                
+                let bTime = $('#burstTime').val() || '0/0';
+                if (bTime === '/') bTime = '0/0';
+                
+                let prio = $('#priority').val() || '8';
+                
+                let mRate = $('#minRate').val() || '0/0';
+                if (mRate === '/') mRate = '0/0';
+
+                // Contoh hasil: "2M/2M 5M/5M 1M/1M 8/8 8 1M/1M"
+                finalRateLimit = `${finalRateLimit} ${bLimit} ${bThresh} ${bTime} ${prio} ${mRate}`;
+            }
+
+            // 3. Tembakkan hasil jahitan tersebut kembali ke input 'rateLimit'
+            // Supaya Backend tinggal nyimpan data ini utuh-utuh
+            $('#rateLimit').val(finalRateLimit);
+
+            const btn = $(this).find('button[type="submit"]');
+            const originalText = btn.text();
+            btn.prop('disabled', true).text('Saving...');
+
+            $.post('/admin/mikrotik/save-profile', $(this).serialize(), function(res) {
+                if(res.success) location.reload();
+                else { alert('GAGAL: ' + res.message); btn.prop('disabled', false).text(originalText); }
+            });
+        });
+        
+        // Tombol Hapus
+        $(document).on('click', '.delete-profile-btn', function() {
+            const name = $(this).data('name');
+            if(confirm(`Hapus Profile "${name}"? Pelanggan dengan paket ini mungkin akan error.`)) {
+                $.post('/admin/mikrotik/delete-profile', { id: name }, function(res) {
+                    if(res.success) location.reload(); else alert(res.message);
+                });
+            }
+        });
+    });
+</script>

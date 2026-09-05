@@ -1,0 +1,54 @@
+{
+  "name": "pulsebill",
+  "version": "1.0.0",
+  "description": "Autonomous Telecom Billing Engine, Mikrotik RouterOS Provisioning & Multi-Gateway Payment Orchestrator",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "seed": "node scripts/seed-demo-data.js"
+  },
+  "dependencies": {
+    "@hapi/boom": "^10.0.1",
+    "@whiskeysockets/baileys": "^7.0.0-rc13",
+    "axios": "^1.13.4",
+    "bcryptjs": "^3.0.3",
+    "dotenv": "^16.6.1",
+    "ejs": "^3.1.10",
+    "exceljs": "^4.4.0",
+    "express": "^4.18.2",
+    "express-ejs-layouts": "^2.5.1",
+    "express-mysql-session": "^3.0.3",
+    "express-rate-limit": "^8.4.1",
+    "express-session": "^1.19.0",
+    "midtrans-client": "^1.4.3",
+    "moment": "^2.30.1",
+    "multer": "^2.0.2",
+    "mysql2": "^3.16.2",
+    "net-snmp": "^3.26.1",
+    "node-cron": "^3.0.3",
+    "node-fetch": "^3.3.2",
+    "node-routeros": "^1.6.9",
+    "pino": "^8.11.0",
+    "protobufjs": "7.2.4",
+    "qrcode-terminal": "^0.12.0",
+    "socket.io": "^4.8.3",
+    "sqlite3": "^5.1.7",
+    "winston": "^3.8.2",
+    "xendit-node": "^7.0.0",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.2.4",
+    "autoprefixer": "^10.5.0",
+    "ejs-lint": "^2.0.1",
+    "nodemon": "^3.1.10",
+    "postcss": "^8.5.13",
+    "tailwindcss": "^4.2.4"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "author": "Feri Hidayat <ferihidayat95@gmail.com>",
+  "license": "MIT"
+}

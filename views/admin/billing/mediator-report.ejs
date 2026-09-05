@@ -1,0 +1,603 @@
+<%- include('../../partials/header') %>
+<body class="bg-[#0f172a] text-slate-300 font-sans antialiased selection:bg-blue-500 selection:text-white">
+
+<div class="no-print">
+    <%- include('../../partials/admin-header') %>
+    <%- include('../../partials/billing-sidebar', { page: 'finance', settings: settings }) %>
+</div>
+
+<main class="p-4 sm:ml-64 pt-20 min-h-screen transition-all duration-300">
+
+    <div class="mb-8">
+        <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+            <div>
+                <h1 class="text-3xl font-black text-white tracking-tighter uppercase leading-none">
+                    Laporan <span class="text-blue-500">Komisi Mediator</span>
+                </h1>
+                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-[4px] mt-2 italic">Rekapitulasi Arus Kas</p>
+            </div>
+            
+            <div class="flex gap-2">
+                <button type="button" onclick="printLaporanKhusus()" class="px-5 py-2.5 text-xs font-black text-white bg-slate-800 border border-slate-700 rounded-xl hover:bg-slate-700 transition-all uppercase tracking-widest shadow-lg">
+                    <i class="bi bi-printer-fill me-2 text-blue-400"></i> Print Laporan
+                </button>
+                <button type="button" onclick="simpanSemua()" class="px-5 py-2.5 text-xs font-black text-white bg-blue-600 rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-500/20 transition-all uppercase tracking-widest">
+                    <i class="bi bi-save-fill me-2 text-white/80"></i> Simpan
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div class="bg-[#1e293b] border border-slate-700/50 rounded-2xl p-6 shadow-xl relative overflow-hidden group">
+                <div class="relative z-10 text-white">
+                    <p class="text-[10px] font-black opacity-60 uppercase tracking-widest mb-1">Tagihan Lunas</p>
+                    <h3 class="text-2xl font-black uppercase"><%= totalTrx %> <span class="text-xs font-bold opacity-60">Trx</span></h3>
+                </div>
+                <i class="bi bi-receipt absolute top-1/2 -right-2 -translate-y-1/2 text-6xl text-white/5"></i>
+            </div>
+            <div class="bg-[#1e293b] border border-emerald-500/30 rounded-2xl p-6 shadow-xl relative overflow-hidden group">
+                <div class="relative z-10 text-emerald-400">
+                    <p class="text-[10px] font-black opacity-70 uppercase tracking-widest mb-1 text-slate-500">Total Pemasukan</p>
+                    <h3 class="text-2xl font-black font-mono">Rp <%= parseInt(totalUangMasuk).toLocaleString('id-ID') %></h3>
+                </div>
+                <i class="bi bi-wallet2 absolute top-1/2 -right-2 -translate-y-1/2 text-6xl text-emerald-500/10"></i>
+            </div>
+            <div class="bg-[#1e293b] border border-amber-500/30 rounded-2xl p-6 shadow-xl relative overflow-hidden group">
+                <div class="relative z-10 text-amber-400">
+                    <p class="text-[10px] font-black opacity-70 uppercase tracking-widest mb-1 text-slate-500">Total Komisi</p>
+                    <h3 class="text-2xl font-black font-mono">Rp <%= parseInt(totalKomisi).toLocaleString('id-ID') %></h3>
+                </div>
+                <i class="bi bi-people-fill absolute top-1/2 -right-2 -translate-y-1/2 text-6xl text-amber-500/10"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-[#1e293b] border border-slate-700/60 rounded-3xl shadow-2xl overflow-hidden mb-10">
+        
+        <div class="px-6 py-5 border-b border-slate-700 bg-[#111827]/50">
+            <div class="flex flex-wrap gap-2">
+                <button type="button" onclick="switchTab('tab_laporan', this)" class="tab-btn px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all bg-blue-600 text-white shadow-lg active-tab">
+                    <i class="bi bi-table me-2"></i> Data Pembayaran
+                </button>
+                <button type="button" onclick="switchTab('tab_mediator', this)" class="tab-btn px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all text-slate-500 hover:bg-slate-800 hover:text-white">
+                    <i class="bi bi-person-badge me-2"></i> Data Mediator
+                </button>
+            </div>
+        </div>
+
+        <div class="p-6">
+            
+            <div id="tab_laporan" class="tab-content block">
+                <form method="GET" action="" class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#111827]/30 p-4 rounded-2xl border border-slate-700/50">
+                    
+                    <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+                        <div class="flex items-center gap-2">
+                            <i class="bi bi-funnel-fill text-blue-500 text-sm"></i>
+                        </div>
+                        
+                        <select name="mediator_id" id="filterMediatorUtama" class="bg-[#0f172a] border border-slate-700 text-blue-400 text-xs font-bold rounded-xl px-4 py-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
+                            <option value="">-- Semua Mediator --</option>
+                            <% mediators.forEach(m => { %>
+                                <option value="<%= m.id %>" <%= (typeof filterMediator !== 'undefined' && filterMediator == m.id) ? 'selected' : '' %>><%= m.name %></option>
+                            <% }) %>
+                        </select>
+
+                        <select name="bulan" class="bg-[#0f172a] border border-slate-700 text-amber-400 text-xs font-bold rounded-xl px-4 py-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-all">
+                            <option value="">-- 2 Bulan Terakhir --</option>
+                            <option value="1" <%= (typeof filterBulan !== 'undefined' && filterBulan == '1') ? 'selected' : '' %>>Januari</option>
+                            <option value="2" <%= (typeof filterBulan !== 'undefined' && filterBulan == '2') ? 'selected' : '' %>>Februari</option>
+                            <option value="3" <%= (typeof filterBulan !== 'undefined' && filterBulan == '3') ? 'selected' : '' %>>Maret</option>
+                            <option value="4" <%= (typeof filterBulan !== 'undefined' && filterBulan == '4') ? 'selected' : '' %>>April</option>
+                            <option value="5" <%= (typeof filterBulan !== 'undefined' && filterBulan == '5') ? 'selected' : '' %>>Mei</option>
+                            <option value="6" <%= (typeof filterBulan !== 'undefined' && filterBulan == '6') ? 'selected' : '' %>>Juni</option>
+                            <option value="7" <%= (typeof filterBulan !== 'undefined' && filterBulan == '7') ? 'selected' : '' %>>Juli</option>
+                            <option value="8" <%= (typeof filterBulan !== 'undefined' && filterBulan == '8') ? 'selected' : '' %>>Agustus</option>
+                            <option value="9" <%= (typeof filterBulan !== 'undefined' && filterBulan == '9') ? 'selected' : '' %>>September</option>
+                            <option value="10" <%= (typeof filterBulan !== 'undefined' && filterBulan == '10') ? 'selected' : '' %>>Oktober</option>
+                            <option value="11" <%= (typeof filterBulan !== 'undefined' && filterBulan == '11') ? 'selected' : '' %>>November</option>
+                            <option value="12" <%= (typeof filterBulan !== 'undefined' && filterBulan == '12') ? 'selected' : '' %>>Desember</option>
+                        </select>
+
+                        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black rounded-xl px-4 py-2 uppercase tracking-widest shadow-lg transition-all">
+                            Terapkan
+                        </button>
+                        
+                        <% if((typeof filterMediator !== 'undefined' && filterMediator) || (typeof filterBulan !== 'undefined' && filterBulan)) { %>
+                            <span class="text-[9px] font-black bg-emerald-500/10 text-emerald-500 px-3 py-1 rounded-full uppercase tracking-tighter">Terfilter</span>
+                        <% } %>
+                    </div>
+                
+                    <div class="relative w-full md:w-64">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                            <i class="bi bi-search text-slate-500 text-xs"></i>
+                        </div>
+                        <input type="text" id="customSearch" placeholder="Cari pelanggan..." class="w-full bg-[#0f172a] border border-slate-700 text-white text-xs font-bold rounded-xl pl-9 pr-4 py-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder-slate-600 shadow-inner">
+                    </div>
+                </form>  
+
+                <div id="bulkActionArea" class="mb-4 hidden">
+                    <div class="bg-red-500/10 border-l-4 border-red-500 p-4 rounded-xl flex justify-between items-center shadow-lg">
+                        <div class="flex items-center text-red-400 font-bold text-sm">
+                            <i class="bi bi-exclamation-triangle-fill me-3 animate-pulse"></i>
+                            <span id="jumlahTerpilih">0</span> Data Dipilih
+                        </div>
+                        <button type="button" onclick="hapusMasal()" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-[10px] font-black rounded-lg uppercase tracking-widest">Hapus</button>
+                    </div>
+                </div>
+
+                <div id="areaSiapCetak" class="overflow-x-auto">
+                    <table id="tableUtama" class="w-full text-left text-slate-400">
+                        <thead class="text-[10px] text-slate-500 uppercase bg-[#111827]/30 border-b border-slate-700">
+                            <tr>
+                                <th class="px-4 py-4 font-black text-center w-10 ignore-print"><input type="checkbox" id="checkAll" class="rounded bg-slate-800 border-slate-700 text-blue-600"></th>
+                                <th class="px-4 py-4 font-black text-center w-10">No</th>
+                                <th class="px-4 py-4 font-black text-center">Tanggal</th>
+                                <th class="px-4 py-4 font-black text-left">Pelanggan</th>
+                                <th class="px-4 py-4 font-black text-center">Paket</th>
+                                <th class="px-4 py-4 font-black text-center">Total</th>
+                                <th class="px-4 py-4 font-black text-center">Metode</th>
+                                <th class="px-4 py-4 font-black text-center" width="180">Mediator</th>
+                                <th class="px-4 py-4 font-black text-center" width="150">Komisi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-700/50">
+                            <% laporan.forEach((row, index) => { %>
+                            <tr class="hover:bg-slate-800/50 transition-colors group">
+                                <td class="px-4 py-4 text-center ignore-print">
+                                    <input type="checkbox" class="cb-pilih rounded bg-slate-800 border-slate-700 text-blue-600" value="<%= row.id %>">
+                                </td>
+                                <td class="px-4 py-4 text-center font-mono text-xs text-slate-500"><%= index + 1 %></td>
+                                <td class="px-4 py-4 text-center text-xs font-bold text-white"><%= new Date(row.payment_date).toLocaleDateString('id-ID') %></td>
+                                <td class="px-4 py-4">
+                                    <div class="font-bold text-white text-sm uppercase"><%= row.customer_name || '-' %></div>
+                                    <div class="text-[9px] text-slate-500 mt-1"><%= row.customer_address || '-' %></div>
+                                    <input type="hidden" class="v-id" value="<%= row.id %>">
+                                </td>
+                                <td class="px-4 py-4 text-center">
+                                    <span class="px-2 py-0.5 rounded bg-[#111827] border border-slate-700 text-[9px] font-bold text-slate-400 uppercase"><%= row.package_name || row.profile_name %></span>
+                                </td>
+                                <td class="px-4 py-4 text-center font-mono text-xs font-black text-white">
+                                    Rp <%= parseInt(row.total_price || row.amount || 0).toLocaleString('id-ID') %>
+                                </td>
+                                <td class="px-4 py-4 text-center">
+                                    <span class="px-2 py-1 rounded bg-[#111827] border border-slate-700 text-[9px] font-bold <%= row.metode_bayar && row.metode_bayar.includes('Cash') ? 'text-amber-400' : 'text-blue-400' %> uppercase tracking-widest">
+                                        <%= row.metode_bayar || 'Cash/Manual' %>
+                                    </span>
+                                </td>
+                                <td class="px-4 py-4 text-center">
+                                    <div class="web-only">
+                                        <select class="w-full bg-[#111827] border border-slate-700 text-white text-[11px] rounded-lg p-1.5 font-bold v-agent" onchange="gantiKomisi(this)">
+                                            <option value="" data-comm="0">- Pilih -</option>
+                                            <% mediators.forEach(m => { %>
+                                                <option value="<%= m.id %>" data-comm="<%= m.commission || 0 %>" <%= row.mediator_id == m.id ? 'selected' : '' %>>
+                                                    <%= m.name %> (<%= m.commission || 0 %>%)
+                                                </option>
+                                            <% }) %>
+                                        </select>
+                                    </div>
+                                    <span class="print-text hidden"><%= row.mediator_name || '-' %></span>
+                                </td>
+                                <td class="px-4 py-4 text-center">
+                                    <div class="web-only flex items-center bg-[#111827] border border-slate-700 rounded-lg px-2 py-1.5">
+                                        <span class="text-[10px] text-slate-500 mr-1">Rp</span>
+                                        <input type="number" class="bg-transparent border-0 text-xs font-bold text-white w-full p-0 v-comm" value="<%= row.commission_amount || row.komisi || 0 %>">
+                                    </div>
+                                    <span class="hidden nilai-komisi" data-agent="<%= row.mediator_name %>" data-val="<%= row.commission_amount || row.komisi || 0 %>"></span>
+                                    <span class="print-text hidden font-mono">Rp <%= parseInt(row.commission_amount || row.komisi || 0).toLocaleString('id-ID') %></span>
+                                </td>
+                            </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="tab_mediator" class="tab-content hidden">
+                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    <div class="lg:col-span-4">
+                        <div class="bg-[#111827]/50 border border-slate-700 rounded-2xl p-6">
+                            <h4 class="text-sm font-black text-white uppercase mb-4 border-b border-slate-700 pb-2">Input Mediator</h4>
+                            <form id="formMediator" class="space-y-4">
+                                <input type="hidden" name="id" id="med_id" value="0">
+                                <div><label class="block text-[10px] font-black text-slate-500 uppercase">Nama</label>
+                                <input type="text" name="name" id="med_name" required class="w-full bg-[#0f172a] border border-slate-700 rounded-xl p-3 text-sm text-white font-bold"></div>
+                                <div><label class="block text-[10px] font-black text-slate-500 uppercase">Komisi Default</label>
+                                <input type="number" name="commission" id="med_comm" required class="w-full bg-[#0f172a] border border-slate-700 rounded-xl p-3 text-sm text-white font-mono"></div>
+                                <button type="submit" class="w-full py-3 bg-blue-600 text-white text-[10px] font-black rounded-xl uppercase hover:bg-blue-700 transition-colors shadow-lg">Simpan</button>
+                                <button type="button" id="btnBatal" onclick="resetForm()" class="hidden w-full mt-2 py-2 bg-slate-700 text-slate-300 hover:text-white text-[10px] font-black rounded-xl uppercase transition-colors">Batal Edit</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-8">
+                        <div class="overflow-x-auto rounded-xl border border-slate-700/50">
+                            <table class="w-full text-left text-slate-400">
+                                <thead class="text-[10px] uppercase bg-[#111827]/30 border-b border-slate-700">
+                                    <tr><th class="px-6 py-4">Nama</th><th class="px-6 py-4 text-center">Komisi Default</th><th class="px-6 py-4 text-right">Aksi</th></tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-700/50">
+                                    <% mediators.forEach(m => { %>
+                                    <tr class="hover:bg-slate-800/30 transition-colors">
+                                        <td class="px-6 py-4 font-bold text-white"><%= m.name %></td>
+                                        <td class="px-6 py-4 text-center font-mono text-emerald-400">Rp <%= parseInt(m.commission || 0).toLocaleString('id-ID') %></td>
+                                        <td class="px-6 py-4 text-right">
+                                            <button type="button" onclick="editMediator('<%= m.id %>', '<%= m.name %>', '<%= m.commission || 0 %>')" class="text-amber-400 hover:text-amber-300 mr-3 p-2 bg-amber-500/10 rounded-lg transition-colors"><i class="bi bi-pencil-square"></i></button>
+                                            <button type="button" onclick="hapusMediator('<%= m.id %>')" class="text-red-400 hover:text-red-300 p-2 bg-red-500/10 rounded-lg transition-colors"><i class="bi bi-trash"></i></button>
+                                        </td>
+                                    </tr>
+                                    <% }) %>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</main>
+
+<%- include('../../partials/footer') %>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<style>
+    /* BATMAN WEB STYLES (Agar web tetap gelap) */
+    .dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_length { display: none; }
+    .dataTables_info { color: #64748b !important; font-size: 0.7rem; font-weight: 800; margin-top: 1rem; padding-left: 1rem; }
+    .dataTables_paginate { margin-top: 1rem; display: flex; justify-content: flex-end; gap: 5px; padding-right: 1rem; }
+    .paginate_button { padding: 4px 12px; border-radius: 8px; background: #111827; color: #94a3b8 !important; cursor: pointer; border: 1px solid #334151; font-size: 0.7rem; font-weight: 800; }
+    .paginate_button.current { background: #3b82f6; color: white !important; border-color: #3b82f6; }
+</style>
+
+<script>
+    $(document).ready(function() {
+        var table = $('#tableUtama').DataTable({
+            "pageLength": 50, 
+            "ordering": false, 
+            "language": { "search": "", "emptyTable": "Tidak ada transaksi yang cocok." }
+        });
+        
+        $('#customSearch').on('keyup', function() {
+            table.search(this.value).draw();
+        });
+        
+        $(document).on('change', '.cb-pilih, #checkAll', function() {
+            if (this.id === 'checkAll') {
+                $('.cb-pilih', table.rows({search:'applied'}).nodes()).prop('checked', this.checked);
+            }
+            const count = $('.cb-pilih:checked').length;
+            if (count > 0) { 
+                $('#bulkActionArea').show().removeClass('hidden'); 
+                $('#jumlahTerpilih').text(count); 
+            } else { 
+                $('#bulkActionArea').hide(); 
+            }
+        });
+    });
+
+    function switchTab(tabId, btn) {
+        $('.tab-content').addClass('hidden').removeClass('block');
+        $('#' + tabId).removeClass('hidden').addClass('block');
+        $('.tab-btn').removeClass('bg-blue-600 text-white shadow-lg active-tab').addClass('text-slate-500 hover:bg-slate-800');
+        $(btn).addClass('bg-blue-600 text-white shadow-lg active-tab').removeClass('text-slate-500');
+    }
+
+    function gantiKomisi(el) {
+        var $row = $(el).closest('tr');
+        
+        // 1. Ambil PERSENTASE dari atribut data-comm (Misal: 15 untuk 15%)
+        var persenKomisi = parseFloat($(el).find(':selected').data('comm')) || 0;
+        
+        var name = $(el).find(':selected').text().trim();
+        
+        // 2. Ambil TOTAL TAGIHAN (dari kolom ke-6 tabel)
+        var teksTotalTagihan = $row.find('td:eq(5)').text().replace(/[^0-9]/g, '');
+        var totalTagihan = parseFloat(teksTotalTagihan) || 0;
+    
+        // 3. RUMUS 15% SULTAN: (Total Tagihan * Persentase) / 100
+        var hasilKomisiAkurat = totalTagihan * (persenKomisi / 100);
+    
+        if(persenKomisi !== undefined) {
+            // 4. Masukkan hasil hitungan otomatis (misal 22500) ke dalam kotak input (.v-comm)
+            $row.find('.v-comm').val(hasilKomisiAkurat);
+            
+            // 5. Update teks untuk tampilan Print (Nota)
+            $row.find('.print-text').first().text(name);
+            $row.find('.print-text').last().text('Rp ' + parseInt(hasilKomisiAkurat).toLocaleString('id-ID'));
+            
+            // 6. Simpan data aslinya di background
+            $row.find('.nilai-komisi').data('val', hasilKomisiAkurat);
+            $row.find('.nilai-komisi').data('agent', name);
+        }
+    }
+
+    // --- FUNGSI PRINT SAKTI (DIKEMBALIKAN KE ASLI PUNYA BOS) ---
+    function printLaporanKhusus() {
+        var dt = $('#tableUtama').DataTable();
+        var currentLen = dt.page.len(); 
+        
+        // Paksa tabel buka semua halaman sebelum discrape untuk print
+        dt.page.len(-1).draw(false); 
+
+        let rekapHtml = '';
+        let rekap = {};
+        let grandTotal = 0;
+        
+        // Ambil nama mediator dari dropdown filter (jika ada)
+        const filterAktif = $('#filterMediatorUtama option:selected').text();
+
+        // Hitung Rekap (Hanya baris yang :visible)
+        $('#tableUtama tbody tr:visible').each(function() {
+            let name = $(this).find('.v-agent option:selected').text().trim();
+            if (name === '- Pilih -') name = $(this).find('.print-text').first().text().trim();
+            let val = parseFloat($(this).find('.v-comm').val()) || 0;
+            
+            if(name && name !== '-' && name !== '- Pilih -' && val > 0) {
+                if(!rekap[name]) rekap[name] = { count: 0, sum: 0 };
+                rekap[name].count++;
+                rekap[name].sum += val;
+                grandTotal += val;
+            }
+        });
+
+        for(var n in rekap) {
+            rekapHtml += `<tr><td style="padding:2px 0;">${n} (${rekap[n].count} Trx)</td><td style="padding:2px 0; font-weight:bold; text-align:right;">Rp ${rekap[n].sum.toLocaleString('id-ID')}</td></tr>`;
+        }
+        rekapHtml += `<tr style="border-top:2px solid black;"><td style="padding:4px 0; font-weight:bold;">TOTAL SELURUHNYA</td><td style="padding:4px 0; font-weight:bold; text-align:right;">Rp ${grandTotal.toLocaleString('id-ID')}</td></tr>`;
+
+        // Clone Tabel Data
+        let rowsHtml = '';
+        let printIndex = 1;
+        $('#tableUtama tbody tr:visible').each(function() {
+            let tgl = $(this).find('td:eq(2)').text().trim();
+            let nama = $(this).find('td:eq(3) div').first().text().trim();
+            let paket = $(this).find('td:eq(4) span').text().trim();
+            let total = $(this).find('td:eq(5)').text().trim();
+            let metode = $(this).find('td:eq(6) span').text().trim(); 
+            let medName = $(this).find('.v-agent option:selected').text().trim();
+            if(medName === '- Pilih -') medName = $(this).find('.print-text').first().text().trim() || '-';
+            let commVal = $(this).find('.v-comm').val();
+            let commTxt = 'Rp ' + parseInt(commVal || 0).toLocaleString('id-ID');
+
+            rowsHtml += `
+                <tr>
+                    <td style="text-align:center; padding:3px; border:1px solid #000;">${printIndex++}</td>
+                    <td style="text-align:center; padding:3px; border:1px solid #000;">${tgl}</td>
+                    <td style="padding:3px; border:1px solid #000; font-size:9pt;">${nama}</td>
+                    <td style="text-align:center; padding:3px; border:1px solid #000; font-size:8pt;">${paket}</td>
+                    <td style="text-align:right; padding:3px; border:1px solid #000;">${total}</td>
+                    <td style="text-align:center; padding:3px; border:1px solid #000; font-size:8pt;">${metode}</td> 
+                    <td style="text-align:center; padding:3px; border:1px solid #000;">${medName}</td>
+                    <td style="text-align:right; padding:3px; border:1px solid #000;">${commTxt}</td>
+                </tr>
+            `;
+        });
+
+        // Kembalikan ukuran tabel ke semula
+        dt.page.len(currentLen).draw(false);
+
+        // Buka Jendela Baru
+        let subJudul = filterAktif && filterAktif !== '-- Semua Mediator --' ? ` - ${filterAktif}` : '';
+        let w = window.open('', 'PRINT', 'height=600,width=1000');
+        w.document.write(`
+            <html>
+            <head>
+                <title>Laporan Komisi${subJudul}</title>
+                <style>
+                    @page { size: A4 landscape; margin: 5mm; }
+                    body { font-family: Arial, sans-serif; font-size: 10pt; margin: 0; padding: 10px; }
+                    h2 { margin: 0 0 2px 0; font-size: 14pt; }
+                    p { margin: 0; font-size: 9pt; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+                    th { background: #eee; border: 1px solid #000; padding: 4px; font-weight:bold; font-size: 9pt; }
+                    td { font-size: 9pt; }
+                    .footer-box { display: flex; justify-content: space-between; margin-top: 15px; border: 1px solid #000; padding: 10px; break-inside: avoid; }
+                    .sign-box { width: 100%; margin-top: 20px; border: none; }
+                    .sign-col { text-align: center; width: 50%; vertical-align: top; }
+                </style>
+            </head>
+            <body>
+                <div style="text-align:center; border-bottom: 2px double #000; padding-bottom: 5px;">
+                    <h2>LAPORAN PEMBAYARAN & KOMISI${subJudul.toUpperCase()}</h2>
+                    <p>INETKU NETWORK | Dicetak: ${new Date().toLocaleString('id-ID')}</p>
+                </div>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th width="30">No</th>
+                            <th width="80">Tanggal</th>
+                            <th>Pelanggan</th>
+                            <th width="100">Paket</th>
+                            <th width="90">Total Bayar</th>
+                            <th width="80">Metode</th> <th width="100">Mediator</th>
+                            <th width="90">Komisi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${rowsHtml}
+                    </tbody>
+                </table>
+                
+                <div class="footer-box">
+                    <div style="width: 48%;">
+                        <b style="font-size: 9pt;">RINGKASAN KOMISI:</b>
+                        <table style="width:100%; margin-top:5px; border:none; font-size: 9pt;">${rekapHtml}</table>
+                    </div>
+                    <div style="width: 48%; text-align: right; font-style: italic; font-size: 8pt;">
+                        <br>Generated by INETKU Billing System
+                    </div>
+                </div>
+
+                <table class="sign-box">
+                    <tr>
+                        <td class="sign-col">
+                            <p>Dibuat Oleh,</p><br><br><br><p><b>( Admin Keuangan )</b></p>
+                        </td>
+                        <td class="sign-col">
+                            <p>Mengetahui,</p><br><br><br><p><b>( Pimpinan )</b></p>
+                        </td>
+                    </tr>
+                </table>
+            </body>
+            </html>
+        `);
+        w.document.close();
+        w.focus();
+        setTimeout(() => { w.print(); w.close(); }, 500);
+    }
+
+    function simpanSemua() {
+        Swal.fire({
+            title: 'Simpan Perubahan?',
+            text: "Data mediator dan komisi akan diperbarui",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3b82f6',
+            cancelButtonColor: '#475569',
+            confirmButtonText: 'Ya, Simpan!',
+            background: '#0f172a',
+            color: '#fff'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                var dt = $('#tableUtama').DataTable();
+                var data = [];
+                
+                dt.rows().every(function () {
+                    var row = $(this.node());
+                    var id = row.find('.v-id').val();
+                    var med = row.find('.v-agent').val();
+                    var comm = row.find('.v-comm').val();
+                    
+                    // --- PENYARING SULTAN: HANYA PROSES YANG ADA ID & MEDIATORNYA ---
+                    if (id && med && med !== "" && med !== "null") { 
+                        data.push({ 
+                            id: parseInt(id), 
+                            mediator_id: parseInt(med), 
+                            comm: parseFloat(comm) || 0 
+                        }); 
+                    }
+                });
+    
+                // Proteksi jika user belum memilih satu pun mediator di tabel
+                if (data.length === 0) {
+                    Swal.fire({
+                        icon: 'info', 
+                        title: 'Tidak Ada Perubahan', 
+                        text: 'Silakan pilih mediator terlebih dahulu pada salah satu baris transaksi, Bos!', 
+                        background: '#0f172a', 
+                        color: '#fff'
+                    });
+                    return;
+                }
+    
+                $.ajax({ 
+                    url: '/admin/finance/api/bulk-update', 
+                    method: 'POST', 
+                    contentType: 'application/json', 
+                    data: JSON.stringify(data), 
+                    success: function(res) { 
+                        if(res.success) { 
+                            Swal.fire({icon: 'success', title: 'Tersimpan!', background: '#0f172a', color: '#fff', timer:1500, showConfirmButton: false})
+                            .then(() => location.reload());
+                        } else {
+                            Swal.fire({icon: 'error', title: 'Gagal', text: res.message, background: '#0f172a', color: '#fff'});
+                        }
+                    },
+                    error: function(xhr) {
+                        Swal.fire({icon: 'error', title: 'Gagal', text: 'Server menolak data. Pastikan format angka komisi benar.', background: '#0f172a', color: '#fff'});
+                    }
+                });
+            }
+        });
+    }
+
+    function hapusMasal() {
+        const ids = []; 
+        $('.cb-pilih:checked').each(function() { ids.push($(this).val()); });
+        if (ids.length === 0) return;
+        
+        Swal.fire({
+            title: 'Yakin Hapus Data?',
+            text: `${ids.length} Laporan akan dimusnahkan permanen!`,
+            icon: 'error',
+            showCancelButton: true,
+            confirmButtonColor: '#dc2626',
+            cancelButtonColor: '#475569',
+            confirmButtonText: 'Musnahkan!',
+            background: '#0f172a',
+            color: '#fff'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({ 
+                    url: '/admin/finance/api/bulk-delete-reports', 
+                    method: 'POST', 
+                    contentType: 'application/json', 
+                    data: JSON.stringify({ ids: ids }), 
+                    success: function(res) { 
+                        if(res.success) { 
+                            Swal.fire({icon: 'success', title: 'Dihapus!', background: '#0f172a', color: '#fff', timer:1500, showConfirmButton: false})
+                            .then(() => location.reload());
+                        } else {
+                            Swal.fire({icon: 'error', title: 'Gagal', text: res.message, background: '#0f172a', color: '#fff'});
+                        }
+                    } 
+                });
+            }
+        });
+    }
+
+    $('#formMediator').submit(function(e) {
+        e.preventDefault();
+        const btn = $(this).find('button[type="submit"]');
+        const originalText = btn.text();
+        btn.prop('disabled', true).text('PROCESSING...');
+
+        $.post('/admin/finance/api/mediator-save', $(this).serialize())
+        .done(function(res) {
+            if(res.success) {
+                Swal.fire({
+                    icon: 'success', title: 'BERHASIL!', text: res.message || 'Data Mediator Berhasil Disimpan.',
+                    background: '#0a0f1e', color: '#fff', timer: 2000, showConfirmButton: false
+                }).then(() => { location.reload(); });
+            } else {
+                Swal.fire({ icon: 'error', title: 'GAGAL SIMPAN', text: res.message, background: '#0a0f1e', color: '#fff' });
+                btn.prop('disabled', false).text(originalText);
+            }
+        })
+        .fail(function(xhr) {
+            Swal.fire({ icon: 'error', title: 'KONEKSI GAGAL', text: 'Error ' + xhr.status, background: '#0a0f1e', color: '#fff' });
+            btn.prop('disabled', false).text(originalText);
+        });
+    });
+
+    function editMediator(id, name, comm) { 
+        $('#med_id').val(id); $('#med_name').val(name); $('#med_comm').val(comm); 
+        $('#btnBatal').removeClass('hidden'); 
+        switchTab('tab_mediator', $('.tab-btn').eq(1)); 
+    }
+    
+    function resetForm() { 
+        $('#formMediator')[0].reset(); $('#med_id').val(0); $('#btnBatal').addClass('hidden'); 
+    }
+    
+    function hapusMediator(id) { 
+        Swal.fire({
+            title: 'Hapus Mediator?', icon: 'warning', showCancelButton: true,
+            confirmButtonColor: '#dc2626', cancelButtonColor: '#475569', confirmButtonText: 'Hapus',
+            background: '#0f172a', color: '#fff'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.post('/admin/finance/api/mediator-delete', {id: id}, function(res) { 
+                    if(res.success) location.reload(); 
+                }); 
+            }
+        });
+    }
+</script>
+
+</body>
+</html>
