@@ -1,4 +1,4 @@
-const pool = require('./database'); 
+﻿const pool = require('./database'); 
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
@@ -1443,7 +1443,7 @@ class BillingManager {
                 amount: invoice.amount,
                 customer_name: customer.name,
                 customer_phone: customer.phone,
-                customer_email: customer.email || 'customer@inetku.net', // Fallback Email Wajib
+                customer_email: customer.email || 'customer@pulsebill.io', // Fallback Email Wajib
                 package_name: invoice.package_name || 'Paket Internet',
                 package_id: invoice.package_id
             };
@@ -1506,7 +1506,7 @@ class BillingManager {
                 amount: invoice.amount,
                 customer_name: customer.name,
                 customer_phone: customer.phone,
-                customer_email: customer.email || 'customer@inetku.net', // Fallback anti-error gateway
+                customer_email: customer.email || 'customer@pulsebill.io', // Fallback anti-error gateway
                 package_name: invoice.package_name || 'Paket Internet',
                 package_id: invoice.package_id,
                 payment_method: method
@@ -1685,7 +1685,7 @@ class BillingManager {
             'merchant_ref': invoice_number,
             'amount': amount,
             'customer_name': inv.name,
-            'customer_email': inv.email || 'billing@inetku.net',
+            'customer_email': inv.email || 'billing@pulsebill.io',
             'customer_phone': inv.phone || '08123456789',
             'order_items': [{ 'sku': 'NET', 'name': 'Internet Bill ' + invoice_number, 'price': amount, 'quantity': 1 }],
             'return_url': 'https://' + hostname + '/payment/finish',
@@ -2919,7 +2919,7 @@ class BillingManager {
                 ['auto_invoice_enabled', 'false'],
                 ['invoice_generation_date', '14'],
                 ['invoice_due_days', '7'],
-                ['admin_phone', '6282130769320'],
+                ['admin_phone', '6281234567890'],
                 ['whatsapp_templates', '{}']
             ];
 
@@ -3253,7 +3253,7 @@ class BillingManager {
             // 2. Logika Link Pembayaran Otomatis
             if (!invoice.tripay_url) {
                 // Pastikan domain sudah sesuai dengan config Bos
-                invoice.tripay_url = `https://inetku.sgtnet.cloud/payment/select/${invoice.invoice_number}/${invoice.customer_id}`;
+                invoice.tripay_url = `https://billing.pulsebill.io/payment/select/${invoice.invoice_number}/${invoice.customer_id}`;
             }
 
             return invoice;

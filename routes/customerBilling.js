@@ -1,4 +1,4 @@
-const dbPool = require('../config/database');
+﻿const dbPool = require('../config/database');
 const express = require('express');
 const router = express.Router();
 const billingManager = require('../config/billing');
@@ -14,23 +14,23 @@ const ensureCustomerSession = async (req, res, next) => {
 
         // Jika tidak ada customer_username tapi ada phone, ambil dari billing
         if (!username && phone) {
-            console.log(`🔄 [SESSION_FIX] No customer_username but phone exists: ${phone}, fetching from billing`);
+            console.log(`ðŸ”„ [SESSION_FIX] No customer_username but phone exists: ${phone}, fetching from billing`);
             try {
                 const customer = await billingManager.getCustomerByPhone(phone);
                 if (customer) {
                     req.session.customer_username = customer.username;
                     req.session.customer_phone = phone;
                     username = customer.username;
-                    console.log(`✅ [SESSION_FIX] Set customer_username: ${username} for phone: ${phone}`);
+                    console.log(`âœ… [SESSION_FIX] Set customer_username: ${username} for phone: ${phone}`);
                 } else {
                     // Customer tidak ada di billing, buat temporary username
                     req.session.customer_username = `temp_${phone}`;
                     req.session.customer_phone = phone;
                     username = `temp_${phone}`;
-                    console.log(`⚠️ [SESSION_FIX] Customer not in billing, created temp username: ${username} for phone: ${phone}`);
+                    console.log(`âš ï¸ [SESSION_FIX] Customer not in billing, created temp username: ${username} for phone: ${phone}`);
                 }
             } catch (error) {
-                console.error(`❌ [SESSION_FIX] Error getting customer from billing:`, error);
+                console.error(`âŒ [SESSION_FIX] Error getting customer from billing:`, error);
                 // Fallback ke temporary username
                 req.session.customer_username = `temp_${phone}`;
                 req.session.customer_phone = phone;
@@ -40,7 +40,7 @@ const ensureCustomerSession = async (req, res, next) => {
 
         // Jika masih tidak ada customer_username atau phone, redirect ke login
         if (!username && !phone) {
-            console.log(`❌ [SESSION_FIX] No session found, redirecting to login`);
+            console.log(`âŒ [SESSION_FIX] No session found, redirecting to login`);
             return res.redirect('/customer/login');
         }
 
@@ -62,7 +62,7 @@ const getAppSettings = (req, res, next) => {
         payment_account_holder: getSetting('payment_account_holder', 'ALIJAYA DIGITAL NETWORK'),
         payment_cash_address: getSetting('payment_cash_address', 'Jl. Contoh No. 123'),
         payment_cash_hours: getSetting('payment_cash_hours', '08:00 - 17:00'),
-        contact_whatsapp: getSetting('contact_whatsapp', '081947215703'),
+        contact_whatsapp: getSetting('contact_whatsapp', '081234567890'),
         contact_phone: getSetting('contact_phone', '0812-3456-7890')
     };
     next();
@@ -464,17 +464,17 @@ router.get('/invoices/:id/download', getAppSettings, async (req, res) => {
 router.get('/invoices/:id/print', ensureCustomerSession, getAppSettings, async (req, res) => {
     try {
         const username = req.session.customer_username;
-        console.log(`📄 [PRINT] Print request - username: ${username}, invoice_id: ${req.params.id}`);
+        console.log(`ðŸ“„ [PRINT] Print request - username: ${username}, invoice_id: ${req.params.id}`);
         
         if (!username) {
-            console.log(`❌ [PRINT] No customer_username in session`);
+            console.log(`âŒ [PRINT] No customer_username in session`);
             return res.redirect('/customer/login');
         }
 
         const { id } = req.params;
         const invoice = await billingManager.getInvoiceById(id);
         
-        console.log(`📄 [PRINT] Invoice found:`, invoice ? {
+        console.log(`ðŸ“„ [PRINT] Invoice found:`, invoice ? {
             id: invoice.id,
             customer_username: invoice.customer_username,
             invoice_number: invoice.invoice_number,
@@ -482,7 +482,7 @@ router.get('/invoices/:id/print', ensureCustomerSession, getAppSettings, async (
         } : 'null');
         
         if (!invoice || invoice.customer_username !== username) {
-            console.log(`❌ [PRINT] Access denied - invoice.customer_username: ${invoice?.customer_username}, session username: ${username}`);
+            console.log(`âŒ [PRINT] Access denied - invoice.customer_username: ${invoice?.customer_username}, session username: ${username}`);
             return res.status(404).render('error', {
                 message: 'Tagihan tidak ditemukan',
                 error: 'Terjadi kesalahan. Silakan coba lagi.',

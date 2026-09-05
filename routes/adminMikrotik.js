@@ -1,4 +1,4 @@
-const express = require('express');
+﻿const express = require('express');
 const router = express.Router();
 const { exec } = require('child_process');
 const { adminAuth } = require('./adminAuth');
@@ -88,7 +88,7 @@ router.get('/mikrotik/profiles', adminAuth, async (req, res) => {
             nasList, 
             selectedNasId, 
             settings,
-            company_header: settings.company_header || "inetku.net"
+            company_header: settings.company_header || "pulsebill.io"
         });
 
     } catch (err) {
@@ -161,7 +161,7 @@ router.get('/mikrotik/hotspot-profiles', adminAuth, async (req, res) => {
             nasList, 
             selectedNasId, 
             settings: settings,
-            company_header: settings.company_header || "inetku.net" 
+            company_header: settings.company_header || "pulsebill.io" 
         });
 
     } catch (err) {
@@ -171,7 +171,7 @@ router.get('/mikrotik/hotspot-profiles', adminAuth, async (req, res) => {
             nasList: [], 
             selectedNasId: null, 
             settings: settings, 
-            company_header: settings.company_header || "inetku.net", 
+            company_header: settings.company_header || "pulsebill.io", 
             error: err.message 
         });
     }

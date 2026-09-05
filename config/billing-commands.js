@@ -1,4 +1,4 @@
-const billingManager = require('./billing');
+﻿const billingManager = require('./billing');
 const logger = require('./logger');
 const { getSetting } = require('./settingsManager');
 const serviceSuspension = require('./serviceSuspension');
@@ -33,11 +33,11 @@ class BillingCommands {
         try {
             if (params.length < 1) {
                 await this.sendFormattedMessage(remoteJid,
-                    '❌ *FORMAT SALAH!*\n\n' +
+                    'âŒ *FORMAT SALAH!*\n\n' +
                     'Format: isolir [nomor/nama_pelanggan] [alasan opsional]\n' +
                     'Contoh:\n' +
-                    '• isolir 081234567890 Telat bayar\n' +
-                    '• isolir "Santo" Telat 2 bulan'
+                    'â€¢ isolir 081234567890 Telat bayar\n' +
+                    'â€¢ isolir "Santo" Telat 2 bulan'
                 );
                 return;
             }
@@ -52,17 +52,17 @@ class BillingCommands {
                 const candidates = await billingManager.findCustomersByNameOrPhone(params.join(' '));
                 if (candidates.length === 0) {
                     await this.sendFormattedMessage(remoteJid,
-                        '❌ *PELANGGAN TIDAK DITEMUKAN!*\n\n' +
+                        'âŒ *PELANGGAN TIDAK DITEMUKAN!*\n\n' +
                         `Pencarian: "${params.join(' ')}"`
                     );
                     return;
                 }
                 if (candidates.length > 1) {
-                    let message = `🔍 *DITEMUKAN ${candidates.length} PELANGGAN*\n\n`;
+                    let message = `ðŸ” *DITEMUKAN ${candidates.length} PELANGGAN*\n\n`;
                     candidates.forEach((c, i) => {
                         message += `${i + 1}. *${c.name}*\n`;
-                        message += `   📱 ${c.phone}\n`;
-                        message += `   👤 ${c.username}\n`;
+                        message += `   ðŸ“± ${c.phone}\n`;
+                        message += `   ðŸ‘¤ ${c.username}\n`;
                         message += `   Gunakan: \`isolir ${c.phone} [alasan]\`\n\n`;
                     });
                     await this.sendFormattedMessage(remoteJid, message);
@@ -75,7 +75,7 @@ class BillingCommands {
             const result = await serviceSuspension.suspendCustomerService(customer, reason);
             if (result && result.success) {
                 await this.sendFormattedMessage(remoteJid,
-                    '⛔ *ISOLIR BERHASIL*\n\n' +
+                    'â›” *ISOLIR BERHASIL*\n\n' +
                     `*Pelanggan:* ${customer.name}\n` +
                     `*Nomor:* ${customer.phone}\n` +
                     `*Username:* ${customer.username}\n` +
@@ -84,14 +84,14 @@ class BillingCommands {
                 );
             } else {
                 await this.sendFormattedMessage(remoteJid,
-                    '❌ *GAGAL ISOLIR!*\n\n' +
+                    'âŒ *GAGAL ISOLIR!*\n\n' +
                     `Error: ${(result && result.error) || 'Unknown error'}`
                 );
             }
         } catch (error) {
             logger.error('Error in handleIsolir:', error);
             await this.sendFormattedMessage(remoteJid,
-                '❌ *ERROR SISTEM!*\n\n' +
+                'âŒ *ERROR SISTEM!*\n\n' +
                 (error.message || 'Terjadi kesalahan saat isolir pelanggan.')
             );
         }
@@ -102,11 +102,11 @@ class BillingCommands {
         try {
             if (params.length < 1) {
                 await this.sendFormattedMessage(remoteJid,
-                    '❌ *FORMAT SALAH!*\n\n' +
+                    'âŒ *FORMAT SALAH!*\n\n' +
                     'Format: buka [nomor/nama_pelanggan] [alasan opsional]\n' +
                     'Contoh:\n' +
-                    '• buka 081234567890 Sudah bayar\n' +
-                    '• buka "Santo" Pembayaran terkonfirmasi'
+                    'â€¢ buka 081234567890 Sudah bayar\n' +
+                    'â€¢ buka "Santo" Pembayaran terkonfirmasi'
                 );
                 return;
             }
@@ -119,17 +119,17 @@ class BillingCommands {
                 const candidates = await billingManager.findCustomersByNameOrPhone(params.join(' '));
                 if (candidates.length === 0) {
                     await this.sendFormattedMessage(remoteJid,
-                        '❌ *PELANGGAN TIDAK DITEMUKAN!*\n\n' +
+                        'âŒ *PELANGGAN TIDAK DITEMUKAN!*\n\n' +
                         `Pencarian: "${params.join(' ')}"`
                     );
                     return;
                 }
                 if (candidates.length > 1) {
-                    let message = `🔍 *DITEMUKAN ${candidates.length} PELANGGAN*\n\n`;
+                    let message = `ðŸ” *DITEMUKAN ${candidates.length} PELANGGAN*\n\n`;
                     candidates.forEach((c, i) => {
                         message += `${i + 1}. *${c.name}*\n`;
-                        message += `   📱 ${c.phone}\n`;
-                        message += `   👤 ${c.username}\n`;
+                        message += `   ðŸ“± ${c.phone}\n`;
+                        message += `   ðŸ‘¤ ${c.username}\n`;
                         message += `   Gunakan: \`buka ${c.phone} [alasan]\`\n\n`;
                     });
                     await this.sendFormattedMessage(remoteJid, message);
@@ -141,7 +141,7 @@ class BillingCommands {
             const result = await serviceSuspension.restoreCustomerService(customer, reason);
             if (result && result.success) {
                 await this.sendFormattedMessage(remoteJid,
-                    '🔓 *RESTORE BERHASIL*\n\n' +
+                    'ðŸ”“ *RESTORE BERHASIL*\n\n' +
                     `*Pelanggan:* ${customer.name}\n` +
                     `*Nomor:* ${customer.phone}\n` +
                     `*Username:* ${customer.username}\n` +
@@ -150,14 +150,14 @@ class BillingCommands {
                 );
             } else {
                 await this.sendFormattedMessage(remoteJid,
-                    '❌ *GAGAL RESTORE!*\n\n' +
+                    'âŒ *GAGAL RESTORE!*\n\n' +
                     `Error: ${(result && result.error) || 'Unknown error'}`
                 );
             }
         } catch (error) {
             logger.error('Error in handleBuka:', error);
             await this.sendFormattedMessage(remoteJid,
-                '❌ *ERROR SISTEM!*\n\n' +
+                'âŒ *ERROR SISTEM!*\n\n' +
                 (error.message || 'Terjadi kesalahan saat restore layanan pelanggan.')
             );
         }
@@ -167,44 +167,44 @@ class BillingCommands {
         const header = getSetting('company_header', 'ALIJAYA BOT MANAGEMENT ISP');
         const footer = getSetting('footer_info', 'Internet Tanpa Batas');
         
-        return `🏢 *${header}*\n\n${message}\n\n${footer}`;
+        return `ðŸ¢ *${header}*\n\n${message}\n\n${footer}`;
     }
 
     // Menu utama billing
     async handleBillingMenu(remoteJid) {
-        const menuMessage = `📊 *MENU BILLING ADMIN*\n\n` +
+        const menuMessage = `ðŸ“Š *MENU BILLING ADMIN*\n\n` +
             `*Perintah Pelanggan:*\n` +
-            `• 👤 *tambah [nama] [nomor] [paket]* - Tambah pelanggan baru\n` +
-            `• 📝 *edit [nomor] [field] [value]* - Edit data pelanggan\n` +
-            `• 🗑️ *hapus [nomor]* - Hapus pelanggan\n` +
-            `• 📋 *daftar* - Daftar semua pelanggan\n` +
-            `• 🔍 *cari [nomor/nama]* - Cari pelanggan\n\n` +
+            `â€¢ ðŸ‘¤ *tambah [nama] [nomor] [paket]* - Tambah pelanggan baru\n` +
+            `â€¢ ðŸ“ *edit [nomor] [field] [value]* - Edit data pelanggan\n` +
+            `â€¢ ðŸ—‘ï¸ *hapus [nomor]* - Hapus pelanggan\n` +
+            `â€¢ ðŸ“‹ *daftar* - Daftar semua pelanggan\n` +
+            `â€¢ ðŸ” *cari [nomor/nama]* - Cari pelanggan\n\n` +
             
             `*Perintah Pembayaran:*\n` +
-            `• 💰 *bayar [nomor/nama]* - Bayar tagihan pelanggan\n` +
-            `• 📊 *tagihan [nomor/nama]* - Cek status pembayaran\n` +
-            `• ✅ *sudahbayar* - Daftar pelanggan yang sudah bayar\n` +
-            `• ⏰ *terlambat* - Daftar pelanggan terlambat\n` +
-            `• 📈 *statistik* - Statistik billing\n\n` +
+            `â€¢ ðŸ’° *bayar [nomor/nama]* - Bayar tagihan pelanggan\n` +
+            `â€¢ ðŸ“Š *tagihan [nomor/nama]* - Cek status pembayaran\n` +
+            `â€¢ âœ… *sudahbayar* - Daftar pelanggan yang sudah bayar\n` +
+            `â€¢ â° *terlambat* - Daftar pelanggan terlambat\n` +
+            `â€¢ ðŸ“ˆ *statistik* - Statistik billing\n\n` +
 
             `*Perintah Isolir:*\n` +
-            `• ⛔ *isolir [nomor/nama] [alasan?]* - Suspend layanan pelanggan\n` +
-            `• 🔓 *buka [nomor/nama] [alasan?]* - Restore layanan pelanggan\n\n` +
+            `â€¢ â›” *isolir [nomor/nama] [alasan?]* - Suspend layanan pelanggan\n` +
+            `â€¢ ðŸ”“ *buka [nomor/nama] [alasan?]* - Restore layanan pelanggan\n\n` +
             
             `*Perintah Paket:*\n` +
-            `• 📦 *tambahpaket [nama] [speed] [harga]* - Tambah paket\n` +
-            `• 📋 *daftarpaket* - Daftar semua paket\n\n` +
+            `â€¢ ðŸ“¦ *tambahpaket [nama] [speed] [harga]* - Tambah paket\n` +
+            `â€¢ ðŸ“‹ *daftarpaket* - Daftar semua paket\n\n` +
             
             `*Perintah Tagihan:*\n` +
-            `• 📄 *buattagihan [nomor] [jumlah] [tanggal]* - Buat tagihan\n` +
-            `• 📊 *daftartagihan [nomor]* - Daftar tagihan pelanggan\n\n` +
+            `â€¢ ðŸ“„ *buattagihan [nomor] [jumlah] [tanggal]* - Buat tagihan\n` +
+            `â€¢ ðŸ“Š *daftartagihan [nomor]* - Daftar tagihan pelanggan\n\n` +
             
             `*Contoh Penggunaan:*\n` +
             `tambah "John Doe" 081234567890 "Paket Premium"\n` +
-            `bayar 081321960111  ← menggunakan nomor\n` +
-            `bayar Santo  ← menggunakan nama\n` +
-            `tagihan "John Doe"  ← nama dengan spasi\n` +
-            `cari John  ← pencarian nama\n` +
+            `bayar 081234567890  â† menggunakan nomor\n` +
+            `bayar Santo  â† menggunakan nama\n` +
+            `tagihan "John Doe"  â† nama dengan spasi\n` +
+            `cari John  â† pencarian nama\n` +
             `isolir Santo Telat bayar 2 bulan\n` +
             `buka 081234567890 Sudah melunasi tagihan\n` +
             `sudahbayar`;
@@ -217,7 +217,7 @@ class BillingCommands {
         try {
             if (params.length < 3) {
                 await this.sendFormattedMessage(remoteJid, 
-                    '❌ *FORMAT SALAH!*\n\n' +
+                    'âŒ *FORMAT SALAH!*\n\n' +
                     'Format: addcustomer [nama] [phone] [paket]\n' +
                     'Contoh: addcustomer "John Doe" 081234567890 "Paket Premium"'
                 );
@@ -234,9 +234,9 @@ class BillingCommands {
             
             if (!selectedPackage) {
                 await this.sendFormattedMessage(remoteJid, 
-                    '❌ *PAKET TIDAK DITEMUKAN!*\n\n' +
+                    'âŒ *PAKET TIDAK DITEMUKAN!*\n\n' +
                     'Paket yang tersedia:\n' +
-                    packages.map(p => `• ${p.name} - ${p.speed} - Rp${p.price}`).join('\n')
+                    packages.map(p => `â€¢ ${p.name} - ${p.speed} - Rp${p.price}`).join('\n')
                 );
                 return;
             }
@@ -245,7 +245,7 @@ class BillingCommands {
             const existingCustomer = await billingManager.getCustomerByPhone(phone);
             if (existingCustomer) {
                 await this.sendFormattedMessage(remoteJid, 
-                    '❌ *NOMOR TELEPON SUDAH TERDAFTAR!*\n\n' +
+                    'âŒ *NOMOR TELEPON SUDAH TERDAFTAR!*\n\n' +
                     `Pelanggan: ${existingCustomer.name}`
                 );
                 return;
@@ -263,7 +263,7 @@ class BillingCommands {
             
             if (result.success) {
                 await this.sendFormattedMessage(remoteJid, 
-                    '✅ *PELANGGAN BERHASIL DITAMBAHKAN!*\n\n' +
+                    'âœ… *PELANGGAN BERHASIL DITAMBAHKAN!*\n\n' +
                     `*Nama:* ${name}\n` +
                     `*Phone:* ${phone}\n` +
                     `*Paket:* ${selectedPackage.name} (${selectedPackage.speed})\n` +
@@ -272,14 +272,14 @@ class BillingCommands {
                 );
             } else {
                 await this.sendFormattedMessage(remoteJid, 
-                    '❌ *GAGAL MENAMBAHKAN PELANGGAN!*\n\n' +
+                    'âŒ *GAGAL MENAMBAHKAN PELANGGAN!*\n\n' +
                     `Error: ${result.error}`
                 );
             }
         } catch (error) {
             logger.error('Error in handleAddCustomer:', error);
             await this.sendFormattedMessage(remoteJid, 
-                '❌ *ERROR SISTEM!*\n\n' +
+                'âŒ *ERROR SISTEM!*\n\n' +
                 'Terjadi kesalahan saat menambah pelanggan.'
             );
         }
@@ -290,7 +290,7 @@ class BillingCommands {
         try {
             if (params.length < 3) {
                 await this.sendFormattedMessage(remoteJid, 
-                    '❌ *FORMAT SALAH!*\n\n' +
+                    'âŒ *FORMAT SALAH!*\n\n' +
                     'Format: tambah [nama] [nomor] [paket]\n' +
                     'Contoh: tambah "John Doe" 081234567890 "Paket Premium"'
                 );
@@ -307,9 +307,9 @@ class BillingCommands {
             
             if (!selectedPackage) {
                 await this.sendFormattedMessage(remoteJid, 
-                    '❌ *PAKET TIDAK DITEMUKAN!*\n\n' +
+                    'âŒ *PAKET TIDAK DITEMUKAN!*\n\n' +
                     'Paket yang tersedia:\n' +
-                    packages.map(p => `• ${p.name} - ${p.speed} - Rp${p.price}`).join('\n')
+                    packages.map(p => `â€¢ ${p.name} - ${p.speed} - Rp${p.price}`).join('\n')
                 );
                 return;
             }
@@ -318,7 +318,7 @@ class BillingCommands {
             const existingCustomer = await billingManager.getCustomerByPhone(phone);
             if (existingCustomer) {
                 await this.sendFormattedMessage(remoteJid, 
-                    '❌ *NOMOR TELEPON SUDAH TERDAFTAR!*\n\n' +
+                    'âŒ *NOMOR TELEPON SUDAH TERDAFTAR!*\n\n' +
                     `Pelanggan: ${existingCustomer.name}`
                 );
                 return;
@@ -336,7 +336,7 @@ class BillingCommands {
             
             if (result.success) {
                 await this.sendFormattedMessage(remoteJid, 
-                    '✅ *PELANGGAN BERHASIL DITAMBAHKAN!*\n\n' +
+                    'âœ… *PELANGGAN BERHASIL DITAMBAHKAN!*\n\n' +
                     `*Nama:* ${name}\n` +
                     `*Nomor:* ${phone}\n` +
                     `*Paket:* ${selectedPackage.name} (${selectedPackage.speed})\n` +
@@ -345,14 +345,14 @@ class BillingCommands {
                 );
             } else {
                 await this.sendFormattedMessage(remoteJid, 
-                    '❌ *GAGAL MENAMBAHKAN PELANGGAN!*\n\n' +
+                    'âŒ *GAGAL MENAMBAHKAN PELANGGAN!*\n\n' +
                     `Error: ${result.error}`
                 );
             }
         } catch (error) {
             logger.error('Error in handleTambah:', error);
             await this.sendFormattedMessage(remoteJid, 
-                '❌ *ERROR SISTEM!*\n\n' +
+                'âŒ *ERROR SISTEM!*\n\n' +
                 'Terjadi kesalahan saat menambah pelanggan.'
             );
         }
@@ -362,7 +362,7 @@ class BillingCommands {
         try {
             if (params.length < 3) {
                 await this.sendFormattedMessage(remoteJid, 
-                    '❌ *FORMAT SALAH!*\n\n' +
+                    'âŒ *FORMAT SALAH!*\n\n' +
                     'Format: editcustomer [phone] [field] [value]\n' +
                     'Field yang tersedia: name, phone, package_id, status\n' +
                     'Contoh: editcustomer 081234567890 name "John Smith"'
@@ -377,7 +377,7 @@ class BillingCommands {
             const customer = await billingManager.getCustomerByPhone(phone);
             if (!customer) {
                 await this.sendFormattedMessage(remoteJid, 
-                    '❌ *PELANGGAN TIDAK DITEMUKAN!*\n\n' +
+                    'âŒ *PELANGGAN TIDAK DITEMUKAN!*\n\n' +
                     `Phone: ${phone}`
                 );
                 return;
@@ -390,21 +390,21 @@ class BillingCommands {
             
             if (result.success) {
                 await this.sendFormattedMessage(remoteJid, 
-                    '✅ *DATA PELANGGAN BERHASIL DIUPDATE!*\n\n' +
+                    'âœ… *DATA PELANGGAN BERHASIL DIUPDATE!*\n\n' +
                     `*Phone:* ${phone}\n` +
                     `*Field:* ${field}\n` +
                     `*Value:* ${value}`
                 );
             } else {
                 await this.sendFormattedMessage(remoteJid, 
-                    '❌ *GAGAL UPDATE DATA PELANGGAN!*\n\n' +
+                    'âŒ *GAGAL UPDATE DATA PELANGGAN!*\n\n' +
                     `Error: ${result.error}`
                 );
             }
         } catch (error) {
             logger.error('Error in handleEditCustomer:', error);
             await this.sendFormattedMessage(remoteJid, 
-                '❌ *ERROR SISTEM!*\n\n' +
+                'âŒ *ERROR SISTEM!*\n\n' +
                 'Terjadi kesalahan saat mengupdate data pelanggan.'
             );
         }
@@ -414,7 +414,7 @@ class BillingCommands {
         try {
             if (params.length < 1) {
                 await this.sendFormattedMessage(remoteJid, 
-                    '❌ *FORMAT SALAH!*\n\n' +
+                    'âŒ *FORMAT SALAH!*\n\n' +
                     'Format: delcustomer [phone]\n' +
                     'Contoh: delcustomer 081234567890'
                 );
@@ -426,7 +426,7 @@ class BillingCommands {
             
             if (!customer) {
                 await this.sendFormattedMessage(remoteJid, 
-                    '❌ *PELANGGAN TIDAK DITEMUKAN!*\n\n' +
+                    'âŒ *PELANGGAN TIDAK DITEMUKAN!*\n\n' +
                     `Phone: ${phone}`
                 );
                 return;
@@ -436,21 +436,21 @@ class BillingCommands {
             
             if (result.success) {
                 await this.sendFormattedMessage(remoteJid, 
-                    '✅ *PELANGGAN BERHASIL DIHAPUS!*\n\n' +
+                    'âœ… *PELANGGAN BERHASIL DIHAPUS!*\n\n' +
                     `*Nama:* ${customer.name}\n` +
                     `*Phone:* ${customer.phone}\n` +
                     `*Username:* ${customer.username}`
                 );
             } else {
                 await this.sendFormattedMessage(remoteJid, 
-                    '❌ *GAGAL MENGHAPUS PELANGGAN!*\n\n' +
+                    'âŒ *GAGAL MENGHAPUS PELANGGAN!*\n\n' +
                     `Error: ${result.error}`
                 );
             }
         } catch (error) {
             logger.error('Error in handleDeleteCustomer:', error);
             await this.sendFormattedMessage(remoteJid, 
-                '❌ *ERROR SISTEM!*\n\n' +
+                'âŒ *ERROR SISTEM!*\n\n' +
                 'Terjadi kesalahan saat menghapus pelanggan.'
             );
         }
@@ -462,27 +462,27 @@ class BillingCommands {
             
             if (customers.length === 0) {
                 await this.sendFormattedMessage(remoteJid, 
-                    '📋 *DAFTAR PELANGGAN*\n\n' +
+                    'ðŸ“‹ *DAFTAR PELANGGAN*\n\n' +
                     'Tidak ada pelanggan terdaftar.'
                 );
                 return;
             }
 
-            let message = `📋 *DAFTAR PELANGGAN* (${customers.length} total)\n\n`;
+            let message = `ðŸ“‹ *DAFTAR PELANGGAN* (${customers.length} total)\n\n`;
             
             customers.forEach((customer, index) => {
                 message += `${index + 1}. *${customer.name}*\n`;
-                message += `   📱 ${customer.phone}\n`;
-                message += `   👤 ${customer.username}\n`;
-                message += `   📦 Paket: ${customer.package_name || 'N/A'}\n`;
-                message += `   📊 Status: ${customer.status}\n\n`;
+                message += `   ðŸ“± ${customer.phone}\n`;
+                message += `   ðŸ‘¤ ${customer.username}\n`;
+                message += `   ðŸ“¦ Paket: ${customer.package_name || 'N/A'}\n`;
+                message += `   ðŸ“Š Status: ${customer.status}\n\n`;
             });
 
             await this.sendFormattedMessage(remoteJid, message);
         } catch (error) {
             logger.error('Error in handleListCustomers:', error);
             await this.sendFormattedMessage(remoteJid, 
-                '❌ *ERROR SISTEM!*\n\n' +
+                'âŒ *ERROR SISTEM!*\n\n' +
                 'Terjadi kesalahan saat mengambil daftar pelanggan.'
             );
         }
@@ -495,27 +495,27 @@ class BillingCommands {
             
             if (customers.length === 0) {
                 await this.sendFormattedMessage(remoteJid, 
-                    '📋 *DAFTAR PELANGGAN*\n\n' +
+                    'ðŸ“‹ *DAFTAR PELANGGAN*\n\n' +
                     'Tidak ada pelanggan terdaftar.'
                 );
                 return;
             }
 
-            let message = `📋 *DAFTAR PELANGGAN* (${customers.length} total)\n\n`;
+            let message = `ðŸ“‹ *DAFTAR PELANGGAN* (${customers.length} total)\n\n`;
             
             customers.forEach((customer, index) => {
                 message += `${index + 1}. *${customer.name}*\n`;
-                message += `   📱 ${customer.phone}\n`;
-                message += `   👤 ${customer.username}\n`;
-                message += `   📦 Paket: ${customer.package_name || 'N/A'}\n`;
-                message += `   📊 Status: ${customer.status}\n\n`;
+                message += `   ðŸ“± ${customer.phone}\n`;
+                message += `   ðŸ‘¤ ${customer.username}\n`;
+                message += `   ðŸ“¦ Paket: ${customer.package_name || 'N/A'}\n`;
+                message += `   ðŸ“Š Status: ${customer.status}\n\n`;
             });
 
             await this.sendFormattedMessage(remoteJid, message);
         } catch (error) {
             logger.error('Error in handleDaftar:', error);
             await this.sendFormattedMessage(remoteJid, 
-                '❌ *ERROR SISTEM!*\n\n' +
+                'âŒ *ERROR SISTEM!*\n\n' +
                 'Terjadi kesalahan saat mengambil daftar pelanggan.'
             );
         }
@@ -525,7 +525,7 @@ class BillingCommands {
         try {
             if (params.length < 1) {
                 await this.sendFormattedMessage(remoteJid, 
-                    '❌ *FORMAT SALAH!*\n\n' +
+                    'âŒ *FORMAT SALAH!*\n\n' +
                     'Format: findcustomer [phone/username]\n' +
                     'Contoh: findcustomer 081234567890'
                 );
@@ -544,7 +544,7 @@ class BillingCommands {
 
             if (!customer) {
                 await this.sendFormattedMessage(remoteJid, 
-                    '❌ *PELANGGAN TIDAK DITEMUKAN!*\n\n' +
+                    'âŒ *PELANGGAN TIDAK DITEMUKAN!*\n\n' +
                     `Search term: ${searchTerm}`
                 );
                 return;
@@ -553,7 +553,7 @@ class BillingCommands {
             const packages = await billingManager.getPackages();
             const selectedPackage = packages.find(p => p.id === customer.package_id);
 
-            let message = `🔍 *DETAIL PELANGGAN*\n\n`;
+            let message = `ðŸ” *DETAIL PELANGGAN*\n\n`;
             message += `*Nama:* ${customer.name}\n`;
             message += `*Phone:* ${customer.phone}\n`;
             message += `*Username:* ${customer.username}\n`;
@@ -568,7 +568,7 @@ class BillingCommands {
         } catch (error) {
             logger.error('Error in handleFindCustomer:', error);
             await this.sendFormattedMessage(remoteJid, 
-                '❌ *ERROR SISTEM!*\n\n' +
+                'âŒ *ERROR SISTEM!*\n\n' +
                 'Terjadi kesalahan saat mencari pelanggan.'
             );
         }
@@ -579,12 +579,12 @@ class BillingCommands {
         try {
             if (params.length < 1) {
                 await this.sendFormattedMessage(remoteJid, 
-                    '❌ *FORMAT SALAH!*\n\n' +
+                    'âŒ *FORMAT SALAH!*\n\n' +
                     'Format: cari [nomor/nama_pelanggan]\n' +
                     'Contoh: \n' +
-                    '• cari 081234567890\n' +
-                    '• cari "Santo"\n' +
-                    '• cari John'
+                    'â€¢ cari 081234567890\n' +
+                    'â€¢ cari "Santo"\n' +
+                    'â€¢ cari John'
                 );
                 return;
             }
@@ -600,7 +600,7 @@ class BillingCommands {
                 
                 if (customers.length === 0) {
                     await this.sendFormattedMessage(remoteJid, 
-                        '❌ *PELANGGAN TIDAK DITEMUKAN!*\n\n' +
+                        'âŒ *PELANGGAN TIDAK DITEMUKAN!*\n\n' +
                         `Pencarian: "${searchTerm}"\n` +
                         `Pastikan nomor telepon atau nama pelanggan benar.`
                     );
@@ -609,15 +609,15 @@ class BillingCommands {
                     customer = customers[0];
                 } else {
                     // Multiple customers found, show all
-                    let message = `🔍 *DITEMUKAN ${customers.length} PELANGGAN*\n\n`;
+                    let message = `ðŸ” *DITEMUKAN ${customers.length} PELANGGAN*\n\n`;
                     message += `Pencarian: "${searchTerm}"\n\n`;
                     
                     customers.forEach((cust, index) => {
                         message += `${index + 1}. *${cust.name}*\n`;
-                        message += `   📱 ${cust.phone}\n`;
-                        message += `   👤 ${cust.username}\n`;
-                        message += `   📦 ${cust.package_name || 'N/A'}\n`;
-                        message += `   📊 Status: ${cust.status}\n\n`;
+                        message += `   ðŸ“± ${cust.phone}\n`;
+                        message += `   ðŸ‘¤ ${cust.username}\n`;
+                        message += `   ðŸ“¦ ${cust.package_name || 'N/A'}\n`;
+                        message += `   ðŸ“Š Status: ${cust.status}\n\n`;
                     });
                     
                     message += `Gunakan nomor telepon untuk detail lebih lanjut:\n`;
@@ -631,7 +631,7 @@ class BillingCommands {
             const packages = await billingManager.getPackages();
             const selectedPackage = packages.find(p => p.id === customer.package_id);
 
-            let message = `🔍 *DETAIL PELANGGAN*\n\n`;
+            let message = `ðŸ” *DETAIL PELANGGAN*\n\n`;
             message += `*Nama:* ${customer.name}\n`;
             message += `*Nomor:* ${customer.phone}\n`;
             message += `*Username:* ${customer.username}\n`;
@@ -646,7 +646,7 @@ class BillingCommands {
         } catch (error) {
             logger.error('Error in handleCari:', error);
             await this.sendFormattedMessage(remoteJid, 
-                '❌ *ERROR SISTEM!*\n\n' +
+                'âŒ *ERROR SISTEM!*\n\n' +
                 'Terjadi kesalahan saat mencari pelanggan.'
             );
         }
@@ -657,7 +657,7 @@ class BillingCommands {
         try {
             if (params.length < 3) {
                 await this.sendFormattedMessage(remoteJid, 
-                    '❌ *FORMAT SALAH!*\n\n' +
+                    'âŒ *FORMAT SALAH!*\n\n' +
                     'Format: payinvoice [invoice_id] [amount] [method]\n' +
                     'Contoh: payinvoice 123 500000 cash'
                 );
@@ -671,7 +671,7 @@ class BillingCommands {
             const invoice = await billingManager.getInvoiceById(invoiceId);
             if (!invoice) {
                 await this.sendFormattedMessage(remoteJid, 
-                    '❌ *INVOICE TIDAK DITEMUKAN!*\n\n' +
+                    'âŒ *INVOICE TIDAK DITEMUKAN!*\n\n' +
                     `Invoice ID: ${invoiceId}`
                 );
                 return;
@@ -695,7 +695,7 @@ class BillingCommands {
                 await billingManager.updateInvoiceStatus(invoiceId, 'paid', method);
 
                 await this.sendFormattedMessage(remoteJid, 
-                    '✅ *PEMBAYARAN BERHASIL!*\n\n' +
+                    'âœ… *PEMBAYARAN BERHASIL!*\n\n' +
                     `*Invoice ID:* ${invoiceId}\n` +
                     `*Pelanggan:* ${customer.name}\n` +
                     `*Paket:* ${selectedPackage.name}\n` +
@@ -720,14 +720,14 @@ class BillingCommands {
                 }
             } else {
                 await this.sendFormattedMessage(remoteJid, 
-                    '❌ *GAGAL MEMPROSES PEMBAYARAN!*\n\n' +
+                    'âŒ *GAGAL MEMPROSES PEMBAYARAN!*\n\n' +
                     `Error: ${result.error}`
                 );
             }
         } catch (error) {
             logger.error('Error in handlePayInvoice:', error);
             await this.sendFormattedMessage(remoteJid, 
-                '❌ *ERROR SISTEM!*\n\n' +
+                'âŒ *ERROR SISTEM!*\n\n' +
                 'Terjadi kesalahan saat memproses pembayaran.'
             );
         }
@@ -740,12 +740,12 @@ class BillingCommands {
             
             if (params.length < 1) {
                 await this.sendFormattedMessage(remoteJid, 
-                    '❌ *FORMAT SALAH!*\n\n' +
+                    'âŒ *FORMAT SALAH!*\n\n' +
                     'Format: bayar [nomor/nama_pelanggan]\n' +
                     'Contoh: \n' +
-                    '• bayar 081234567890\n' +
-                    '• bayar "Santo"\n' +
-                    '• bayar John'
+                    'â€¢ bayar 081234567890\n' +
+                    'â€¢ bayar "Santo"\n' +
+                    'â€¢ bayar John'
                 );
                 return;
             }
@@ -764,7 +764,7 @@ class BillingCommands {
                 
                 if (customers.length === 0) {
                     await this.sendFormattedMessage(remoteJid, 
-                        '❌ *PELANGGAN TIDAK DITEMUKAN!*\n\n' +
+                        'âŒ *PELANGGAN TIDAK DITEMUKAN!*\n\n' +
                         `Pencarian: "${searchTerm}"\n` +
                         `Pastikan nomor telepon atau nama pelanggan benar.`
                     );
@@ -773,14 +773,14 @@ class BillingCommands {
                     customer = customers[0];
                 } else {
                     // Multiple customers found, ask for clarification
-                    let message = `🔍 *DITEMUKAN ${customers.length} PELANGGAN*\n\n`;
+                    let message = `ðŸ” *DITEMUKAN ${customers.length} PELANGGAN*\n\n`;
                     message += `Pencarian: "${searchTerm}"\n\n`;
                     message += `Silakan gunakan perintah bayar dengan data yang lebih spesifik:\n\n`;
                     
                     customers.forEach((cust, index) => {
                         message += `${index + 1}. *${cust.name}*\n`;
-                        message += `   📱 ${cust.phone}\n`;
-                        message += `   📦 ${cust.package_name || 'N/A'}\n`;
+                        message += `   ðŸ“± ${cust.phone}\n`;
+                        message += `   ðŸ“¦ ${cust.package_name || 'N/A'}\n`;
                         message += `   Gunakan: \`bayar ${cust.phone}\`\n\n`;
                     });
                     
@@ -796,7 +796,7 @@ class BillingCommands {
             
             if (!invoices || invoices.length === 0) {
                 await this.sendFormattedMessage(remoteJid, 
-                    '❌ *PELANGGAN TIDAK MEMILIKI TAGIHAN!*\n\n' +
+                    'âŒ *PELANGGAN TIDAK MEMILIKI TAGIHAN!*\n\n' +
                     `*Pelanggan:* ${customer.name}\n` +
                     `*Nomor:* ${customer.phone}\n` +
                     `*Status:* Belum ada tagihan dibuat`
@@ -809,7 +809,7 @@ class BillingCommands {
             
             if (unpaidInvoices.length === 0) {
                 await this.sendFormattedMessage(remoteJid, 
-                    '✅ *PELANGGAN TIDAK MEMILIKI TAGIHAN!*\n\n' +
+                    'âœ… *PELANGGAN TIDAK MEMILIKI TAGIHAN!*\n\n' +
                     `*Pelanggan:* ${customer.name}\n` +
                     `*Nomor:* ${customer.phone}\n` +
                     `*Status:* Semua tagihan sudah dibayar`
@@ -826,7 +826,7 @@ class BillingCommands {
 
             if (!selectedPackage) {
                 await this.sendFormattedMessage(remoteJid, 
-                    '❌ *ERROR PAKET!*\n\n' +
+                    'âŒ *ERROR PAKET!*\n\n' +
                     'Paket tidak ditemukan untuk invoice ini.'
                 );
                 return;
@@ -852,7 +852,7 @@ class BillingCommands {
                     await billingManager.updateInvoiceStatus(oldestInvoice.id, 'paid', 'cash');
 
                     await this.sendFormattedMessage(remoteJid, 
-                        '✅ *PEMBAYARAN BERHASIL!*\n\n' +
+                        'âœ… *PEMBAYARAN BERHASIL!*\n\n' +
                         `*Pelanggan:* ${customer.name}\n` +
                         `*Nomor:* ${customer.phone}\n` +
                         `*Paket:* ${selectedPackage.name}\n` +
@@ -879,14 +879,14 @@ class BillingCommands {
                 } else {
                     logger.error(`[BILLING] Record payment gagal:`, result);
                     await this.sendFormattedMessage(remoteJid, 
-                        '❌ *GAGAL MEMPROSES PEMBAYARAN!*\n\n' +
+                        'âŒ *GAGAL MEMPROSES PEMBAYARAN!*\n\n' +
                         `Error: ${result ? result.error : 'Payment record failed'}`
                     );
                 }
             } catch (paymentError) {
                 logger.error(`[BILLING] Error saat record payment:`, paymentError);
                 await this.sendFormattedMessage(remoteJid, 
-                    '❌ *GAGAL MEMPROSES PEMBAYARAN!*\n\n' +
+                    'âŒ *GAGAL MEMPROSES PEMBAYARAN!*\n\n' +
                     `Error: ${paymentError.message || 'Database error'}`
                 );
             }
@@ -894,7 +894,7 @@ class BillingCommands {
             logger.error('Error in handleBayar:', error);
             logger.error('Error stack:', error.stack);
             await this.sendFormattedMessage(remoteJid, 
-                '❌ *ERROR SISTEM!*\n\n' +
+                'âŒ *ERROR SISTEM!*\n\n' +
                 `Terjadi kesalahan: ${error.message || 'Unknown error'}`
             );
         }
@@ -904,7 +904,7 @@ class BillingCommands {
         try {
             if (params.length < 1) {
                 await this.sendFormattedMessage(remoteJid, 
-                    '❌ *FORMAT SALAH!*\n\n' +
+                    'âŒ *FORMAT SALAH!*\n\n' +
                     'Format: checkpayment [invoice_id]\n' +
                     'Contoh: checkpayment 123'
                 );
@@ -916,7 +916,7 @@ class BillingCommands {
             
             if (!invoice) {
                 await this.sendFormattedMessage(remoteJid, 
-                    '❌ *INVOICE TIDAK DITEMUKAN!*\n\n' +
+                    'âŒ *INVOICE TIDAK DITEMUKAN!*\n\n' +
                     `Invoice ID: ${invoiceId}`
                 );
                 return;
@@ -926,7 +926,7 @@ class BillingCommands {
             const selectedPackage = await billingManager.getPackageById(invoice.package_id);
             const payments = await billingManager.getPayments(invoiceId);
 
-            let message = `📊 *STATUS PEMBAYARAN*\n\n`;
+            let message = `ðŸ“Š *STATUS PEMBAYARAN*\n\n`;
             message += `*Invoice ID:* ${invoice.id}\n`;
             message += `*Invoice Number:* ${invoice.invoice_number}\n`;
             message += `*Pelanggan:* ${customer.name}\n`;
@@ -949,7 +949,7 @@ class BillingCommands {
         } catch (error) {
             logger.error('Error in handleCheckPayment:', error);
             await this.sendFormattedMessage(remoteJid, 
-                '❌ *ERROR SISTEM!*\n\n' +
+                'âŒ *ERROR SISTEM!*\n\n' +
                 'Terjadi kesalahan saat mengecek status pembayaran.'
             );
         }
@@ -960,12 +960,12 @@ class BillingCommands {
         try {
             if (params.length < 1) {
                 await this.sendFormattedMessage(remoteJid, 
-                    '❌ *FORMAT SALAH!*\n\n' +
+                    'âŒ *FORMAT SALAH!*\n\n' +
                     'Format: tagihan [nomor/nama_pelanggan]\n' +
                     'Contoh: \n' +
-                    '• tagihan 081234567890\n' +
-                    '• tagihan "Santo"\n' +
-                    '• tagihan John'
+                    'â€¢ tagihan 081234567890\n' +
+                    'â€¢ tagihan "Santo"\n' +
+                    'â€¢ tagihan John'
                 );
                 return;
             }
@@ -981,7 +981,7 @@ class BillingCommands {
                 
                 if (customers.length === 0) {
                     await this.sendFormattedMessage(remoteJid, 
-                        '❌ *PELANGGAN TIDAK DITEMUKAN!*\n\n' +
+                        'âŒ *PELANGGAN TIDAK DITEMUKAN!*\n\n' +
                         `Pencarian: "${searchTerm}"\n` +
                         `Pastikan nomor telepon atau nama pelanggan benar.`
                     );
@@ -990,14 +990,14 @@ class BillingCommands {
                     customer = customers[0];
                 } else {
                     // Multiple customers found, ask for clarification
-                    let message = `🔍 *DITEMUKAN ${customers.length} PELANGGAN*\n\n`;
+                    let message = `ðŸ” *DITEMUKAN ${customers.length} PELANGGAN*\n\n`;
                     message += `Pencarian: "${searchTerm}"\n\n`;
                     message += `Silakan gunakan perintah tagihan dengan data yang lebih spesifik:\n\n`;
                     
                     customers.forEach((cust, index) => {
                         message += `${index + 1}. *${cust.name}*\n`;
-                        message += `   📱 ${cust.phone}\n`;
-                        message += `   📦 ${cust.package_name || 'N/A'}\n`;
+                        message += `   ðŸ“± ${cust.phone}\n`;
+                        message += `   ðŸ“¦ ${cust.package_name || 'N/A'}\n`;
                         message += `   Gunakan: \`tagihan ${cust.phone}\`\n\n`;
                     });
                     
@@ -1011,7 +1011,7 @@ class BillingCommands {
                 packages.find(p => p.id === customer.package_id)
             );
 
-            let message = `📊 *STATUS PELANGGAN*\n\n`;
+            let message = `ðŸ“Š *STATUS PELANGGAN*\n\n`;
             message += `*Nama:* ${customer.name}\n`;
             message += `*Nomor:* ${customer.phone}\n`;
             message += `*Paket:* ${selectedPackage ? selectedPackage.name : 'N/A'}\n`;
@@ -1035,9 +1035,9 @@ class BillingCommands {
                         const daysOverdue = Math.floor((today - dueDate) / (1000 * 60 * 60 * 24));
                         
                         message += `${index + 1}. ${invoice.invoice_number}\n`;
-                        message += `   💰 Rp${invoice.amount.toLocaleString()}\n`;
-                        message += `   📅 Jatuh tempo: ${invoice.due_date}\n`;
-                        message += `   ⏰ ${daysOverdue > 0 ? `${daysOverdue} hari terlambat` : 'Belum terlambat'}\n\n`;
+                        message += `   ðŸ’° Rp${invoice.amount.toLocaleString()}\n`;
+                        message += `   ðŸ“… Jatuh tempo: ${invoice.due_date}\n`;
+                        message += `   â° ${daysOverdue > 0 ? `${daysOverdue} hari terlambat` : 'Belum terlambat'}\n\n`;
                     });
                     
                     if (unpaidInvoices.length > 3) {
@@ -1050,7 +1050,7 @@ class BillingCommands {
         } catch (error) {
             logger.error('Error in handleTagihan:', error);
             await this.sendFormattedMessage(remoteJid, 
-                '❌ *ERROR SISTEM!*\n\n' +
+                'âŒ *ERROR SISTEM!*\n\n' +
                 'Terjadi kesalahan saat mengecek status pelanggan.'
             );
         }
@@ -1063,23 +1063,23 @@ class BillingCommands {
             
             if (paidInvoices.length === 0) {
                 await this.sendFormattedMessage(remoteJid, 
-                    '✅ *PELANGGAN YANG SUDAH BAYAR*\n\n' +
+                    'âœ… *PELANGGAN YANG SUDAH BAYAR*\n\n' +
                     'Tidak ada pelanggan yang sudah membayar.'
                 );
                 return;
             }
 
-            let message = `✅ *PELANGGAN YANG SUDAH BAYAR* (${paidInvoices.length} total)\n\n`;
+            let message = `âœ… *PELANGGAN YANG SUDAH BAYAR* (${paidInvoices.length} total)\n\n`;
             
             for (const invoice of paidInvoices.slice(0, 10)) { // Limit to 10
                 const customer = await billingManager.getCustomerById(invoice.customer_id);
                 const selectedPackage = await billingManager.getPackageById(invoice.package_id);
                 
-                message += `• *${customer.name}*\n`;
-                message += `  📱 ${customer.phone}\n`;
-                message += `  📦 ${selectedPackage.name}\n`;
-                message += `  💰 Rp${invoice.amount.toLocaleString()}\n`;
-                message += `  📅 ${invoice.payment_date}\n\n`;
+                message += `â€¢ *${customer.name}*\n`;
+                message += `  ðŸ“± ${customer.phone}\n`;
+                message += `  ðŸ“¦ ${selectedPackage.name}\n`;
+                message += `  ðŸ’° Rp${invoice.amount.toLocaleString()}\n`;
+                message += `  ðŸ“… ${invoice.payment_date}\n\n`;
             }
 
             if (paidInvoices.length > 10) {
@@ -1090,7 +1090,7 @@ class BillingCommands {
         } catch (error) {
             logger.error('Error in handlePaidCustomers:', error);
             await this.sendFormattedMessage(remoteJid, 
-                '❌ *ERROR SISTEM!*\n\n' +
+                'âŒ *ERROR SISTEM!*\n\n' +
                 'Terjadi kesalahan saat mengambil daftar pelanggan yang sudah bayar.'
             );
         }
@@ -1104,23 +1104,23 @@ class BillingCommands {
             
             if (paidInvoices.length === 0) {
                 await this.sendFormattedMessage(remoteJid, 
-                    '✅ *PELANGGAN YANG SUDAH BAYAR*\n\n' +
+                    'âœ… *PELANGGAN YANG SUDAH BAYAR*\n\n' +
                     'Tidak ada pelanggan yang sudah membayar.'
                 );
                 return;
             }
 
-            let message = `✅ *PELANGGAN YANG SUDAH BAYAR* (${paidInvoices.length} total)\n\n`;
+            let message = `âœ… *PELANGGAN YANG SUDAH BAYAR* (${paidInvoices.length} total)\n\n`;
             
             for (const invoice of paidInvoices.slice(0, 10)) { // Limit to 10
                 const customer = await billingManager.getCustomerById(invoice.customer_id);
                 const selectedPackage = await billingManager.getPackageById(invoice.package_id);
                 
-                message += `• *${customer.name}*\n`;
-                message += `  📱 ${customer.phone}\n`;
-                message += `  📦 ${selectedPackage.name}\n`;
-                message += `  💰 Rp${invoice.amount.toLocaleString()}\n`;
-                message += `  📅 ${invoice.payment_date}\n\n`;
+                message += `â€¢ *${customer.name}*\n`;
+                message += `  ðŸ“± ${customer.phone}\n`;
+                message += `  ðŸ“¦ ${selectedPackage.name}\n`;
+                message += `  ðŸ’° Rp${invoice.amount.toLocaleString()}\n`;
+                message += `  ðŸ“… ${invoice.payment_date}\n\n`;
             }
 
             if (paidInvoices.length > 10) {
@@ -1131,7 +1131,7 @@ class BillingCommands {
         } catch (error) {
             logger.error('Error in handleSudahBayar:', error);
             await this.sendFormattedMessage(remoteJid, 
-                '❌ *ERROR SISTEM!*\n\n' +
+                'âŒ *ERROR SISTEM!*\n\n' +
                 'Terjadi kesalahan saat mengambil daftar pelanggan yang sudah bayar.'
             );
         }
@@ -1143,13 +1143,13 @@ class BillingCommands {
             
             if (overdueInvoices.length === 0) {
                 await this.sendFormattedMessage(remoteJid, 
-                    '⏰ *PELANGGAN TERLAMBAT BAYAR*\n\n' +
+                    'â° *PELANGGAN TERLAMBAT BAYAR*\n\n' +
                     'Tidak ada pelanggan yang terlambat bayar.'
                 );
                 return;
             }
 
-            let message = `⏰ *PELANGGAN TERLAMBAT BAYAR* (${overdueInvoices.length} total)\n\n`;
+            let message = `â° *PELANGGAN TERLAMBAT BAYAR* (${overdueInvoices.length} total)\n\n`;
             
             for (const invoice of overdueInvoices.slice(0, 10)) { // Limit to 10
                 const customer = await billingManager.getCustomerById(invoice.customer_id);
@@ -1159,12 +1159,12 @@ class BillingCommands {
                 const today = new Date();
                 const daysOverdue = Math.floor((today - dueDate) / (1000 * 60 * 60 * 24));
                 
-                message += `• *${customer.name}*\n`;
-                message += `  📱 ${customer.phone}\n`;
-                message += `  📦 ${selectedPackage.name}\n`;
-                message += `  💰 Rp${invoice.amount.toLocaleString()}\n`;
-                message += `  📅 Due: ${invoice.due_date}\n`;
-                message += `  ⏰ ${daysOverdue} hari terlambat\n\n`;
+                message += `â€¢ *${customer.name}*\n`;
+                message += `  ðŸ“± ${customer.phone}\n`;
+                message += `  ðŸ“¦ ${selectedPackage.name}\n`;
+                message += `  ðŸ’° Rp${invoice.amount.toLocaleString()}\n`;
+                message += `  ðŸ“… Due: ${invoice.due_date}\n`;
+                message += `  â° ${daysOverdue} hari terlambat\n\n`;
             }
 
             if (overdueInvoices.length > 10) {
@@ -1175,7 +1175,7 @@ class BillingCommands {
         } catch (error) {
             logger.error('Error in handleOverdueCustomers:', error);
             await this.sendFormattedMessage(remoteJid, 
-                '❌ *ERROR SISTEM!*\n\n' +
+                'âŒ *ERROR SISTEM!*\n\n' +
                 'Terjadi kesalahan saat mengambil daftar pelanggan terlambat.'
             );
         }
@@ -1188,13 +1188,13 @@ class BillingCommands {
             
             if (overdueInvoices.length === 0) {
                 await this.sendFormattedMessage(remoteJid, 
-                    '⏰ *PELANGGAN TERLAMBAT BAYAR*\n\n' +
+                    'â° *PELANGGAN TERLAMBAT BAYAR*\n\n' +
                     'Tidak ada pelanggan yang terlambat bayar.'
                 );
                 return;
             }
 
-            let message = `⏰ *PELANGGAN TERLAMBAT BAYAR* (${overdueInvoices.length} total)\n\n`;
+            let message = `â° *PELANGGAN TERLAMBAT BAYAR* (${overdueInvoices.length} total)\n\n`;
             
             for (const invoice of overdueInvoices.slice(0, 10)) { // Limit to 10
                 const customer = await billingManager.getCustomerById(invoice.customer_id);
@@ -1204,12 +1204,12 @@ class BillingCommands {
                 const today = new Date();
                 const daysOverdue = Math.floor((today - dueDate) / (1000 * 60 * 60 * 24));
                 
-                message += `• *${customer.name}*\n`;
-                message += `  📱 ${customer.phone}\n`;
-                message += `  📦 ${selectedPackage.name}\n`;
-                message += `  💰 Rp${invoice.amount.toLocaleString()}\n`;
-                message += `  📅 Jatuh tempo: ${invoice.due_date}\n`;
-                message += `  ⏰ ${daysOverdue} hari terlambat\n\n`;
+                message += `â€¢ *${customer.name}*\n`;
+                message += `  ðŸ“± ${customer.phone}\n`;
+                message += `  ðŸ“¦ ${selectedPackage.name}\n`;
+                message += `  ðŸ’° Rp${invoice.amount.toLocaleString()}\n`;
+                message += `  ðŸ“… Jatuh tempo: ${invoice.due_date}\n`;
+                message += `  â° ${daysOverdue} hari terlambat\n\n`;
             }
 
             if (overdueInvoices.length > 10) {
@@ -1220,7 +1220,7 @@ class BillingCommands {
         } catch (error) {
             logger.error('Error in handleTerlambat:', error);
             await this.sendFormattedMessage(remoteJid, 
-                '❌ *ERROR SISTEM!*\n\n' +
+                'âŒ *ERROR SISTEM!*\n\n' +
                 'Terjadi kesalahan saat mengambil daftar pelanggan terlambat.'
             );
         }
@@ -1233,7 +1233,7 @@ class BillingCommands {
             const invoices = await billingManager.getInvoices();
             const overdueInvoices = await billingManager.getOverdueInvoices();
 
-            let message = `📈 *STATISTIK BILLING*\n\n`;
+            let message = `ðŸ“ˆ *STATISTIK BILLING*\n\n`;
             message += `*Total Pelanggan:* ${customers.length}\n`;
             message += `*Total Invoice:* ${invoices.length}\n`;
             message += `*Invoice Paid:* ${invoices.filter(inv => inv.status === 'paid').length}\n`;
@@ -1241,15 +1241,15 @@ class BillingCommands {
             message += `*Overdue Invoices:* ${overdueInvoices.length}\n\n`;
             
             message += `*Revenue:*\n`;
-            message += `• Total: Rp${stats.totalRevenue?.toLocaleString() || '0'}\n`;
-            message += `• This Month: Rp${stats.monthlyRevenue?.toLocaleString() || '0'}\n`;
-            message += `• Outstanding: Rp${stats.outstandingAmount?.toLocaleString() || '0'}`;
+            message += `â€¢ Total: Rp${stats.totalRevenue?.toLocaleString() || '0'}\n`;
+            message += `â€¢ This Month: Rp${stats.monthlyRevenue?.toLocaleString() || '0'}\n`;
+            message += `â€¢ Outstanding: Rp${stats.outstandingAmount?.toLocaleString() || '0'}`;
 
             await this.sendFormattedMessage(remoteJid, message);
         } catch (error) {
             logger.error('Error in handleBillingStats:', error);
             await this.sendFormattedMessage(remoteJid, 
-                '❌ *ERROR SISTEM!*\n\n' +
+                'âŒ *ERROR SISTEM!*\n\n' +
                 'Terjadi kesalahan saat mengambil statistik billing.'
             );
         }
@@ -1263,7 +1263,7 @@ class BillingCommands {
             const invoices = await billingManager.getInvoices();
             const overdueInvoices = await billingManager.getOverdueInvoices();
 
-            let message = `📈 *STATISTIK BILLING*\n\n`;
+            let message = `ðŸ“ˆ *STATISTIK BILLING*\n\n`;
             message += `*Total Pelanggan:* ${customers.length}\n`;
             message += `*Total Tagihan:* ${invoices.length}\n`;
             message += `*Sudah Dibayar:* ${invoices.filter(inv => inv.status === 'paid').length}\n`;
@@ -1271,15 +1271,15 @@ class BillingCommands {
             message += `*Terlambat Bayar:* ${overdueInvoices.length}\n\n`;
             
             message += `*Pendapatan:*\n`;
-            message += `• Total: Rp${stats.totalRevenue?.toLocaleString() || '0'}\n`;
-            message += `• Bulan Ini: Rp${stats.monthlyRevenue?.toLocaleString() || '0'}\n`;
-            message += `• Belum Dibayar: Rp${stats.outstandingAmount?.toLocaleString() || '0'}`;
+            message += `â€¢ Total: Rp${stats.totalRevenue?.toLocaleString() || '0'}\n`;
+            message += `â€¢ Bulan Ini: Rp${stats.monthlyRevenue?.toLocaleString() || '0'}\n`;
+            message += `â€¢ Belum Dibayar: Rp${stats.outstandingAmount?.toLocaleString() || '0'}`;
 
             await this.sendFormattedMessage(remoteJid, message);
         } catch (error) {
             logger.error('Error in handleStatistik:', error);
             await this.sendFormattedMessage(remoteJid, 
-                '❌ *ERROR SISTEM!*\n\n' +
+                'âŒ *ERROR SISTEM!*\n\n' +
                 'Terjadi kesalahan saat mengambil statistik billing.'
             );
         }
@@ -1290,7 +1290,7 @@ class BillingCommands {
         try {
             if (params.length < 3) {
                 await this.sendFormattedMessage(remoteJid, 
-                    '❌ *FORMAT SALAH!*\n\n' +
+                    'âŒ *FORMAT SALAH!*\n\n' +
                     'Format: addpackage [nama] [speed] [harga]\n' +
                     'Contoh: addpackage "Paket Premium" "50 Mbps" 500000'
                 );
@@ -1313,7 +1313,7 @@ class BillingCommands {
             
             if (result.success) {
                 await this.sendFormattedMessage(remoteJid, 
-                    '✅ *PAKET BERHASIL DITAMBAHKAN!*\n\n' +
+                    'âœ… *PAKET BERHASIL DITAMBAHKAN!*\n\n' +
                     `*Nama:* ${name}\n` +
                     `*Speed:* ${speed}\n` +
                     `*Harga:* Rp${price.toLocaleString()}\n` +
@@ -1321,14 +1321,14 @@ class BillingCommands {
                 );
             } else {
                 await this.sendFormattedMessage(remoteJid, 
-                    '❌ *GAGAL MENAMBAHKAN PAKET!*\n\n' +
+                    'âŒ *GAGAL MENAMBAHKAN PAKET!*\n\n' +
                     `Error: ${result.error}`
                 );
             }
         } catch (error) {
             logger.error('Error in handleAddPackage:', error);
             await this.sendFormattedMessage(remoteJid, 
-                '❌ *ERROR SISTEM!*\n\n' +
+                'âŒ *ERROR SISTEM!*\n\n' +
                 'Terjadi kesalahan saat menambah paket.'
             );
         }
@@ -1340,26 +1340,26 @@ class BillingCommands {
             
             if (packages.length === 0) {
                 await this.sendFormattedMessage(remoteJid, 
-                    '📦 *DAFTAR PAKET*\n\n' +
+                    'ðŸ“¦ *DAFTAR PAKET*\n\n' +
                     'Tidak ada paket terdaftar.'
                 );
                 return;
             }
 
-            let message = `📦 *DAFTAR PAKET* (${packages.length} total)\n\n`;
+            let message = `ðŸ“¦ *DAFTAR PAKET* (${packages.length} total)\n\n`;
             
             packages.forEach((pkg, index) => {
                 message += `${index + 1}. *${pkg.name}*\n`;
-                message += `   🚀 Speed: ${pkg.speed}\n`;
-                message += `   💰 Harga: Rp${pkg.price.toLocaleString()}\n`;
-                message += `   📊 Status: ${pkg.is_active ? 'Active' : 'Inactive'}\n\n`;
+                message += `   ðŸš€ Speed: ${pkg.speed}\n`;
+                message += `   ðŸ’° Harga: Rp${pkg.price.toLocaleString()}\n`;
+                message += `   ðŸ“Š Status: ${pkg.is_active ? 'Active' : 'Inactive'}\n\n`;
             });
 
             await this.sendFormattedMessage(remoteJid, message);
         } catch (error) {
             logger.error('Error in handleListPackages:', error);
             await this.sendFormattedMessage(remoteJid, 
-                '❌ *ERROR SISTEM!*\n\n' +
+                'âŒ *ERROR SISTEM!*\n\n' +
                 'Terjadi kesalahan saat mengambil daftar paket.'
             );
         }
@@ -1372,26 +1372,26 @@ class BillingCommands {
             
             if (packages.length === 0) {
                 await this.sendFormattedMessage(remoteJid, 
-                    '📦 *DAFTAR PAKET*\n\n' +
+                    'ðŸ“¦ *DAFTAR PAKET*\n\n' +
                     'Tidak ada paket terdaftar.'
                 );
                 return;
             }
 
-            let message = `📦 *DAFTAR PAKET* (${packages.length} total)\n\n`;
+            let message = `ðŸ“¦ *DAFTAR PAKET* (${packages.length} total)\n\n`;
             
             packages.forEach((pkg, index) => {
                 message += `${index + 1}. *${pkg.name}*\n`;
-                message += `   🚀 Kecepatan: ${pkg.speed}\n`;
-                message += `   💰 Harga: Rp${pkg.price.toLocaleString()}\n`;
-                message += `   📊 Status: ${pkg.is_active ? 'Aktif' : 'Tidak Aktif'}\n\n`;
+                message += `   ðŸš€ Kecepatan: ${pkg.speed}\n`;
+                message += `   ðŸ’° Harga: Rp${pkg.price.toLocaleString()}\n`;
+                message += `   ðŸ“Š Status: ${pkg.is_active ? 'Aktif' : 'Tidak Aktif'}\n\n`;
             });
 
             await this.sendFormattedMessage(remoteJid, message);
         } catch (error) {
             logger.error('Error in handleDaftarPaket:', error);
             await this.sendFormattedMessage(remoteJid, 
-                '❌ *ERROR SISTEM!*\n\n' +
+                'âŒ *ERROR SISTEM!*\n\n' +
                 'Terjadi kesalahan saat mengambil daftar paket.'
             );
         }
@@ -1402,7 +1402,7 @@ class BillingCommands {
         try {
             if (params.length < 3) {
                 await this.sendFormattedMessage(remoteJid, 
-                    '❌ *FORMAT SALAH!*\n\n' +
+                    'âŒ *FORMAT SALAH!*\n\n' +
                     'Format: createinvoice [phone] [amount] [due_date]\n' +
                     'Contoh: createinvoice 081234567890 500000 2024-02-15'
                 );
@@ -1416,7 +1416,7 @@ class BillingCommands {
             const customer = await billingManager.getCustomerByPhone(phone);
             if (!customer) {
                 await this.sendFormattedMessage(remoteJid, 
-                    '❌ *PELANGGAN TIDAK DITEMUKAN!*\n\n' +
+                    'âŒ *PELANGGAN TIDAK DITEMUKAN!*\n\n' +
                     `Phone: ${phone}`
                 );
                 return;
@@ -1434,7 +1434,7 @@ class BillingCommands {
             
             if (result.success) {
                 await this.sendFormattedMessage(remoteJid, 
-                    '✅ *INVOICE BERHASIL DIBUAT!*\n\n' +
+                    'âœ… *INVOICE BERHASIL DIBUAT!*\n\n' +
                     `*Invoice ID:* ${result.invoice.id}\n` +
                     `*Invoice Number:* ${result.invoice.invoice_number}\n` +
                     `*Pelanggan:* ${customer.name}\n` +
@@ -1445,14 +1445,14 @@ class BillingCommands {
                 );
             } else {
                 await this.sendFormattedMessage(remoteJid, 
-                    '❌ *GAGAL MEMBUAT INVOICE!*\n\n' +
+                    'âŒ *GAGAL MEMBUAT INVOICE!*\n\n' +
                     `Error: ${result.error}`
                 );
             }
         } catch (error) {
             logger.error('Error in handleCreateInvoice:', error);
             await this.sendFormattedMessage(remoteJid, 
-                '❌ *ERROR SISTEM!*\n\n' +
+                'âŒ *ERROR SISTEM!*\n\n' +
                 'Terjadi kesalahan saat membuat invoice.'
             );
         }
@@ -1468,7 +1468,7 @@ class BillingCommands {
                 customer = await billingManager.getCustomerByPhone(phone);
                 if (!customer) {
                     await this.sendFormattedMessage(remoteJid, 
-                        '❌ *PELANGGAN TIDAK DITEMUKAN!*\n\n' +
+                        'âŒ *PELANGGAN TIDAK DITEMUKAN!*\n\n' +
                         `Phone: ${phone}`
                     );
                     return;
@@ -1480,27 +1480,27 @@ class BillingCommands {
 
             if (invoices.length === 0) {
                 const message = customer 
-                    ? `📄 *INVOICE PELANGGAN*\n\nTidak ada invoice untuk ${customer.name}`
-                    : '📄 *DAFTAR INVOICE*\n\nTidak ada invoice terdaftar.';
+                    ? `ðŸ“„ *INVOICE PELANGGAN*\n\nTidak ada invoice untuk ${customer.name}`
+                    : 'ðŸ“„ *DAFTAR INVOICE*\n\nTidak ada invoice terdaftar.';
                 
                 await this.sendFormattedMessage(remoteJid, message);
                 return;
             }
 
             let message = customer 
-                ? `📄 *INVOICE PELANGGAN: ${customer.name}* (${invoices.length} total)\n\n`
-                : `📄 *DAFTAR INVOICE* (${invoices.length} total)\n\n`;
+                ? `ðŸ“„ *INVOICE PELANGGAN: ${customer.name}* (${invoices.length} total)\n\n`
+                : `ðŸ“„ *DAFTAR INVOICE* (${invoices.length} total)\n\n`;
 
             for (const invoice of invoices.slice(0, 10)) { // Limit to 10
                 const invCustomer = customer || await billingManager.getCustomerById(invoice.customer_id);
                 const selectedPackage = await billingManager.getPackageById(invoice.package_id);
                 
-                message += `• *Invoice #${invoice.invoice_number}*\n`;
-                message += `  👤 ${invCustomer.name}\n`;
-                message += `  📦 ${selectedPackage.name}\n`;
-                message += `  💰 Rp${invoice.amount.toLocaleString()}\n`;
-                message += `  📅 Due: ${invoice.due_date}\n`;
-                message += `  📊 Status: ${invoice.status.toUpperCase()}\n\n`;
+                message += `â€¢ *Invoice #${invoice.invoice_number}*\n`;
+                message += `  ðŸ‘¤ ${invCustomer.name}\n`;
+                message += `  ðŸ“¦ ${selectedPackage.name}\n`;
+                message += `  ðŸ’° Rp${invoice.amount.toLocaleString()}\n`;
+                message += `  ðŸ“… Due: ${invoice.due_date}\n`;
+                message += `  ðŸ“Š Status: ${invoice.status.toUpperCase()}\n\n`;
             }
 
             if (invoices.length > 10) {
@@ -1511,7 +1511,7 @@ class BillingCommands {
         } catch (error) {
             logger.error('Error in handleListInvoices:', error);
             await this.sendFormattedMessage(remoteJid, 
-                '❌ *ERROR SISTEM!*\n\n' +
+                'âŒ *ERROR SISTEM!*\n\n' +
                 'Terjadi kesalahan saat mengambil daftar invoice.'
             );
         }

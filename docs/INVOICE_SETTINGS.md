@@ -1,4 +1,4 @@
-# Invoice Settings Configuration - Gembok Bill
+﻿# Invoice Settings Configuration - Gembok Bill
 
 ## Overview
 Dokumen ini menjelaskan semua field settings yang digunakan untuk mengkustomisasi invoice tanpa perlu restart aplikasi.
@@ -22,7 +22,7 @@ Dokumen ini menjelaskan semua field settings yang digunakan untuk mengkustomisas
 ### 2. Footer Information
 ```json
 {
-  "footer_info": "Info Hubungi : 081947215703"
+  "footer_info": "Info Hubungi : 081234567890"
 }
 ```
 
@@ -53,7 +53,7 @@ Dokumen ini menjelaskan semua field settings yang digunakan untuk mengkustomisas
   "contact_phone": "0812-3456-7890",
   "contact_email": "info@example.com",
   "contact_address": "Jl. Contoh No. 123, Kota",
-  "contact_whatsapp": "081947215703"
+  "contact_whatsapp": "081234567890"
 }
 ```
 
@@ -247,7 +247,7 @@ console.log(require('./config/settingsManager').getSettingsWithCache());
 ### Contact
 - **Developer**: Admin System
 - **Email**: info@example.com
-- **WhatsApp**: 081947215703
+- **WhatsApp**: 081234567890
 
 ### Documentation
 - **Invoice System**: `/docs/INVOICE_SYSTEM.md`

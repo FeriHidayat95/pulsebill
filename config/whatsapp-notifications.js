@@ -1,4 +1,4 @@
-const { getSetting } = require('./settingsManager');
+﻿const { getSetting } = require('./settingsManager');
 const billingManager = require('./billing');
 const logger = require('./logger');
 const fs = require('fs');
@@ -184,7 +184,7 @@ class WhatsAppNotificationManager {
                 package_speed: data.package_speed || '-',     // Mengisi {package_speed}
                 notes: data.notes || '-',                     // Mengisi {notes}
                 // URL Pembayaran Otomatis
-                payment_url: `https://inetku.sgtnet.cloud/payment/select/${data.invoice_number || '-'}/${data.customer_id || ''}`
+                payment_url: `https://billing.pulsebill.io/payment/select/${data.invoice_number || '-'}/${data.customer_id || ''}`
             };
 
             // PROSES INJECT: Mengganti {variabel} di template dengan data di atas
@@ -244,7 +244,7 @@ class WhatsAppNotificationManager {
                 package_name: data.package_name || '-',
                 package_speed: data.package_speed || '-',
                 peringatan_khusus: peringatanTambahan, // Variabel baru buat di template
-                payment_url: `https://inetku.sgtnet.cloud/payment/select/${data.invoice_number || '-'}/${data.customer_id || ''}`
+                payment_url: `https://billing.pulsebill.io/payment/select/${data.invoice_number || '-'}/${data.customer_id || ''}`
             };
 
             // Ambil template dari Database
@@ -281,7 +281,7 @@ class WhatsAppNotificationManager {
                 due_date: this.formatDate(customer.due_date),
                 invoice_number: customer.invoice_number || '-',
                 reason: reason || 'Tagihan jatuh tempo',
-                payment_url: `https://inetku.sgtnet.cloud/payment/select/${customer.invoice_number || '-'}/${customer.id || ''}`
+                payment_url: `https://billing.pulsebill.io/payment/select/${customer.invoice_number || '-'}/${customer.id || ''}`
             };
 
             const message = this.replaceTemplateVariables(rawTemplate, data);
@@ -388,7 +388,7 @@ class WhatsAppNotificationManager {
                 disruption_type: disruptionData.type || 'Gangguan Jaringan',
                 affected_area: disruptionData.area || 'Seluruh Area',
                 estimated_resolution: disruptionData.estimatedTime || 'Sedang dalam penanganan',
-                support_phone: getSetting('support_phone', '081947215703')
+                support_phone: getSetting('support_phone', '081234567890')
             };
 
             const message = this.replaceTemplateVariables(this.templates.service_disruption.template, data);
@@ -439,7 +439,7 @@ class WhatsAppNotificationManager {
                 package_name: customer.package_name || '-',
                 package_speed: customer.package_speed || '-',
                 wifi_password: customer.wifi_password || '-',
-                support_phone: getSetting('support_phone', '081947215703')
+                support_phone: getSetting('support_phone', '081234567890')
             };
 
             const message = this.replaceTemplateVariables(this.templates.welcome_message.template, data);

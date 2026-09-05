@@ -1,4 +1,4 @@
-const dbPool = require('../config/database');
+﻿const dbPool = require('../config/database');
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
@@ -16,7 +16,7 @@ async function isValidCustomer(phone) {
     // 1. Cek di database billing terlebih dahulu
     const customer = await billingManager.getCustomerByPhone(phone);
     if (customer) {
-      console.log(`✅ Customer found in billing database: ${phone}`);
+      console.log(`âœ… Customer found in billing database: ${phone}`);
       return true; // Pelanggan valid jika ada di billing
     }
     
@@ -37,11 +37,11 @@ async function isValidCustomer(phone) {
     }
     
     if (device) {
-      console.log(`✅ Customer found in GenieACS: ${phone}`);
+      console.log(`âœ… Customer found in GenieACS: ${phone}`);
       return true;
     }
     
-    console.log(`❌ Customer not found in billing or GenieACS: ${phone}`);
+    console.log(`âŒ Customer not found in billing or GenieACS: ${phone}`);
     return false;
     
   } catch (error) {
@@ -118,7 +118,7 @@ async function getCustomerDeviceData(phone) {
     let billingData = null;
     
     if (customer) {
-      console.log(`✅ Customer found in billing: ${customer.name} (${phone})`);
+      console.log(`âœ… Customer found in billing: ${customer.name} (${phone})`);
       
       // 2. Coba ambil data device dari GenieACS jika ada
       device = await findDeviceByTag(phone);
@@ -166,7 +166,7 @@ async function getCustomerDeviceData(phone) {
     
     // 4. Jika tidak ada device di GenieACS, buat data default
     if (!device) {
-      console.log(`⚠️ No device found in GenieACS for: ${phone}`);
+      console.log(`âš ï¸ No device found in GenieACS for: ${phone}`);
       
       // Buat data default berdasarkan customer billing
       const defaultData = {
@@ -326,7 +326,7 @@ async function updateSSID(phone, newSSID) {
 // Helper: Update SSID Optimized (seperti WhatsApp command) - Fast Response
 async function updateSSIDOptimized(phone, newSSID) {
   try {
-    console.log(`🔄 Optimized SSID update for phone: ${phone} to: ${newSSID}`);
+    console.log(`ðŸ”„ Optimized SSID update for phone: ${phone} to: ${newSSID}`);
     
     // Cari device berdasarkan nomor pelanggan
     let device = await findDeviceByTag(phone);
@@ -413,10 +413,10 @@ async function updateSSIDOptimized(phone, newSSID) {
     const wifi5GFound = results[1].status === 'fulfilled';
     
     if (mainTaskSuccess) {
-      console.log(`✅ SSID update completed for ${phone}: ${newSSID}`);
+      console.log(`âœ… SSID update completed for ${phone}: ${newSSID}`);
       return { success: true, wifi5GFound };
     } else {
-      console.error(`❌ SSID update failed for ${phone}: ${results[0].reason?.message || 'Unknown error'}`);
+      console.error(`âŒ SSID update failed for ${phone}: ${results[0].reason?.message || 'Unknown error'}`);
       return { success: false, message: 'Gagal update SSID' };
     }
     
@@ -500,7 +500,7 @@ async function updatePassword(phone, newPassword) {
 // Helper: Update Password Optimized (seperti WhatsApp command) - Fast Response
 async function updatePasswordOptimized(phone, newPassword) {
   try {
-    console.log(`🔄 Optimized password update for phone: ${phone}`);
+    console.log(`ðŸ”„ Optimized password update for phone: ${phone}`);
     
     // Cari device berdasarkan nomor pelanggan
     let device = await findDeviceByTag(phone);
@@ -583,10 +583,10 @@ async function updatePasswordOptimized(phone, newPassword) {
     const mainTaskSuccess = results[0].status === 'fulfilled';
     
     if (mainTaskSuccess) {
-      console.log(`✅ Password update completed for ${phone}`);
+      console.log(`âœ… Password update completed for ${phone}`);
       return { success: true };
     } else {
-      console.error(`❌ Password update failed for ${phone}: ${results[0].reason?.message || 'Unknown error'}`);
+      console.error(`âŒ Password update failed for ${phone}: ${results[0].reason?.message || 'Unknown error'}`);
       return { success: false, message: 'Gagal update password' };
     }
     
@@ -752,15 +752,15 @@ router.post('/otp', async (req, res) => {
     if (customer) {
       req.session.customer_username = customer.username;
       req.session.customer_phone = phone;
-      console.log(`✅ [OTP_LOGIN] Set session customer_username: ${customer.username} for phone: ${phone}`);
+      console.log(`âœ… [OTP_LOGIN] Set session customer_username: ${customer.username} for phone: ${phone}`);
     } else {
       // Customer belum ada di billing, set temporary username
       req.session.customer_username = `temp_${phone}`;
       req.session.customer_phone = phone;
-      console.log(`⚠️ [OTP_LOGIN] No billing customer found for phone: ${phone}, set temp username`);
+      console.log(`âš ï¸ [OTP_LOGIN] No billing customer found for phone: ${phone}, set temp username`);
     }
   } catch (error) {
-    console.error(`❌ [OTP_LOGIN] Error getting customer from billing:`, error);
+    console.error(`âŒ [OTP_LOGIN] Error getting customer from billing:`, error);
     // Fallback ke temporary username
     req.session.customer_username = `temp_${phone}`;
     req.session.customer_phone = phone;
@@ -780,7 +780,7 @@ router.get('/billing', async (req, res) => {
     
     if (!customer) {
       // Pelanggan belum ada di sistem billing, tapi tetap bisa akses halaman billing
-      console.log(`⚠️ [BILLING_REDIRECT] Customer not found in billing system for phone: ${phone}, but allowing access`);
+      console.log(`âš ï¸ [BILLING_REDIRECT] Customer not found in billing system for phone: ${phone}, but allowing access`);
       
       // Buat session customer_username sementara berdasarkan phone
       req.session.customer_username = `temp_${phone}`;
@@ -795,7 +795,7 @@ router.get('/billing', async (req, res) => {
     // Set customer_username session for customer billing compatibility
     req.session.customer_username = customer.username;
     req.session.customer_phone = phone; // Backup phone untuk referensi
-    console.log(`✅ [BILLING_REDIRECT] Set session customer_username: ${customer.username} for phone: ${phone}`);
+    console.log(`âœ… [BILLING_REDIRECT] Set session customer_username: ${customer.username} for phone: ${phone}`);
     
     // Redirect to new customer billing dashboard with payment method selection
     res.redirect('/customer/billing/dashboard');
@@ -819,8 +819,8 @@ router.post('/restart-device', async (req, res) => {
   }
   
   try {
-    console.log(`🔄 Restart device request from customer: ${customerUsername || phone}`);
-    console.log(`🔄 Session data - customer_username: ${customerUsername}, phone: ${phone}`);
+    console.log(`ðŸ”„ Restart device request from customer: ${customerUsername || phone}`);
+    console.log(`ðŸ”„ Session data - customer_username: ${customerUsername}, phone: ${phone}`);
     
     // Ambil data customer dari billing
     let customer = null;
@@ -828,14 +828,14 @@ router.post('/restart-device', async (req, res) => {
       try {
         const billingManager = require('../config/billing');
         customer = await billingManager.getCustomerByPhone(phone);
-        console.log(`📋 [RESTART] Customer from billing:`, customer ? {
+        console.log(`ðŸ“‹ [RESTART] Customer from billing:`, customer ? {
           id: customer.id, 
           username: customer.username, 
           pppoe_username: customer.pppoe_username,
           phone: customer.phone
         } : 'Not found');
       } catch (error) {
-        console.error(`❌ [RESTART] Error getting customer from billing:`, error);
+        console.error(`âŒ [RESTART] Error getting customer from billing:`, error);
       }
     }
     
@@ -843,14 +843,14 @@ router.post('/restart-device', async (req, res) => {
     
     // Prioritas 1: Cari berdasarkan PPPoE Username dari billing
     if (customer && customer.pppoe_username) {
-      console.log(`🔍 [RESTART] Searching by PPPoE username: ${customer.pppoe_username}`);
+      console.log(`ðŸ” [RESTART] Searching by PPPoE username: ${customer.pppoe_username}`);
       try {
         device = await findDeviceByPPPoE(customer.pppoe_username);
         if (device) {
-          console.log(`✅ [RESTART] Device found by PPPoE username: ${customer.pppoe_username}`);
+          console.log(`âœ… [RESTART] Device found by PPPoE username: ${customer.pppoe_username}`);
         }
       } catch (error) {
-        console.error(`❌ [RESTART] Error finding device by PPPoE:`, error);
+        console.error(`âŒ [RESTART] Error finding device by PPPoE:`, error);
       }
     }
     
@@ -877,9 +877,9 @@ router.post('/restart-device', async (req, res) => {
       // Selalu coba dengan phone variants, bahkan tanpa billing data
       if (phone) {
         searchVariants.push(
-          phone,                          // Format asli (087828060111)
-          phone.replace(/^0/, '62'),     // 62878280601111  
-          phone.replace(/^0/, '+62'),    // +62878280601111
+          phone,                          // Format asli (081234567890)
+          phone.replace(/^0/, '62'),     // 6281234567890  
+          phone.replace(/^0/, '+62'),    // +6281234567890
           phone.replace(/^0/, ''),       // 87828060111
           phone.substring(1)             // 87828060111
         );
@@ -887,7 +887,7 @@ router.post('/restart-device', async (req, res) => {
       
       // Jika tidak ada billing data, coba dengan customerUsername dari session
       if (!customer && customerUsername) {
-        console.log(`📱 [RESTART] No billing data, trying session customerUsername: ${customerUsername}`);
+        console.log(`ðŸ“± [RESTART] No billing data, trying session customerUsername: ${customerUsername}`);
         searchVariants.push(customerUsername);
         
         // Extract dari customer username jika format cust_xxxx_xxxxxx
@@ -900,22 +900,22 @@ router.post('/restart-device', async (req, res) => {
       
       // Remove duplicates dan filter empty values
       const uniqueVariants = [...new Set(searchVariants.filter(v => v && v.trim()))];
-      console.log(`📱 [RESTART] Searching device by tag with variants:`, uniqueVariants);
+      console.log(`ðŸ“± [RESTART] Searching device by tag with variants:`, uniqueVariants);
       
       // Cari device berdasarkan tag variants
       for (const variant of uniqueVariants) {
-        console.log(`🔍 [RESTART] Trying tag variant: ${variant}`);
+        console.log(`ðŸ” [RESTART] Trying tag variant: ${variant}`);
         device = await findDeviceByTag(variant);
         if (device) {
-          console.log(`✅ [RESTART] Device found by tag variant: ${variant}`);
+          console.log(`âœ… [RESTART] Device found by tag variant: ${variant}`);
           break;
         }
       }
     }
     
     if (!device) {
-      console.log(`❌ Device not found for customer: ${customerUsername || phone}`);
-      console.log(`❌ Customer data:`, customer ? {
+      console.log(`âŒ Device not found for customer: ${customerUsername || phone}`);
+      console.log(`âŒ Customer data:`, customer ? {
         username: customer.username,
         pppoe_username: customer.pppoe_username,
         phone: customer.phone
@@ -926,22 +926,22 @@ router.post('/restart-device', async (req, res) => {
       });
     }
     
-    console.log(`✅ Device found: ${device._id}`);
+    console.log(`âœ… Device found: ${device._id}`);
     
     // Cek status device
     const lastInform = device._lastInform ? new Date(device._lastInform) : null;
     const minutesAgo = lastInform ? Math.floor((Date.now() - lastInform.getTime()) / (1000 * 60)) : 999;
     
     if (minutesAgo > 5) {
-      console.log(`⚠️ Device is offline. Last inform: ${lastInform ? lastInform.toLocaleString() : 'Never'}`);
-      console.log(`⏰ Time since last inform: ${minutesAgo} minutes`);
+      console.log(`âš ï¸ Device is offline. Last inform: ${lastInform ? lastInform.toLocaleString() : 'Never'}`);
+      console.log(`â° Time since last inform: ${minutesAgo} minutes`);
       return res.status(400).json({ 
         success: false, 
         message: 'Perangkat offline. Restart hanya tersedia untuk perangkat yang online.' 
       });
     }
     
-    console.log(`✅ Device is online. Last inform: ${lastInform.toLocaleString()}`);
+    console.log(`âœ… Device is online. Last inform: ${lastInform.toLocaleString()}`);
     
     // Ambil konfigurasi GenieACS
     const settings = getSettingsWithCache();
@@ -949,7 +949,7 @@ router.post('/restart-device', async (req, res) => {
     const username = settings.genieacs_username || 'admin';
     const password = settings.genieacs_password || 'admin';
     
-    console.log(`🔗 GenieACS URL: ${genieacsUrl}`);
+    console.log(`ðŸ”— GenieACS URL: ${genieacsUrl}`);
     
     // Encode device ID
     const deviceId = device._id;
@@ -958,14 +958,14 @@ router.post('/restart-device', async (req, res) => {
     try {
       // Coba encode device ID
       encodedDeviceId = encodeURIComponent(deviceId);
-      console.log(`🔧 Using encoded device ID: ${encodedDeviceId}`);
+      console.log(`ðŸ”§ Using encoded device ID: ${encodedDeviceId}`);
     } catch (error) {
-      console.log(`🔧 Using original device ID: ${deviceId}`);
+      console.log(`ðŸ”§ Using original device ID: ${deviceId}`);
     }
     
     // Kirim task restart ke GenieACS
     try {
-      console.log(`📤 Sending restart task to GenieACS for device: ${deviceId}`);
+      console.log(`ðŸ“¤ Sending restart task to GenieACS for device: ${deviceId}`);
       
       const response = await axios.post(`${genieacsUrl}/devices/${encodedDeviceId}/tasks`, {
         name: "reboot"
@@ -974,17 +974,17 @@ router.post('/restart-device', async (req, res) => {
         timeout: 10000
       });
       
-      console.log(`✅ GenieACS response:`, response.data);
-      console.log(`🔄 Restart command sent successfully. Device will be offline during restart process.`);
+      console.log(`âœ… GenieACS response:`, response.data);
+      console.log(`ðŸ”„ Restart command sent successfully. Device will be offline during restart process.`);
       
       // Kirim notifikasi WhatsApp ke pelanggan
       try {
         const waJid = phone.replace(/^0/, '62') + '@s.whatsapp.net';
-        const msg = `🔄 *RESTART PERANGKAT*\n\nPerintah restart telah dikirim ke perangkat Anda.\n\n⏰ Perangkat akan restart dalam beberapa detik dan koneksi internet akan terputus sementara (1-2 menit).\n\n📱 Silakan tunggu hingga perangkat selesai restart.`;
+        const msg = `ðŸ”„ *RESTART PERANGKAT*\n\nPerintah restart telah dikirim ke perangkat Anda.\n\nâ° Perangkat akan restart dalam beberapa detik dan koneksi internet akan terputus sementara (1-2 menit).\n\nðŸ“± Silakan tunggu hingga perangkat selesai restart.`;
         await sendMessage(waJid, msg);
-        console.log(`✅ WhatsApp notification sent to ${phone}`);
+        console.log(`âœ… WhatsApp notification sent to ${phone}`);
       } catch (e) {
-        console.error('❌ Gagal mengirim notifikasi restart:', e);
+        console.error('âŒ Gagal mengirim notifikasi restart:', e);
       }
       
       res.json({ 
@@ -993,11 +993,11 @@ router.post('/restart-device', async (req, res) => {
       });
       
     } catch (taskError) {
-      console.error(`❌ Error sending restart task:`, taskError.response?.data || taskError.message);
+      console.error(`âŒ Error sending restart task:`, taskError.response?.data || taskError.message);
       
       // Fallback: coba dengan device ID asli
       try {
-        console.log(`🔄 Trying with original device ID: ${deviceId}`);
+        console.log(`ðŸ”„ Trying with original device ID: ${deviceId}`);
         const response = await axios.post(`${genieacsUrl}/devices/${deviceId}/tasks`, {
           name: "reboot"
         }, {
@@ -1005,14 +1005,14 @@ router.post('/restart-device', async (req, res) => {
           timeout: 10000
         });
         
-        console.log(`✅ Fallback restart successful`);
+        console.log(`âœ… Fallback restart successful`);
         res.json({ 
           success: true, 
           message: 'Perintah restart berhasil dikirim. Perangkat akan restart dalam beberapa detik.' 
         });
         
       } catch (fallbackError) {
-        console.error(`❌ Fallback restart failed:`, fallbackError.response?.data || fallbackError.message);
+        console.error(`âŒ Fallback restart failed:`, fallbackError.response?.data || fallbackError.message);
         res.status(500).json({ 
           success: false, 
           message: 'Gagal mengirim perintah restart. Silakan coba lagi atau hubungi admin.' 
@@ -1021,8 +1021,8 @@ router.post('/restart-device', async (req, res) => {
     }
     
   } catch (error) {
-    console.error('❌ Error restart device:', error.message);
-    console.error('❌ Error details:', error.response?.data || error);
+    console.error('âŒ Error restart device:', error.message);
+    console.error('âŒ Error details:', error.response?.data || error);
     res.status(500).json({ 
       success: false, 
       message: 'Terjadi kesalahan saat restart perangkat. Silakan coba lagi.' 
@@ -1041,7 +1041,7 @@ router.get('/dashboard', async (req, res) => {
     
     // Pastikan data tidak null
     if (!data) {
-      console.log(`❌ No data returned for phone: ${phone}`);
+      console.log(`âŒ No data returned for phone: ${phone}`);
       return res.render('dashboard', { 
         customer: { phone, ssid: '-', status: 'Tidak ditemukan', lastInform: '-' }, 
         connectedUsers: [], 
@@ -1092,7 +1092,7 @@ router.post('/change-ssid', async (req, res) => {
   if (ok) {
     // Kirim notifikasi WhatsApp ke pelanggan
     const waJid = phone.replace(/^0/, '62') + '@s.whatsapp.net';
-    const msg = `✅ *PERUBAHAN NAMA WIFI*\n\nNama WiFi Anda telah diubah menjadi:\n• WiFi 2.4GHz: ${ssid}\n• WiFi 5GHz: ${ssid}-5G\n\nSilakan hubungkan ulang perangkat Anda ke WiFi baru.`;
+    const msg = `âœ… *PERUBAHAN NAMA WIFI*\n\nNama WiFi Anda telah diubah menjadi:\nâ€¢ WiFi 2.4GHz: ${ssid}\nâ€¢ WiFi 5GHz: ${ssid}-5G\n\nSilakan hubungkan ulang perangkat Anda ke WiFi baru.`;
     try { await sendMessage(waJid, msg); } catch (e) {}
   }
   const data = await getCustomerDeviceData(phone);
@@ -1130,14 +1130,14 @@ router.post('/api/change-ssid', async (req, res) => {
       if (result.success) {
         // Kirim notifikasi WhatsApp ke pelanggan (non-blocking)
         const waJid = phone.replace(/^0/, '62') + '@s.whatsapp.net';
-        const msg = `✅ *PERUBAHAN NAMA WIFI*\n\nNama WiFi Anda telah diubah menjadi:\n• WiFi 2.4GHz: ${ssid}\n• WiFi 5GHz: ${ssid}-5G\n\nSilakan hubungkan ulang perangkat Anda ke WiFi baru.`;
+        const msg = `âœ… *PERUBAHAN NAMA WIFI*\n\nNama WiFi Anda telah diubah menjadi:\nâ€¢ WiFi 2.4GHz: ${ssid}\nâ€¢ WiFi 5GHz: ${ssid}-5G\n\nSilakan hubungkan ulang perangkat Anda ke WiFi baru.`;
         sendMessage(waJid, msg).catch(e => {
           console.error('Error sending WhatsApp notification:', e);
         });
         
-        console.log(`✅ SSID update completed for ${phone}: ${ssid}`);
+        console.log(`âœ… SSID update completed for ${phone}: ${ssid}`);
       } else {
-        console.error(`❌ SSID update failed for ${phone}: ${result.message}`);
+        console.error(`âŒ SSID update failed for ${phone}: ${result.message}`);
       }
     }).catch(error => {
       console.error('Error in background SSID update:', error);
@@ -1158,7 +1158,7 @@ router.post('/change-password', async (req, res) => {
   if (ok) {
     // Kirim notifikasi WhatsApp ke pelanggan
     const waJid = phone.replace(/^0/, '62') + '@s.whatsapp.net';
-    const msg = `✅ *PERUBAHAN PASSWORD WIFI*\n\nPassword WiFi Anda telah diubah menjadi:\n• Password Baru: ${password}\n\nSilakan hubungkan ulang perangkat Anda dengan password baru.`;
+    const msg = `âœ… *PERUBAHAN PASSWORD WIFI*\n\nPassword WiFi Anda telah diubah menjadi:\nâ€¢ Password Baru: ${password}\n\nSilakan hubungkan ulang perangkat Anda dengan password baru.`;
     try { await sendMessage(waJid, msg); } catch (e) {}
   }
   const data = await getCustomerDeviceData(phone);
@@ -1195,14 +1195,14 @@ router.post('/api/change-password', async (req, res) => {
       if (result.success) {
         // Kirim notifikasi WhatsApp ke pelanggan (non-blocking)
         const waJid = phone.replace(/^0/, '62') + '@s.whatsapp.net';
-        const msg = `✅ *PERUBAHAN PASSWORD WIFI*\n\nPassword WiFi Anda telah diubah menjadi:\n• Password Baru: ${password}\n\nSilakan hubungkan ulang perangkat Anda dengan password baru.`;
+        const msg = `âœ… *PERUBAHAN PASSWORD WIFI*\n\nPassword WiFi Anda telah diubah menjadi:\nâ€¢ Password Baru: ${password}\n\nSilakan hubungkan ulang perangkat Anda dengan password baru.`;
         sendMessage(waJid, msg).catch(e => {
           console.error('Error sending WhatsApp notification:', e);
         });
         
-        console.log(`✅ Password update completed for ${phone}`);
+        console.log(`âœ… Password update completed for ${phone}`);
       } else {
-        console.error(`❌ Password update failed for ${phone}: ${result.message}`);
+        console.error(`âŒ Password update failed for ${phone}: ${result.message}`);
       }
     }).catch(error => {
       console.error('Error in background password update:', error);

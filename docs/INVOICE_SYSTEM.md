@@ -1,4 +1,4 @@
-# Sistem Cetak Invoice - Gembok Bill
+﻿# Sistem Cetak Invoice - Gembok Bill
 
 ## Overview
 Sistem cetak invoice adalah fitur utama aplikasi Gembok Bill yang memungkinkan admin untuk mencetak dan mengunduh invoice dalam format yang dapat dicetak atau PDF.
@@ -164,7 +164,7 @@ window.addEventListener('afterprint', function() {
 ```json
 {
   "company_header": "ALIJAYA DIGITAL NETWORK",
-  "footer_info": "Info Hubungi : 081947215703",
+  "footer_info": "Info Hubungi : 081234567890",
   "logo_filename": "logo.png"
 }
 ```
@@ -186,7 +186,7 @@ window.addEventListener('afterprint', function() {
   "contact_phone": "0812-3456-7890",
   "contact_email": "info@example.com",
   "contact_address": "Jl. Contoh No. 123, Kota",
-  "contact_whatsapp": "081947215703"
+  "contact_whatsapp": "081234567890"
 }
 ```
 
@@ -296,7 +296,7 @@ Gunakan file `test-invoice.html` untuk test otomatis:
 ### Contact
 - **Developer**: Admin System
 - **Email**: info@example.com
-- **WhatsApp**: 081947215703
+- **WhatsApp**: 081234567890
 
 ### Documentation
 - **API Docs**: `/docs/api.md`

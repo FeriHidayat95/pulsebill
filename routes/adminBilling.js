@@ -1,4 +1,4 @@
-// =============================================================
+﻿// =============================================================
 // SETTING ZONA WAKTU: JAKARTA (WIB) - WAJIB DI BARIS 1
 // =============================================================
 process.env.TZ = 'Asia/Jakarta'; 
@@ -759,7 +759,7 @@ router.post('/whatsapp-settings/test', adminAuth, async (req, res) => {
             due_date: '28 Februari 2026',
             package_name: 'Paket Sultan 50Mbps',
             days_remaining: '3',
-            login_url: 'https://inetku.net/login'
+            login_url: 'https://pulsebill.io/login'
         };
         
         console.log(`?? Mengirim pesan test (${templateKey}) ke: ${phoneNumber}`);

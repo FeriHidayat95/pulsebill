@@ -1,4 +1,4 @@
-// genieacs-commands.js - Module for handling GenieACS commands via WhatsApp
+﻿// genieacs-commands.js - Module for handling GenieACS commands via WhatsApp
 const logger = require('./logger');
 const genieacsApi = require('./genieacs');
 const responses = require('./responses');
@@ -101,24 +101,24 @@ function getParameterValue(device, path) {
 // Parameter paths for different device parameters (updated with confirmed VirtualParameters)
 const parameterPaths = {
     rxPower: [
-        'VirtualParameters.RXPower',                    // ✅ CONFIRMED: -19.74
+        'VirtualParameters.RXPower',                    // âœ… CONFIRMED: -19.74
         'InternetGatewayDevice.WANDevice.1.WANPONInterfaceConfig.RXPower',
         'InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.X_ALU-COM_RxPower',
         'InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.RxPower',
         'Device.Optical.Interface.1.RxPower'
     ],
     pppoeIP: [
-        'VirtualParameters.pppoeIP',                    // ✅ CONFIRMED: 192.168.10.159
+        'VirtualParameters.pppoeIP',                    // âœ… CONFIRMED: 192.168.10.159
         'InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.ExternalIPAddress',
         'Device.PPP.Interface.1.IPCPExtensions.RemoteIPAddress'
     ],
     pppUsername: [
-        'VirtualParameters.pppoeUsername',              // ✅ CONFIRMED: leha
+        'VirtualParameters.pppoeUsername',              // âœ… CONFIRMED: leha
         'InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.Username',
         'Device.PPP.Interface.1.Username'
     ],
     uptime: [
-        'VirtualParameters.getdeviceuptime',            // ✅ CONFIRMED: 5d 04:50:18
+        'VirtualParameters.getdeviceuptime',            // âœ… CONFIRMED: 5d 04:50:18
         'InternetGatewayDevice.DeviceInfo.UpTime',
         'Device.DeviceInfo.UpTime'
     ],
@@ -127,28 +127,28 @@ const parameterPaths = {
         'Device.DeviceInfo.SoftwareVersion'
     ],
     userConnected: [
-        'InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.TotalAssociations',  // ✅ SSID 1 (2.4GHz) only
-        'VirtualParameters.activedevices',              // ✅ Fallback if needed
+        'InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.TotalAssociations',  // âœ… SSID 1 (2.4GHz) only
+        'VirtualParameters.activedevices',              // âœ… Fallback if needed
         'Device.WiFi.AccessPoint.1.AssociatedDeviceNumberOfEntries'
     ],
     temperature: [
-        'VirtualParameters.gettemp',                    // ✅ CONFIRMED: 48
+        'VirtualParameters.gettemp',                    // âœ… CONFIRMED: 48
         'InternetGatewayDevice.DeviceInfo.TemperatureStatus.TemperatureValue',
         'Device.DeviceInfo.TemperatureStatus.TemperatureValue'
     ],
     // Additional VirtualParameters yang tersedia
     serialNumber: [
-        'VirtualParameters.getSerialNumber',            // ✅ AVAILABLE: CIOT12E8C8B8
+        'VirtualParameters.getSerialNumber',            // âœ… AVAILABLE: ONTG12345678
         'InternetGatewayDevice.DeviceInfo.SerialNumber'
     ],
     ponMode: [
-        'VirtualParameters.getponmode'                  // ✅ AVAILABLE: EPON
+        'VirtualParameters.getponmode'                  // âœ… AVAILABLE: EPON
     ],
     pppUptime: [
-        'VirtualParameters.getpppuptime'                // ✅ AVAILABLE: 0d 08:46:43
+        'VirtualParameters.getpppuptime'                // âœ… AVAILABLE: 0d 08:46:43
     ],
     ponMac: [
-        'VirtualParameters.PonMac',                     // ✅ AVAILABLE (but might be empty)
+        'VirtualParameters.PonMac',                     // âœ… AVAILABLE (but might be empty)
         'VirtualParameters.ponMac',                     // Alternative lowercase
         'VirtualParameters.MacAddress',                 // Alternative name
         'VirtualParameters.deviceMac',                  // Alternative name
@@ -157,7 +157,7 @@ const parameterPaths = {
         'InternetGatewayDevice.LANDevice.1.LANEthernetInterfaceConfig.1.MACAddress'
     ],
     wlanPassword: [
-        'VirtualParameters.WlanPassword'                // ✅ AVAILABLE
+        'VirtualParameters.WlanPassword'                // âœ… AVAILABLE
     ]
 };
 
@@ -576,7 +576,7 @@ async function handleFactoryReset(remoteJid, senderNumber) {
 
         // Send confirmation message
         await sock.sendMessage(remoteJid, {
-            text: formatResponse(`⚠️ *PERINGATAN FACTORY RESET*\n\nAnda akan melakukan factory reset pada perangkat Anda.\nSemua pengaturan akan kembali ke default pabrik.\n\nKetik "confirm factory reset" untuk melanjutkan.`)
+            text: formatResponse(`âš ï¸ *PERINGATAN FACTORY RESET*\n\nAnda akan melakukan factory reset pada perangkat Anda.\nSemua pengaturan akan kembali ke default pabrik.\n\nKetik "confirm factory reset" untuk melanjutkan.`)
         });
 
         // Save factory reset confirmation status
@@ -589,7 +589,7 @@ async function handleFactoryReset(remoteJid, senderNumber) {
     } catch (error) {
         logger.error(`Error preparing factory reset: ${error.message}`);
         await sock.sendMessage(remoteJid, {
-            text: formatResponse(`❌ Terjadi kesalahan: ${error.message}`)
+            text: formatResponse(`âŒ Terjadi kesalahan: ${error.message}`)
         });
     }
 }
@@ -604,7 +604,7 @@ async function handleFactoryResetConfirmation(remoteJid, senderNumber) {
     try {
         if (!global.pendingFactoryResets || !global.pendingFactoryResets[senderNumber]) {
             await sock.sendMessage(remoteJid, {
-                text: formatResponse(`❌ Tidak ada permintaan factory reset yang pending.`)
+                text: formatResponse(`âŒ Tidak ada permintaan factory reset yang pending.`)
             });
             return;
         }
@@ -614,7 +614,7 @@ async function handleFactoryResetConfirmation(remoteJid, senderNumber) {
         // Check if confirmation is still valid (within 5 minutes)
         if (Date.now() - timestamp > 5 * 60 * 1000) {
             await sock.sendMessage(remoteJid, {
-                text: formatResponse(`❌ Permintaan factory reset sudah expired. Silakan ulangi.`)
+                text: formatResponse(`âŒ Permintaan factory reset sudah expired. Silakan ulangi.`)
             });
             delete global.pendingFactoryResets[senderNumber];
             return;
@@ -622,7 +622,7 @@ async function handleFactoryResetConfirmation(remoteJid, senderNumber) {
 
         // Send processing message
         await sock.sendMessage(remoteJid, {
-            text: formatResponse(`🔄 Melakukan factory reset perangkat...\nMohon tunggu beberapa menit.`)
+            text: formatResponse(`ðŸ”„ Melakukan factory reset perangkat...\nMohon tunggu beberapa menit.`)
         });
 
         try {
@@ -633,7 +633,7 @@ async function handleFactoryResetConfirmation(remoteJid, senderNumber) {
             if (result && result._id) {
                 // Send success message
                 await sock.sendMessage(remoteJid, {
-                    text: formatResponse(`✅ Factory reset berhasil dilakukan.\nPerangkat akan restart dan kembali ke pengaturan default pabrik.`)
+                    text: formatResponse(`âœ… Factory reset berhasil dilakukan.\nPerangkat akan restart dan kembali ke pengaturan default pabrik.`)
                 });
             } else {
                 throw new Error('Gagal factory reset perangkat: Tidak ada respons dari server');
@@ -642,7 +642,7 @@ async function handleFactoryResetConfirmation(remoteJid, senderNumber) {
         } catch (apiError) {
             logger.error(`Error in factoryReset: ${apiError.message}`);
             await sock.sendMessage(remoteJid, {
-                text: formatResponse(`❌ Terjadi kesalahan: ${apiError.message}`)
+                text: formatResponse(`âŒ Terjadi kesalahan: ${apiError.message}`)
             });
         }
 
@@ -652,7 +652,7 @@ async function handleFactoryResetConfirmation(remoteJid, senderNumber) {
     } catch (error) {
         logger.error(`Error handling factory reset confirmation: ${error.message}`);
         await sock.sendMessage(remoteJid, {
-            text: formatResponse(`❌ Terjadi kesalahan: ${error.message}`)
+            text: formatResponse(`âŒ Terjadi kesalahan: ${error.message}`)
         });
 
         // Delete factory reset confirmation status even if error
@@ -713,7 +713,7 @@ async function handleConnectedDevices(remoteJid, senderNumber) {
             logger.error(`Error getting detailed host info: ${error.message}`);
         }
 
-        let message = `📱 *PERANGKAT TERHUBUNG*\n\n`;
+        let message = `ðŸ“± *PERANGKAT TERHUBUNG*\n\n`;
         message += `Jumlah perangkat aktif: ${connectedUsers}\n\n`;
 
         if (hostInfo) {
@@ -729,7 +729,7 @@ async function handleConnectedDevices(remoteJid, senderNumber) {
     } catch (error) {
         logger.error(`Error handling connected devices: ${error.message}`);
         await sock.sendMessage(remoteJid, {
-            text: formatResponse(`❌ Terjadi kesalahan: ${error.message}`)
+            text: formatResponse(`âŒ Terjadi kesalahan: ${error.message}`)
         });
     }
 }
@@ -747,7 +747,7 @@ async function handleAdminDeviceDetail(remoteJid, phoneNumber) {
 
         if (!device) {
             await sock.sendMessage(remoteJid, {
-                text: formatResponse(`❌ Perangkat dengan nomor ${phoneNumber} tidak ditemukan.`)
+                text: formatResponse(`âŒ Perangkat dengan nomor ${phoneNumber} tidak ditemukan.`)
             });
             return;
         }
@@ -777,36 +777,36 @@ async function handleAdminDeviceDetail(remoteJid, phoneNumber) {
         const model = device.InternetGatewayDevice?.DeviceInfo?.ModelName?._value || 'N/A';
         const hardwareVersion = device.InternetGatewayDevice?.DeviceInfo?.HardwareVersion?._value || 'N/A';
 
-        let message = `🔍 *DETAIL PERANGKAT ADMIN*\n\n`;
-        message += `📱 *Nomor:* ${phoneNumber}\n`;
-        message += `🆔 *Device ID:* ${device._id}\n`;
-        message += `📟 *Serial Number:* ${serialNumber}\n`;
-        message += `🏭 *Manufacturer:* ${manufacturer}\n`;
-        message += `📦 *Model:* ${model}\n`;
-        message += `🔧 *Hardware Version:* ${hardwareVersion}\n`;
-        message += `💾 *Firmware:* ${firmware}\n\n`;
+        let message = `ðŸ” *DETAIL PERANGKAT ADMIN*\n\n`;
+        message += `ðŸ“± *Nomor:* ${phoneNumber}\n`;
+        message += `ðŸ†” *Device ID:* ${device._id}\n`;
+        message += `ðŸ“Ÿ *Serial Number:* ${serialNumber}\n`;
+        message += `ðŸ­ *Manufacturer:* ${manufacturer}\n`;
+        message += `ðŸ“¦ *Model:* ${model}\n`;
+        message += `ðŸ”§ *Hardware Version:* ${hardwareVersion}\n`;
+        message += `ðŸ’¾ *Firmware:* ${firmware}\n\n`;
 
-        message += `🌐 *Status Koneksi:*\n`;
-        message += `• Status: ${isOnline ? '🟢 Online' : '🔴 Offline'}\n`;
-        message += `• Last Inform: ${new Date(lastInform).toLocaleString()}\n`;
-        message += `• Device Uptime: ${uptime}\n`;
-        message += `• PPP Uptime: ${pppUptime}\n`;
-        message += `• PPPoE IP: ${pppoeIP}\n`;
-        message += `• PPP Username: ${pppUsername}\n\n`;
+        message += `ðŸŒ *Status Koneksi:*\n`;
+        message += `â€¢ Status: ${isOnline ? 'ðŸŸ¢ Online' : 'ðŸ”´ Offline'}\n`;
+        message += `â€¢ Last Inform: ${new Date(lastInform).toLocaleString()}\n`;
+        message += `â€¢ Device Uptime: ${uptime}\n`;
+        message += `â€¢ PPP Uptime: ${pppUptime}\n`;
+        message += `â€¢ PPPoE IP: ${pppoeIP}\n`;
+        message += `â€¢ PPP Username: ${pppUsername}\n\n`;
 
-        message += `📡 *Network Information:*\n`;
-        message += `• PON Mode: ${ponMode}\n`;
-        message += `• RX Power: ${rxPower} dBm\n`;
-        message += `• Temperature: ${temperature}°C\n\n`;
+        message += `ðŸ“¡ *Network Information:*\n`;
+        message += `â€¢ PON Mode: ${ponMode}\n`;
+        message += `â€¢ RX Power: ${rxPower} dBm\n`;
+        message += `â€¢ Temperature: ${temperature}Â°C\n\n`;
 
-        message += `📶 *WiFi Information:*\n`;
-        message += `• SSID 2.4G: ${ssid}\n`;
-        message += `• SSID 5G: ${ssid5G}\n`;
-        message += `• Connected Devices: ${connectedUsers}\n\n`;
+        message += `ðŸ“¶ *WiFi Information:*\n`;
+        message += `â€¢ SSID 2.4G: ${ssid}\n`;
+        message += `â€¢ SSID 5G: ${ssid5G}\n`;
+        message += `â€¢ Connected Devices: ${connectedUsers}\n\n`;
 
         // Get tags
         if (device._tags && device._tags.length > 0) {
-            message += `🏷️ *Tags:* ${device._tags.join(', ')}\n`;
+            message += `ðŸ·ï¸ *Tags:* ${device._tags.join(', ')}\n`;
         }
 
         await sock.sendMessage(remoteJid, {
@@ -816,7 +816,7 @@ async function handleAdminDeviceDetail(remoteJid, phoneNumber) {
     } catch (error) {
         logger.error(`Error handling admin device detail: ${error.message}`);
         await sock.sendMessage(remoteJid, {
-            text: formatResponse(`❌ Terjadi kesalahan: ${error.message}`)
+            text: formatResponse(`âŒ Terjadi kesalahan: ${error.message}`)
         });
     }
 }
@@ -834,14 +834,14 @@ async function handleAdminRestartDevice(remoteJid, phoneNumber) {
 
         if (!device) {
             await sock.sendMessage(remoteJid, {
-                text: formatResponse(`❌ Perangkat dengan nomor ${phoneNumber} tidak ditemukan.`)
+                text: formatResponse(`âŒ Perangkat dengan nomor ${phoneNumber} tidak ditemukan.`)
             });
             return;
         }
 
         // Send processing message
         await sock.sendMessage(remoteJid, {
-            text: formatResponse(`🔄 Melakukan restart perangkat pelanggan ${phoneNumber}...\nMohon tunggu beberapa menit.`)
+            text: formatResponse(`ðŸ”„ Melakukan restart perangkat pelanggan ${phoneNumber}...\nMohon tunggu beberapa menit.`)
         });
 
         try {
@@ -852,7 +852,7 @@ async function handleAdminRestartDevice(remoteJid, phoneNumber) {
             if (result && result._id) {
                 // Send success message
                 await sock.sendMessage(remoteJid, {
-                    text: formatResponse(`✅ Perintah restart berhasil dikirim ke perangkat pelanggan ${phoneNumber}.\nPerangkat akan restart dalam beberapa menit.`)
+                    text: formatResponse(`âœ… Perintah restart berhasil dikirim ke perangkat pelanggan ${phoneNumber}.\nPerangkat akan restart dalam beberapa menit.`)
                 });
             } else {
                 throw new Error('Gagal restart perangkat: Tidak ada respons dari server');
@@ -861,14 +861,14 @@ async function handleAdminRestartDevice(remoteJid, phoneNumber) {
         } catch (apiError) {
             logger.error(`Error in reboot: ${apiError.message}`);
             await sock.sendMessage(remoteJid, {
-                text: formatResponse(`❌ Terjadi kesalahan: ${apiError.message}`)
+                text: formatResponse(`âŒ Terjadi kesalahan: ${apiError.message}`)
             });
         }
 
     } catch (error) {
         logger.error(`Error handling admin restart device: ${error.message}`);
         await sock.sendMessage(remoteJid, {
-            text: formatResponse(`❌ Terjadi kesalahan: ${error.message}`)
+            text: formatResponse(`âŒ Terjadi kesalahan: ${error.message}`)
         });
     }
 }
@@ -886,14 +886,14 @@ async function handleAdminFactoryReset(remoteJid, phoneNumber) {
 
         if (!device) {
             await sock.sendMessage(remoteJid, {
-                text: formatResponse(`❌ Perangkat dengan nomor ${phoneNumber} tidak ditemukan.`)
+                text: formatResponse(`âŒ Perangkat dengan nomor ${phoneNumber} tidak ditemukan.`)
             });
             return;
         }
 
         // Send confirmation message
         await sock.sendMessage(remoteJid, {
-            text: formatResponse(`⚠️ *PERINGATAN FACTORY RESET ADMIN*\n\nAnda akan melakukan factory reset pada perangkat pelanggan ${phoneNumber}.\nSemua pengaturan akan kembali ke default pabrik.\n\nKetik "confirm admin factory reset ${phoneNumber}" untuk melanjutkan.`)
+            text: formatResponse(`âš ï¸ *PERINGATAN FACTORY RESET ADMIN*\n\nAnda akan melakukan factory reset pada perangkat pelanggan ${phoneNumber}.\nSemua pengaturan akan kembali ke default pabrik.\n\nKetik "confirm admin factory reset ${phoneNumber}" untuk melanjutkan.`)
         });
 
         // Save factory reset confirmation status
@@ -906,7 +906,7 @@ async function handleAdminFactoryReset(remoteJid, phoneNumber) {
     } catch (error) {
         logger.error(`Error preparing admin factory reset: ${error.message}`);
         await sock.sendMessage(remoteJid, {
-            text: formatResponse(`❌ Terjadi kesalahan: ${error.message}`)
+            text: formatResponse(`âŒ Terjadi kesalahan: ${error.message}`)
         });
     }
 }
@@ -921,7 +921,7 @@ async function handleAdminFactoryResetConfirmation(remoteJid, phoneNumber) {
     try {
         if (!global.pendingAdminFactoryResets || !global.pendingAdminFactoryResets[phoneNumber]) {
             await sock.sendMessage(remoteJid, {
-                text: formatResponse(`❌ Tidak ada permintaan factory reset yang pending untuk nomor ${phoneNumber}.`)
+                text: formatResponse(`âŒ Tidak ada permintaan factory reset yang pending untuk nomor ${phoneNumber}.`)
             });
             return;
         }
@@ -931,7 +931,7 @@ async function handleAdminFactoryResetConfirmation(remoteJid, phoneNumber) {
         // Check if confirmation is still valid (within 5 minutes)
         if (Date.now() - timestamp > 5 * 60 * 1000) {
             await sock.sendMessage(remoteJid, {
-                text: formatResponse(`❌ Permintaan factory reset untuk ${phoneNumber} sudah expired. Silakan ulangi.`)
+                text: formatResponse(`âŒ Permintaan factory reset untuk ${phoneNumber} sudah expired. Silakan ulangi.`)
             });
             delete global.pendingAdminFactoryResets[phoneNumber];
             return;
@@ -939,7 +939,7 @@ async function handleAdminFactoryResetConfirmation(remoteJid, phoneNumber) {
 
         // Send processing message
         await sock.sendMessage(remoteJid, {
-            text: formatResponse(`🔄 Melakukan factory reset perangkat pelanggan ${phoneNumber}...\nMohon tunggu beberapa menit.`)
+            text: formatResponse(`ðŸ”„ Melakukan factory reset perangkat pelanggan ${phoneNumber}...\nMohon tunggu beberapa menit.`)
         });
 
         try {
@@ -950,7 +950,7 @@ async function handleAdminFactoryResetConfirmation(remoteJid, phoneNumber) {
             if (result && result._id) {
                 // Send success message
                 await sock.sendMessage(remoteJid, {
-                    text: formatResponse(`✅ Factory reset berhasil dilakukan pada perangkat pelanggan ${phoneNumber}.\nPerangkat akan restart dan kembali ke pengaturan default pabrik.`)
+                    text: formatResponse(`âœ… Factory reset berhasil dilakukan pada perangkat pelanggan ${phoneNumber}.\nPerangkat akan restart dan kembali ke pengaturan default pabrik.`)
                 });
             } else {
                 throw new Error('Gagal factory reset perangkat: Tidak ada respons dari server');
@@ -959,7 +959,7 @@ async function handleAdminFactoryResetConfirmation(remoteJid, phoneNumber) {
         } catch (apiError) {
             logger.error(`Error in factoryReset: ${apiError.message}`);
             await sock.sendMessage(remoteJid, {
-                text: formatResponse(`❌ Terjadi kesalahan: ${apiError.message}`)
+                text: formatResponse(`âŒ Terjadi kesalahan: ${apiError.message}`)
             });
         }
 
@@ -969,7 +969,7 @@ async function handleAdminFactoryResetConfirmation(remoteJid, phoneNumber) {
     } catch (error) {
         logger.error(`Error handling admin factory reset confirmation: ${error.message}`);
         await sock.sendMessage(remoteJid, {
-            text: formatResponse(`❌ Terjadi kesalahan: ${error.message}`)
+            text: formatResponse(`âŒ Terjadi kesalahan: ${error.message}`)
         });
 
         // Delete factory reset confirmation status even if error
@@ -1022,13 +1022,13 @@ async function handleSpeedTest(remoteJid, senderNumber) {
             'Device.IP.Interface.1.Stats.BytesSent'
         ]) || 'N/A';
 
-        let message = `📊 *INFORMASI BANDWIDTH*\n\n`;
-        message += `📥 *Download Speed:* ${downloadSpeed}\n`;
-        message += `📤 *Upload Speed:* ${uploadSpeed}\n\n`;
-        message += `📈 *Statistik Interface:*\n`;
-        message += `• Bytes Received: ${formatBytes(bytesReceived)}\n`;
-        message += `• Bytes Sent: ${formatBytes(bytesSent)}\n\n`;
-        message += `💡 *Tips:* Untuk speed test yang akurat, gunakan aplikasi speed test di perangkat Anda.`;
+        let message = `ðŸ“Š *INFORMASI BANDWIDTH*\n\n`;
+        message += `ðŸ“¥ *Download Speed:* ${downloadSpeed}\n`;
+        message += `ðŸ“¤ *Upload Speed:* ${uploadSpeed}\n\n`;
+        message += `ðŸ“ˆ *Statistik Interface:*\n`;
+        message += `â€¢ Bytes Received: ${formatBytes(bytesReceived)}\n`;
+        message += `â€¢ Bytes Sent: ${formatBytes(bytesSent)}\n\n`;
+        message += `ðŸ’¡ *Tips:* Untuk speed test yang akurat, gunakan aplikasi speed test di perangkat Anda.`;
 
         await sock.sendMessage(remoteJid, {
             text: formatResponse(message)
@@ -1037,7 +1037,7 @@ async function handleSpeedTest(remoteJid, senderNumber) {
     } catch (error) {
         logger.error(`Error handling speed test: ${error.message}`);
         await sock.sendMessage(remoteJid, {
-            text: formatResponse(`❌ Terjadi kesalahan: ${error.message}`)
+            text: formatResponse(`âŒ Terjadi kesalahan: ${error.message}`)
         });
     }
 }
@@ -1081,46 +1081,46 @@ async function handleNetworkDiagnostic(remoteJid, senderNumber) {
             'InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.DNSServers'
         ]) || 'N/A';
 
-        let message = `🔧 *DIAGNOSTIK JARINGAN*\n\n`;
+        let message = `ðŸ”§ *DIAGNOSTIK JARINGAN*\n\n`;
 
         // Status koneksi
-        message += `🌐 *Status Koneksi:*\n`;
-        message += `• Device: ${isOnline ? '🟢 Online' : '🔴 Offline'}\n`;
-        message += `• WAN Status: ${wanStatus}\n`;
-        message += `• PPPoE IP: ${pppoeIP}\n`;
-        message += `• Last Inform: ${new Date(lastInform).toLocaleString()}\n\n`;
+        message += `ðŸŒ *Status Koneksi:*\n`;
+        message += `â€¢ Device: ${isOnline ? 'ðŸŸ¢ Online' : 'ðŸ”´ Offline'}\n`;
+        message += `â€¢ WAN Status: ${wanStatus}\n`;
+        message += `â€¢ PPPoE IP: ${pppoeIP}\n`;
+        message += `â€¢ Last Inform: ${new Date(lastInform).toLocaleString()}\n\n`;
 
         // Signal quality
-        message += `📶 *Kualitas Signal:*\n`;
-        message += `• RX Power: ${rxPower} dBm\n`;
+        message += `ðŸ“¶ *Kualitas Signal:*\n`;
+        message += `â€¢ RX Power: ${rxPower} dBm\n`;
         const rxPowerNum = parseFloat(rxPower);
         if (!isNaN(rxPowerNum)) {
             if (rxPowerNum >= -25) {
-                message += `• Status: 🟢 Excellent\n`;
+                message += `â€¢ Status: ðŸŸ¢ Excellent\n`;
             } else if (rxPowerNum >= -27) {
-                message += `• Status: 🟡 Good\n`;
+                message += `â€¢ Status: ðŸŸ¡ Good\n`;
             } else if (rxPowerNum >= -30) {
-                message += `• Status: 🟠 Fair\n`;
+                message += `â€¢ Status: ðŸŸ  Fair\n`;
             } else {
-                message += `• Status: 🔴 Poor\n`;
+                message += `â€¢ Status: ðŸ”´ Poor\n`;
             }
         }
-        message += `• Temperature: ${temperature}°C\n\n`;
+        message += `â€¢ Temperature: ${temperature}Â°C\n\n`;
 
         // Network settings
-        message += `⚙️ *Pengaturan Jaringan:*\n`;
-        message += `• DNS Servers: ${dnsServers}\n\n`;
+        message += `âš™ï¸ *Pengaturan Jaringan:*\n`;
+        message += `â€¢ DNS Servers: ${dnsServers}\n\n`;
 
         // Recommendations
-        message += `💡 *Rekomendasi:*\n`;
+        message += `ðŸ’¡ *Rekomendasi:*\n`;
         if (!isOnline) {
-            message += `• Perangkat offline, coba restart perangkat\n`;
+            message += `â€¢ Perangkat offline, coba restart perangkat\n`;
         }
         if (!isNaN(rxPowerNum) && rxPowerNum < -27) {
-            message += `• Signal lemah, hubungi teknisi\n`;
+            message += `â€¢ Signal lemah, hubungi teknisi\n`;
         }
         if (!isNaN(parseFloat(temperature)) && parseFloat(temperature) > 70) {
-            message += `• Temperature tinggi, pastikan ventilasi baik\n`;
+            message += `â€¢ Temperature tinggi, pastikan ventilasi baik\n`;
         }
 
         await sock.sendMessage(remoteJid, {
@@ -1130,7 +1130,7 @@ async function handleNetworkDiagnostic(remoteJid, senderNumber) {
     } catch (error) {
         logger.error(`Error handling network diagnostic: ${error.message}`);
         await sock.sendMessage(remoteJid, {
-            text: formatResponse(`❌ Terjadi kesalahan: ${error.message}`)
+            text: formatResponse(`âŒ Terjadi kesalahan: ${error.message}`)
         });
     }
 }
@@ -1165,27 +1165,27 @@ async function handleConnectionHistory(remoteJid, senderNumber) {
         const lastInform = device._lastInform;
         const firstInform = device._registered || device._created || 'N/A';
 
-        let message = `📊 *RIWAYAT KONEKSI*\n\n`;
-        message += `⏰ *Waktu Aktif:*\n`;
-        message += `• Device Uptime: ${deviceUptime}\n`;
-        message += `• PPPoE Uptime: ${pppUptime}\n\n`;
+        let message = `ðŸ“Š *RIWAYAT KONEKSI*\n\n`;
+        message += `â° *Waktu Aktif:*\n`;
+        message += `â€¢ Device Uptime: ${deviceUptime}\n`;
+        message += `â€¢ PPPoE Uptime: ${pppUptime}\n\n`;
 
-        message += `📅 *Riwayat:*\n`;
-        message += `• First Registered: ${firstInform !== 'N/A' ? new Date(firstInform).toLocaleString() : 'N/A'}\n`;
-        message += `• Last Inform: ${new Date(lastInform).toLocaleString()}\n\n`;
+        message += `ðŸ“… *Riwayat:*\n`;
+        message += `â€¢ First Registered: ${firstInform !== 'N/A' ? new Date(firstInform).toLocaleString() : 'N/A'}\n`;
+        message += `â€¢ Last Inform: ${new Date(lastInform).toLocaleString()}\n\n`;
 
         // Calculate connection stability
         const now = Date.now();
         const lastInformTime = new Date(lastInform).getTime();
         const timeDiff = now - lastInformTime;
 
-        message += `🔄 *Status Koneksi:*\n`;
+        message += `ðŸ”„ *Status Koneksi:*\n`;
         if (timeDiff < 5 * 60 * 1000) { // 5 minutes
-            message += `• Status: 🟢 Stabil (Last inform ${Math.round(timeDiff / 1000)} detik lalu)\n`;
+            message += `â€¢ Status: ðŸŸ¢ Stabil (Last inform ${Math.round(timeDiff / 1000)} detik lalu)\n`;
         } else if (timeDiff < 30 * 60 * 1000) { // 30 minutes
-            message += `• Status: 🟡 Normal (Last inform ${Math.round(timeDiff / 60000)} menit lalu)\n`;
+            message += `â€¢ Status: ðŸŸ¡ Normal (Last inform ${Math.round(timeDiff / 60000)} menit lalu)\n`;
         } else {
-            message += `• Status: 🔴 Bermasalah (Last inform ${Math.round(timeDiff / 60000)} menit lalu)\n`;
+            message += `â€¢ Status: ðŸ”´ Bermasalah (Last inform ${Math.round(timeDiff / 60000)} menit lalu)\n`;
         }
 
         await sock.sendMessage(remoteJid, {
@@ -1195,7 +1195,7 @@ async function handleConnectionHistory(remoteJid, senderNumber) {
     } catch (error) {
         logger.error(`Error handling connection history: ${error.message}`);
         await sock.sendMessage(remoteJid, {
-            text: formatResponse(`❌ Terjadi kesalahan: ${error.message}`)
+            text: formatResponse(`âŒ Terjadi kesalahan: ${error.message}`)
         });
     }
 }

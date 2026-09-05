@@ -1,4 +1,4 @@
-const express = require('express');
+﻿const express = require('express');
 const router = express.Router();
 const { getSettingsWithCache } = require('../config/settingsManager');
 const { RadiusManager } = require('../config/RadiusManager'); // Pintu Otak
@@ -16,7 +16,7 @@ router.get('/', adminAuth, async (req, res) => {
         res.render('adminHotspot', {
             users: cleanUsers, 
             onlineCount: cleanUsers.length,
-            company_header: settings.company_header || "inetku.net",
+            company_header: settings.company_header || "pulsebill.io",
             settings: settings
         });
 
@@ -143,7 +143,7 @@ router.get('/voucher', adminAuth, async (req, res) => {
             settings, 
             profiles: data.profiles, 
             voucherHistory: [],
-            company_header: settings.company_header || "inetku.net",
+            company_header: settings.company_header || "pulsebill.io",
             stats: data.stats
         });
     } catch (e) { 
@@ -161,7 +161,7 @@ router.post('/api/voucher-history', adminAuth, async (req, res) => {
         res.json({ 
             success: true, 
             vouchers: vouchers, 
-            namaHotspot: getSettingsWithCache().company_header || "inetku.net" 
+            namaHotspot: getSettingsWithCache().company_header || "pulsebill.io" 
         });
     } catch (e) {
         console.error("[API VOUCHER HISTORY ERROR]", e.message);
@@ -193,7 +193,7 @@ router.post('/generate-voucher', adminAuth, async (req, res) => {
             vouchers: result.vouchers, 
             profile: result.profile, 
             price: result.price, 
-            namaHotspot: getSettingsWithCache().company_header || "inetku.net" 
+            namaHotspot: getSettingsWithCache().company_header || "pulsebill.io" 
         });
 
     } catch (e) {

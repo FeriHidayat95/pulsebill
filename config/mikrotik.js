@@ -1,4 +1,4 @@
-// Modul untuk koneksi dan operasi Mikrotik
+﻿// Modul untuk koneksi dan operasi Mikrotik
 const { RouterOSAPI } = require('node-routeros');
 const { exec } = require('child_process');
 const logger = require('./logger');
@@ -649,11 +649,11 @@ async function monitorPPPoEConnections() {
                         offlineList = pppSecrets.filter(secret => !activeNow.includes(secret.name)).map(u => u.name);
                     } catch (e) {}
                     // Format pesan WhatsApp
-                    let msg = `🔔 *PPPoE LOGIN*\n\n`;
+                    let msg = `ðŸ”” *PPPoE LOGIN*\n\n`;
                     loginDetail.forEach((u, i) => {
-                        msg += `*${i+1}. ${u.name}*\n• Address: ${u.address || '-'}\n• Uptime: ${u.uptime || '-'}\n\n`;
+                        msg += `*${i+1}. ${u.name}*\nâ€¢ Address: ${u.address || '-'}\nâ€¢ Uptime: ${u.uptime || '-'}\n\n`;
                     });
-                    msg += `🚫 *Pelanggan Offline* (${offlineList.length})\n`;
+                    msg += `ðŸš« *Pelanggan Offline* (${offlineList.length})\n`;
                     offlineList.forEach((u, i) => {
                         msg += `${i+1}. ${u}\n`;
                     });
@@ -682,11 +682,11 @@ async function monitorPPPoEConnections() {
                         offlineList = pppSecrets.filter(secret => !activeNow.includes(secret.name)).map(u => u.name);
                     } catch (e) {}
                     // Format pesan WhatsApp
-                    let msg = `🚪 *PPPoE LOGOUT*\n\n`;
+                    let msg = `ðŸšª *PPPoE LOGOUT*\n\n`;
                     logoutDetail.forEach((u, i) => {
                         msg += `*${i+1}. ${u.name}*\n\n`;
                     });
-                    msg += `🚫 *Pelanggan Offline* (${offlineList.length})\n`;
+                    msg += `ðŸš« *Pelanggan Offline* (${offlineList.length})\n`;
                     offlineList.forEach((u, i) => {
                         msg += `${i+1}. ${u}\n`;
                     });
@@ -1724,7 +1724,7 @@ let lastMikrotikConfig = {};
 
 function getCurrentMikrotikConfig() {
     return {
-        host: getSetting('mikrotik_host', '192.168.8.1'),
+        host: getSetting('mikrotik_host', '192.168.88.1'),
         port: getSetting('mikrotik_port', '8728'),
         user: getSetting('mikrotik_user', 'admin'),
         password: getSetting('mikrotik_password', 'admin')

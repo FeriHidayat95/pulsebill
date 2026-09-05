@@ -1,4 +1,4 @@
-// Modul untuk koneksi dan operasi Mikrotik
+﻿// Modul untuk koneksi dan operasi Mikrotik
 const { RouterOSAPI } = require('node-routeros');
 const logger = require('./logger');
 const { getSetting } = require('./settingsManager');
@@ -16,7 +16,7 @@ function setSock(sockInstance) {
 async function connectToMikrotik() {
     try {
         // Dapatkan konfigurasi Mikrotik
-        const host = getSetting('mikrotik_host', '192.168.8.1');
+        const host = getSetting('mikrotik_host', '192.168.88.1');
         const port = parseInt(getSetting('mikrotik_port', '8728'));
         const user = getSetting('mikrotik_user', 'admin');
         const password = getSetting('mikrotik_password', 'admin');

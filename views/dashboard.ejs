@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id" data-bs-theme="light">
 <head>
   <meta charset="UTF-8">
@@ -523,7 +523,7 @@
               <div>
                 <i class="bi bi-info-circle me-2"></i>Jika mengalami kendala, silakan hubungi admin.
               </div>
-              <a href="https://wa.me/<%= customer.adminNumberWA || '6281947215703' %>" target="_blank" class="btn btn-success btn-sm rounded-pill px-3 fw-bold">
+              <a href="https://wa.me/<%= customer.adminNumberWA || '6281234567890' %>" target="_blank" class="btn btn-success btn-sm rounded-pill px-3 fw-bold">
                 <i class="bi bi-whatsapp me-1"></i><%= customer.adminNumber || 'Chat Admin' %>
               </a>
             </div>
@@ -594,7 +594,7 @@
         </div>
 
         <footer class="footer border-top pt-4 d-none d-md-block">
-          &copy; <%= new Date().getFullYear() %> <%= typeof customer !== 'undefined' && customer.companyHeader ? customer.companyHeader : 'SASIKIRANA NETWORK' %>
+          &copy; <%= new Date().getFullYear() %> <%= typeof customer !== 'undefined' && customer.companyHeader ? customer.companyHeader : 'PULSEBILL NETWORKS' %>
         </footer>
 
       </div>
@@ -665,7 +665,7 @@
                   <% } %>
               </div>
               <% if (hasOverdue || hasUnpaid) { %>
-                  <a href="https://inetku.sgtnet.cloud/customer/billing/payments" class="btn rounded-pill px-4" style="font-size: 12px; font-weight: 700; padding: 9px 18px; background: #ef4444; color: white; border: none; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);">Bayar</a>
+                  <a href="https://billing.pulsebill.io/customer/billing/payments" class="btn rounded-pill px-4" style="font-size: 12px; font-weight: 700; padding: 9px 18px; background: #ef4444; color: white; border: none; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);">Bayar</a>
               <% } else { %>
                   <span class="btn rounded-pill px-4" style="font-size: 12px; font-weight: 700; padding: 9px 18px; background: #10b981; color: white; border: none; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.4); pointer-events: none; cursor: default;">Lunas</span>
               <% } %>
@@ -678,7 +678,7 @@
               </a>
               <a href="/customer/billing/payments" class="mob-grid-item"><i class="bi bi-clock-history mob-grid-icon"></i><span class="mob-grid-text">Riwayat</span></a>
               <a href="/customer/billing/profile" class="mob-grid-item"><i class="bi bi-people mob-grid-icon"></i><span class="mob-grid-text">Profil</span></a>
-              <a href="https://wa.me/<%= customer.adminNumberWA || '6281947215703' %>" class="mob-grid-item"><i class="bi bi-chat-dots mob-grid-icon"></i><span class="mob-grid-text">Chat WA</span></a>
+              <a href="https://wa.me/<%= customer.adminNumberWA || '6281234567890' %>" class="mob-grid-item"><i class="bi bi-chat-dots mob-grid-icon"></i><span class="mob-grid-text">Chat WA</span></a>
           </div>
 
           <div class="mob-card p-3">
@@ -752,7 +752,7 @@
               <i class="bi bi-shield-x text-danger mb-3" style="font-size: 40px;"></i>
               <h5 class="fw-bold" style="font-size: 16px;">Belum Terdaftar</h5>
               <p style="font-size: 11px; color: var(--text-muted);">Nomor HP <strong><%= phone || 'Anda' %></strong> belum terdaftar di sistem billing.</p>
-              <a href="https://wa.me/<%= typeof settings !== 'undefined' ? settings.adminNumberWA || '6281947215703' : '6281947215703' %>" class="btn btn-primary w-100 rounded-pill mt-2 py-2" style="font-size: 12px; font-weight: 600;">Hubungi Admin</a>
+              <a href="https://wa.me/<%= typeof settings !== 'undefined' ? settings.adminNumberWA || '6281234567890' : '6281234567890' %>" class="btn btn-primary w-100 rounded-pill mt-2 py-2" style="font-size: 12px; font-weight: 600;">Hubungi Admin</a>
           </div>
       <% } %>
 

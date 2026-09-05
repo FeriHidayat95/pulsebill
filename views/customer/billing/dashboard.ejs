@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
@@ -639,12 +639,12 @@
                             </h6>
                             <p class="mb-2 small">Metode pembayaran yang tersedia:</p>
                             <div class="row g-1">
-                              <div class="col-4 col-sm-2 col-lg-4"><small class="text-muted">🎯 QRIS</small></div>
-                              <div class="col-4 col-sm-2 col-lg-4"><small class="text-muted">💰 DANA</small></div>
-                              <div class="col-4 col-sm-2 col-lg-4"><small class="text-muted">🛍️ GoPay</small></div>
-                              <div class="col-4 col-sm-2 col-lg-4"><small class="text-muted">📱 OVO</small></div>
-                              <div class="col-4 col-sm-2 col-lg-4"><small class="text-muted">🏦 BRIVA</small></div>
-                              <div class="col-4 col-sm-2 col-lg-4"><small class="text-muted">💳 Kartu</small></div>
+                              <div class="col-4 col-sm-2 col-lg-4"><small class="text-muted">ðŸŽ¯ QRIS</small></div>
+                              <div class="col-4 col-sm-2 col-lg-4"><small class="text-muted">ðŸ’° DANA</small></div>
+                              <div class="col-4 col-sm-2 col-lg-4"><small class="text-muted">ðŸ›ï¸ GoPay</small></div>
+                              <div class="col-4 col-sm-2 col-lg-4"><small class="text-muted">ðŸ“± OVO</small></div>
+                              <div class="col-4 col-sm-2 col-lg-4"><small class="text-muted">ðŸ¦ BRIVA</small></div>
+                              <div class="col-4 col-sm-2 col-lg-4"><small class="text-muted">ðŸ’³ Kartu</small></div>
                             </div>
                             <div class="text-center mt-3 mb-3">
                               <div id="qr-container" style="display:none;">
@@ -927,8 +927,8 @@
       <div class="alert alert-info">
         <i class="bi bi-info-circle me-2"></i>
         Untuk informasi lebih lanjut atau bantuan pembayaran, silakan hubungi admin melalui WhatsApp: 
-        <a href="https://wa.me/<%= settings.adminNumberWA || '6281947215703' %>" target="_blank" class="alert-link">
-          <i class="bi bi-whatsapp me-1"></i><%= settings.adminNumber || '081947215703' %>
+        <a href="https://wa.me/<%= settings.adminNumberWA || '6281234567890' %>" target="_blank" class="alert-link">
+          <i class="bi bi-whatsapp me-1"></i><%= settings.adminNumber || '081234567890' %>
         </a>
             </div>
         </div>
@@ -1049,12 +1049,12 @@
               <i class="bi bi-shield-x text-danger mb-3" style="font-size: 40px;"></i>
               <h5 class="fw-bold" style="font-size: 16px;">Belum Terdaftar</h5>
               <p style="font-size: 11px; color: var(--text-muted);">Nomor HP <strong><%= phone || 'Anda' %></strong> belum terdaftar di sistem billing kami.</p>
-              <a href="https://wa.me/<%= typeof settings !== 'undefined' ? settings.adminNumberWA || '6281947215703' : '6281947215703' %>" class="btn btn-primary w-100 rounded-pill mt-2 py-2" style="font-size: 12px; font-weight: 600;">Hubungi Admin</a>
+              <a href="https://wa.me/<%= typeof settings !== 'undefined' ? settings.adminNumberWA || '6281234567890' : '6281234567890' %>" class="btn btn-primary w-100 rounded-pill mt-2 py-2" style="font-size: 12px; font-weight: 600;">Hubungi Admin</a>
           </div>
       <% } %>
       
       <footer class="footer">
-        &copy; <%= new Date().getFullYear() %> <%= settings.companyHeader || 'SASIKIRANA NETWORK' %>
+        &copy; <%= new Date().getFullYear() %> <%= settings.companyHeader || 'PULSEBILL NETWORKS' %>
       </footer>
       
       <div style="height: 100px;"></div> <div class="mob-nav">

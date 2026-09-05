@@ -1,4 +1,4 @@
-const express = require('express');
+﻿const express = require('express');
 const router = express.Router();
 const { adminAuth, onlyAdmin } = require('./adminAuth'); // Pagar Sultan tetap wajib
 const { getSetting } = require('../config/settingsManager');
@@ -16,7 +16,7 @@ router.get('/', adminAuth, onlyAdmin, async (req, res) => {
             usersList: users,
             user: res.locals.user,
             settings: { 
-                company_name: getSetting('company_name', 'Sasikirana.Net'),
+                company_name: getSetting('company_name', 'PulseBill Networks'),
                 logo_filename: getSetting('logo_filename', 'logo.png')
             }
         });

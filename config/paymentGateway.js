@@ -1,4 +1,4 @@
-const fs = require('fs');
+﻿const fs = require('fs');
 const crypto = require('crypto');
 const axios = require('axios'); // Kita pakai axios agar lebih stabil
 const { getSetting, getSettingsWithCache } = require('./settingsManager');
@@ -193,7 +193,7 @@ class XenditGateway {
         const payload = {
             external_id: `XND-${invoice.id || Date.now()}-${merchantRef}`,
             amount: Math.floor(invoice.amount),
-            payer_email: invoice.customer_email || 'billing@sasikirana.net',
+            payer_email: invoice.customer_email || 'billing@pulsebill.io',
             description: `Tagihan Internet: ${invoice.package_name || merchantRef}`,
             customer: {
                 given_names: invoice.customer_name || 'Pelanggan',

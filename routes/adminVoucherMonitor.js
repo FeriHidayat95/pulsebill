@@ -1,4 +1,4 @@
-const express = require('express');
+﻿const express = require('express');
 const router = express.Router();
 const { getSettingsWithCache } = require('../config/settingsManager');
 const { RadiusManager } = require('../config/RadiusManager'); // Terhubung ke Pintu Otak
@@ -20,7 +20,7 @@ router.get('/', adminAuth, async (req, res) => {
             currentSearch: req.query.search || '',
             currentStatus: req.query.status || '',
             page: 'voucher-monitor', 
-            company_header: settings.company_header || "inetku.net",
+            company_header: settings.company_header || "pulsebill.io",
             settings
         });
     } catch (e) {

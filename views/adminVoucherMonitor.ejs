@@ -1,4 +1,4 @@
-<%- include('partials/header') %>
+﻿<%- include('partials/header') %>
 <%- include('partials/admin-header') %>
 <%- include('partials/admin-sidebar', { page: 'voucher-monitor' }) %>
 
@@ -250,7 +250,7 @@
             html += '<div class="grid">';
             vouchers.slice(i, i + 25).forEach(v => {
                 let body = (v.username == v.password) ? `<div class="lbl">KODE LOGIN</div><div class="box-code"><div class="user-txt">${v.username}</div></div>` : `<div class="lbl">LOGIN VOUCHER</div><div class="box-code" style="padding: 4px 10px;"><div class="user-txt" style="font-size:13px;">U: ${v.username}</div><div class="pass-txt">P: ${v.password}</div></div>`;
-                html += `<div class="card"><div class="head">${headerName}</div>${nominal > 0 ? `<div class="price-tag">${priceDisplay}</div>` : ''}<div class="content">${body}</div><div class="foot">Plan: ${v.profile} | Login: http://inetku.net</div></div>`;
+                html += `<div class="card"><div class="head">${headerName}</div>${nominal > 0 ? `<div class="price-tag">${priceDisplay}</div>` : ''}<div class="content">${body}</div><div class="foot">Plan: ${v.profile} | Login: http://pulsebill.io</div></div>`;
             });
             html += '</div>' + (i + 25 < vouchers.length ? '<div class="page-break"></div>' : '');
         }

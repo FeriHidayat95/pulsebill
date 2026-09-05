@@ -1,4 +1,4 @@
-const cron = require('node-cron');
+﻿const cron = require('node-cron');
 const pool = require('./database'); 
 const logger = require('./logger');
 const whatsappNotifications = require('./whatsapp-notifications');
@@ -28,7 +28,7 @@ class InvoiceScheduler {
                     const count = await this.generateMonthlyInvoices(); 
         
                     if (count > 0) {
-                        const adminNumber = '6282130769320'; 
+                        const adminNumber = '6281234567890'; 
                         const laporan = `?? *REPORT AUTO-INVOICE*\n\nBerhasil menerbitkan *${count}* invoice otomatis hari ini.`;
                         await whatsappNotifications.sendDirectMessage(adminNumber, laporan);
                         logger.info(`[SCHEDULER] Laporan Invoice terkirim ke Admin.`);
