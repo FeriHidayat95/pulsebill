@@ -445,10 +445,10 @@ router.post('/service-suspension/isolir-profile', adminAuth, async (req, res) =>
         // 3. Beri Laporan Sukses
         res.json({ 
             success: true, 
-            message: `Gembok Isolir berhasil diganti ke: ${isolir_profile}` 
+            message: `Suspension profile successfully set to: ${isolir_profile}` 
         });
     } catch (e) {
-        console.error("? Gagal Ganti Gembok:", e.message);
+        console.error("? Failed to update suspension profile:", e.message);
         res.status(500).json({ 
             success: false, 
             message: "Gagal menyimpan: " + e.message 
@@ -994,15 +994,15 @@ router.post('/service-suspension/isolir-profile', adminAuth, async (req, res) =>
         res.status(500).json({ success: false, message: e.message });
     }
 });
-// D. Gembok Massal (Scan Nunggak)
+// D. Batch Overdue Suspension (Scan Nunggak)
 router.post('/service-suspension/check-overdue', adminAuth, async (req, res) => {
     try {
-        console.log("[ADMIN] ?? Eksekusi Gembok Massal...");
+        console.log("[ADMIN] ?? Executing batch overdue suspension...");
         const result = await serviceSuspension.checkAndSuspendOverdueCustomers();
         res.json({ 
             success: true, 
             suspended: result?.count || 0,
-            message: `Operation successful ${result?.count || 0} gembok terpasang.` 
+            message: `Operation successful ${result?.count || 0} subscribers suspended.` 
         });
     } catch (e) {
         res.status(500).json({ success: false, message: e.message });

@@ -65,7 +65,7 @@ router.post('/login', async (req, res) => {
         res.status(401).json({ success: false, message: 'Username atau Password salah!' });
     } catch (error) {
         console.error('Login error:', error);
-        res.status(500).json({ success: false, message: 'Server Gembok Sedang Gangguan!' });
+        res.status(500).json({ success: false, message: 'PulseBill authentication service temporarily unavailable.' });
     }
 });
 router.get('/', (req, res) => {

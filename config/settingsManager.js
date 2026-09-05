@@ -107,7 +107,7 @@ async function createDatabaseBackup(adminUsername, req) {
         try {
             const dbConfig = dbPool.pool.config.connectionConfig;
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-            const filename = `gembok_backup_${timestamp}.sql`;
+            const filename = `pulsebill_backup_${timestamp}.sql`;
             const filepath = path.join(backupDir, filename);
             const cmd = `mysqldump -h ${dbConfig.host} -u ${dbConfig.user} -p"${dbConfig.password}" ${dbConfig.database} > "${filepath}"`;
             exec(cmd, (error, stdout, stderr) => {

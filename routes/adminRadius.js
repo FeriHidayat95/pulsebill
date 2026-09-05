@@ -206,39 +206,39 @@ router.get('/radius/mikrotik-script/:type', adminAuth, async (req, res) => {
 });
 // --- FUNGSI GENERATOR SCRIPT (STANDALONE) ---
 function generatePPPoEScript(serverIP, mikrotikIP, secret) {
-  return `# --- GEMBOK RADIUS: PPPoE CONFIG ---
+  return `# --- PULSEBILL TELECOM: PPPoE CONFIG ---
 # Generated: ${new Date().toLocaleString('id-ID')}
-/radius remove [find comment="GEMBOK-PPPoE"]
-/radius add address=${serverIP} secret="${secret}" service=ppp src-address=${mikrotikIP} timeout=3000ms comment="GEMBOK-PPPoE"
+/radius remove [find comment="PULSEBILL-PPPoE"]
+/radius add address=${serverIP} secret="${secret}" service=ppp src-address=${mikrotikIP} timeout=3000ms comment="PULSEBILL-PPPoE"
 /radius incoming set accept=yes port=3799
 /interface pppoe-server server set [find] use-radius=yes default-profile=default
 /ppp aaa set use-radius=yes accounting=yes interim-update=10m
-/ip firewall filter add chain=input protocol=udp dst-port=1812,1813,3799 action=accept comment="Allow-GEMBOK-Radius" place-before=0
+/ip firewall filter add chain=input protocol=udp dst-port=1812,1813,3799 action=accept comment="Allow-PulseBill-Radius" place-before=0
 # Selesai! Tempel di Terminal Mikrotik.`;
 }
 function generateHotspotScript(serverIP, mikrotikIP, secret) {
-  return `# --- GEMBOK RADIUS: HOTSPOT CONFIG ---
+  return `# --- PULSEBILL TELECOM: HOTSPOT CONFIG ---
 # Generated: ${new Date().toLocaleString('id-ID')}
-/radius remove [find comment="GEMBOK-Hotspot"]
-/radius add address=${serverIP} secret="${secret}" service=hotspot src-address=${mikrotikIP} timeout=3000ms comment="GEMBOK-Hotspot"
+/radius remove [find comment="PULSEBILL-Hotspot"]
+/radius add address=${serverIP} secret="${secret}" service=hotspot src-address=${mikrotikIP} timeout=3000ms comment="PULSEBILL-Hotspot"
 /radius incoming set accept=yes port=3799
 /ip hotspot profile add name="profile-radius" use-radius=yes login-by=http-chap,http-pap,mac-cookie
 /ip hotspot set [find] profile=profile-radius
 /ip hotspot aaa set use-radius=yes accounting=yes interim-update=10m
-/ip firewall filter add chain=input protocol=udp dst-port=1812,1813,3799 action=accept comment="Allow-GEMBOK-Radius" place-before=0
+/ip firewall filter add chain=input protocol=udp dst-port=1812,1813,3799 action=accept comment="Allow-PulseBill-Radius" place-before=0
 # Selesai!`;
 }
 function generateCompleteScript(serverIP, mikrotikIP, secret) {
-  return `# --- GEMBOK RADIUS: COMPLETE (PPPoE + Hotspot) ---
-/radius remove [find comment="GEMBOK-All"]
-/radius add address=${serverIP} secret="${secret}" service=ppp,hotspot src-address=${mikrotikIP} timeout=3000ms comment="GEMBOK-All"
+  return `# --- PULSEBILL TELECOM: COMPLETE (PPPoE + Hotspot) ---
+/radius remove [find comment="PULSEBILL-All"]
+/radius add address=${serverIP} secret="${secret}" service=ppp,hotspot src-address=${mikrotikIP} timeout=3000ms comment="PULSEBILL-All"
 /radius incoming set accept=yes port=3799
 /interface pppoe-server server set [find] use-radius=yes
 /ppp aaa set use-radius=yes accounting=yes interim-update=10m
 /ip hotspot profile add name="radius-profile" use-radius=yes login-by=http-chap,http-pap,mac-cookie
 /ip hotspot set [find] profile=radius-profile
 /ip hotspot aaa set use-radius=yes accounting=yes interim-update=10m
-/ip firewall filter add chain=input protocol=udp dst-port=1812,1813,3799 action=accept comment="Allow-GEMBOK-Radius" place-before=0
+/ip firewall filter add chain=input protocol=udp dst-port=1812,1813,3799 action=accept comment="Allow-PulseBill-Radius" place-before=0
 # Selesai!`;
 }
 module.exports = router;

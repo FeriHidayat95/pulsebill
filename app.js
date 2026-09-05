@@ -111,7 +111,7 @@ app.use((req, res, next) => {
     const settings = getSettingsWithCache() || {};
     
     // Ini rahasianya: res.locals bikin variabel bisa dibaca di SEMUA EJS
-    res.locals.company_header = settings.company_header || "Gembok Radius";
+    res.locals.company_header = settings.company_header || "PulseBill Telecom";
     res.locals.title = "Billing System"; // Sekalian buat title default
     res.locals.onlineCount = 0; 
     res.locals.users = [];

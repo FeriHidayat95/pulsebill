@@ -282,7 +282,7 @@
     });
     // A. Cek Overdue Manual (Gembok Masal)
     $('#btnCheckOverdue').click(function() {
-        if(!confirm("?? JALANKAN GEMBOK MASSAL?\nSistem akan mengisolir semua pelanggan yang telat bayar.")) return;
+        if(!confirm("?? Execute batch suspension for overdue accounts?\nSistem akan mengisolir semua pelanggan yang telat bayar.")) return;
         
         const btn = $(this);
         btn.prop('disabled', true);
@@ -321,7 +321,7 @@
     });
     // Restore Manual per User
     window.restoreCustomer = function(username) {
-        if(!confirm(`Buka gembok layanan pelanggan ${username} secara manual?`)) return;
+        if(!confirm(`Reactivate service for customer ${username} secara manual?`)) return;
         
         $.post(`/admin/billing/service-suspension/restore/${username}`)
         .done(res => {

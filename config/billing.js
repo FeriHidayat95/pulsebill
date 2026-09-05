@@ -86,7 +86,7 @@ class BillingManager {
                 await pool.execute("INSERT INTO radusergroup (username, groupname, priority) VALUES (?, ?, '1')", [username, finalGroup]);
                 // B. KELOLA ATRIBUT EXPIRATION
                 if (status === 'suspended') {
-                    // Cabut gembok expired agar Mikrotik fokus ke pool isolir
+                    // Cabut lock expired agar Mikrotik fokus ke pool isolir
                     await pool.execute("DELETE FROM radcheck WHERE username = ? AND attribute = 'Expiration'", [username]);
                 } else if (status === 'active' && existing.expired_date) {
                     // Pasang lagi expired-nya jika diaktifkan kembali
@@ -897,7 +897,7 @@ class BillingManager {
             const customerId = customer.id;
             const activeUser = customer.pppoe_username || customer.username;
             await conn.beginTransaction();
-            // Matikan gembok relasi sebentar biar bisa hapus massal
+            // Matikan lock relasi sebentar biar bisa hapus massal
             await conn.query("SET FOREIGN_KEY_CHECKS = 0");
             // 1. Bersihkan Radius
             if (activeUser) {
@@ -2505,7 +2505,7 @@ class BillingManager {
                         ]);
                         createdCount++;
                     } catch (error) {
-                        // Jika ada bentrok massal, gembok MariaDB akan menendangnya
+                        // Jika ada bentrok massal, lock MariaDB akan menendangnya
                         if (error.code !== 'ER_DUP_ENTRY') throw error;
                     }
                 } else {
@@ -3475,7 +3475,7 @@ class BillingManager {
             if ((inv.pppoe_username || inv.username) && !isHotspotMember) {
                 const pppoeUser = inv.pppoe_username || inv.username;
                 const pppoeProfile = inv.pppoe_profile || 'default';
-                // 1. Bersihkan semua gembok pembatas (Sapu bersih biar gak ada sisa Expiration)
+                // 1. Bersihkan semua expiration constraints (Sapu bersih biar gak ada sisa Expiration)
                 await conn.execute("DELETE FROM radcheck WHERE username = ? AND attribute IN ('Expiration', 'Max-All-Session', 'WISPr-Session-Terminate-Time')", [pppoeUser]);
                 await conn.execute("DELETE FROM radreply WHERE username = ? AND attribute = 'Session-Timeout'", [pppoeUser]);
                 await conn.execute("DELETE FROM radusergroup WHERE username = ?", [pppoeUser]);

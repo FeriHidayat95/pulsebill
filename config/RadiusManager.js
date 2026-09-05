@@ -140,7 +140,7 @@ const RadiusManager = {
             // B. Hapus Atribut Mikrotik (Reply)
             await conn.execute("DELETE FROM radgroupreply WHERE groupname = ?", [profileName]);
             
-            // C. Hapus Gembok Radius (Check)
+            // C. Hapus PulseBill Telecom (Check)
             await conn.execute("DELETE FROM radgroupcheck WHERE groupname = ?", [profileName]);
             await conn.commit();
             
@@ -354,12 +354,12 @@ const RadiusManager = {
             );
             // 3. LOGIKA PINTAR PENYEMBUHAN (Pemisahan PPPoE vs Hotspot)
             if (!isHotspot) {
-                // JIKA PPPOE: Sapu bersih gembok Expiration dan data Pool Lama
+                // JIKA PPPOE: Sapu bersih Expiration attribute dan data Pool Lama
                 // Biar Radius kasih "ACCEPT" dan MikroTik yang kasih IP Lokal
                 await conn.execute("DELETE FROM radcheck WHERE username = ? AND attribute = 'Expiration'", [pppoe_username]);
                 await conn.execute("DELETE FROM radreply WHERE username = ?", [pppoe_username]); 
             } else {
-                // JIKA HOTSPOT: Pasang lagi gembok Expiration-nya sesuai tanggal di Web
+                // JIKA HOTSPOT: Pasang lagi Expiration attribute-nya sesuai tanggal di Web
                 if (expired_date) {
                     const formattedExp = this.formatDateForRadius(new Date(expired_date));
                     await conn.execute("DELETE FROM radcheck WHERE username = ? AND attribute = 'Expiration'", [pppoe_username]);
@@ -1039,7 +1039,7 @@ const RadiusManager = {
                 // A. Hapus riwayat radacct agar SUM(sessiontime) kembali ke NOL
                 // Tanpa ini, user akan langsung "Expired" jika pemakaian lamanya sudah banyak.
                 await conn.execute("DELETE FROM radacct WHERE username = ?", [username]);
-                // B. Suntik Max-All-Session (Gembok Radius)
+                // B. Suntik Max-All-Session (PulseBill Telecom)
                 await conn.execute("DELETE FROM radcheck WHERE username = ? AND attribute IN ('Max-All-Session', 'Access-Period')", [username]);
                 await conn.execute(
                     "INSERT INTO radcheck (username, attribute, op, value) VALUES (?, 'Max-All-Session', ':=', ?)", 
@@ -1194,7 +1194,7 @@ const RadiusManager = {
             // =========================================================
             // =========================================================
             await conn.beginTransaction();
-            // 1. Hapus dari tabel Utama Radius (Gembok & Kamar)
+            // 1. Hapus dari tabel Utama Radius (RADIUS check and reply tables)
             await conn.execute(`DELETE FROM radcheck WHERE username IN (${placeholders})`, usernames);
             await conn.execute(`DELETE FROM radusergroup WHERE username IN (${placeholders})`, usernames);
             

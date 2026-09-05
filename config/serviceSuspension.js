@@ -122,7 +122,7 @@ class ServiceSuspensionManager {
                             }
                         });
                     } else {
-                        logger.info(`â„¹ï¸ [MIKROTIK] Tidak ada sesi aktif untuk ${customer.pppoe_username}, gembok Radius Isolir sudah siaga.`);
+                        logger.info(`â„¹ï¸ [MIKROTIK] Tidak ada sesi aktif untuk ${customer.pppoe_username}, RADIUS isolation profile active.`);
                     }
                     results.mikrotik = true;
                 } catch (e) {

@@ -95,7 +95,7 @@ class InvoiceScheduler {
     }
     // Financial ledger and transaction processing
     async generateMonthlyInvoices() {
-        // 1. GEMBOK ANTI-RACE CONDITION (Mencegah mesin jalan ganda)
+        // 1. Distributed execution lock (Mencegah mesin jalan ganda)
         if (this.isGenerating) {
             logger.info("[SUSPENSION-ENGINE] Mesin generate masih bekerja, menolak eksekusi ganda.");
             return 0;
@@ -214,7 +214,7 @@ class InvoiceScheduler {
             logger.error(`Error Fatal Algojo: ${error.message}`); 
             return totalCreated; 
         } finally {
-            // BUKA GEMBOK
+            // RELEASE MUTEX
             this.isGenerating = false;
         }
     }

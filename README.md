@@ -184,7 +184,12 @@ npm run dev
 
 ---
 
-## API & Webhook Reference
+## API and Webhook Reference
+
+Detailed specifications and architecture documents:
+- **REST API & Webhooks Reference:** [`docs/api-reference.md`](docs/api-reference.md)
+- **Network Automation & RADIUS Architecture:** [`docs/network-architecture.md`](docs/network-architecture.md)
+- **Design System Specification:** [`DESIGN.md`](DESIGN.md)
 
 ### Core Ingress Endpoints
 
