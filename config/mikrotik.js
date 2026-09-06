@@ -597,23 +597,23 @@ async function monitorPPPoEConnections() {
                         const pppSecrets = await conn.write('/ppp/secret/print');
                         offlineList = pppSecrets.filter(secret => !activeNow.includes(secret.name)).map(u => u.name);
                     } catch (e) {}
-                    // Format pesan WhatsApp
-                    let msg = `ðŸ”” *PPPoE LOGIN*\n\n`;
+                    // Format WhatsApp message
+                    let msg = `*PPPoE SESSION LOGIN*\n\n`;
                     loginDetail.forEach((u, i) => {
-                        msg += `*${i+1}. ${u.name}*\nâ€¢ Address: ${u.address || '-'}\nâ€¢ Uptime: ${u.uptime || '-'}\n\n`;
+                        msg += `*${i+1}. ${u.name}*\n- Address: ${u.address || '-'}\n- Uptime: ${u.uptime || '-'}\n\n`;
                     });
-                    msg += `ðŸš« *Pelanggan Offline* (${offlineList.length})\n`;
+                    msg += `*Offline Subscribers* (${offlineList.length})\n`;
                     offlineList.forEach((u, i) => {
                         msg += `${i+1}. ${u}\n`;
                     });
-                    // Kirim ke group WhatsApp
+                    // Send to technician alert group
                     const technicianGroupId = getSetting('technician_group_id', '');
                     if (sock && technicianGroupId) {
                         try {
                             await sock.sendMessage(technicianGroupId, { text: msg });
                             logger.info(`PPPoE login notification sent to group: ${technicianGroupId}`);
                         } catch (e) {
-                            logger.error('Gagal kirim notifikasi PPPoE ke WhatsApp group:', e);
+                            logger.error('Failed to dispatch PPPoE notification to alert group:', e);
                         }
                     } else {
                         logger.warn('No technician group configured for PPPoE notifications');
@@ -621,32 +621,31 @@ async function monitorPPPoEConnections() {
                     logger.info('PPPoE LOGIN:', loginUsers);
                 }
                 if (logoutUsers.length > 0) {
-                    // Ambil detail user logout dari lastActivePPPoE (karena sudah tidak ada di connections.data)
+                    // Extract logged out users
                     let logoutDetail = logoutUsers.map(name => ({ name }));
-                    // Ambil daftar user offline terbaru
                     let offlineList = [];
                     try {
                         const conn = await getMikrotikConnection();
                         const pppSecrets = await conn.write('/ppp/secret/print');
                         offlineList = pppSecrets.filter(secret => !activeNow.includes(secret.name)).map(u => u.name);
                     } catch (e) {}
-                    // Format pesan WhatsApp
-                    let msg = `ðŸšª *PPPoE LOGOUT*\n\n`;
+                    // Format WhatsApp message
+                    let msg = `*PPPoE SESSION TERMINATED*\n\n`;
                     logoutDetail.forEach((u, i) => {
                         msg += `*${i+1}. ${u.name}*\n\n`;
                     });
-                    msg += `ðŸš« *Pelanggan Offline* (${offlineList.length})\n`;
+                    msg += `*Offline Subscribers* (${offlineList.length})\n`;
                     offlineList.forEach((u, i) => {
                         msg += `${i+1}. ${u}\n`;
                     });
-                    // Kirim ke group WhatsApp
+                    // Send to technician alert group
                     const technicianGroupId = getSetting('technician_group_id', '');
                     if (sock && technicianGroupId) {
                         try {
                             await sock.sendMessage(technicianGroupId, { text: msg });
                             logger.info(`PPPoE logout notification sent to group: ${technicianGroupId}`);
                         } catch (e) {
-                            logger.error('Gagal kirim notifikasi PPPoE LOGOUT ke WhatsApp group:', e);
+                            logger.error('Failed to dispatch PPPoE logout notification to alert group:', e);
                         }
                     } else {
                         logger.warn('No technician group configured for PPPoE notifications');

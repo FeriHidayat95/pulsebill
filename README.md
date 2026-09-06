@@ -20,7 +20,12 @@
 
 ---
 
-</div>
+> [!IMPORTANT]
+> **Architectural Portfolio Showcase & Intellectual Property Notice**
+> 
+> This repository is published strictly as an **Architectural Portfolio Showcase** demonstrating senior-level distributed system design, clean architecture, double-entry financial ledger patterns, and defensive automated testing.
+> - **Codebase Inspection:** Technical recruiters, hiring managers, and system architects are granted full rights to inspect, clone, and execute this codebase locally for hiring and technical evaluation under the [Technical Portfolio Evaluation License](LICENSE).
+> - **Proprietary Safeguards:** Production hardware daemons (Mikrotik persistent binary socket multiplexers) and live financial payment rails operate via **sandboxed mock adapters** to safeguard proprietary commercial intellectual property. Turnkey commercial deployment or redistribution without a written commercial license is strictly prohibited.
 
 ## Overview
 
