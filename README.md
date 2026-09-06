@@ -27,6 +27,11 @@
 > - **Codebase Inspection:** Technical recruiters, hiring managers, and system architects are granted full rights to inspect, clone, and execute this codebase locally for hiring and technical evaluation under the [Technical Portfolio Evaluation License](LICENSE).
 > - **Proprietary Safeguards:** Production hardware daemons (Mikrotik persistent binary socket multiplexers) and live financial payment rails operate via **sandboxed mock adapters** to safeguard proprietary commercial intellectual property. Turnkey commercial deployment or redistribution without a written commercial license is strictly prohibited.
 
+> [!NOTE]
+> **Production Provenance & Engineering History**
+> 
+> This codebase represents a sanitized, standalone architectural release extracted from a multi-year commercial deployment that has actively powered ISP billing operations, subscriber lifecycle management, and Mikrotik network automation in Indonesia since 2022. Internal proprietary commit logs, infrastructure credentials, and customer PII have been redacted for confidentiality and enterprise compliance.
+
 ## Overview
 
 Modern Internet Service Providers face operational friction when billing records and access router configurations become out of sync. Manual reconciliation leads to revenue leakage, delayed service activations, and customer frustration.
