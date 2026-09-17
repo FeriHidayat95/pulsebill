@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PulseBill - Telecom Billing OS & Network Provisioning Engine</title>
+  <title>PulseBill - Telecom Billing OS & Mikrotik Provisioning Engine</title>
   
   <!-- Meta Design System Typography Stack: Optimistic / Apple System / Segoe UI / Roboto -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -24,6 +24,7 @@
             brand: {
               navy: '#152C4A',
               navyHover: '#0F2037',
+              navyDark: '#0A1727',
               emerald: '#059669',
               emeraldHover: '#047857',
               green: '#10B981',
@@ -52,7 +53,7 @@
     .font-mono {
       font-family: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
     }
-    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 999px; }
     ::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
@@ -105,6 +106,21 @@
       letter-spacing: 0.15em;
       transform: rotate(-8deg);
     }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fadeIn {
+      animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @media print {
+      body * { visibility: hidden; }
+      #printable-receipt-card, #printable-receipt-card * { visibility: visible; }
+      #printable-receipt-card { position: absolute; left: 0; top: 0; width: 100%; }
+      .no-print { display: none !important; }
+    }
   </style>
 </head>
 <body class="bg-[#F8FAFC] text-slate-900 flex flex-col h-screen overflow-hidden text-xs select-none">
@@ -117,8 +133,9 @@
 
     <!-- Left Fixed Sidebar (240px) -->
     <aside class="w-60 bg-white border-r border-slate-200 flex flex-col flex-shrink-0 z-20 shadow-xs">
+      
       <!-- Brand Logo Box (Height 64px - Flush with Topbar) -->
-      <div class="h-16 flex items-center px-5 gap-2.5 border-b border-slate-200">
+      <div class="h-16 flex items-center px-5 gap-2.5 border-b border-slate-200 cursor-pointer" onclick="switchTab('dashboard')">
         <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-navy to-brand-emerald flex items-center justify-center text-white shadow-md">
           <i data-lucide="receipt" class="w-5 h-5 text-white"></i>
         </div>
@@ -134,60 +151,67 @@
       <!-- Navigation Menu -->
       <div class="flex-1 overflow-y-auto px-3 py-4 space-y-6 text-xs">
         
-        <!-- Group: Revenue & Ledger -->
+        <!-- Group: Core Operations -->
         <div>
-          <span class="px-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1.5 font-mono">Ledger & Billing</span>
+          <span class="px-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1.5 font-mono">Operations & CRM</span>
           <nav class="space-y-1">
             <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-xl brand-gradient font-medium transition text-left">
               <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
               <span>Billing Operations</span>
             </button>
+            <button onclick="switchTab('subscribers')" id="nav-subscribers" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-brand-navy transition font-medium text-left">
+              <i data-lucide="users" class="w-4 h-4 text-slate-400"></i>
+              <span>Pelanggan (Subscribers)</span>
+              <span id="badge-sub-count" class="ml-auto bg-slate-100 text-slate-600 text-[10px] px-1.5 py-0.2 rounded font-mono font-bold">16</span>
+            </button>
+            <button onclick="switchTab('packages')" id="nav-packages" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-brand-navy transition font-medium text-left">
+              <i data-lucide="layers" class="w-4 h-4 text-slate-400"></i>
+              <span>Paket Internet (Plans)</span>
+              <span id="badge-pkg-count" class="ml-auto bg-slate-100 text-slate-600 text-[10px] px-1.5 py-0.2 rounded font-mono font-bold">6</span>
+            </button>
             <button onclick="switchTab('invoices')" id="nav-invoices" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-brand-navy transition font-medium text-left">
               <i data-lucide="file-text" class="w-4 h-4 text-slate-400"></i>
-              <span>Invoices & Receipts</span>
-              <span id="badge-invoice-count" class="ml-auto bg-amber-100 text-amber-800 text-[10px] px-1.5 py-0.2 rounded font-mono font-bold">24</span>
-            </button>
-            <button onclick="switchTab('gateways')" id="nav-gateways" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-brand-navy transition font-medium text-left">
-              <i data-lucide="credit-card" class="w-4 h-4 text-slate-400"></i>
-              <span>Payment Gateways</span>
-              <span class="ml-auto w-2 h-2 rounded-full bg-emerald-500"></span>
-            </button>
-            <button onclick="switchTab('ratecards')" id="nav-ratecards" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-brand-navy transition font-medium text-left">
-              <i data-lucide="layers" class="w-4 h-4 text-slate-400"></i>
-              <span>Rate Cards & Plans</span>
+              <span>Invoices & Kwitansi</span>
+              <span id="badge-invoice-count" class="ml-auto bg-amber-100 text-amber-800 text-[10px] px-1.5 py-0.2 rounded font-mono font-bold">16</span>
             </button>
           </nav>
         </div>
 
-        <!-- Group: Network Automation -->
+        <!-- Group: Network Infrastructure -->
         <div>
-          <span class="px-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1.5 font-mono">Network Automation</span>
+          <span class="px-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1.5 font-mono">Network Infrastructure</span>
           <nav class="space-y-1">
-            <button onclick="switchTab('routeros')" id="nav-routeros" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-brand-navy transition font-medium text-left">
-              <i data-lucide="cpu" class="w-4 h-4 text-slate-400"></i>
-              <span>Mikrotik RouterOS</span>
-              <span class="ml-auto text-[9px] font-mono font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.2 rounded">Port 8728</span>
+            <button onclick="switchTab('routers')" id="nav-routers" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-brand-navy transition font-medium text-left">
+              <i data-lucide="server" class="w-4 h-4 text-slate-400"></i>
+              <span>Mikrotik Routers / NAS</span>
+              <span class="ml-auto text-[9px] font-mono font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">3 Online</span>
+            </button>
+            <button onclick="switchTab('suspension')" id="nav-suspension" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-brand-navy transition font-medium text-left">
+              <i data-lucide="shield-alert" class="w-4 h-4 text-slate-400"></i>
+              <span>Pusat Isolir (Suspension)</span>
+              <span id="badge-susp-count" class="ml-auto bg-rose-100 text-rose-800 text-[10px] px-1.5 py-0.2 rounded font-mono font-bold">4</span>
             </button>
             <button onclick="switchTab('genieacs')" id="nav-genieacs" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-brand-navy transition font-medium text-left">
               <i data-lucide="radio" class="w-4 h-4 text-slate-400"></i>
               <span>TR-069 GenieACS</span>
-              <span class="ml-auto text-[9px] font-mono font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.2 rounded">Online</span>
-            </button>
-            <button onclick="switchTab('suspension')" id="nav-suspension" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-brand-navy transition font-medium text-left">
-              <i data-lucide="shield-alert" class="w-4 h-4 text-slate-400"></i>
-              <span>Suspension Profiles</span>
+              <span class="ml-auto text-[9px] font-mono font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.2 rounded">CWMP Active</span>
             </button>
           </nav>
         </div>
 
-        <!-- Group: Event & Dispatch -->
+        <!-- Group: Gateways & Automation -->
         <div>
-          <span class="px-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1.5 font-mono">Operations & CRM</span>
+          <span class="px-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1.5 font-mono">Gateways & Bot</span>
           <nav class="space-y-1">
-            <button onclick="switchTab('subscribers')" id="nav-subscribers" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-brand-navy transition font-medium text-left">
-              <i data-lucide="users" class="w-4 h-4 text-slate-400"></i>
-              <span>Subscribers</span>
-              <span class="ml-auto text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 font-bold">1,284</span>
+            <button onclick="switchTab('gateways')" id="nav-gateways" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-brand-navy transition font-medium text-left">
+              <i data-lucide="credit-card" class="w-4 h-4 text-slate-400"></i>
+              <span>Gateways & Ledger</span>
+              <span class="ml-auto text-[9px] font-mono font-bold text-blue-600 bg-blue-50 px-1.5 py-0.2 rounded">Stripe/Midtrans</span>
+            </button>
+            <button onclick="switchTab('whatsapp')" id="nav-whatsapp" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-brand-navy transition font-medium text-left">
+              <i data-lucide="message-square" class="w-4 h-4 text-slate-400"></i>
+              <span>WhatsApp Center</span>
+              <span class="ml-auto text-[9px] font-mono font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.2 rounded">Baileys Bot</span>
             </button>
             <button onclick="switchTab('settings')" id="nav-settings" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-brand-navy transition font-medium text-left">
               <i data-lucide="settings" class="w-4 h-4 text-slate-400"></i>
@@ -223,9 +247,9 @@
             <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-2.5"></i>
             <input 
               type="text" 
-              id="global-invoice-search"
-              placeholder="Search invoice number, subscriber, email, or IP..." 
-              onkeyup="filterInvoiceTable()"
+              id="global-search-input"
+              placeholder="Search subscribers, PPPoE secrets, IP, or invoice #..." 
+              onkeyup="handleGlobalSearch(this.value)"
               class="w-full pl-9 pr-14 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-brand-emerald focus:bg-white transition font-sans"
             />
             <kbd class="absolute right-2.5 top-2 text-[9px] font-mono px-1.5 py-0.5 rounded bg-white border border-slate-200 text-slate-400 hidden sm:inline">Ctrl+K</kbd>
@@ -234,7 +258,7 @@
 
         <div class="flex items-center gap-3">
           
-          <!-- Integrated Developer / Sandbox Operations Toolbar (Replacing the old black bar cleanly) -->
+          <!-- Integrated Developer / Sandbox Operations Toolbar -->
           <div class="hidden lg:flex items-center gap-1.5 bg-slate-100 border border-slate-200 rounded-xl p-1 shadow-inner">
             <span class="text-[10px] font-mono font-bold text-slate-500 px-2 flex items-center gap-1">
               <i data-lucide="terminal" class="w-3 h-3 text-slate-400"></i>
@@ -247,6 +271,10 @@
             <button onclick="triggerSuspensionSimulation()" title="Simulate automated subscriber suspension" class="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-[11px] font-semibold transition shadow-sm active:scale-95">
               <i data-lucide="shield-alert" class="w-3 h-3"></i>
               <span>RouterOS Isolir</span>
+            </button>
+            <button onclick="generateMonthlyInvoices()" title="Trigger autonomous billing cycle run" class="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-brand-navy hover:bg-brand-navyHover text-white text-[11px] font-semibold transition shadow-sm active:scale-95">
+              <i data-lucide="plus-circle" class="w-3 h-3"></i>
+              <span>+ Generate Invoices</span>
             </button>
           </div>
 
@@ -268,15 +296,8 @@
                 <span>Recent System Events</span>
                 <span class="text-[10px] font-mono text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">Real-Time</span>
               </div>
-              <div class="space-y-2.5">
-                <div class="p-2 rounded-lg bg-slate-50 border border-slate-100">
-                  <div class="font-bold text-slate-800">Stripe Webhook Verified</div>
-                  <div class="text-[11px] text-slate-500 mt-0.5">INV-2026-0891 marked settled ($199.99).</div>
-                </div>
-                <div class="p-2 rounded-lg bg-slate-50 border border-slate-100">
-                  <div class="font-bold text-slate-800">Mikrotik RouterOS Sync</div>
-                  <div class="text-[11px] text-slate-500 mt-0.5">482 queues synchronized across core gateway.</div>
-                </div>
+              <div id="notification-items" class="space-y-2.5 max-h-60 overflow-y-auto">
+                <!-- Injected via JS -->
               </div>
             </div>
           </div>
@@ -298,99 +319,78 @@
       <!-- Main Page Content Scrollable Area -->
       <main class="flex-1 overflow-y-auto p-6 space-y-6">
 
-        <!-- TAB 1: DASHBOARD (Billing Operations Command Center) -->
-        <div id="tab-dashboard" class="tab-pane space-y-6">
+        <!-- ========================================================================= -->
+        <!-- TAB 1: DASHBOARD (Billing Operations)                                     -->
+        <!-- ========================================================================= -->
+        <div id="tab-dashboard" class="tab-pane space-y-6 animate-fadeIn">
           
-          <!-- Page Heading & Quick Actions -->
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <h2 class="text-xl font-bold text-brand-navy tracking-tight">Billing Operations Command Center</h2>
-              <p class="text-xs text-slate-500 mt-0.5">Automated invoice lifecycles, payment webhooks reconciliation, and Mikrotik RouterOS provisioning.</p>
-            </div>
-            <div class="flex items-center gap-2.5">
-              <button onclick="syncGatewaysAction()" class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold px-3 py-2 rounded-xl text-xs flex items-center gap-1.5 transition shadow-2xs active:scale-95">
-                <i data-lucide="refresh-cw" id="sync-spinner" class="w-3.5 h-3.5 text-slate-500"></i>
-                <span>Sync Gateways</span>
-              </button>
-              <button onclick="generateInvoicesAction()" class="brand-btn-primary font-semibold px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5 active:scale-95">
-                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-                <span>+ Generate Invoices</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- 5-Metric Financial Cards Grid -->
-          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
+          <!-- Top Row KPI Metric Cards (5 Cards) -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             
-            <!-- Metric 1: MRR -->
-            <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs hover:border-emerald-300 transition">
+            <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs hover:border-slate-300 transition">
               <div class="flex items-center justify-between">
-                <span class="text-[11px] font-medium text-slate-500">Monthly Rec. Revenue</span>
+                <span class="text-[11px] font-medium text-slate-500">Monthly Recurring Revenue</span>
                 <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                  <i data-lucide="dollar-sign" class="w-4 h-4"></i>
+                  <i data-lucide="trending-up" class="w-4 h-4"></i>
                 </div>
               </div>
               <div class="mt-2.5">
-                <span class="font-mono text-2xl font-bold text-brand-navy tracking-tight" id="metric-mrr">$48,920</span>
-                <span class="text-[10px] text-emerald-600 font-semibold block mt-0.5 flex items-center gap-0.5">
-                  <i data-lucide="trending-up" class="w-3 h-3"></i> +14.2% MoM growth
+                <span id="metric-mrr" class="font-mono text-2xl font-bold text-brand-navy tracking-tight">$48,920</span>
+                <span class="text-[10px] text-emerald-600 font-medium block mt-0.5">
+                  <i data-lucide="arrow-up-right" class="w-3 h-3 inline"></i> +8.4% vs last billing cycle
                 </span>
               </div>
             </div>
 
-            <!-- Metric 2: Active Subscribers -->
-            <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs hover:border-blue-300 transition">
+            <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs hover:border-slate-300 transition">
               <div class="flex items-center justify-between">
                 <span class="text-[11px] font-medium text-slate-500">Active Subscribers</span>
-                <div class="w-7 h-7 rounded-lg bg-blue-50 text-brand-blue flex items-center justify-center">
+                <div class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
                   <i data-lucide="users" class="w-4 h-4"></i>
                 </div>
               </div>
               <div class="mt-2.5">
-                <span class="font-mono text-2xl font-bold text-brand-navy tracking-tight" id="metric-subs">1,284</span>
-                <span class="text-[10px] text-slate-500 font-medium block mt-0.5">99.2% Good Standing</span>
+                <span id="metric-subs-count" class="font-mono text-2xl font-bold text-brand-navy tracking-tight">1,428</span>
+                <span class="text-[10px] text-slate-500 font-medium block mt-0.5">98.2% on-time settlement</span>
               </div>
             </div>
 
-            <!-- Metric 3: Pending Invoices -->
             <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs hover:border-amber-300 transition">
               <div class="flex items-center justify-between">
-                <span class="text-[11px] font-medium text-slate-500">Pending Settlement</span>
+                <span class="text-[11px] font-medium text-slate-500">Uncollected Receivables</span>
                 <div class="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
                   <i data-lucide="clock" class="w-4 h-4"></i>
                 </div>
               </div>
               <div class="mt-2.5">
-                <span class="font-mono text-2xl font-bold text-amber-600 tracking-tight" id="metric-pending">$3,420</span>
-                <span class="text-[10px] text-slate-500 font-medium block mt-0.5" id="metric-pending-count">24 open invoices</span>
+                <span id="metric-uncollected" class="font-mono text-2xl font-bold text-amber-600 tracking-tight">$3,840</span>
+                <span id="metric-uncollected-count" class="text-[10px] text-slate-500 font-medium block mt-0.5">16 invoices pending grace</span>
               </div>
             </div>
 
-            <!-- Metric 4: RouterOS Syncs -->
-            <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs hover:border-purple-300 transition">
+            <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs hover:border-rose-300 transition">
               <div class="flex items-center justify-between">
-                <span class="text-[11px] font-medium text-slate-500">RouterOS Auto-Sync</span>
-                <div class="w-7 h-7 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
+                <span class="text-[11px] font-medium text-slate-500">Suspended / Isolir</span>
+                <div class="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center">
+                  <i data-lucide="shield-alert" class="w-4 h-4"></i>
+                </div>
+              </div>
+              <div class="mt-2.5">
+                <span id="metric-suspended" class="font-mono text-2xl font-bold text-rose-600 tracking-tight">4</span>
+                <span class="text-[10px] text-slate-500 font-medium block mt-0.5">PPPoE throttled to 256k</span>
+              </div>
+            </div>
+
+            <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs hover:border-emerald-300 transition">
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] font-medium text-slate-500">RouterOS API Socket</span>
+                <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
                   <i data-lucide="cpu" class="w-4 h-4"></i>
                 </div>
               </div>
               <div class="mt-2.5">
-                <span class="font-mono text-2xl font-bold text-brand-navy tracking-tight">482 <span class="text-xs font-normal text-slate-400">runs/24h</span></span>
-                <span class="text-[10px] text-emerald-600 font-semibold block mt-0.5">0 API Sync Faults</span>
-              </div>
-            </div>
-
-            <!-- Metric 5: Webhook Health -->
-            <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs hover:border-emerald-300 transition">
-              <div class="flex items-center justify-between">
-                <span class="text-[11px] font-medium text-slate-500">Webhook Reliability</span>
-                <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                  <i data-lucide="shield-check" class="w-4 h-4"></i>
-                </div>
-              </div>
-              <div class="mt-2.5">
-                <span class="font-mono text-2xl font-bold text-emerald-600 tracking-tight">99.98%</span>
-                <span class="text-[10px] text-slate-500 font-medium block mt-0.5">Zero dropped events</span>
+                <span class="font-mono text-2xl font-bold text-emerald-600 tracking-tight">3.2 ms</span>
+                <span class="text-[10px] text-slate-500 font-medium block mt-0.5">3 Core NAS Online</span>
               </div>
             </div>
 
@@ -432,247 +432,93 @@
 
               <!-- Event Stream List (Dynamically updated on simulations) -->
               <div id="automation-feed" class="flex-1 mt-3 space-y-3 overflow-y-auto max-h-[220px]">
-                
-                <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100 flex items-start gap-2.5 animate-fadeIn">
-                  <div class="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <i data-lucide="check" class="w-3.5 h-3.5"></i>
-                  </div>
-                  <div class="flex-1 min-w-0">
-                    <div class="flex items-center justify-between">
-                      <span class="font-bold text-[11px] text-brand-navy">Stripe Payment Settled</span>
-                      <span class="font-mono text-[9px] text-slate-400">12s ago</span>
-                    </div>
-                    <p class="text-[10px] text-slate-600 mt-0.5 truncate">INV-2026-0891 ($199.99) &bull; Elena Rostova</p>
-                    <span class="text-[9px] font-mono text-emerald-600 font-semibold block mt-0.5">RouterOS: PPPoE speed unthrottled (1 Gbps)</span>
-                  </div>
-                </div>
-
-                <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100 flex items-start gap-2.5">
-                  <div class="w-6 h-6 rounded-lg bg-blue-100 text-brand-blue flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
-                  </div>
-                  <div class="flex-1 min-w-0">
-                    <div class="flex items-center justify-between">
-                      <span class="font-bold text-[11px] text-brand-navy">TR-069 Optical Check</span>
-                      <span class="font-mono text-[9px] text-slate-400">2m ago</span>
-                    </div>
-                    <p class="text-[10px] text-slate-600 mt-0.5 truncate">ONT-HW-20260901 &bull; Rx: -19.4 dBm (Normal)</p>
-                    <span class="text-[9px] font-mono text-slate-500 block mt-0.5">GenieACS: WAN PPPoE Session Healthy</span>
-                  </div>
-                </div>
-
-                <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100 flex items-start gap-2.5">
-                  <div class="w-6 h-6 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <i data-lucide="clock" class="w-3.5 h-3.5"></i>
-                  </div>
-                  <div class="flex-1 min-w-0">
-                    <div class="flex items-center justify-between">
-                      <span class="font-bold text-[11px] text-brand-navy">Invoice Grace Period Reminder</span>
-                      <span class="font-mono text-[9px] text-slate-400">8m ago</span>
-                    </div>
-                    <p class="text-[10px] text-slate-600 mt-0.5 truncate">INV-2026-0893 ($89.99) &bull; Devon Chen</p>
-                    <span class="text-[9px] font-mono text-amber-600 font-semibold block mt-0.5">Automated WhatsApp billing reminder dispatched</span>
-                  </div>
-                </div>
-
+                <!-- Populated via JS -->
               </div>
             </div>
 
           </div>
 
-          <!-- Financial Ledger & Subscriber Status Table -->
-          <div class="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
-            
-            <!-- Table Controls -->
-            <div class="p-4 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div>
-                <h3 class="font-bold text-sm text-brand-navy">Live Subscriber Invoice Ledger</h3>
-                <p class="text-[11px] text-slate-500 mt-0.5">Multi-gateway settlements and automated Mikrotik RouterOS PPPoE state.</p>
+          <!-- Quick Navigation Cards to Other Modules -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div onclick="switchTab('subscribers')" class="bg-white border border-slate-200 hover:border-emerald-500 rounded-2xl p-4 cursor-pointer transition shadow-2xs group">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-brand-navy group-hover:text-emerald-600 transition">Kelola Pelanggan (Subscribers) &rarr;</span>
+                <i data-lucide="users" class="w-4 h-4 text-slate-400 group-hover:text-emerald-500 transition"></i>
               </div>
-              
-              <div class="flex items-center gap-2">
-                <!-- Status Filter Dropdown -->
-                <div class="relative">
-                  <select id="table-status-filter" onchange="filterInvoiceTable()" class="bg-slate-50 border border-slate-200 text-slate-700 text-xs font-semibold rounded-xl px-3 py-1.5 focus:outline-none cursor-pointer">
-                    <option value="all">All Statuses</option>
-                    <option value="paid">Paid / Settled</option>
-                    <option value="pending">Pending Grace</option>
-                    <option value="suspended">Overdue / Suspended</option>
-                  </select>
-                </div>
-
-                <!-- Export CSV Button -->
-                <button onclick="exportInvoicesCSV()" class="px-3 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold flex items-center gap-1.5 transition active:scale-95 shadow-2xs">
-                  <i data-lucide="download" class="w-3.5 h-3.5 text-brand-emerald"></i>
-                  <span>Export CSV</span>
-                </button>
-              </div>
+              <p class="text-[11px] text-slate-500 mt-1">16 subscriber terdata, kontrol PPPoE secret & bandwidth.</p>
             </div>
+            <div onclick="switchTab('packages')" class="bg-white border border-slate-200 hover:border-emerald-500 rounded-2xl p-4 cursor-pointer transition shadow-2xs group">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-brand-navy group-hover:text-emerald-600 transition">Paket Layanan Internet &rarr;</span>
+                <i data-lucide="layers" class="w-4 h-4 text-slate-400 group-hover:text-emerald-500 transition"></i>
+              </div>
+              <p class="text-[11px] text-slate-500 mt-1">6 tier paket bandwidth dari 20M s/d 1 Gbps.</p>
+            </div>
+            <div onclick="switchTab('suspension')" class="bg-white border border-slate-200 hover:border-rose-500 rounded-2xl p-4 cursor-pointer transition shadow-2xs group">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-brand-navy group-hover:text-rose-600 transition">Pusat Isolir Pelanggan &rarr;</span>
+                <i data-lucide="shield-alert" class="w-4 h-4 text-slate-400 group-hover:text-rose-500 transition"></i>
+              </div>
+              <p class="text-[11px] text-slate-500 mt-1">Buka isolir instan atau jalankan eksekusi pemutusan otomatis.</p>
+            </div>
+          </div>
 
-            <!-- Ledger Table -->
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- TAB 2: SUBSCRIBERS (Pelanggan)                                           -->
+        <!-- ========================================================================= -->
+        <div id="tab-subscribers" class="tab-pane hidden space-y-5 animate-fadeIn">
+          
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs">
+            <div>
+              <h2 class="text-base font-bold text-brand-navy">Pelanggan & PPPoE Credentials Directory</h2>
+              <p class="text-[11px] text-slate-500 mt-0.5">Database pelanggan aktif, binding NAS Mikrotik, status isolir, dan IP address.</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="openAddSubscriberModal()" class="brand-btn-primary px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm">
+                <i data-lucide="user-plus" class="w-4 h-4"></i>
+                <span>+ Tambah Pelanggan Baru</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Search & Filter Bar -->
+          <div class="flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs">
+            <div class="flex items-center gap-2 flex-1 max-w-sm">
+              <i data-lucide="search" class="w-4 h-4 text-slate-400"></i>
+              <input 
+                type="text" 
+                id="search-subscribers" 
+                placeholder="Cari nama, WhatsApp, username PPPoE, atau IP..." 
+                onkeyup="filterSubscribersTable()"
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-brand-emerald focus:bg-white transition"
+              />
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="text-slate-400 font-mono text-[11px] mr-1">Status:</span>
+              <button onclick="setSubFilter('ALL')" id="sub-filter-all" class="sub-filter-btn px-2.5 py-1 rounded-lg bg-brand-navy text-white text-[11px] font-semibold">Semua (16)</button>
+              <button onclick="setSubFilter('ACTIVE')" id="sub-filter-active" class="sub-filter-btn px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 text-[11px] font-semibold">Aktif (12)</button>
+              <button onclick="setSubFilter('SUSPENDED')" id="sub-filter-suspended" class="sub-filter-btn px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 text-[11px] font-semibold">Terisolir (4)</button>
+            </div>
+          </div>
+
+          <!-- Subscribers Data Table -->
+          <div class="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
             <div class="overflow-x-auto">
-              <table class="w-full text-left border-collapse text-xs">
+              <table class="w-full text-left text-xs border-collapse">
                 <thead>
-                  <tr class="bg-slate-50 text-slate-500 font-mono text-[10px] uppercase tracking-wider border-b border-slate-200">
-                    <th class="py-3 px-4">Invoice ID</th>
-                    <th class="py-3 px-4">Subscriber</th>
-                    <th class="py-3 px-4">Service Plan</th>
-                    <th class="py-3 px-4">Amount</th>
-                    <th class="py-3 px-4">Payment Method</th>
-                    <th class="py-3 px-4">Billing Status</th>
-                    <th class="py-3 px-4">RouterOS Provisioning</th>
-                    <th class="py-3 px-4 text-right">Actions</th>
+                  <tr class="bg-slate-50/80 border-b border-slate-200 font-mono text-slate-500 text-[11px]">
+                    <th class="py-3 px-4 font-semibold">ID & NAMA PELANGGAN</th>
+                    <th class="py-3 px-4 font-semibold">PPPOE USERNAME / IP</th>
+                    <th class="py-3 px-4 font-semibold">PAKET LAYANAN</th>
+                    <th class="py-3 px-4 font-semibold">ROUTER GATEWAY</th>
+                    <th class="py-3 px-4 font-semibold">STATUS JARINGAN</th>
+                    <th class="py-3 px-4 font-semibold text-right">AKSI CEPAT</th>
                   </tr>
                 </thead>
-                <tbody id="invoice-table-body" class="divide-y divide-slate-100 text-slate-700">
-                  
-                  <!-- Row 1: Paid Gigabit Enterprise -->
-                  <tr class="invoice-row hover:bg-slate-50/80 transition" data-status="paid" data-search="INV-2026-0891 Elena Rostova elena@techscale.io Gigabit Enterprise Stripe 10.24.12.92">
-                    <td class="py-3.5 px-4 font-mono font-bold text-brand-navy">INV-2026-0891</td>
-                    <td class="py-3.5 px-4">
-                      <span class="font-bold text-brand-navy block">Elena Rostova</span>
-                      <span class="text-[10px] text-slate-400 font-mono">PB-CUST-1002 &bull; elena@techscale.io</span>
-                    </td>
-                    <td class="py-3.5 px-4">
-                      <span class="font-semibold text-slate-800 block">Gigabit Enterprise</span>
-                      <span class="text-[10px] text-slate-500 font-mono">1 Gbps Symmetrical</span>
-                    </td>
-                    <td class="py-3.5 px-4 font-mono font-bold text-brand-navy">$199.99</td>
-                    <td class="py-3.5 px-4">
-                      <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
-                        Stripe Card &bull; 4242
-                      </span>
-                    </td>
-                    <td class="py-3.5 px-4">
-                      <span class="status-badge px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                        PAID / SETTLED
-                      </span>
-                    </td>
-                    <td class="py-3.5 px-4">
-                      <div class="routeros-status flex items-center gap-1.5 font-mono text-[11px] text-emerald-600 font-semibold">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                        <span>Active (1G_Enterprise)</span>
-                      </div>
-                    </td>
-                    <td class="py-3.5 px-4 text-right">
-                      <button onclick="viewReceipt('INV-2026-0891', 'Elena Rostova', 'elena@techscale.io', 'Gigabit Enterprise', '$199.99', 'Stripe Card • 4242', 'PAID', '1G_Enterprise')" class="text-brand-emerald hover:underline font-semibold text-xs flex items-center gap-1 ml-auto">
-                        <span>Receipt</span>
-                        <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
-                      </button>
-                    </td>
-                  </tr>
-
-                  <!-- Row 2: Paid Fiber Pro Business -->
-                  <tr class="invoice-row hover:bg-slate-50/80 transition" data-status="paid" data-search="INV-2026-0890 Marcus Vance marcus@vancecapital.com Fiber Pro Business Midtrans 10.24.12.88">
-                    <td class="py-3.5 px-4 font-mono font-bold text-brand-navy">INV-2026-0890</td>
-                    <td class="py-3.5 px-4">
-                      <span class="font-bold text-brand-navy block">Marcus Vance</span>
-                      <span class="text-[10px] text-slate-400 font-mono">PB-CUST-1001 &bull; marcus@vancecapital.com</span>
-                    </td>
-                    <td class="py-3.5 px-4">
-                      <span class="font-semibold text-slate-800 block">Fiber Pro Business</span>
-                      <span class="text-[10px] text-slate-500 font-mono">250 Mbps Symmetrical</span>
-                    </td>
-                    <td class="py-3.5 px-4 font-mono font-bold text-brand-navy">$89.99</td>
-                    <td class="py-3.5 px-4">
-                      <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
-                        Midtrans &bull; Bank VA
-                      </span>
-                    </td>
-                    <td class="py-3.5 px-4">
-                      <span class="status-badge px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                        PAID / SETTLED
-                      </span>
-                    </td>
-                    <td class="py-3.5 px-4">
-                      <div class="routeros-status flex items-center gap-1.5 font-mono text-[11px] text-emerald-600 font-semibold">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                        <span>Active (250M_Symmetrical)</span>
-                      </div>
-                    </td>
-                    <td class="py-3.5 px-4 text-right">
-                      <button onclick="viewReceipt('INV-2026-0890', 'Marcus Vance', 'marcus@vancecapital.com', 'Fiber Pro Business', '$89.99', 'Midtrans • Bank VA', 'PAID', '250M_Symmetrical')" class="text-brand-emerald hover:underline font-semibold text-xs flex items-center gap-1 ml-auto">
-                        <span>Receipt</span>
-                        <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
-                      </button>
-                    </td>
-                  </tr>
-
-                  <!-- Row 3: Pending Grace Period -->
-                  <tr class="invoice-row hover:bg-slate-50/80 transition" id="row-devon-chen" data-status="pending" data-search="INV-2026-0892 Devon Chen devon.chen@gmail.com Fiber Starter Xendit 10.24.12.102">
-                    <td class="py-3.5 px-4 font-mono font-bold text-brand-navy">INV-2026-0892</td>
-                    <td class="py-3.5 px-4">
-                      <span class="font-bold text-brand-navy block">Devon Chen</span>
-                      <span class="text-[10px] text-slate-400 font-mono">PB-CUST-1003 &bull; devon.chen@gmail.com</span>
-                    </td>
-                    <td class="py-3.5 px-4">
-                      <span class="font-semibold text-slate-800 block">Fiber Starter</span>
-                      <span class="text-[10px] text-slate-500 font-mono">50 Mbps Symmetrical</span>
-                    </td>
-                    <td class="py-3.5 px-4 font-mono font-bold text-amber-600" id="devon-amount">$39.99</td>
-                    <td class="py-3.5 px-4">
-                      <span class="payment-method-badge px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
-                        Xendit Payment Link
-                      </span>
-                    </td>
-                    <td class="py-3.5 px-4">
-                      <span class="status-badge px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                        PENDING (GRACE DAY 2)
-                      </span>
-                    </td>
-                    <td class="py-3.5 px-4">
-                      <div class="routeros-status flex items-center gap-1.5 font-mono text-[11px] text-amber-600 font-semibold">
-                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                        <span>Active (Grace Exp: 24h)</span>
-                      </div>
-                    </td>
-                    <td class="py-3.5 px-4 text-right">
-                      <div class="flex items-center justify-end gap-2">
-                        <button onclick="sendReminder('Devon Chen', 'INV-2026-0892')" class="text-brand-blue hover:underline font-semibold text-xs">
-                          Send Reminder &rarr;
-                        </button>
-                        <button onclick="viewReceipt('INV-2026-0892', 'Devon Chen', 'devon.chen@gmail.com', 'Fiber Starter', '$39.99', 'Xendit Link', 'PENDING', '50M_Starter')" class="text-slate-400 hover:text-slate-600">
-                          <i data-lucide="eye" class="w-3.5 h-3.5"></i>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-
-                  <!-- Row 4: Suspended / Overdue -->
-                  <tr class="invoice-row hover:bg-slate-50/80 transition bg-rose-50/20" id="row-sarah-jenkins" data-status="suspended" data-search="INV-2026-0888 Sarah Jenkins sarah.j@outlook.com Fiber Starter Overdue 10.24.12.110">
-                    <td class="py-3.5 px-4 font-mono font-bold text-brand-navy">INV-2026-0888</td>
-                    <td class="py-3.5 px-4">
-                      <span class="font-bold text-brand-navy block">Sarah Jenkins</span>
-                      <span class="text-[10px] text-slate-400 font-mono">PB-CUST-1004 &bull; sarah.j@outlook.com</span>
-                    </td>
-                    <td class="py-3.5 px-4">
-                      <span class="font-semibold text-slate-800 block">Fiber Starter</span>
-                      <span class="text-[10px] text-slate-500 font-mono">50 Mbps Symmetrical</span>
-                    </td>
-                    <td class="py-3.5 px-4 font-mono font-bold text-rose-600">$39.99</td>
-                    <td class="py-3.5 px-4">
-                      <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-500 border border-slate-200">
-                        Unsettled
-                      </span>
-                    </td>
-                    <td class="py-3.5 px-4">
-                      <span class="status-badge px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
-                        OVERDUE &bull; SUSPENDED
-                      </span>
-                    </td>
-                    <td class="py-3.5 px-4">
-                      <div class="routeros-status flex items-center gap-1.5 font-mono text-[11px] text-rose-600 font-semibold">
-                        <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
-                        <span>Isolated (pool-isolir)</span>
-                      </div>
-                    </td>
-                    <td class="py-3.5 px-4 text-right">
-                      <button onclick="manualReconnect('Sarah Jenkins', 'row-sarah-jenkins')" class="text-rose-600 hover:underline font-semibold text-xs">
-                        Manual Reconnect &rarr;
-                      </button>
-                    </td>
-                  </tr>
-
+                <tbody id="subscribers-table-body" class="divide-y divide-slate-100">
+                  <!-- Populated via JS -->
                 </tbody>
               </table>
             </div>
@@ -680,166 +526,611 @@
 
         </div>
 
-        <!-- TAB 2: INVOICES & RECEIPTS -->
-        <div id="tab-invoices" class="tab-pane hidden space-y-4">
-          <div class="flex items-center justify-between">
+        <!-- ========================================================================= -->
+        <!-- TAB 3: PACKAGES (Paket Layanan)                                           -->
+        <!-- ========================================================================= -->
+        <div id="tab-packages" class="tab-pane hidden space-y-5 animate-fadeIn">
+          
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs">
             <div>
-              <h2 class="text-xl font-bold text-brand-navy tracking-tight">Invoices & Receipts Directory</h2>
-              <p class="text-xs text-slate-500 mt-0.5">Historical ledger of all generated recurring invoices and settlement records.</p>
+              <h2 class="text-base font-bold text-brand-navy">Paket Layanan Internet & Rate Limiting</h2>
+              <p class="text-[11px] text-slate-500 mt-0.5">Daftar tarif langganan, profil PPPoE Mikrotik, batas kecepatan (UP/DOWN), dan subscriber aktif.</p>
             </div>
-            <button onclick="exportInvoicesCSV()" class="brand-btn-primary font-semibold px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5">
-              <i data-lucide="download" class="w-3.5 h-3.5"></i>
-              <span>Download Master Ledger</span>
+            <div class="flex items-center gap-2">
+              <button onclick="syncMikrotikProfiles()" class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 flex items-center gap-1.5 transition">
+                <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                <span>Sync Mikrotik Profiles</span>
+              </button>
+              <button onclick="openAddPackageModal()" class="brand-btn-primary px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                <span>+ Buat Paket Baru</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Packages Grid -->
+          <div id="packages-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            <!-- Populated via JS -->
+          </div>
+
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- TAB 4: INVOICES & KWITANSI                                               -->
+        <!-- ========================================================================= -->
+        <div id="tab-invoices" class="tab-pane hidden space-y-5 animate-fadeIn">
+          
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs">
+            <div>
+              <h2 class="text-base font-bold text-brand-navy">Ledger Invoices & Kwitansi Tagihan</h2>
+              <p class="text-[11px] text-slate-500 mt-0.5">Faktur tagihan bulanan pelanggan, status pembayaran gateway, dan kwitansi resmi telecom.</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="exportInvoicesCSV()" class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 flex items-center gap-1.5 transition">
+                <i data-lucide="download" class="w-4 h-4"></i>
+                <span>Export CSV</span>
+              </button>
+              <button onclick="generateMonthlyInvoices()" class="brand-btn-primary px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm">
+                <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                <span>+ Generate Monthly Invoices</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Filter & Search Toolbar -->
+          <div class="flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs">
+            <div class="flex items-center gap-2 flex-1 max-w-sm">
+              <i data-lucide="search" class="w-4 h-4 text-slate-400"></i>
+              <input 
+                type="text" 
+                id="search-invoices" 
+                placeholder="Cari nomor invoice, nama pelanggan, atau nominal..." 
+                onkeyup="filterInvoiceTable()"
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-brand-emerald focus:bg-white transition"
+              />
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-slate-400 font-mono text-[11px]">Status:</span>
+              <select id="invoice-status-select" onchange="filterInvoiceTable()" class="bg-slate-50 border border-slate-200 text-slate-700 text-xs rounded-xl px-3 py-1.5 focus:outline-none focus:border-brand-emerald">
+                <option value="ALL">Semua Status (All)</option>
+                <option value="PAID">Lunas (Paid / Settled)</option>
+                <option value="PENDING">Menunggu Pembayaran (Pending)</option>
+                <option value="OVERDUE">Nunggak / Isolir (Overdue)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Invoices Data Table -->
+          <div class="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr class="bg-slate-50/80 border-b border-slate-200 font-mono text-slate-500 text-[11px]">
+                    <th class="py-3 px-4 font-semibold">NO. INVOICE</th>
+                    <th class="py-3 px-4 font-semibold">PELANGGAN / PERIODE</th>
+                    <th class="py-3 px-4 font-semibold">PAKET INTERNET</th>
+                    <th class="py-3 px-4 font-semibold">TOTAL TAGIHAN</th>
+                    <th class="py-3 px-4 font-semibold">JATUH TEMPO</th>
+                    <th class="py-3 px-4 font-semibold">STATUS</th>
+                    <th class="py-3 px-4 font-semibold text-right">AKSI</th>
+                  </tr>
+                </thead>
+                <tbody id="invoices-table-body" class="divide-y divide-slate-100">
+                  <!-- Populated via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- TAB 5: MIKROTIK ROUTERS / NAS                                             -->
+        <!-- ========================================================================= -->
+        <div id="tab-routers" class="tab-pane hidden space-y-5 animate-fadeIn">
+          
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs">
+            <div>
+              <h2 class="text-base font-bold text-brand-navy">Manajemen Router Mikrotik & NAS</h2>
+              <p class="text-[11px] text-slate-500 mt-0.5">Koneksi RouterOS Binary API (Port 8728), monitor sesi PPPoE, dan sinkronisasi dynamic queue.</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="openAddRouterModal()" class="brand-btn-primary px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                <span>+ Daftarkan Router NAS</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Router Cards Grid -->
+          <div id="routers-grid" class="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <!-- Populated via JS -->
+          </div>
+
+          <!-- Active Queues & Interface Monitor -->
+          <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div>
+                <h3 class="font-bold text-sm text-brand-navy">Live RouterOS Queue Stream</h3>
+                <p class="text-[11px] text-slate-500 mt-0.5">Top 3 subscriber bandwidth consumption across core interfaces.</p>
+              </div>
+              <span class="text-[10px] font-mono text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Auto-Refresh (1s)</span>
+            </div>
+            <div class="mt-4 space-y-3">
+              <div>
+                <div class="flex justify-between text-xs font-mono mb-1">
+                  <span>Elena Rostova &bull; 1 Gbps Ultra</span>
+                  <span class="font-bold text-emerald-600">842 Mbps / 1000 Mbps (84.2%)</span>
+                </div>
+                <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                  <div class="bg-emerald-500 h-full rounded-full" style="width: 84.2%"></div>
+                </div>
+              </div>
+              <div>
+                <div class="flex justify-between text-xs font-mono mb-1">
+                  <span>Ahmad Fauzi &bull; 50 Mbps Fast</span>
+                  <span class="font-bold text-blue-600">46.5 Mbps / 50 Mbps (93.0%)</span>
+                </div>
+                <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                  <div class="bg-blue-500 h-full rounded-full" style="width: 93.0%"></div>
+                </div>
+              </div>
+              <div>
+                <div class="flex justify-between text-xs font-mono mb-1">
+                  <span>Marcus Vance &bull; 200 Mbps Dedicated</span>
+                  <span class="font-bold text-emerald-600">142 Mbps / 200 Mbps (71.0%)</span>
+                </div>
+                <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                  <div class="bg-emerald-500 h-full rounded-full" style="width: 71.0%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- TAB 6: PUSAT ISOLIR (Service Suspension Engine)                           -->
+        <!-- ========================================================================= -->
+        <div id="tab-suspension" class="tab-pane hidden space-y-5 animate-fadeIn">
+          
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs">
+            <div>
+              <h2 class="text-base font-bold text-brand-navy">Pusat Isolir Otomatis (Service Suspension Engine)</h2>
+              <p class="text-[11px] text-slate-500 mt-0.5">Otomatisasi pemutusan bandwidth bagi pelanggan yang menunggak lewat masa tenggang (Grace Period).</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="runBatchIsolate()" class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-rose-600 hover:bg-rose-500 text-white flex items-center gap-1.5 transition shadow-sm">
+                <i data-lucide="shield-alert" class="w-4 h-4"></i>
+                <span>Jalankan Isolir Massal Sekarang</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Policy & Configuration Banner -->
+          <div class="bg-rose-50/70 border border-rose-200 rounded-2xl p-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center flex-shrink-0">
+                <i data-lucide="lock" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <span class="font-bold text-rose-900 text-xs block">Kebijakan Isolir: H+3 Jatuh Tempo</span>
+                <span class="text-[11px] text-rose-700">Pelanggan terisolir dialihkan ke Mikrotik IP Pool: <code class="font-mono font-bold">10.99.0.0/24</code> dengan bandwidth 256k & halaman redirect tagihan.</span>
+              </div>
+            </div>
+            <span class="font-mono text-xs font-bold text-rose-800 bg-white border border-rose-200 px-3 py-1 rounded-xl shadow-2xs">
+              4 Akun Sedang Terisolir
+            </span>
+          </div>
+
+          <!-- Suspended Accounts Table -->
+          <div class="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr class="bg-slate-50/80 border-b border-slate-200 font-mono text-slate-500 text-[11px]">
+                    <th class="py-3 px-4 font-semibold">PELANGGAN TERISOLIR</th>
+                    <th class="py-3 px-4 font-semibold">PPPOE SECRET</th>
+                    <th class="py-3 px-4 font-semibold">TUNGGAKAN</th>
+                    <th class="py-3 px-4 font-semibold">TANGGAL ISOLIR</th>
+                    <th class="py-3 px-4 font-semibold">IP ISOLIR</th>
+                    <th class="py-3 px-4 font-semibold text-right">AKSI PEMULIHAN</th>
+                  </tr>
+                </thead>
+                <tbody id="suspension-table-body" class="divide-y divide-slate-100">
+                  <!-- Populated via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- TAB 7: TR-069 GENIEACS                                                    -->
+        <!-- ========================================================================= -->
+        <div id="tab-genieacs" class="tab-pane hidden space-y-5 animate-fadeIn">
+          
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs">
+            <div>
+              <h2 class="text-base font-bold text-brand-navy">TR-069 GenieACS Optical Provisioning Server</h2>
+              <p class="text-[11px] text-slate-500 mt-0.5">CWMP auto-provisioning ONT/modem pelanggan dan monitoring optical power attenuation.</p>
+            </div>
+            <button onclick="triggerOpticalScan()" class="brand-btn-primary px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm">
+              <i data-lucide="scan-line" class="w-4 h-4"></i>
+              <span>Trigger CWMP Inform Scan</span>
             </button>
           </div>
-          <div class="p-6 bg-white border border-slate-200 rounded-2xl shadow-xs text-center">
-            <i data-lucide="file-check-2" class="w-8 h-8 text-brand-emerald mx-auto mb-2"></i>
-            <h4 class="font-bold text-brand-navy text-sm">Automated Billing Ledger Sync</h4>
-            <p class="text-xs text-slate-500 mt-1 max-w-md mx-auto leading-relaxed">
-              All 1,284 invoices are reconciled continuously against Stripe, Midtrans, and Xendit webhooks with zero dropped transactions.
-            </p>
+
+          <!-- Optical Health KPI -->
+          <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+            <div class="bg-white border border-slate-200 p-4 rounded-2xl shadow-xs">
+              <span class="text-slate-400 font-medium text-[11px]">Total Managed ONT</span>
+              <span class="font-mono text-xl font-bold text-brand-navy block mt-1">1,428 Devices</span>
+            </div>
+            <div class="bg-white border border-slate-200 p-4 rounded-2xl shadow-xs">
+              <span class="text-slate-400 font-medium text-[11px]">Normal Attenuation (-15 to -24 dBm)</span>
+              <span class="font-mono text-xl font-bold text-emerald-600 block mt-1">1,394 (97.6%)</span>
+            </div>
+            <div class="bg-white border border-slate-200 p-4 rounded-2xl shadow-xs">
+              <span class="text-slate-400 font-medium text-[11px]">High Loss Warning (-25 to -27 dBm)</span>
+              <span class="font-mono text-xl font-bold text-amber-600 block mt-1">28 (2.0%)</span>
+            </div>
+            <div class="bg-white border border-slate-200 p-4 rounded-2xl shadow-xs">
+              <span class="text-slate-400 font-medium text-[11px]">Critical Attenuation (> -28 dBm)</span>
+              <span class="font-mono text-xl font-bold text-rose-600 block mt-1">6 (0.4%)</span>
+            </div>
           </div>
+
+          <!-- ONT Table -->
+          <div class="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
+            <div class="p-4 border-b border-slate-100 flex items-center justify-between">
+              <h3 class="font-bold text-sm text-brand-navy">Sample Customer ONT Optical Telemetry</h3>
+              <span class="font-mono text-[11px] text-slate-500">Preset: Last Inform &lt; 5m ago</span>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr class="bg-slate-50/80 border-b border-slate-200 font-mono text-slate-500 text-[11px]">
+                    <th class="py-3 px-4 font-semibold">PELANGGAN</th>
+                    <th class="py-3 px-4 font-semibold">MODEL ONT & SERIAL</th>
+                    <th class="py-3 px-4 font-semibold">OPTICAL RX POWER</th>
+                    <th class="py-3 px-4 font-semibold">CWMP IP ADDRESS</th>
+                    <th class="py-3 px-4 font-semibold">LAST INFORM</th>
+                    <th class="py-3 px-4 font-semibold text-right">DIAGNOSTIK</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                  <tr class="hover:bg-slate-50/80 transition">
+                    <td class="py-3 px-4 font-bold text-slate-800">Elena Rostova</td>
+                    <td class="py-3 px-4 font-mono text-slate-600">ZTE-F670L (SN: ZTEG0482910)</td>
+                    <td class="py-3 px-4 font-mono font-bold text-emerald-600">-18.42 dBm (Excellent)</td>
+                    <td class="py-3 px-4 font-mono text-slate-500">10.20.1.92</td>
+                    <td class="py-3 px-4 text-slate-500 font-mono">18s ago</td>
+                    <td class="py-3 px-4 text-right">
+                      <button onclick="showToast('ONT Diagnostic', 'Reboot signal dispatched via TR-069 RPC', 'info')" class="text-brand-navy font-semibold hover:underline">Reboot ONT</button>
+                    </td>
+                  </tr>
+                  <tr class="hover:bg-slate-50/80 transition">
+                    <td class="py-3 px-4 font-bold text-slate-800">Ahmad Fauzi</td>
+                    <td class="py-3 px-4 font-mono text-slate-600">Huawei HG8245H5 (SN: 48575443)</td>
+                    <td class="py-3 px-4 font-mono font-bold text-emerald-600">-21.15 dBm (Good)</td>
+                    <td class="py-3 px-4 font-mono text-slate-500">10.20.1.45</td>
+                    <td class="py-3 px-4 text-slate-500 font-mono">42s ago</td>
+                    <td class="py-3 px-4 text-right">
+                      <button onclick="showToast('ONT Diagnostic', 'Reboot signal dispatched via TR-069 RPC', 'info')" class="text-brand-navy font-semibold hover:underline">Reboot ONT</button>
+                    </td>
+                  </tr>
+                  <tr class="hover:bg-slate-50/80 transition">
+                    <td class="py-3 px-4 font-bold text-slate-800">Dewi Sartika</td>
+                    <td class="py-3 px-4 font-mono text-slate-600">FiberHome AN5506 (SN: FHTT8932)</td>
+                    <td class="py-3 px-4 font-mono font-bold text-amber-600">-26.80 dBm (Degraded)</td>
+                    <td class="py-3 px-4 font-mono text-slate-500">10.20.1.77</td>
+                    <td class="py-3 px-4 text-slate-500 font-mono">2m ago</td>
+                    <td class="py-3 px-4 text-right">
+                      <button onclick="showToast('Optical Warning', 'Dispatched technician ticket for fiber bending check', 'warning')" class="text-amber-600 font-semibold hover:underline">Dispatch Check</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
         </div>
 
-        <!-- TAB 3: PAYMENT GATEWAYS -->
-        <div id="tab-gateways" class="tab-pane hidden space-y-4">
-          <div class="flex items-center justify-between">
+        <!-- ========================================================================= -->
+        <!-- TAB 8: GATEWAYS & LEDGER                                                  -->
+        <!-- ========================================================================= -->
+        <div id="tab-gateways" class="tab-pane hidden space-y-5 animate-fadeIn">
+          
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs">
             <div>
-              <h2 class="text-xl font-bold text-brand-navy tracking-tight">Payment Gateways & Rails</h2>
-              <p class="text-xs text-slate-500 mt-0.5">Multi-gateway webhook endpoints and HMAC signature verification drivers.</p>
+              <h2 class="text-base font-bold text-brand-navy">Payment Gateways & Transaction Ledger</h2>
+              <p class="text-[11px] text-slate-500 mt-0.5">Integrasi mutasi otomatis Stripe, Midtrans (QRIS & Virtual Account), dan Xendit.</p>
             </div>
-            <button onclick="syncGatewaysAction()" class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold px-3 py-2 rounded-xl text-xs flex items-center gap-1.5">
-              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
-              <span>Re-check Rails</span>
+            <button onclick="triggerSimulatedWebhook()" class="brand-btn-primary px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm">
+              <i data-lucide="zap" class="w-4 h-4"></i>
+              <span>Test Webhook ($199.99)</span>
             </button>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs">
+          <!-- Gateway Cards -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs">
               <div class="flex items-center justify-between">
-                <span class="font-bold text-brand-navy">Stripe Payments</span>
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">ACTIVE</span>
+                <div class="flex items-center gap-2">
+                  <div class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">S</div>
+                  <div>
+                    <h4 class="font-bold text-slate-800">Stripe Billing</h4>
+                    <span class="text-[10px] text-slate-400 font-mono">Credit Card, Apple Pay</span>
+                  </div>
+                </div>
+                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
               </div>
-              <div class="text-[11px] text-slate-500 mt-2 font-mono">Webhook: /api/webhooks/stripe</div>
-              <div class="text-[10px] text-emerald-600 font-bold mt-1">HMAC SHA-256 Verified</div>
+              <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between text-[11px] font-mono">
+                <span class="text-slate-500">Status: <strong class="text-emerald-600">Active</strong></span>
+                <span class="text-slate-500">Fee: <strong>2.9% + 30¢</strong></span>
+              </div>
             </div>
 
-            <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs">
+            <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs">
               <div class="flex items-center justify-between">
-                <span class="font-bold text-brand-navy">Midtrans Snap</span>
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">ACTIVE</span>
+                <div class="flex items-center gap-2">
+                  <div class="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">M</div>
+                  <div>
+                    <h4 class="font-bold text-slate-800">Midtrans Snap</h4>
+                    <span class="text-[10px] text-slate-400 font-mono">QRIS, BCA VA, Mandiri</span>
+                  </div>
+                </div>
+                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
               </div>
-              <div class="text-[11px] text-slate-500 mt-2 font-mono">Webhook: /api/webhooks/midtrans</div>
-              <div class="text-[10px] text-emerald-600 font-bold mt-1">Bank VA & QRIS Idempotent</div>
+              <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between text-[11px] font-mono">
+                <span class="text-slate-500">Status: <strong class="text-emerald-600">Active</strong></span>
+                <span class="text-slate-500">Fee: <strong>Rp 4.000 / VA</strong></span>
+              </div>
             </div>
 
-            <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs">
+            <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs">
               <div class="flex items-center justify-between">
-                <span class="font-bold text-brand-navy">Xendit Invoice</span>
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">ACTIVE</span>
+                <div class="flex items-center gap-2">
+                  <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">X</div>
+                  <div>
+                    <h4 class="font-bold text-slate-800">Xendit Invoicing</h4>
+                    <span class="text-[10px] text-slate-400 font-mono">OVO, DANA, Alfamart</span>
+                  </div>
+                </div>
+                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
               </div>
-              <div class="text-[11px] text-slate-500 mt-2 font-mono">Webhook: /api/webhooks/xendit</div>
-              <div class="text-[10px] text-emerald-600 font-bold mt-1">Callback Token Authenticated</div>
+              <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between text-[11px] font-mono">
+                <span class="text-slate-500">Status: <strong class="text-emerald-600">Active</strong></span>
+                <span class="text-slate-500">Fee: <strong>1.5% e-Wallet</strong></span>
+              </div>
             </div>
           </div>
+
+          <!-- Transaction Ledger Table -->
+          <div class="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
+            <div class="p-4 border-b border-slate-100 flex items-center justify-between">
+              <h3 class="font-bold text-sm text-brand-navy">Recent Payment Gateway Settlements</h3>
+              <span class="font-mono text-[11px] text-slate-500">HMAC SHA-256 Signature Verified</span>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr class="bg-slate-50/80 border-b border-slate-200 font-mono text-slate-500 text-[11px]">
+                    <th class="py-3 px-4 font-semibold">TRANSACTION ID</th>
+                    <th class="py-3 px-4 font-semibold">GATEWAY</th>
+                    <th class="py-3 px-4 font-semibold">PELANGGAN</th>
+                    <th class="py-3 px-4 font-semibold">NOMINAL NET</th>
+                    <th class="py-3 px-4 font-semibold">WAKTU SETTLED</th>
+                    <th class="py-3 px-4 font-semibold">STATUS</th>
+                    <th class="py-3 px-4 font-semibold text-right">PAYLOAD</th>
+                  </tr>
+                </thead>
+                <tbody id="gateways-table-body" class="divide-y divide-slate-100">
+                  <!-- Populated via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
         </div>
 
-        <!-- TAB 4: MIKROTIK ROUTEROS -->
-        <div id="tab-routeros" class="tab-pane hidden space-y-4">
-          <div class="flex items-center justify-between">
+        <!-- ========================================================================= -->
+        <!-- TAB 9: WHATSAPP NOTIFICATION CENTER                                      -->
+        <!-- ========================================================================= -->
+        <div id="tab-whatsapp" class="tab-pane hidden space-y-5 animate-fadeIn">
+          
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs">
             <div>
-              <h2 class="text-xl font-bold text-brand-navy tracking-tight">Mikrotik RouterOS API v7 Engine</h2>
-              <p class="text-xs text-slate-500 mt-0.5">Persistent binary socket connection to core BRAS router (Port 8728).</p>
+              <h2 class="text-base font-bold text-brand-navy">WhatsApp Notification Engine & Baileys Gateway</h2>
+              <p class="text-[11px] text-slate-500 mt-0.5">Pengiriman otomatis tagihan H-3, peringatan isolir, dan kwitansi PDF lunas ke WhatsApp pelanggan.</p>
             </div>
-            <button onclick="showToast('RouterOS Ping', 'Socket connection to 10.24.0.1:8728 responded in 4.2ms. Zero latency jitter.', 'success')" class="brand-btn-primary font-semibold px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5">
-              <i data-lucide="radio" class="w-3.5 h-3.5"></i>
-              <span>Ping Binary Socket</span>
+            <div class="flex items-center gap-2">
+              <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                Baileys Daemon: +62 812-3456-7890 (Connected)
+              </span>
+            </div>
+          </div>
+
+          <!-- Broadcast Templates Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            
+            <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                  <h4 class="font-bold text-brand-navy flex items-center gap-1.5">
+                    <i data-lucide="bell" class="w-4 h-4 text-blue-500"></i>
+                    Template: Pengingat Tagihan (H-3)
+                  </h4>
+                  <span class="text-[10px] font-mono text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">Otomatis Aktif</span>
+                </div>
+                <div class="mt-3 p-3 rounded-xl bg-slate-50 border border-slate-200 font-mono text-[11px] text-slate-700 whitespace-pre-line leading-relaxed">
+                  Halo *{{nama}}*, tagihan internet paket *{{paket}}* sebesar *{{nominal}}* akan jatuh tempo pada *{{jatuh_tempo}}*.
+                  
+                  Bayar mudah melalui link resmi:
+                  {{link_bayar}}
+                </div>
+              </div>
+              <div class="mt-4 pt-3 border-t border-slate-100 flex justify-end">
+                <button onclick="openWhatsAppSimulator('H-3 Reminder')" class="brand-btn-primary px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1">
+                  <i data-lucide="send" class="w-3.5 h-3.5"></i>
+                  <span>Test Kirim WA</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                  <h4 class="font-bold text-brand-navy flex items-center gap-1.5">
+                    <i data-lucide="check-circle" class="w-4 h-4 text-emerald-500"></i>
+                    Template: Kwitansi Pembayaran Lunas
+                  </h4>
+                  <span class="text-[10px] font-mono text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">Otomatis Aktif</span>
+                </div>
+                <div class="mt-3 p-3 rounded-xl bg-slate-50 border border-slate-200 font-mono text-[11px] text-slate-700 whitespace-pre-line leading-relaxed">
+                  Terima kasih *{{nama}}*! Pembayaran invoice *{{no_invoice}}* sebesar *{{nominal}}* telah kami terima.
+                  
+                  Status layanan Anda: *AKTIF NORMAL*.
+                  Unduh kwitansi resmi: {{link_struk}}
+                </div>
+              </div>
+              <div class="mt-4 pt-3 border-t border-slate-100 flex justify-end">
+                <button onclick="openWhatsAppSimulator('Paid Receipt')" class="brand-btn-primary px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1">
+                  <i data-lucide="send" class="w-3.5 h-3.5"></i>
+                  <span>Test Kirim WA</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                  <h4 class="font-bold text-brand-navy flex items-center gap-1.5">
+                    <i data-lucide="shield-alert" class="w-4 h-4 text-rose-500"></i>
+                    Template: Notifikasi Pemutusan Isolir
+                  </h4>
+                  <span class="text-[10px] font-mono text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">Otomatis Aktif</span>
+                </div>
+                <div class="mt-3 p-3 rounded-xl bg-slate-50 border border-slate-200 font-mono text-[11px] text-slate-700 whitespace-pre-line leading-relaxed">
+                  Pemberitahuan: Layanan internet Anda *{{username}}* telah dihentikan sementara (*TERISOLIR*) karena melewati batas jatuh tempo.
+                  
+                  Segera lunasi tagihan Anda untuk membuka isolir otomatis secara instan:
+                  {{link_bayar}}
+                </div>
+              </div>
+              <div class="mt-4 pt-3 border-t border-slate-100 flex justify-end">
+                <button onclick="openWhatsAppSimulator('Suspension Notice')" class="brand-btn-primary px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1">
+                  <i data-lucide="send" class="w-3.5 h-3.5"></i>
+                  <span>Test Kirim WA</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                  <h4 class="font-bold text-brand-navy flex items-center gap-1.5">
+                    <i data-lucide="file-plus" class="w-4 h-4 text-indigo-500"></i>
+                    Template: Tagihan Baru Diterbitkan
+                  </h4>
+                  <span class="text-[10px] font-mono text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">Otomatis Aktif</span>
+                </div>
+                <div class="mt-3 p-3 rounded-xl bg-slate-50 border border-slate-200 font-mono text-[11px] text-slate-700 whitespace-pre-line leading-relaxed">
+                  Tagihan internet periode baru *{{periode}}* telah diterbitkan untuk ID *{{id_pelanggan}}*.
+                  Nominal: *{{nominal}}*.
+                  Jatuh tempo: *{{jatuh_tempo}}*.
+                </div>
+              </div>
+              <div class="mt-4 pt-3 border-t border-slate-100 flex justify-end">
+                <button onclick="openWhatsAppSimulator('New Invoice')" class="brand-btn-primary px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1">
+                  <i data-lucide="send" class="w-3.5 h-3.5"></i>
+                  <span>Test Kirim WA</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- TAB 10: SYSTEM SETTINGS                                                   -->
+        <!-- ========================================================================= -->
+        <div id="tab-settings" class="tab-pane hidden space-y-5 animate-fadeIn">
+          
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs">
+            <div>
+              <h2 class="text-base font-bold text-brand-navy">System & ISP Configuration</h2>
+              <p class="text-[11px] text-slate-500 mt-0.5">Konfigurasi profil ISP, kebijakan tagihan, mata uang, dan IP pool isolir Mikrotik.</p>
+            </div>
+            <button onclick="saveSystemSettings()" class="brand-btn-primary px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm">
+              <i data-lucide="save" class="w-4 h-4"></i>
+              <span>Simpan Perubahan</span>
             </button>
           </div>
 
-          <div class="bg-slate-950 text-slate-200 font-mono text-xs p-5 rounded-2xl border border-slate-800 space-y-2 shadow-lg">
-            <div class="text-emerald-400 font-bold">// PulseBill RouterOS Binary Socket Live Stream</div>
-            <div class="text-slate-400">15:40:01 [/ppp/active/print] => 1,284 PPPoE sessions active</div>
-            <div class="text-slate-400">15:40:02 [/queue/simple/print] => Queue tree synchronized with rate-limit cards</div>
-            <div class="text-cyan-400">15:40:03 [ROS-EVENT] CoA Packet sent to user "marcus" => Profile: 250M_Symmetrical</div>
-            <div class="text-emerald-400">15:40:04 [ROS-OK] Socket multiplexer idle. Replay buffer clear.</div>
-          </div>
-        </div>
-
-        <!-- TAB 5: TR-069 GENIEACS -->
-        <div id="tab-genieacs" class="tab-pane hidden space-y-4">
-          <div class="flex items-center justify-between">
+          <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs space-y-6 max-w-4xl">
+            
             <div>
-              <h2 class="text-xl font-bold text-brand-navy tracking-tight">TR-069 GenieACS Auto-Configuration</h2>
-              <p class="text-xs text-slate-500 mt-0.5">CWMP Device Management protocol over port 7547.</p>
+              <h4 class="font-bold text-sm text-brand-navy pb-2 border-b border-slate-100">Profil Perusahaan ISP</h4>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                <div>
+                  <label class="block text-[11px] font-semibold text-slate-600 mb-1">Nama Provider ISP / BSS</label>
+                  <input type="text" id="setting-isp-name" value="PulseBill Telecom Solutions Inc." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-brand-emerald">
+                </div>
+                <div>
+                  <label class="block text-[11px] font-semibold text-slate-600 mb-1">Nomor Kontak WhatsApp Support</label>
+                  <input type="text" id="setting-isp-phone" value="+62 812-3456-7890" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-brand-emerald">
+                </div>
+              </div>
             </div>
-          </div>
 
-          <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-2">
-            <div class="font-bold text-brand-navy text-sm">TR-069 Auto-Provisioning Pipeline</div>
-            <p class="text-xs text-slate-600 leading-relaxed">
-              When an invoice is paid or isolated, PulseBill dispatches asynchronous RPC calls to GenieACS to reconfigure the Optical Network Terminal (ONT) WAN profile automatically.
-            </p>
-          </div>
-        </div>
-
-        <!-- TAB 6: RATE CARDS & PLANS -->
-        <div id="tab-ratecards" class="tab-pane hidden space-y-4">
-          <div class="flex items-center justify-between">
             <div>
-              <h2 class="text-xl font-bold text-brand-navy tracking-tight">Service Rate Cards & QoS Plans</h2>
-              <p class="text-xs text-slate-500 mt-0.5">Symmetrical bandwidth limits and burst profiles mapped to RouterOS queue trees.</p>
+              <h4 class="font-bold text-sm text-brand-navy pb-2 border-b border-slate-100">Kebijakan Billing & Mikrotik</h4>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
+                <div>
+                  <label class="block text-[11px] font-semibold text-slate-600 mb-1">Masa Tenggang (Grace Period)</label>
+                  <input type="number" id="setting-grace-period" value="3" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-brand-emerald">
+                  <span class="text-[10px] text-slate-400 mt-1 block">Hari setelah jatuh tempo sebelum isolir</span>
+                </div>
+                <div>
+                  <label class="block text-[11px] font-semibold text-slate-600 mb-1">Tarif Pajak PPN (%)</label>
+                  <input type="number" id="setting-tax-rate" value="11" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-brand-emerald">
+                  <span class="text-[10px] text-slate-400 mt-1 block">Standar PPN Telecom Indonesia</span>
+                </div>
+                <div>
+                  <label class="block text-[11px] font-semibold text-slate-600 mb-1">Mikrotik Isolir IP Pool</label>
+                  <input type="text" id="setting-isolir-pool" value="10.99.0.0/24" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono focus:outline-none focus:border-brand-emerald">
+                  <span class="text-[10px] text-slate-400 mt-1 block">Subnet dialihkan ke firewall drop</span>
+                </div>
+              </div>
             </div>
-          </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs">
-              <div class="font-bold text-brand-navy text-sm">Gigabit Enterprise</div>
-              <div class="text-2xl font-bold font-mono text-brand-navy mt-1">$199.99<span class="text-xs font-normal text-slate-400">/mo</span></div>
-              <div class="text-[11px] text-emerald-600 font-mono font-semibold mt-1">1 Gbps Symmetrical &bull; Priority 1</div>
-            </div>
-
-            <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs">
-              <div class="font-bold text-brand-navy text-sm">Fiber Pro Business</div>
-              <div class="text-2xl font-bold font-mono text-brand-navy mt-1">$89.99<span class="text-xs font-normal text-slate-400">/mo</span></div>
-              <div class="text-[11px] text-emerald-600 font-mono font-semibold mt-1">250 Mbps Symmetrical &bull; Priority 3</div>
-            </div>
-
-            <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs">
-              <div class="font-bold text-brand-navy text-sm">Fiber Starter</div>
-              <div class="text-2xl font-bold font-mono text-brand-navy mt-1">$39.99<span class="text-xs font-normal text-slate-400">/mo</span></div>
-              <div class="text-[11px] text-emerald-600 font-mono font-semibold mt-1">50 Mbps Symmetrical &bull; Priority 5</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- TAB 7: SUBSCRIBERS -->
-        <div id="tab-subscribers" class="tab-pane hidden space-y-4">
-          <div class="flex items-center justify-between">
             <div>
-              <h2 class="text-xl font-bold text-brand-navy tracking-tight">Active Subscriber Directory</h2>
-              <p class="text-xs text-slate-500 mt-0.5">1,284 active optical subscribers with automated billing binding.</p>
+              <h4 class="font-bold text-sm text-brand-navy pb-2 border-b border-slate-100">Daemon Cron Scheduler</h4>
+              <div class="space-y-3 mt-4 text-xs">
+                <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
+                  <div>
+                    <span class="font-bold text-slate-800 block">Generate Invoices Massal</span>
+                    <span class="text-[11px] text-slate-500">Berjalan setiap tanggal 1 pukul 00:01 WIB</span>
+                  </div>
+                  <span class="font-mono font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">0 0 1 * *</span>
+                </div>
+                <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
+                  <div>
+                    <span class="font-bold text-slate-800 block">Cron Isolir Pelanggan Nunggak</span>
+                    <span class="text-[11px] text-slate-500">Berjalan setiap hari pukul 00:05 WIB</span>
+                  </div>
+                  <span class="font-mono font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded">5 0 * * *</span>
+                </div>
+              </div>
             </div>
-          </div>
-          <div class="bg-white border border-slate-200 rounded-2xl p-6 text-center text-slate-500">
-            <i data-lucide="users" class="w-8 h-8 text-brand-blue mx-auto mb-2"></i>
-            <div class="font-bold text-brand-navy text-sm">1,284 Telecom Accounts Monitored</div>
-            <div class="text-xs text-slate-400 mt-0.5">All accounts synchronized with RADIUS and RouterOS pools.</div>
-          </div>
-        </div>
 
-        <!-- TAB 8: SETTINGS -->
-        <div id="tab-settings" class="tab-pane hidden space-y-4">
-          <div class="flex items-center justify-between">
-            <div>
-              <h2 class="text-xl font-bold text-brand-navy tracking-tight">System & Billing Settings</h2>
-              <p class="text-xs text-slate-500 mt-0.5">Invoice scheduling, currency configuration, and Mikrotik authentication.</p>
-            </div>
           </div>
-          <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-3">
-            <div class="font-bold text-brand-navy">Autonomous Cron Schedule</div>
-            <div class="text-xs text-slate-600 font-mono">0 0 1 * * => Generate recurring invoices on the 1st of every month at midnight.</div>
-          </div>
+
         </div>
 
       </main>
@@ -848,504 +1139,954 @@
 
   </div>
 
-  <!-- Printable Telecom Invoice Receipt Modal -->
-  <div id="receipt-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs hidden">
-    <div class="bg-white border border-slate-200 rounded-3xl max-w-lg w-full p-6 shadow-2xl relative overflow-hidden animate-fadeIn text-xs font-sans">
+  <!-- ========================================================================= -->
+  <!-- MODAL: PRINTABLE RECEIPT / KWITANSI RESMI TELECOM                         -->
+  <!-- ========================================================================= -->
+  <div id="receipt-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white border border-slate-200 rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden flex flex-col max-h-[90vh] animate-fadeIn">
       
-      <!-- Close Button -->
-      <button onclick="closeReceiptModal()" class="absolute top-5 right-5 p-1.5 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600">
-        <i data-lucide="x" class="w-5 h-5"></i>
-      </button>
-
-      <!-- Invoice Header -->
-      <div class="flex items-start justify-between border-b border-slate-100 pb-4 mb-4">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-navy to-brand-emerald flex items-center justify-center text-white font-bold shadow">
-            <i data-lucide="receipt" class="w-5 h-5"></i>
+      <!-- Receipt Header Toolbar -->
+      <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between shrink-0 no-print">
+        <div class="flex items-center gap-2">
+          <div class="w-7 h-7 rounded-lg brand-gradient flex items-center justify-center text-white">
+            <i data-lucide="receipt" class="w-4 h-4"></i>
           </div>
-          <div>
-            <h3 class="font-bold text-base text-brand-navy leading-none">PulseBill Telecom Inc.</h3>
-            <span class="text-[10px] text-slate-400 font-mono">Official Telecom Tax Invoice</span>
-          </div>
+          <span class="font-bold text-slate-800 text-sm">Official Telecom Invoice Receipt</span>
         </div>
+        <div class="flex items-center gap-2">
+          <button onclick="window.print()" class="px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-xs flex items-center gap-1 shadow-2xs transition">
+            <i data-lucide="printer" class="w-3.5 h-3.5 text-slate-500"></i>
+            <span>Print</span>
+          </button>
+          <button onclick="closeReceiptModal()" class="w-7 h-7 rounded-lg hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Printable Document Body -->
+      <div id="printable-receipt-card" class="p-6 overflow-y-auto space-y-6 text-xs bg-white text-slate-900">
         
-        <!-- Paid/Status Stamp -->
-        <div id="modal-stamp" class="px-3 py-1 rounded text-xs stamp-paid uppercase">
-          PAID
+        <!-- Header Info -->
+        <div class="flex items-start justify-between border-b border-slate-200 pb-5">
+          <div>
+            <div class="flex items-center gap-2 font-bold text-base text-brand-navy">
+              <span>PulseBill Telecom Solutions</span>
+            </div>
+            <p class="text-[11px] text-slate-500 mt-1">Autonomous Telecom Infrastructure & Billing</p>
+            <p class="text-[10px] text-slate-400 font-mono">Tax ID: ID-894-9218204-TEL</p>
+          </div>
+          <div class="text-right">
+            <div id="receipt-status-stamp" class="inline-block px-3 py-1 rounded-lg text-xs stamp-paid">
+              PAID
+            </div>
+            <span id="receipt-invoice-id" class="block font-mono font-bold text-xs text-slate-700 mt-2">INV-2026-0891</span>
+            <span id="receipt-date" class="block font-mono text-[10px] text-slate-400">Issued: Sep 12, 2026</span>
+          </div>
         </div>
-      </div>
 
-      <!-- Invoice Details Grid -->
-      <div class="grid grid-cols-2 gap-3 p-3.5 bg-slate-50 rounded-2xl border border-slate-100 text-xs mb-4">
-        <div>
-          <span class="text-slate-400 text-[10px] uppercase font-mono block">Billed To</span>
-          <span class="font-bold text-brand-navy block mt-0.5" id="modal-customer-name">Elena Rostova</span>
-          <span class="text-[11px] text-slate-500 font-mono" id="modal-customer-email">elena@techscale.io</span>
+        <!-- Subscriber Information Grid -->
+        <div class="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
+          <div>
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block font-mono">Billed To:</span>
+            <h4 id="receipt-customer-name" class="font-bold text-slate-800 text-xs mt-0.5">Elena Rostova</h4>
+            <span id="receipt-customer-phone" class="text-[11px] text-slate-500 block">+62 812-9842-1092</span>
+            <span id="receipt-customer-address" class="text-[10px] text-slate-500 block mt-0.5">Kebayoran Baru, Jakarta Selatan</span>
+          </div>
+          <div class="text-right">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block font-mono">Connection Profile:</span>
+            <span id="receipt-pppoe" class="font-mono text-[11px] text-slate-700 block mt-0.5">elena.rostova@isp</span>
+            <span id="receipt-ip" class="font-mono text-[10px] text-emerald-600 block">IP: 10.20.1.92</span>
+            <span id="receipt-router" class="font-mono text-[10px] text-slate-400 block">Core: CCR2004-CORE-01</span>
+          </div>
         </div>
-        <div>
-          <span class="text-slate-400 text-[10px] uppercase font-mono block">Invoice Reference</span>
-          <span class="font-bold font-mono text-brand-navy block mt-0.5" id="modal-invoice-id">INV-2026-0891</span>
-          <span class="text-[11px] text-slate-500 font-mono">Issued: Sep 01, 2026</span>
-        </div>
-      </div>
 
-      <!-- Itemized Service Charge -->
-      <div class="border border-slate-100 rounded-2xl overflow-hidden mb-4">
-        <table class="w-full text-left text-xs">
-          <thead class="bg-slate-50 border-b border-slate-100 text-slate-400 font-mono text-[10px] uppercase">
-            <tr>
-              <th class="p-3">Service Description</th>
-              <th class="p-3">Bandwidth / QoS</th>
-              <th class="p-3 text-right">Amount</th>
+        <!-- Itemized Table -->
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-slate-200 font-mono text-[10px] text-slate-400">
+              <th class="py-2">ITEM DESCRIPTION</th>
+              <th class="py-2 text-center">SPEED</th>
+              <th class="py-2 text-right">AMOUNT</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100">
             <tr>
-              <td class="p-3 font-semibold text-slate-800" id="modal-service-name">Gigabit Enterprise</td>
-              <td class="p-3 font-mono text-slate-500 text-[11px]" id="modal-queue-profile">1G_Enterprise</td>
-              <td class="p-3 font-mono font-bold text-brand-navy text-right" id="modal-amount">$199.99</td>
+              <td class="py-3">
+                <span id="receipt-item-plan" class="font-bold text-slate-800 block">FTTH Gigabit Enterprise Tier</span>
+                <span class="text-[10px] text-slate-400">Service Period: Current Month Recurring</span>
+              </td>
+              <td id="receipt-item-speed" class="py-3 text-center font-mono text-slate-600">1000M / 1000M</td>
+              <td id="receipt-item-amount" class="py-3 text-right font-mono font-bold text-slate-900">$179.99</td>
+            </tr>
+            <tr>
+              <td class="py-2 text-slate-500">Standard Telecom Infrastructure Tax (PPN 11%)</td>
+              <td class="py-2 text-center font-mono text-slate-400">11%</td>
+              <td id="receipt-item-tax" class="py-2 text-right font-mono text-slate-700">$20.00</td>
             </tr>
           </tbody>
+          <tfoot>
+            <tr class="border-t border-slate-200">
+              <th colspan="2" class="py-3 text-right font-bold text-slate-800">Total Settled:</th>
+              <th id="receipt-total-amount" class="py-3 text-right font-mono text-sm font-bold text-brand-navy">$199.99</th>
+            </tr>
+          </tfoot>
         </table>
+
+        <!-- Security & Audit Footnote -->
+        <div class="pt-4 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-400 font-mono">
+          <div>
+            <span>Idempotency Hash: </span>
+            <code id="receipt-idempotency" class="text-slate-600">e3b0c44298fc1c14...</code>
+          </div>
+          <span class="text-emerald-600 font-semibold flex items-center gap-1">
+            <i data-lucide="check" class="w-3 h-3"></i> Authenticated
+          </span>
+        </div>
+
       </div>
 
-      <!-- Payment Settlement & RouterOS Status -->
-      <div class="space-y-1.5 p-3 rounded-xl bg-emerald-50/50 border border-emerald-100 text-[11px] font-mono mb-5">
-        <div class="flex justify-between">
-          <span class="text-slate-500">Payment Channel:</span>
-          <span class="font-bold text-slate-800" id="modal-payment-method">Stripe Card • 4242</span>
-        </div>
-        <div class="flex justify-between">
-          <span class="text-slate-500">RouterOS Provisioning:</span>
-          <span class="font-bold text-emerald-600">Active PPPoE (Unthrottled)</span>
-        </div>
-        <div class="flex justify-between">
-          <span class="text-slate-500">Idempotency Key:</span>
-          <span class="text-slate-600">idemp_live_891024af88</span>
-        </div>
-      </div>
-
-      <!-- Modal Action Buttons -->
-      <div class="flex items-center justify-between pt-2 border-t border-slate-100">
-        <span class="text-[10px] text-slate-400 font-mono">PulseBill Automated Ledger Engine</span>
-        <div class="flex items-center gap-2">
-          <button onclick="closeReceiptModal()" class="px-3 py-1.5 rounded-xl border border-slate-200 text-slate-600 font-semibold hover:bg-slate-50 text-xs">
-            Close
-          </button>
-          <button onclick="printReceiptAction()" class="brand-btn-primary px-3.5 py-1.5 rounded-xl text-white font-semibold text-xs flex items-center gap-1.5">
-            <i data-lucide="printer" class="w-3.5 h-3.5"></i>
-            <span>Print Receipt</span>
-          </button>
-        </div>
+      <!-- Modal Footer -->
+      <div class="px-6 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between shrink-0 no-print">
+        <span class="text-[10px] text-slate-400 font-mono">PulseBill Automated BSS/OSS Engine</span>
+        <button onclick="closeReceiptModal()" class="px-4 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold text-xs transition">
+          Close
+        </button>
       </div>
 
     </div>
   </div>
 
-  <!-- Initialize Lucide Icons & Chart.js -->
+  <!-- ========================================================================= -->
+  <!-- MODAL: SUBSCRIBER DETAIL (PPPoE Credentials & Session Telemetry)          -->
+  <!-- ========================================================================= -->
+  <div id="sub-detail-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white border border-slate-200 rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden flex flex-col max-h-[90vh] animate-fadeIn">
+      <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="w-7 h-7 rounded-lg brand-gradient flex items-center justify-center text-white font-bold">
+            <i data-lucide="user" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 id="modal-sub-name" class="font-bold text-brand-navy text-sm">Subscriber Profile</h3>
+            <span id="modal-sub-id" class="text-[10px] text-slate-400 font-mono">PB-SUB-1001</span>
+          </div>
+        </div>
+        <button onclick="closeSubDetailModal()" class="w-7 h-7 rounded-lg hover:bg-slate-200 text-slate-500 flex items-center justify-center">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="p-6 space-y-5 overflow-y-auto text-xs">
+        
+        <!-- Status & Quick Action -->
+        <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-200">
+          <div>
+            <span class="text-[10px] text-slate-400 uppercase font-mono block">Current Network Status</span>
+            <span id="modal-sub-status-badge" class="font-bold text-emerald-600 flex items-center gap-1.5 mt-0.5">
+              <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Active & Online
+            </span>
+          </div>
+          <button id="modal-sub-toggle-btn" onclick="handleModalSubToggle()" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 transition">
+            Isolir Pelanggan Ini
+          </button>
+        </div>
+
+        <!-- PPPoE Credentials -->
+        <div>
+          <h4 class="font-bold text-slate-800 pb-1 border-b border-slate-100 font-mono text-[11px]">PPPoE Credentials & Gateway Binding</h4>
+          <div class="grid grid-cols-2 gap-3 mt-2 font-mono">
+            <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-100">
+              <span class="text-[10px] text-slate-400 block">PPPoE Username</span>
+              <span id="modal-sub-pppoe" class="font-bold text-slate-800 text-xs">ahmad.fauzi@isp</span>
+            </div>
+            <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-100">
+              <span class="text-[10px] text-slate-400 block">Assigned IP Address</span>
+              <span id="modal-sub-ip" class="font-bold text-emerald-600 text-xs">10.20.1.45</span>
+            </div>
+            <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-100">
+              <span class="text-[10px] text-slate-400 block">Core Router Gateway</span>
+              <span id="modal-sub-router" class="font-bold text-slate-800 text-xs">CORE-ROUTER-01</span>
+            </div>
+            <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-100">
+              <span class="text-[10px] text-slate-400 block">Bandwidth Rate Profile</span>
+              <span id="modal-sub-speed" class="font-bold text-blue-600 text-xs">50M / 50M</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Contact & Location -->
+        <div>
+          <h4 class="font-bold text-slate-800 pb-1 border-b border-slate-100 font-mono text-[11px]">Contact & Installation Address</h4>
+          <div class="mt-2 space-y-1.5 text-slate-600">
+            <div><strong>WhatsApp:</strong> <span id="modal-sub-phone">+62 812-3456-7890</span></div>
+            <div><strong>Alamat Pasang:</strong> <span id="modal-sub-address">Jl. Margonda Raya No. 42, Depok</span></div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="px-6 py-3 bg-slate-50 border-t border-slate-200 flex justify-end">
+        <button onclick="closeSubDetailModal()" class="px-4 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold text-xs">
+          Tutup
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: TAMBAH PELANGGAN BARU                                              -->
+  <!-- ========================================================================= -->
+  <div id="add-sub-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white border border-slate-200 rounded-3xl shadow-2xl max-w-md w-full overflow-hidden flex flex-col max-h-[90vh] animate-fadeIn">
+      <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+        <h3 class="font-bold text-brand-navy text-sm flex items-center gap-2">
+          <i data-lucide="user-plus" class="w-4 h-4 text-emerald-600"></i>
+          Daftarkan Pelanggan Baru
+        </h3>
+        <button onclick="closeAddSubModal()" class="w-7 h-7 rounded-lg hover:bg-slate-200 text-slate-500 flex items-center justify-center">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <form onsubmit="submitNewSubscriber(event)" class="p-6 space-y-4 overflow-y-auto text-xs">
+        <div>
+          <label class="block text-slate-600 font-semibold mb-1">Nama Lengkap Pelanggan</label>
+          <input type="text" id="new-sub-name" required placeholder="Contoh: Rian Pratama" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-brand-emerald">
+        </div>
+        <div>
+          <label class="block text-slate-600 font-semibold mb-1">Nomor WhatsApp</label>
+          <input type="text" id="new-sub-phone" required placeholder="+62 813-xxxx-xxxx" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono focus:outline-none focus:border-brand-emerald">
+        </div>
+        <div>
+          <label class="block text-slate-600 font-semibold mb-1">Username PPPoE (Secret)</label>
+          <input type="text" id="new-sub-pppoe" required placeholder="rian.pratama@isp" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono focus:outline-none focus:border-brand-emerald">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-600 font-semibold mb-1">Paket Layanan</label>
+            <select id="new-sub-plan" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-brand-emerald">
+              <option value="Home Fast 50 Mbps">Home Fast 50 Mbps</option>
+              <option value="Home Lite 20 Mbps">Home Lite 20 Mbps</option>
+              <option value="GigaStream 100 Mbps">GigaStream 100 Mbps</option>
+              <option value="Dedicated Biz 200 Mbps">Dedicated Biz 200 Mbps</option>
+              <option value="Ultra Gigabit 1 Gbps">Ultra Gigabit 1 Gbps</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-600 font-semibold mb-1">Router NAS</label>
+            <select id="new-sub-router" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-brand-emerald">
+              <option value="CORE-ROUTER-01">CORE-ROUTER-01</option>
+              <option value="DIST-ROUTER-02">DIST-ROUTER-02</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block text-slate-600 font-semibold mb-1">Alamat Pemasangan</label>
+          <input type="text" id="new-sub-address" required placeholder="Jl. Kemang Raya No. 12, Jakarta" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-brand-emerald">
+        </div>
+
+        <div class="pt-3 border-t border-slate-100 flex justify-end gap-2">
+          <button type="button" onclick="closeAddSubModal()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold text-xs">
+            Batal
+          </button>
+          <button type="submit" class="brand-btn-primary px-4 py-2 rounded-xl font-semibold text-xs">
+            Simpan Pelanggan
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: WHATSAPP CHAT SIMULATOR (Live Phone Preview)                       -->
+  <!-- ========================================================================= -->
+  <div id="wa-preview-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white border border-slate-200 rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden flex flex-col animate-fadeIn">
+      
+      <!-- Phone Top Status Bar -->
+      <div class="bg-[#075E54] text-white px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <button onclick="closeWhatsAppModal()" class="hover:opacity-80">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+          </button>
+          <div class="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center font-bold text-xs">
+            PB
+          </div>
+          <div>
+            <span class="font-bold text-xs block leading-none">PulseBill ISP Bot</span>
+            <span class="text-[9px] text-emerald-200 block">online &bull; Official Gateway</span>
+          </div>
+        </div>
+        <i data-lucide="more-vertical" class="w-4 h-4 text-white/80"></i>
+      </div>
+
+      <!-- Chat Canvas -->
+      <div class="bg-[#EFEAE2] p-4 min-h-[300px] flex flex-col justify-end text-xs space-y-3">
+        <div class="bg-white p-3 rounded-2xl rounded-tl-xs shadow-sm max-w-[90%] self-start text-slate-800 whitespace-pre-line leading-relaxed border border-slate-200">
+          <span id="wa-chat-content">
+            Halo *Ahmad Fauzi*, tagihan internet paket *Home Fast 50 Mbps* sebesar *Rp 275.000* akan jatuh tempo pada *15-10-2026*.
+            
+            Bayar mudah melalui link resmi:
+            https://billing.pulsebill.io/pay/INV-2026-0892
+          </span>
+          <span class="text-[9px] text-slate-400 font-mono block text-right mt-1.5 flex items-center justify-end gap-1">
+            <span>10:45 AM</span>
+            <i data-lucide="check-check" class="w-3 h-3 text-blue-500"></i>
+          </span>
+        </div>
+      </div>
+
+      <!-- Input Bar Simulation -->
+      <div class="p-3 bg-[#F0F2F5] border-t border-slate-200 flex items-center gap-2 text-slate-400">
+        <div class="flex-1 bg-white rounded-full px-3 py-1.5 text-[11px] text-slate-400 border border-slate-200">
+          Terkirim otomatis via Baileys API...
+        </div>
+        <button onclick="closeWhatsAppModal()" class="px-3 py-1.5 rounded-full bg-[#075E54] text-white font-semibold text-xs">
+          OK
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- JAVASCRIPT STATE ENGINE & INTERACTIVE LOGIC                              -->
+  <!-- ========================================================================= -->
   <script>
-    lucide.createIcons();
+    // ---------------------------------------------------------------------------
+    // 1. Central Reactive Application State (Realistic ISP Dummy Data)
+    // ---------------------------------------------------------------------------
+    const AppState = {
+      activeTab: 'dashboard',
+      subFilter: 'ALL',
+      selectedSubId: null,
 
-    // Tab Switching
+      subscribers: [
+        { id: 'PB-SUB-1001', name: 'Ahmad Fauzi', phone: '+62 812-4820-1920', pppoe: 'ahmad.fauzi@isp', ip: '10.20.1.45', plan: 'Home Fast 50 Mbps', speed: '50M / 50M', price: 275000, router: 'CORE-ROUTER-01', status: 'ACTIVE', address: 'Jl. Margonda Raya No. 42, Depok' },
+        { id: 'PB-SUB-1002', name: 'Elena Rostova', phone: '+62 812-9842-1092', pppoe: 'elena.rostova@isp', ip: '10.20.1.92', plan: 'Ultra Gigabit 1 Gbps', speed: '1000M / 1000M', price: 2950000, router: 'CORE-ROUTER-01', status: 'ACTIVE', address: 'Kebayoran Baru, Jakarta Selatan' },
+        { id: 'PB-SUB-1003', name: 'Budi Santoso', phone: '+62 813-8821-4029', pppoe: 'budi.santoso@isp', ip: '10.99.0.42', plan: 'Home Lite 20 Mbps', speed: '20M / 20M', price: 175000, router: 'CORE-ROUTER-01', status: 'SUSPENDED', address: 'Jl. Cilandak Barat No. 8, Jakarta' },
+        { id: 'PB-SUB-1004', name: 'Marcus Vance', phone: '+62 811-9230-1492', pppoe: 'marcus.vance@isp', ip: '10.20.1.84', plan: 'Dedicated Biz 200 Mbps', speed: '200M / 200M', price: 950000, router: 'DIST-ROUTER-02', status: 'ACTIVE', address: 'Sudirman Central Business District' },
+        { id: 'PB-SUB-1005', name: 'Siti Rahmawati', phone: '+62 819-0492-8102', pppoe: 'siti.rahma@isp', ip: '10.20.1.33', plan: 'GigaStream 100 Mbps', speed: '100M / 100M', price: 450000, router: 'CORE-ROUTER-01', status: 'ACTIVE', address: 'Jl. Surya Kencana No. 19, Bogor' },
+        { id: 'PB-SUB-1006', name: 'Hendra Gunawan', phone: '+62 812-3392-8104', pppoe: 'hendra.gunawan@isp', ip: '10.99.0.55', plan: 'Home Fast 50 Mbps', speed: '50M / 50M', price: 275000, router: 'DIST-ROUTER-02', status: 'SUSPENDED', address: 'Perumahan Grand Galaxy, Bekasi' },
+        { id: 'PB-SUB-1007', name: 'Dewi Sartika', phone: '+62 812-7729-1049', pppoe: 'dewi.sartika@isp', ip: '10.20.1.77', plan: 'Home Lite 20 Mbps', speed: '20M / 20M', price: 175000, router: 'CORE-ROUTER-01', status: 'ACTIVE', address: 'Jl. Pajajaran No. 5, Bogor' },
+        { id: 'PB-SUB-1008', name: 'Reza Pratama', phone: '+62 813-4920-1849', pppoe: 'reza.pratama@isp', ip: '10.20.1.18', plan: 'Home Fast 50 Mbps', speed: '50M / 50M', price: 275000, router: 'CORE-ROUTER-01', status: 'ACTIVE', address: 'Jl. Tebet Raya No. 33, Jakarta' },
+        { id: 'PB-SUB-1009', name: 'Maya Indah', phone: '+62 818-4920-1920', pppoe: 'maya.indah@isp', ip: '10.99.0.68', plan: 'GigaStream 100 Mbps', speed: '100M / 100M', price: 450000, router: 'DIST-ROUTER-02', status: 'SUSPENDED', address: 'BSD City Sektor 7, Tangerang' },
+        { id: 'PB-SUB-1010', name: 'Fajar Nugraha', phone: '+62 812-9920-1122', pppoe: 'fajar.nugraha@isp', ip: '10.20.1.61', plan: 'Home Lite 20 Mbps', speed: '20M / 20M', price: 175000, router: 'CORE-ROUTER-01', status: 'ACTIVE', address: 'Jl. Dago Asri No. 14, Bandung' },
+        { id: 'PB-SUB-1011', name: 'Jessica Tan', phone: '+62 811-2049-5829', pppoe: 'jessica.tan@isp', ip: '10.20.1.99', plan: 'Ultra Gigabit 1 Gbps', speed: '1000M / 1000M', price: 2950000, router: 'CORE-ROUTER-01', status: 'ACTIVE', address: 'Pantai Indah Kapuk, Jakarta Utara' },
+        { id: 'PB-SUB-1012', name: 'Agus Setiawan', phone: '+62 813-8840-2910', pppoe: 'agus.setiawan@isp', ip: '10.99.0.81', plan: 'Home Lite 20 Mbps', speed: '20M / 20M', price: 175000, router: 'DIST-ROUTER-02', status: 'SUSPENDED', address: 'Jl. Sukajadi No. 88, Bandung' },
+        { id: 'PB-SUB-1013', name: 'Nadia Putri', phone: '+62 812-4029-1928', pppoe: 'nadia.putri@isp', ip: '10.20.1.15', plan: 'Home Fast 50 Mbps', speed: '50M / 50M', price: 275000, router: 'CORE-ROUTER-01', status: 'ACTIVE', address: 'Jl. Dipatiukur No. 20, Bandung' },
+        { id: 'PB-SUB-1014', name: 'Daniel Lim', phone: '+62 811-4829-1029', pppoe: 'daniel.lim@isp', ip: '10.20.1.72', plan: 'Dedicated Biz 200 Mbps', speed: '200M / 200M', price: 950000, router: 'DIST-ROUTER-02', status: 'ACTIVE', address: 'Puri Indah, Jakarta Barat' },
+        { id: 'PB-SUB-1015', name: 'Rina Kusuma', phone: '+62 813-9029-4820', pppoe: 'rina.kusuma@isp', ip: '10.20.1.28', plan: 'Home Lite 20 Mbps', speed: '20M / 20M', price: 175000, router: 'CORE-ROUTER-01', status: 'ACTIVE', address: 'Jl. Riau No. 11, Bandung' },
+        { id: 'PB-SUB-1016', name: 'Irfan Hakim', phone: '+62 812-4920-1049', pppoe: 'irfan.hakim@isp', ip: '10.20.1.53', plan: 'Home Fast 50 Mbps', speed: '50M / 50M', price: 275000, router: 'CORE-ROUTER-01', status: 'ACTIVE', address: 'Bintaro Jaya Sektor 9, Tangerang' }
+      ],
+
+      packages: [
+        { id: 'PKG-01', name: 'Home Lite 20 Mbps', speed: '20M / 20M', priceIdr: 'Rp 175.000', priceUsd: '$12.00', profile: 'pppoe-20M-rate', users: 420, fup: 'Unlimited' },
+        { id: 'PKG-02', name: 'Home Fast 50 Mbps', speed: '50M / 50M', priceIdr: 'Rp 275.000', priceUsd: '$18.50', profile: 'pppoe-50M-rate', users: 580, fup: 'Unlimited' },
+        { id: 'PKG-03', name: 'GigaStream 100 Mbps', speed: '100M / 100M', priceIdr: 'Rp 450.000', priceUsd: '$30.00', profile: 'pppoe-100M-rate', users: 290, fup: 'Unlimited' },
+        { id: 'PKG-04', name: 'Dedicated Biz 200 Mbps', speed: '200M / 200M', priceIdr: 'Rp 950.000', priceUsd: '$65.00', profile: 'pppoe-200M-dedicated', users: 94, fup: '1:1 CIR SLA' },
+        { id: 'PKG-05', name: 'Ultra Gigabit 1 Gbps', speed: '1000M / 1000M', priceIdr: 'Rp 2.950.000', priceUsd: '$199.99', profile: 'pppoe-1G-symmetrical', users: 32, fup: '1:1 Direct Peering' },
+        { id: 'PKG-06', name: 'Hotspot Voucher Unlimited', speed: '5M / 5M', priceIdr: 'Rp 50.000', priceUsd: '$3.50', profile: 'hotspot-5M-voucher', users: 112, fup: '30 Days Validity' }
+      ],
+
+      invoices: [
+        { id: 'INV-2026-0891', subId: 'PB-SUB-1002', name: 'Elena Rostova', plan: 'Ultra Gigabit 1 Gbps', period: 'Sep 2026', amount: '$199.99', amountNum: 199.99, due: '2026-09-15', status: 'PAID', gateway: 'Stripe' },
+        { id: 'INV-2026-0892', subId: 'PB-SUB-1001', name: 'Ahmad Fauzi', plan: 'Home Fast 50 Mbps', period: 'Sep 2026', amount: '$18.50', amountNum: 18.50, due: '2026-09-15', status: 'PAID', gateway: 'Midtrans QRIS' },
+        { id: 'INV-2026-0893', subId: 'PB-SUB-1003', name: 'Budi Santoso', plan: 'Home Lite 20 Mbps', period: 'Sep 2026', amount: '$12.00', amountNum: 12.00, due: '2026-09-10', status: 'OVERDUE', gateway: 'Pending' },
+        { id: 'INV-2026-0894', subId: 'PB-SUB-1004', name: 'Marcus Vance', plan: 'Dedicated Biz 200 Mbps', period: 'Sep 2026', amount: '$65.00', amountNum: 65.00, due: '2026-09-18', status: 'PENDING', gateway: 'BCA VA' },
+        { id: 'INV-2026-0895', subId: 'PB-SUB-1005', name: 'Siti Rahmawati', plan: 'GigaStream 100 Mbps', period: 'Sep 2026', amount: '$30.00', amountNum: 30.00, due: '2026-09-15', status: 'PAID', gateway: 'Xendit OVO' },
+        { id: 'INV-2026-0896', subId: 'PB-SUB-1006', name: 'Hendra Gunawan', plan: 'Home Fast 50 Mbps', period: 'Sep 2026', amount: '$18.50', amountNum: 18.50, due: '2026-09-08', status: 'OVERDUE', gateway: 'Pending' },
+        { id: 'INV-2026-0897', subId: 'PB-SUB-1007', name: 'Dewi Sartika', plan: 'Home Lite 20 Mbps', period: 'Sep 2026', amount: '$12.00', amountNum: 12.00, due: '2026-09-15', status: 'PAID', gateway: 'Mandiri VA' },
+        { id: 'INV-2026-0898', subId: 'PB-SUB-1008', name: 'Reza Pratama', plan: 'Home Fast 50 Mbps', period: 'Sep 2026', amount: '$18.50', amountNum: 18.50, due: '2026-09-15', status: 'PAID', gateway: 'Midtrans QRIS' },
+        { id: 'INV-2026-0899', subId: 'PB-SUB-1009', name: 'Maya Indah', plan: 'GigaStream 100 Mbps', period: 'Sep 2026', amount: '$30.00', amountNum: 30.00, due: '2026-09-09', status: 'OVERDUE', gateway: 'Pending' },
+        { id: 'INV-2026-0900', subId: 'PB-SUB-1010', name: 'Fajar Nugraha', plan: 'Home Lite 20 Mbps', period: 'Sep 2026', amount: '$12.00', amountNum: 12.00, due: '2026-09-19', status: 'PENDING', gateway: 'DANA' },
+        { id: 'INV-2026-0901', subId: 'PB-SUB-1011', name: 'Jessica Tan', plan: 'Ultra Gigabit 1 Gbps', period: 'Sep 2026', amount: '$199.99', amountNum: 199.99, due: '2026-09-15', status: 'PAID', gateway: 'Stripe' },
+        { id: 'INV-2026-0902', subId: 'PB-SUB-1012', name: 'Agus Setiawan', plan: 'Home Lite 20 Mbps', period: 'Sep 2026', amount: '$12.00', amountNum: 12.00, due: '2026-09-07', status: 'OVERDUE', gateway: 'Pending' },
+        { id: 'INV-2026-0903', subId: 'PB-SUB-1013', name: 'Nadia Putri', plan: 'Home Fast 50 Mbps', period: 'Sep 2026', amount: '$18.50', amountNum: 18.50, due: '2026-09-15', status: 'PAID', gateway: 'Midtrans QRIS' },
+        { id: 'INV-2026-0904', subId: 'PB-SUB-1014', name: 'Daniel Lim', plan: 'Dedicated Biz 200 Mbps', period: 'Sep 2026', amount: '$65.00', amountNum: 65.00, due: '2026-09-15', status: 'PAID', gateway: 'BCA VA' },
+        { id: 'INV-2026-0905', subId: 'PB-SUB-1015', name: 'Rina Kusuma', plan: 'Home Lite 20 Mbps', period: 'Sep 2026', amount: '$12.00', amountNum: 12.00, due: '2026-09-20', status: 'PENDING', gateway: 'Pending' },
+        { id: 'INV-2026-0906', subId: 'PB-SUB-1016', name: 'Irfan Hakim', plan: 'Home Fast 50 Mbps', period: 'Sep 2026', amount: '$18.50', amountNum: 18.50, due: '2026-09-15', status: 'PAID', gateway: 'Midtrans QRIS' }
+      ],
+
+      routers: [
+        { id: 'CORE-ROUTER-01', model: 'Mikrotik CCR2004-16G-2S+', ip: '192.168.88.1', port: 8728, cpu: '18%', sessions: 1124, uptime: '48d 12h', status: 'ONLINE', ping: '3.2 ms' },
+        { id: 'DIST-ROUTER-02', model: 'Mikrotik RB4011iGS+', ip: '192.168.89.1', port: 8728, cpu: '24%', sessions: 342, uptime: '19d 04h', status: 'ONLINE', ping: '4.1 ms' },
+        { id: 'HOTSPOT-GW-01', model: 'Mikrotik CCR1009-7G-1C-1S+', ip: '192.168.90.1', port: 8728, cpu: '12%', sessions: 89, uptime: '62d 18h', status: 'ONLINE', ping: '2.8 ms' }
+      ],
+
+      transactions: [
+        { id: 'TX-ST-98214', gateway: 'Stripe', customer: 'Elena Rostova', amount: '$199.99', fee: '$6.10', net: '$193.89', time: '12s ago', status: 'SETTLED' },
+        { id: 'TX-MD-48201', gateway: 'Midtrans QRIS', customer: 'Ahmad Fauzi', amount: 'Rp 275.000', fee: 'Rp 1.925', net: 'Rp 273.075', time: '3m ago', status: 'SETTLED' },
+        { id: 'TX-XD-19402', gateway: 'Xendit OVO', customer: 'Siti Rahmawati', amount: 'Rp 450.000', fee: 'Rp 6.750', net: 'Rp 443.250', time: '15m ago', status: 'SETTLED' },
+        { id: 'TX-MD-48190', gateway: 'BCA VA', customer: 'Daniel Lim', amount: 'Rp 950.000', fee: 'Rp 4.000', net: 'Rp 946.000', time: '1h ago', status: 'SETTLED' },
+        { id: 'TX-ST-98192', gateway: 'Stripe', customer: 'Jessica Tan', amount: '$199.99', fee: '$6.10', net: '$193.89', time: '2h ago', status: 'SETTLED' },
+        { id: 'TX-MD-48110', gateway: 'Midtrans QRIS', customer: 'Reza Pratama', amount: 'Rp 275.000', fee: 'Rp 1.925', net: 'Rp 273.075', time: '4h ago', status: 'SETTLED' }
+      ],
+
+      feed: [
+        { id: 1, title: 'Stripe Webhook Settled', desc: 'INV-2026-0891 ($199.99) &bull; Elena Rostova', note: 'RouterOS: Speed unthrottled (1 Gbps)', time: '12s ago', type: 'success' },
+        { id: 2, title: 'Mikrotik RouterOS Sync', desc: '482 queues synchronized across core gateway', note: 'API Socket: 3.2ms latency', time: '4m ago', type: 'info' },
+        { id: 3, title: 'Suspension Daemon Executed', desc: 'INV-2026-0893 overdue grace &bull; Budi Santoso', note: 'Profile assigned: pool-pulsebill-isolir', time: '18m ago', type: 'danger' },
+        { id: 4, title: 'Midtrans QRIS Webhook', desc: 'INV-2026-0892 ($18.50) &bull; Ahmad Fauzi', note: 'Settlement confirmed via GoPay / BCA', time: '25m ago', type: 'success' }
+      ],
+
+      notifications: [
+        { title: 'Stripe Webhook Verified', desc: 'INV-2026-0891 marked settled ($199.99).' },
+        { title: 'Mikrotik Core Sync', desc: '1,466 queues synchronized across CCR2004.' },
+        { title: 'Baileys Daemon Heartbeat', desc: 'WhatsApp bot active, 42 receipts queued.' }
+      ]
+    };
+
+    // ---------------------------------------------------------------------------
+    // 2. Tab Navigation Switcher
+    // ---------------------------------------------------------------------------
     function switchTab(tabId) {
-      document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
-      const target = document.getElementById('tab-' + tabId);
-      if (target) target.classList.remove('hidden');
+      AppState.activeTab = tabId;
 
-      document.querySelectorAll('.nav-btn').forEach(b => {
-        b.classList.remove('brand-gradient');
-        b.classList.add('text-slate-600');
+      // Hide all tabs
+      document.querySelectorAll('.tab-pane').forEach(el => {
+        el.classList.add('hidden');
+      });
+
+      // Show target tab
+      const target = document.getElementById('tab-' + tabId);
+      if (target) {
+        target.classList.remove('hidden');
+      }
+
+      // Update sidebar nav styling
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('brand-gradient', 'text-white');
+        btn.classList.add('text-slate-600');
+        const icon = btn.querySelector('svg');
+        if (icon) icon.classList.remove('text-white');
       });
 
       const activeBtn = document.getElementById('nav-' + tabId);
       if (activeBtn) {
-        activeBtn.classList.add('brand-gradient');
         activeBtn.classList.remove('text-slate-600');
+        activeBtn.classList.add('brand-gradient', 'text-white');
+        const icon = activeBtn.querySelector('svg');
+        if (icon) icon.classList.add('text-white');
       }
+
+      // Refresh icons
       lucide.createIcons();
     }
 
-    // Render Revenue & Collection Velocity Chart
-    const ctx = document.getElementById('revenueChart').getContext('2d');
-    const gradientFill = ctx.createLinearGradient(0, 0, 0, 200);
-    gradientFill.addColorStop(0, 'rgba(5, 150, 105, 0.2)');
-    gradientFill.addColorStop(1, 'rgba(5, 150, 105, 0.0)');
+    // ---------------------------------------------------------------------------
+    // 3. Render Functions
+    // ---------------------------------------------------------------------------
+    function renderAll() {
+      renderSubscribers();
+      renderPackages();
+      renderInvoices();
+      renderRouters();
+      renderSuspensions();
+      renderGateways();
+      renderFeed();
+      renderNotifications();
+      updateBadgesAndMetrics();
+      lucide.createIcons();
+    }
 
-    const revenueChart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: ['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar'],
-        datasets: [
-          {
-            label: 'Settled Revenue ($)',
-            data: [28400, 31200, 33500, 36200, 38900, 41000, 42500, 44200, 45800, 47100, 48200, 48920],
-            borderColor: '#059669',
-            backgroundColor: gradientFill,
-            borderWidth: 2.5,
-            tension: 0.35,
-            fill: true,
-            pointBackgroundColor: '#059669',
-            pointRadius: 3,
-            pointHoverRadius: 6,
-          },
-          {
-            label: 'Total Invoiced ($)',
-            data: [29000, 32000, 34200, 37000, 39500, 41800, 43200, 45000, 46500, 48000, 49200, 50100],
-            borderColor: '#152C4A',
-            borderWidth: 1.8,
-            borderDash: [5, 4],
-            tension: 0.35,
-            fill: false,
-            pointRadius: 0,
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            backgroundColor: '#152C4A',
-            titleFont: { family: '"Optimistic Text", sans-serif', size: 11 },
-            bodyFont: { family: '"JetBrains Mono", monospace', size: 12 },
-            padding: 10,
-            cornerRadius: 8,
-          }
-        },
-        scales: {
-          x: {
-            grid: { display: false },
-            ticks: {
-              font: { family: '"Optimistic Text", sans-serif', size: 10 },
-              color: '#64748B'
-            }
-          },
-          y: {
-            grid: { color: '#F1F5F9' },
-            ticks: {
-              font: { family: '"JetBrains Mono", monospace', size: 10 },
-              color: '#64748B',
-              callback: function(val) { return '$' + (val / 1000) + 'k'; }
-            }
-          }
-        }
-      }
-    });
+    function renderSubscribers() {
+      const tbody = document.getElementById('subscribers-table-body');
+      if (!tbody) return;
 
-    // Toast Notification System
-    function showToast(title, message, type = 'success') {
-      const container = document.getElementById('toast-container');
-      const toast = document.createElement('div');
-      
-      let borderCol = 'border-emerald-500 bg-white text-slate-800 shadow-xl';
-      let iconCol = 'text-emerald-600';
-      let iconName = 'check-circle-2';
-
-      if (type === 'warning') {
-        borderCol = 'border-amber-400 bg-white text-slate-800 shadow-xl';
-        iconCol = 'text-amber-500';
-        iconName = 'alert-triangle';
-      } else if (type === 'error' || type === 'danger') {
-        borderCol = 'border-rose-500 bg-white text-slate-800 shadow-xl';
-        iconCol = 'text-rose-500';
-        iconName = 'alert-octagon';
-      } else if (type === 'info') {
-        borderCol = 'border-blue-500 bg-white text-slate-800 shadow-xl';
-        iconCol = 'text-blue-500';
-        iconName = 'info';
+      let list = AppState.subscribers;
+      if (AppState.subFilter !== 'ALL') {
+        list = list.filter(s => s.status === AppState.subFilter);
       }
 
-      toast.className = `p-4 rounded-2xl border ${borderCol} transition-all transform duration-300 translate-y-2 opacity-0 font-sans pointer-events-auto`;
-      toast.innerHTML = `
-        <div class="flex items-start gap-3">
-          <i data-lucide="${iconName}" class="w-5 h-5 ${iconCol} shrink-0 mt-0.5"></i>
+      tbody.innerHTML = list.map(sub => {
+        const isSuspended = sub.status === 'SUSPENDED';
+        const statusBadge = isSuspended 
+          ? `<span class="inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 font-bold border border-rose-200"><span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>Terisolir (Isolate)</span>`
+          : `<span class="inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-bold border border-emerald-200"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Aktif (PPPoE Up)</span>`;
+
+        return `
+          <tr class="hover:bg-slate-50/80 transition">
+            <td class="py-3 px-4">
+              <div class="font-bold text-slate-800">${sub.name}</div>
+              <div class="text-[10px] text-slate-400 font-mono">${sub.id} &bull; ${sub.phone}</div>
+            </td>
+            <td class="py-3 px-4 font-mono">
+              <div class="font-semibold text-slate-700">${sub.pppoe}</div>
+              <div class="text-[10px] text-emerald-600">${sub.ip}</div>
+            </td>
+            <td class="py-3 px-4">
+              <span class="font-medium text-slate-800">${sub.plan}</span>
+              <span class="text-[10px] text-slate-400 font-mono block">${sub.speed}</span>
+            </td>
+            <td class="py-3 px-4 font-mono text-slate-600">
+              <span class="px-2 py-0.5 rounded bg-slate-100 border border-slate-200 text-[10px]">${sub.router}</span>
+            </td>
+            <td class="py-3 px-4">
+              ${statusBadge}
+            </td>
+            <td class="py-3 px-4 text-right">
+              <div class="flex items-center justify-end gap-1.5">
+                <button onclick="openSubDetail('${sub.id}')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-[11px] transition">
+                  Detail
+                </button>
+                <button onclick="toggleIsolir('${sub.id}')" class="px-2.5 py-1 rounded-lg ${isSuspended ? 'bg-emerald-600 hover:bg-emerald-500 text-white' : 'bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200'} font-semibold text-[11px] transition">
+                  ${isSuspended ? 'Buka Isolir' : 'Isolir'}
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderPackages() {
+      const grid = document.getElementById('packages-grid');
+      if (!grid) return;
+
+      grid.innerHTML = AppState.packages.map(pkg => `
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs hover:border-slate-300 transition flex flex-col justify-between">
           <div>
-            <div class="font-bold text-xs ${iconCol}">${title}</div>
-            <div class="text-[11px] text-slate-600 mt-0.5 leading-relaxed font-mono">${message}</div>
+            <div class="flex items-start justify-between pb-3 border-b border-slate-100">
+              <div>
+                <h3 class="font-bold text-sm text-brand-navy">${pkg.name}</h3>
+                <span class="text-[10px] font-mono text-slate-400">ID: ${pkg.id} &bull; Mikrotik: ${pkg.profile}</span>
+              </div>
+              <span class="font-mono text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-lg">
+                ${pkg.speed}
+              </span>
+            </div>
+            
+            <div class="mt-4 space-y-2 text-xs">
+              <div class="flex justify-between">
+                <span class="text-slate-500">Tarif Bulanan (IDR):</span>
+                <span class="font-bold text-slate-800 font-mono">${pkg.priceIdr}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-500">Tarif Internasional (USD):</span>
+                <span class="font-bold text-brand-navy font-mono">${pkg.priceUsd}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-500">Kebijakan FUP / SLA:</span>
+                <span class="font-medium text-emerald-600 font-mono text-[11px]">${pkg.fup}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between">
+            <span class="text-[11px] font-mono text-slate-500 font-semibold">
+              <i data-lucide="users" class="w-3.5 h-3.5 inline text-slate-400"></i> ${pkg.users} Pelanggan Aktif
+            </span>
+            <button onclick="showToast('Mikrotik Profile Sync', 'Profile ${pkg.profile} verified on core router', 'info')" class="text-brand-navy hover:text-brand-emerald font-semibold text-[11px] flex items-center gap-1">
+              <span>Sync Router</span> &rarr;
+            </button>
           </div>
         </div>
-      `;
-      container.appendChild(toast);
-      lucide.createIcons();
-      
-      setTimeout(() => {
-        toast.classList.remove('translate-y-2', 'opacity-0');
-      }, 50);
-
-      setTimeout(() => {
-        toast.classList.add('opacity-0', 'translate-y-2');
-        setTimeout(() => toast.remove(), 300);
-      }, 5500);
+      `).join('');
     }
 
-    // Append to Live Automation Feed
-    function appendFeedItem(title, subtitle, detail, icon = 'check', color = 'bg-emerald-100 text-emerald-700') {
-      const feed = document.getElementById('automation-feed');
-      const item = document.createElement('div');
-      item.className = 'p-2.5 rounded-xl bg-slate-50 border border-slate-100 flex items-start gap-2.5 animate-fadeIn';
-      item.innerHTML = `
-        <div class="w-6 h-6 rounded-lg ${color} flex items-center justify-center flex-shrink-0 mt-0.5">
-          <i data-lucide="${icon}" class="w-3.5 h-3.5"></i>
-        </div>
-        <div class="flex-1 min-w-0">
-          <div class="flex items-center justify-between">
-            <span class="font-bold text-[11px] text-brand-navy">${title}</span>
-            <span class="font-mono text-[9px] text-slate-400">Just now</span>
-          </div>
-          <p class="text-[10px] text-slate-600 mt-0.5 truncate">${subtitle}</p>
-          <span class="text-[9px] font-mono font-semibold block mt-0.5">${detail}</span>
-        </div>
-      `;
-      feed.insertBefore(item, feed.firstChild);
-      if (feed.children.length > 5) {
-        feed.removeChild(feed.lastChild);
-      }
-      lucide.createIcons();
-    }
+    function renderInvoices() {
+      const tbody = document.getElementById('invoices-table-body');
+      if (!tbody) return;
 
-    // Toggle Notifications Tray
-    function toggleNotificationTray() {
-      const tray = document.getElementById('notification-tray');
-      tray.classList.toggle('hidden');
-      const badge = document.getElementById('notif-badge');
-      if (badge) badge.classList.add('hidden');
-    }
-
-    // Live Instant Search Filter
-    function filterInvoiceTable() {
-      const query = document.getElementById('global-invoice-search').value.toLowerCase();
-      const statusFilter = document.getElementById('table-status-filter').value;
-      const rows = document.querySelectorAll('.invoice-row');
-
-      rows.forEach(row => {
-        const text = (row.getAttribute('data-search') || row.innerText).toLowerCase();
-        const status = row.getAttribute('data-status');
-
-        const matchesQuery = text.includes(query);
-        const matchesStatus = (statusFilter === 'all') || (status === statusFilter);
-
-        if (matchesQuery && matchesStatus) {
-          row.style.display = '';
+      tbody.innerHTML = AppState.invoices.map(inv => {
+        let badge = '';
+        if (inv.status === 'PAID') {
+          badge = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-50 text-emerald-700 border border-emerald-200"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>LUNAS (${inv.gateway})</span>`;
+        } else if (inv.status === 'PENDING') {
+          badge = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-50 text-amber-700 border border-amber-200"><span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>MENUNGGU</span>`;
         } else {
-          row.style.display = 'none';
+          badge = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-rose-50 text-rose-700 border border-rose-200"><span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>ISOLIR / OVERDUE</span>`;
         }
-      });
+
+        return `
+          <tr class="hover:bg-slate-50/80 transition" id="row-${inv.id}">
+            <td class="py-3 px-4 font-mono font-bold text-slate-800">
+              ${inv.id}
+            </td>
+            <td class="py-3 px-4">
+              <div class="font-bold text-slate-800">${inv.name}</div>
+              <div class="text-[10px] text-slate-400 font-mono">Periode: ${inv.period}</div>
+            </td>
+            <td class="py-3 px-4 font-medium text-slate-700">
+              ${inv.plan}
+            </td>
+            <td class="py-3 px-4 font-mono font-bold text-brand-navy">
+              ${inv.amount}
+            </td>
+            <td class="py-3 px-4 font-mono text-slate-500">
+              ${inv.due}
+            </td>
+            <td class="py-3 px-4">
+              ${badge}
+            </td>
+            <td class="py-3 px-4 text-right">
+              <div class="flex items-center justify-end gap-1.5">
+                <button onclick="openReceiptModal('${inv.id}')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-[11px] transition flex items-center gap-1">
+                  <span>Receipt</span> &rarr;
+                </button>
+                ${inv.status !== 'PAID' ? `
+                  <button onclick="markInvoicePaid('${inv.id}')" class="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-[11px] transition active:scale-95 shadow-2xs">
+                    Bayar
+                  </button>
+                ` : ''}
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
     }
 
-    // Generate Invoices Action
-    function generateInvoicesAction() {
-      showToast(
-        'Autonomous Billing Cycle Executed',
-        'Cron scheduler triggered invoice generation for 1,284 accounts. Reconciling payment links via Stripe and Midtrans.',
-        'info'
-      );
+    function renderRouters() {
+      const grid = document.getElementById('routers-grid');
+      if (!grid) return;
 
-      // Prepend a new invoice row
-      const tbody = document.getElementById('invoice-table-body');
-      const newRow = document.createElement('tr');
-      newRow.className = 'invoice-row hover:bg-slate-50/80 transition animate-fadeIn bg-amber-50/20';
-      newRow.setAttribute('data-status', 'pending');
-      newRow.setAttribute('data-search', 'INV-2026-0894 Sarah Vance sarah.vance@techcorp.com Fiber Pro Business Stripe 10.24.12.118');
-      
-      newRow.innerHTML = `
-        <td class="py-3.5 px-4 font-mono font-bold text-brand-navy">INV-2026-0894</td>
-        <td class="py-3.5 px-4">
-          <span class="font-bold text-brand-navy block">Sarah Vance</span>
-          <span class="text-[10px] text-slate-400 font-mono">PB-CUST-1005 &bull; sarah.vance@techcorp.com</span>
-        </td>
-        <td class="py-3.5 px-4">
-          <span class="font-semibold text-slate-800 block">Fiber Pro Business</span>
-          <span class="text-[10px] text-slate-500 font-mono">250 Mbps Symmetrical</span>
-        </td>
-        <td class="py-3.5 px-4 font-mono font-bold text-amber-600">$89.99</td>
-        <td class="py-3.5 px-4">
-          <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
-            Stripe Invoiced
-          </span>
-        </td>
-        <td class="py-3.5 px-4">
-          <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
-            PENDING (NEW)
-          </span>
-        </td>
-        <td class="py-3.5 px-4">
-          <div class="flex items-center gap-1.5 font-mono text-[11px] text-emerald-600 font-semibold">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-            <span>Active (250M_Symmetrical)</span>
+      grid.innerHTML = AppState.routers.map(router => `
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs flex flex-col justify-between">
+          <div>
+            <div class="flex items-start justify-between pb-3 border-b border-slate-100">
+              <div>
+                <h3 class="font-bold text-sm text-brand-navy">${router.id}</h3>
+                <span class="text-[10px] font-mono text-slate-400">${router.model}</span>
+              </div>
+              <span class="flex items-center gap-1 text-[10px] font-mono font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-lg">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                API OK (${router.ping})
+              </span>
+            </div>
+
+            <div class="mt-4 space-y-2 text-xs font-mono">
+              <div class="flex justify-between">
+                <span class="text-slate-500">NAS IP & Port:</span>
+                <span class="font-bold text-slate-800">${router.ip}:${router.port}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-500">CPU Load:</span>
+                <span class="font-bold text-emerald-600">${router.cpu}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-500">Active PPPoE Sessions:</span>
+                <span class="font-bold text-brand-navy">${router.sessions} users</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-500">System Uptime:</span>
+                <span class="text-slate-600">${router.uptime}</span>
+              </div>
+            </div>
           </div>
-        </td>
-        <td class="py-3.5 px-4 text-right">
-          <button onclick="viewReceipt('INV-2026-0894', 'Sarah Vance', 'sarah.vance@techcorp.com', 'Fiber Pro Business', '$89.99', 'Stripe Invoiced', 'PENDING', '250M_Symmetrical')" class="text-brand-emerald hover:underline font-semibold text-xs flex items-center gap-1 ml-auto">
-            <span>Receipt</span>
-            <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
-          </button>
-        </td>
-      `;
 
-      tbody.insertBefore(newRow, tbody.firstChild);
-      lucide.createIcons();
-
-      // Update pending metrics
-      document.getElementById('metric-pending').innerText = '$3,509.99';
-      document.getElementById('metric-pending-count').innerText = '25 open invoices';
-      document.getElementById('badge-invoice-count').innerText = '25';
-
-      appendFeedItem(
-        'Invoice Cycle Generated',
-        'INV-2026-0894 issued to Sarah Vance ($89.99)',
-        'Stripe Invoice link generated with webhook listener',
-        'file-text',
-        'bg-blue-100 text-brand-blue'
-      );
+          <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between">
+            <button onclick="testRouterSocket('${router.id}')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-[11px] transition flex items-center gap-1">
+              <i data-lucide="radio" class="w-3.5 h-3.5 text-slate-500"></i>
+              <span>Test API Socket</span>
+            </button>
+            <button onclick="syncQueues('${router.id}')" class="px-2.5 py-1 rounded-lg brand-gradient text-white font-semibold text-[11px] transition shadow-2xs">
+              Sync Dynamic Queues
+            </button>
+          </div>
+        </div>
+      `).join('');
     }
 
-    // Sync Gateways Action
-    function syncGatewaysAction() {
-      const spinner = document.getElementById('sync-spinner');
-      if (spinner) spinner.classList.add('animate-spin');
+    function renderSuspensions() {
+      const tbody = document.getElementById('suspension-table-body');
+      if (!tbody) return;
 
-      setTimeout(() => {
-        if (spinner) spinner.classList.remove('animate-spin');
-        showToast(
-          'Gateways Reconciled (100% Synced)',
-          'Polled Stripe, Midtrans, and Xendit webhooks. 0 unsettled discrepancies found across ledger database.',
-          'success'
-        );
-      }, 700);
+      const suspendedSubs = AppState.subscribers.filter(s => s.status === 'SUSPENDED');
+      tbody.innerHTML = suspendedSubs.map(sub => `
+        <tr class="hover:bg-slate-50/80 transition">
+          <td class="py-3 px-4">
+            <div class="font-bold text-slate-800">${sub.name}</div>
+            <div class="text-[10px] text-slate-400 font-mono">${sub.id} &bull; ${sub.phone}</div>
+          </td>
+          <td class="py-3 px-4 font-mono text-slate-700 font-semibold">
+            ${sub.pppoe}
+          </td>
+          <td class="py-3 px-4 font-mono font-bold text-rose-600">
+            Rp ${sub.price.toLocaleString('id-ID')}
+          </td>
+          <td class="py-3 px-4 font-mono text-slate-500">
+            Sep 10, 2026 (Overdue 7d)
+          </td>
+          <td class="py-3 px-4 font-mono text-rose-600">
+            ${sub.ip} (Isolir Pool)
+          </td>
+          <td class="py-3 px-4 text-right">
+            <button onclick="unIsolateAccount('${sub.id}')" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition shadow-2xs active:scale-95">
+              Buka Isolir Instan &rarr;
+            </button>
+          </td>
+        </tr>
+      `).join('');
     }
 
-    // Simulate Stripe Webhook Trigger
+    function renderGateways() {
+      const tbody = document.getElementById('gateways-table-body');
+      if (!tbody) return;
+
+      tbody.innerHTML = AppState.transactions.map(tx => `
+        <tr class="hover:bg-slate-50/80 transition">
+          <td class="py-3 px-4 font-mono font-bold text-slate-800">${tx.id}</td>
+          <td class="py-3 px-4 font-medium text-slate-700">${tx.gateway}</td>
+          <td class="py-3 px-4 font-bold text-slate-800">${tx.customer}</td>
+          <td class="py-3 px-4 font-mono font-bold text-emerald-600">${tx.net}</td>
+          <td class="py-3 px-4 font-mono text-slate-500">${tx.time}</td>
+          <td class="py-3 px-4">
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>${tx.status}
+            </span>
+          </td>
+          <td class="py-3 px-4 text-right">
+            <button onclick="showToast('Webhook Payload', 'HMAC SHA-256 signature verified for ${tx.id}', 'info')" class="text-brand-navy font-semibold text-[11px] hover:underline font-mono">
+              View JSON &rarr;
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function renderFeed() {
+      const container = document.getElementById('automation-feed');
+      if (!container) return;
+
+      container.innerHTML = AppState.feed.map(item => `
+        <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100 flex items-start gap-2.5 animate-fadeIn">
+          <div class="w-6 h-6 rounded-lg ${item.type === 'danger' ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'} flex items-center justify-center flex-shrink-0 mt-0.5">
+            <i data-lucide="${item.type === 'danger' ? 'shield-alert' : 'check'}" class="w-3.5 h-3.5"></i>
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-[11px] text-brand-navy">${item.title}</span>
+              <span class="font-mono text-[9px] text-slate-400">${item.time}</span>
+            </div>
+            <p class="text-[10px] text-slate-600 mt-0.5 truncate">${item.desc}</p>
+            <span class="text-[9px] font-mono ${item.type === 'danger' ? 'text-rose-600' : 'text-emerald-600'} font-semibold block mt-0.5">${item.note}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderNotifications() {
+      const container = document.getElementById('notification-items');
+      if (!container) return;
+
+      container.innerHTML = AppState.notifications.map(n => `
+        <div class="p-2 rounded-lg bg-slate-50 border border-slate-100">
+          <div class="font-bold text-slate-800">${n.title}</div>
+          <div class="text-[11px] text-slate-500 mt-0.5">${n.desc}</div>
+        </div>
+      `).join('');
+    }
+
+    function updateBadgesAndMetrics() {
+      const subCount = AppState.subscribers.length;
+      const invCount = AppState.invoices.length;
+      const suspCount = AppState.subscribers.filter(s => s.status === 'SUSPENDED').length;
+
+      document.getElementById('badge-sub-count').textContent = subCount;
+      document.getElementById('badge-invoice-count').textContent = invCount;
+      document.getElementById('badge-susp-count').textContent = suspCount;
+
+      document.getElementById('metric-suspended').textContent = suspCount;
+    }
+
+    // ---------------------------------------------------------------------------
+    // 4. Interactive Simulation & Operations Logic
+    // ---------------------------------------------------------------------------
     function triggerSimulatedWebhook() {
-      showToast(
-        'Stripe Webhook Ingested [200 OK]',
-        'Signature HMAC verified. Invoice INV-2026-0892 reconciled ($39.99 USD). Mikrotik RouterOS API: PPPoE profile unthrottled to 50M_Starter (latency: 9ms).'
-      );
+      // Find an overdue or pending invoice
+      const targetInvoice = AppState.invoices.find(inv => inv.status !== 'PAID') || AppState.invoices[0];
+      
+      targetInvoice.status = 'PAID';
+      targetInvoice.gateway = 'Stripe';
 
-      // Reconcile Devon Chen row to Paid
-      const devonRow = document.getElementById('row-devon-chen');
-      if (devonRow) {
-        devonRow.setAttribute('data-status', 'paid');
-        const badge = devonRow.querySelector('.status-badge');
-        if (badge) {
-          badge.className = 'status-badge px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200';
-          badge.innerText = 'PAID / SETTLED';
-        }
-        const routerEl = devonRow.querySelector('.routeros-status');
-        if (routerEl) {
-          routerEl.className = 'routeros-status flex items-center gap-1.5 font-mono text-[11px] text-emerald-600 font-semibold';
-          routerEl.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span><span>Active (50M_Starter)</span>';
-        }
-        const payMethod = devonRow.querySelector('.payment-method-badge');
-        if (payMethod) {
-          payMethod.className = 'px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200';
-          payMethod.innerText = 'Stripe Card • 4242';
-        }
+      // Also un-isolate subscriber if suspended
+      const sub = AppState.subscribers.find(s => s.id === targetInvoice.subId);
+      if (sub && sub.status === 'SUSPENDED') {
+        sub.status = 'ACTIVE';
+        sub.ip = '10.20.1.' + Math.floor(Math.random() * 80 + 20);
       }
 
-      // Update MRR
-      document.getElementById('metric-mrr').innerText = '$48,959.99';
-      document.getElementById('metric-pending').innerText = '$3,380.01';
+      // Add to feed
+      AppState.feed.unshift({
+        id: Date.now(),
+        title: 'Stripe Webhook Verified ($199.99)',
+        desc: `${targetInvoice.id} &bull; ${targetInvoice.name}`,
+        note: 'RouterOS: Queue unthrottled & Isolir removed',
+        time: 'Just now',
+        type: 'success'
+      });
 
-      appendFeedItem(
-        'Stripe Webhook Settled',
-        'INV-2026-0892 ($39.99) • Devon Chen',
-        'RouterOS: PPPoE speed unthrottled (50M_Starter)',
-        'zap',
-        'bg-emerald-100 text-emerald-700'
-      );
+      // Add to transactions
+      AppState.transactions.unshift({
+        id: 'TX-ST-' + Math.floor(Math.random() * 90000 + 10000),
+        gateway: 'Stripe',
+        customer: targetInvoice.name,
+        amount: targetInvoice.amount,
+        fee: '$6.10',
+        net: '$193.89',
+        time: 'Just now',
+        status: 'SETTLED'
+      });
+
+      renderAll();
+      showToast('Stripe Webhook Processed', `Payment settled for ${targetInvoice.name} (${targetInvoice.amount}). RouterOS updated.`, 'success');
     }
 
-    // Simulate Overdue Suspension
     function triggerSuspensionSimulation() {
-      showToast(
-        'RouterOS Automated Suspension',
-        'Subscriber Marcus Vance overdue (+3 days). Disconnected active PPPoE session via CoA. Reassigned to pool-pulsebill-isolir (10.10.10.14). Walled-garden active.',
-        'error'
-      );
+      // Find active subscriber and isolate them
+      const targetSub = AppState.subscribers.find(s => s.status === 'ACTIVE' && s.name !== 'Elena Rostova') || AppState.subscribers[0];
+      targetSub.status = 'SUSPENDED';
+      targetSub.ip = '10.99.0.' + Math.floor(Math.random() * 80 + 20);
 
-      appendFeedItem(
-        'RouterOS CoA Disconnect',
-        'Marcus Vance reassigned to pool-pulsebill-isolir',
-        'Walled garden redirect enabled on port 80/443',
-        'shield-alert',
-        'bg-rose-100 text-rose-700'
-      );
+      // Find invoice
+      const inv = AppState.invoices.find(i => i.subId === targetSub.id);
+      if (inv) inv.status = 'OVERDUE';
+
+      // Add to feed
+      AppState.feed.unshift({
+        id: Date.now(),
+        title: 'RouterOS Isolir Executed',
+        desc: `${targetSub.id} &bull; ${targetSub.name}`,
+        note: `Profile switched to pool-pulsebill-isolir (${targetSub.ip})`,
+        time: 'Just now',
+        type: 'danger'
+      });
+
+      renderAll();
+      showToast('Subscriber Isolated', `${targetSub.name} has been moved to isolation pool (256k rate limit).`, 'warning');
     }
 
-    // Row Action: Send Reminder
-    function sendReminder(customer, invoiceId) {
-      showToast(
-        `WhatsApp Notice Dispatched: ${customer}`,
-        `Sent automated billing reminder with PDF receipt link for ${invoiceId}. Read receipt confirmed via Baileys socket.`,
-        'info'
-      );
+    function generateMonthlyInvoices() {
+      const newInvId = 'INV-2026-09' + (AppState.invoices.length + 10);
+      const randomSub = AppState.subscribers[Math.floor(Math.random() * AppState.subscribers.length)];
+      
+      AppState.invoices.unshift({
+        id: newInvId,
+        subId: randomSub.id,
+        name: randomSub.name,
+        plan: randomSub.plan,
+        period: 'Oct 2026',
+        amount: '$' + (randomSub.price / 15000).toFixed(2),
+        amountNum: +(randomSub.price / 15000).toFixed(2),
+        due: '2026-10-15',
+        status: 'PENDING',
+        gateway: 'Pending'
+      });
+
+      AppState.feed.unshift({
+        id: Date.now(),
+        title: 'Batch Invoicing Completed',
+        desc: `Generated invoice ${newInvId} for ${randomSub.name}`,
+        note: 'WhatsApp notification queued for dispatch',
+        time: 'Just now',
+        type: 'info'
+      });
+
+      renderAll();
+      showToast('Billing Cycle Generated', `Invoice ${newInvId} created for ${randomSub.name}. Notifications queued.`, 'info');
     }
 
-    // Row Action: Manual Reconnect
-    function manualReconnect(customer, rowId) {
-      const row = document.getElementById(rowId);
-      if (row) {
-        row.setAttribute('data-status', 'paid');
-        const badge = row.querySelector('.status-badge');
-        if (badge) {
-          badge.className = 'status-badge px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200';
-          badge.innerText = 'RECONNECTED';
-        }
-        const routerEl = row.querySelector('.routeros-status');
-        if (routerEl) {
-          routerEl.className = 'routeros-status flex items-center gap-1.5 font-mono text-[11px] text-emerald-600 font-semibold';
-          routerEl.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span><span>Active (Restored)</span>';
-        }
+    function markInvoicePaid(invId) {
+      const inv = AppState.invoices.find(i => i.id === invId);
+      if (!inv) return;
+
+      inv.status = 'PAID';
+      inv.gateway = 'Manual / Gateway';
+
+      const sub = AppState.subscribers.find(s => s.id === inv.subId);
+      if (sub && sub.status === 'SUSPENDED') {
+        sub.status = 'ACTIVE';
+        sub.ip = '10.20.1.' + Math.floor(Math.random() * 80 + 20);
       }
-      showToast(
-        `RouterOS Reconnect: ${customer}`,
-        `Removed subscriber from pool-pulsebill-isolir. Restored full 50 Mbps bandwidth allocation on core gateway.`,
-        'success'
-      );
+
+      renderAll();
+      showToast('Invoice Paid', `${inv.id} marked as PAID. Router queue restored.`, 'success');
     }
 
-    // Export Invoices CSV
-    function exportInvoicesCSV() {
-      const csvContent = "Invoice_ID,Customer_Name,Email,Plan,Amount,Payment_Method,Billing_Status,RouterOS_State\n" +
-        "INV-2026-0891,Elena Rostova,elena@techscale.io,Gigabit Enterprise,199.99,Stripe Card • 4242,PAID,Active (1G_Enterprise)\n" +
-        "INV-2026-0890,Marcus Vance,marcus@vancecapital.com,Fiber Pro Business,89.99,Midtrans • Bank VA,PAID,Active (250M_Symmetrical)\n" +
-        "INV-2026-0892,Devon Chen,devon.chen@gmail.com,Fiber Starter,39.99,Xendit Link,PENDING,Active (Grace Day 2)\n" +
-        "INV-2026-0888,Sarah Jenkins,sarah.j@outlook.com,Fiber Starter,39.99,Unsettled,SUSPENDED,Isolated (pool-isolir)";
+    function unIsolateAccount(subId) {
+      const sub = AppState.subscribers.find(s => s.id === subId);
+      if (!sub) return;
 
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.setAttribute('href', url);
-      link.setAttribute('download', 'PulseBill_Invoices_Ledger.csv');
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      sub.status = 'ACTIVE';
+      sub.ip = '10.20.1.' + Math.floor(Math.random() * 80 + 20);
 
-      showToast('Export Completed', 'Generated PulseBill_Invoices_Ledger.csv with 4 reconciled records.', 'success');
+      const inv = AppState.invoices.find(i => i.subId === subId);
+      if (inv) {
+        inv.status = 'PAID';
+        inv.gateway = 'Settled';
+      }
+
+      AppState.feed.unshift({
+        id: Date.now(),
+        title: 'Isolir Lifted (Un-isolated)',
+        desc: `${sub.id} &bull; ${sub.name}`,
+        note: 'Restored to full speed profile on CORE-ROUTER-01',
+        time: 'Just now',
+        type: 'success'
+      });
+
+      renderAll();
+      showToast('Isolir Berhasil Dibuka', `Layanan ${sub.name} kembali aktif normal. Profil bandwidth dipulihkan.`, 'success');
     }
 
-    // Receipt Modal Actions
-    function viewReceipt(invId, name, email, service, amount, payment, status, queue) {
-      document.getElementById('modal-invoice-id').innerText = invId;
-      document.getElementById('modal-customer-name').innerText = name;
-      document.getElementById('modal-customer-email').innerText = email;
-      document.getElementById('modal-service-name').innerText = service;
-      document.getElementById('modal-amount').innerText = amount;
-      document.getElementById('modal-payment-method').innerText = payment;
-      document.getElementById('modal-queue-profile').innerText = queue;
+    function toggleIsolir(subId) {
+      const sub = AppState.subscribers.find(s => s.id === subId);
+      if (!sub) return;
 
-      const stamp = document.getElementById('modal-stamp');
-      if (status === 'PAID') {
-        stamp.className = 'px-3 py-1 rounded text-xs stamp-paid uppercase';
-        stamp.innerText = 'PAID';
-      } else if (status === 'PENDING') {
-        stamp.className = 'px-3 py-1 rounded text-xs stamp-pending uppercase';
-        stamp.innerText = 'PENDING';
+      if (sub.status === 'SUSPENDED') {
+        unIsolateAccount(subId);
       } else {
-        stamp.className = 'px-3 py-1 rounded text-xs stamp-suspended uppercase';
-        stamp.innerText = 'SUSPENDED';
+        sub.status = 'SUSPENDED';
+        sub.ip = '10.99.0.' + Math.floor(Math.random() * 80 + 20);
+        const inv = AppState.invoices.find(i => i.subId === subId);
+        if (inv) inv.status = 'OVERDUE';
+        
+        AppState.feed.unshift({
+          id: Date.now(),
+          title: 'Manual Isolir Triggered',
+          desc: `${sub.id} &bull; ${sub.name}`,
+          note: 'Operator moved subscriber to isolation pool',
+          time: 'Just now',
+          type: 'danger'
+        });
+
+        renderAll();
+        showToast('Pelanggan Terisolir', `Layanan ${sub.name} berhasil di-isolir ke pool 10.99.0.x`, 'warning');
+      }
+    }
+
+    // ---------------------------------------------------------------------------
+    // 5. Modals & Detail Handlers
+    // ---------------------------------------------------------------------------
+    function openReceiptModal(invoiceId) {
+      const inv = AppState.invoices.find(i => i.id === invoiceId) || AppState.invoices[0];
+      const sub = AppState.subscribers.find(s => s.id === inv.subId) || AppState.subscribers[0];
+
+      document.getElementById('receipt-invoice-id').textContent = inv.id;
+      document.getElementById('receipt-customer-name').textContent = sub.name;
+      document.getElementById('receipt-customer-phone').textContent = sub.phone;
+      document.getElementById('receipt-customer-address').textContent = sub.address;
+      document.getElementById('receipt-pppoe').textContent = sub.pppoe;
+      document.getElementById('receipt-ip').textContent = 'IP: ' + sub.ip;
+      document.getElementById('receipt-router').textContent = 'Core: ' + sub.router;
+      document.getElementById('receipt-item-plan').textContent = sub.plan;
+      document.getElementById('receipt-item-speed').textContent = sub.speed;
+      document.getElementById('receipt-item-amount').textContent = inv.amount;
+      document.getElementById('receipt-total-amount').textContent = inv.amount;
+      document.getElementById('receipt-idempotency').textContent = 'idem_' + Math.random().toString(36).substring(2, 14);
+
+      const stamp = document.getElementById('receipt-status-stamp');
+      if (inv.status === 'PAID') {
+        stamp.className = 'inline-block px-3 py-1 rounded-lg text-xs stamp-paid';
+        stamp.textContent = 'PAID / LUNAS';
+      } else if (inv.status === 'PENDING') {
+        stamp.className = 'inline-block px-3 py-1 rounded-lg text-xs stamp-pending';
+        stamp.textContent = 'PENDING';
+      } else {
+        stamp.className = 'inline-block px-3 py-1 rounded-lg text-xs stamp-suspended';
+        stamp.textContent = 'SUSPENDED';
       }
 
       document.getElementById('receipt-modal').classList.remove('hidden');
@@ -1356,12 +2097,348 @@
       document.getElementById('receipt-modal').classList.add('hidden');
     }
 
-    function printReceiptAction() {
-      showToast('Print Dialog', 'Rendering official telecom invoice receipt for PDF download/print.', 'info');
-      setTimeout(() => {
-        window.print();
-      }, 400);
+    function openSubDetail(subId) {
+      const sub = AppState.subscribers.find(s => s.id === subId);
+      if (!sub) return;
+
+      AppState.selectedSubId = subId;
+      document.getElementById('modal-sub-id').textContent = sub.id;
+      document.getElementById('modal-sub-name').textContent = sub.name;
+      document.getElementById('modal-sub-pppoe').textContent = sub.pppoe;
+      document.getElementById('modal-sub-ip').textContent = sub.ip;
+      document.getElementById('modal-sub-router').textContent = sub.router;
+      document.getElementById('modal-sub-speed').textContent = sub.speed;
+      document.getElementById('modal-sub-phone').textContent = sub.phone;
+      document.getElementById('modal-sub-address').textContent = sub.address;
+
+      const badge = document.getElementById('modal-sub-status-badge');
+      const toggleBtn = document.getElementById('modal-sub-toggle-btn');
+
+      if (sub.status === 'SUSPENDED') {
+        badge.className = 'font-bold text-rose-600 flex items-center gap-1.5 mt-0.5';
+        badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-rose-500"></span> Terisolir (Suspended)';
+        toggleBtn.className = 'px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-500 transition';
+        toggleBtn.textContent = 'Buka Isolir Sekarang';
+      } else {
+        badge.className = 'font-bold text-emerald-600 flex items-center gap-1.5 mt-0.5';
+        badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-500"></span> Aktif & Online';
+        toggleBtn.className = 'px-3 py-1.5 rounded-xl text-xs font-semibold bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 transition';
+        toggleBtn.textContent = 'Isolir Pelanggan Ini';
+      }
+
+      document.getElementById('sub-detail-modal').classList.remove('hidden');
+      lucide.createIcons();
     }
+
+    function closeSubDetailModal() {
+      document.getElementById('sub-detail-modal').classList.add('hidden');
+    }
+
+    function handleModalSubToggle() {
+      if (AppState.selectedSubId) {
+        toggleIsolir(AppState.selectedSubId);
+        openSubDetail(AppState.selectedSubId);
+      }
+    }
+
+    function openAddSubscriberModal() {
+      document.getElementById('add-sub-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeAddSubModal() {
+      document.getElementById('add-sub-modal').classList.add('hidden');
+    }
+
+    function submitNewSubscriber(e) {
+      e.preventDefault();
+      const name = document.getElementById('new-sub-name').value;
+      const phone = document.getElementById('new-sub-phone').value;
+      const pppoe = document.getElementById('new-sub-pppoe').value;
+      const plan = document.getElementById('new-sub-plan').value;
+      const router = document.getElementById('new-sub-router').value;
+      const address = document.getElementById('new-sub-address').value;
+
+      const newId = 'PB-SUB-' + (AppState.subscribers.length + 1001);
+      const newSub = {
+        id: newId,
+        name: name,
+        phone: phone,
+        pppoe: pppoe,
+        ip: '10.20.1.' + Math.floor(Math.random() * 80 + 20),
+        plan: plan,
+        speed: plan.includes('1 Gbps') ? '1000M / 1000M' : plan.includes('200') ? '200M / 200M' : plan.includes('100') ? '100M / 100M' : '50M / 50M',
+        price: plan.includes('1 Gbps') ? 2950000 : plan.includes('200') ? 950000 : 275000,
+        router: router,
+        status: 'ACTIVE',
+        address: address
+      };
+
+      AppState.subscribers.unshift(newSub);
+      closeAddSubModal();
+      renderAll();
+      showToast('Pelanggan Terdaftar', `${name} (${newId}) berhasil didaftarkan ke Mikrotik ${router}.`, 'success');
+    }
+
+    function openWhatsAppSimulator(templateType) {
+      const modal = document.getElementById('wa-preview-modal');
+      const content = document.getElementById('wa-chat-content');
+      
+      const sample = AppState.subscribers[0];
+      if (templateType === 'H-3 Reminder') {
+        content.textContent = `Halo *${sample.name}*, tagihan internet paket *${sample.plan}* sebesar *Rp ${sample.price.toLocaleString('id-ID')}* akan jatuh tempo pada *15-10-2026*.\n\nBayar mudah melalui link resmi:\nhttps://billing.pulsebill.io/pay/INV-2026-0892`;
+      } else if (templateType === 'Paid Receipt') {
+        content.textContent = `Terima kasih *${sample.name}*! Pembayaran tagihan *${sample.plan}* telah kami terima.\n\nStatus layanan: *AKTIF NORMAL*\nUnduh struk resmi: https://billing.pulsebill.io/receipt/INV-2026-0892`;
+      } else if (templateType === 'Suspension Notice') {
+        content.textContent = `Pemberitahuan: Layanan internet akun *${sample.pppoe}* telah dihentikan sementara (*TERISOLIR*) karena melewati batas jatuh tempo.\n\nSegera lakukan pembayaran untuk membuka isolir otomatis: https://billing.pulsebill.io/pay`;
+      } else {
+        content.textContent = `Tagihan internet periode baru *Oktober 2026* telah diterbitkan untuk ID *${sample.id}*.\nNominal: *Rp ${sample.price.toLocaleString('id-ID')}*.\nJatuh tempo: *15-10-2026*.`;
+      }
+
+      modal.classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeWhatsAppModal() {
+      document.getElementById('wa-preview-modal').classList.add('hidden');
+    }
+
+    // ---------------------------------------------------------------------------
+    // 6. Router & Network Actions
+    // ---------------------------------------------------------------------------
+    function testRouterSocket(routerId) {
+      showToast('RouterOS API Ping', `Testing binary API socket on ${routerId} (port 8728)...`, 'info');
+      setTimeout(() => {
+        showToast('API Socket OK', `${routerId} responded in 3.4ms with zero packet loss.`, 'success');
+      }, 600);
+    }
+
+    function syncQueues(routerId) {
+      showToast('Queue Syncing', `Synchronizing 1,466 dynamic simple queues on ${routerId}...`, 'info');
+      setTimeout(() => {
+        showToast('Sync Succeeded', `All dynamic bandwidth limits verified on ${routerId}.`, 'success');
+      }, 750);
+    }
+
+    function syncMikrotikProfiles() {
+      showToast('Profile Synchronizer', 'Synchronizing PPPoE profiles across all 3 Mikrotik NAS...', 'info');
+      setTimeout(() => {
+        showToast('Profiles Up-To-Date', '6 rate limit profiles matched with database tier rules.', 'success');
+      }, 600);
+    }
+
+    function triggerOpticalScan() {
+      showToast('CWMP TR-069 Inform', 'Broadcasting periodic inform poll to 1,428 ONT devices...', 'info');
+      setTimeout(() => {
+        showToast('CWMP Scan Complete', 'All ONT telemetry and optical power levels refreshed.', 'success');
+      }, 800);
+    }
+
+    function runBatchIsolate() {
+      const suspendedCount = AppState.subscribers.filter(s => s.status === 'SUSPENDED').length;
+      showToast('Isolir Massal Selesai', `Daemon berhasil mengecek semua akun. ${suspendedCount} pelanggan nunggak terisolir.`, 'warning');
+    }
+
+    function saveSystemSettings() {
+      showToast('Pengaturan Tersimpan', 'Konfigurasi BSS/OSS dan Mikrotik pool berhasil diperbarui.', 'success');
+    }
+
+    function exportInvoicesCSV() {
+      showToast('Export CSV', 'File ledger-invoices-september-2026.csv berhasil diunduh.', 'success');
+    }
+
+    // ---------------------------------------------------------------------------
+    // 7. Filtering & Global Search
+    // ---------------------------------------------------------------------------
+    function setSubFilter(filter) {
+      AppState.subFilter = filter;
+      document.querySelectorAll('.sub-filter-btn').forEach(btn => {
+        btn.classList.remove('bg-brand-navy', 'text-white');
+        btn.classList.add('bg-slate-100', 'text-slate-600');
+      });
+      const activeBtn = document.getElementById('sub-filter-' + filter.toLowerCase());
+      if (activeBtn) {
+        activeBtn.classList.remove('bg-slate-100', 'text-slate-600');
+        activeBtn.classList.add('bg-brand-navy', 'text-white');
+      }
+      renderSubscribers();
+      lucide.createIcons();
+    }
+
+    function filterSubscribersTable() {
+      const query = (document.getElementById('search-subscribers').value || '').toLowerCase();
+      const rows = document.querySelectorAll('#subscribers-table-body tr');
+      rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(query) ? '' : 'none';
+      });
+    }
+
+    function filterInvoiceTable() {
+      const query = (document.getElementById('search-invoices').value || '').toLowerCase();
+      const statusFilter = document.getElementById('invoice-status-select').value;
+      const rows = document.querySelectorAll('#invoices-table-body tr');
+
+      rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        let matchesStatus = true;
+        if (statusFilter !== 'ALL') {
+          matchesStatus = text.includes(statusFilter.toLowerCase());
+        }
+        row.style.display = (text.includes(query) && matchesStatus) ? '' : 'none';
+      });
+    }
+
+    function handleGlobalSearch(query) {
+      if (!query) return;
+      query = query.toLowerCase();
+
+      // If user is searching and matches subscriber, switch to subscribers tab
+      if (AppState.activeTab !== 'subscribers' && AppState.activeTab !== 'invoices') {
+        switchTab('subscribers');
+      }
+
+      const subInput = document.getElementById('search-subscribers');
+      if (subInput) {
+        subInput.value = query;
+        filterSubscribersTable();
+      }
+
+      const invInput = document.getElementById('search-invoices');
+      if (invInput) {
+        invInput.value = query;
+        filterInvoiceTable();
+      }
+    }
+
+    function toggleNotificationTray() {
+      const tray = document.getElementById('notification-tray');
+      tray.classList.toggle('hidden');
+    }
+
+    // ---------------------------------------------------------------------------
+    // 8. Toast Notification Utility
+    // ---------------------------------------------------------------------------
+    function showToast(title, message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+
+      const toast = document.createElement('div');
+      const borderClass = type === 'danger' ? 'border-rose-500 bg-white' : type === 'warning' ? 'border-amber-500 bg-white' : 'border-emerald-500 bg-white';
+      const icon = type === 'danger' ? 'shield-alert' : type === 'warning' ? 'alert-triangle' : type === 'info' ? 'info' : 'check-circle-2';
+      const iconColor = type === 'danger' ? 'text-rose-600' : type === 'warning' ? 'text-amber-600' : type === 'info' ? 'text-blue-600' : 'text-emerald-600';
+
+      toast.className = `p-3.5 rounded-2xl border-l-4 shadow-xl text-xs flex items-start gap-2.5 transition-all duration-300 animate-fadeIn pointer-events-auto ${borderClass}`;
+      toast.innerHTML = `
+        <i data-lucide="${icon}" class="w-4 h-4 ${iconColor} flex-shrink-0 mt-0.5"></i>
+        <div class="flex-1 pr-2">
+          <div class="font-bold text-slate-900">${title}</div>
+          <div class="text-slate-500 text-[11px] mt-0.5">${message}</div>
+        </div>
+      `;
+
+      container.appendChild(toast);
+      lucide.createIcons();
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(10px)';
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
+    }
+
+    // ---------------------------------------------------------------------------
+    // 9. Revenue Chart Initialization (Chart.js)
+    // ---------------------------------------------------------------------------
+    let revenueChartInstance = null;
+    function initRevenueChart() {
+      const ctx = document.getElementById('revenueChart');
+      if (!ctx) return;
+
+      revenueChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep (Current)'],
+          datasets: [
+            {
+              label: 'Settled Revenue ($)',
+              data: [36200, 39400, 41800, 44200, 46100, 48920],
+              borderColor: '#059669',
+              backgroundColor: 'rgba(5, 150, 105, 0.08)',
+              fill: true,
+              tension: 0.35,
+              borderWidth: 2.5,
+              pointBackgroundColor: '#059669',
+              pointRadius: 4,
+            },
+            {
+              label: 'Invoiced Target ($)',
+              data: [38000, 41000, 43500, 46000, 48000, 52760],
+              borderColor: '#152C4A',
+              borderDash: [4, 4],
+              borderWidth: 1.5,
+              fill: false,
+              tension: 0.35,
+              pointRadius: 0,
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return ' ' + context.dataset.label + ': $' + context.raw.toLocaleString();
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: { font: { family: 'SF Mono', size: 10 }, color: '#94A3B8' }
+            },
+            y: {
+              grid: { color: '#F1F5F9' },
+              ticks: {
+                font: { family: 'SF Mono', size: 10 },
+                color: '#94A3B8',
+                callback: function(val) { return '$' + (val / 1000) + 'k'; }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // ---------------------------------------------------------------------------
+    // 10. Bootstrap on Page Load
+    // ---------------------------------------------------------------------------
+    window.addEventListener('DOMContentLoaded', () => {
+      renderAll();
+      initRevenueChart();
+      lucide.createIcons();
+
+      // Keyboard Shortcut (Ctrl+K)
+      document.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+          e.preventDefault();
+          const search = document.getElementById('global-search-input');
+          if (search) search.focus();
+        }
+        if (e.key === 'Escape') {
+          closeReceiptModal();
+          closeSubDetailModal();
+          closeAddSubModal();
+          closeWhatsAppModal();
+          document.getElementById('notification-tray').classList.add('hidden');
+        }
+      });
+    });
   </script>
+
 </body>
 </html>
