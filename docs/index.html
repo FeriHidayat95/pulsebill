@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PulseBill - Telecom Billing & Network Provisioning Engine</title>
+  <title>PulseBill - Telecom Billing OS & Network Provisioning Engine</title>
   
   <!-- Meta Design System Typography Stack: Optimistic / Apple System / Segoe UI / Roboto -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -17,17 +17,19 @@
       theme: {
         extend: {
           fontFamily: {
-            sans: ['"Optimistic Text"', '"Optimistic Display"', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
-            mono: ['"SF Mono"', '"JetBrains Mono"', 'monospace'],
+            sans: ['"Optimistic Text"', '"Optimistic Display"', '"Plus Jakarta Sans"', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
+            mono: ['"SF Mono"', '"JetBrains Mono"', 'Menlo', 'Consolas', 'monospace'],
           },
           colors: {
             brand: {
               navy: '#152C4A',
+              navyHover: '#0F2037',
               emerald: '#059669',
+              emeraldHover: '#047857',
               green: '#10B981',
               blue: '#2563EB',
-              ice: '#F1F7FC',
-              border: '#E2EBF4',
+              ice: '#F8FAFC',
+              border: '#E2E8F0',
             }
           }
         }
@@ -43,9 +45,12 @@
 
   <style>
     body {
-      font-family: "Optimistic Text", "Optimistic Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: "Optimistic Text", "Optimistic Display", "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
+    }
+    .font-mono {
+      font-family: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
     }
     ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-track { background: transparent; }
@@ -74,30 +79,35 @@
     .brand-btn-primary:active {
       transform: scale(0.98);
     }
+
+    /* Paid Stamp in Receipt Modal */
+    .stamp-paid {
+      border: 3px dashed #10B981;
+      color: #10B981;
+      font-family: "SF Mono", "JetBrains Mono", monospace;
+      font-weight: 800;
+      letter-spacing: 0.15em;
+      transform: rotate(-8deg);
+    }
+    .stamp-pending {
+      border: 3px dashed #F59E0B;
+      color: #F59E0B;
+      font-family: "SF Mono", "JetBrains Mono", monospace;
+      font-weight: 800;
+      letter-spacing: 0.15em;
+      transform: rotate(-8deg);
+    }
+    .stamp-suspended {
+      border: 3px dashed #EF4444;
+      color: #EF4444;
+      font-family: "SF Mono", "JetBrains Mono", monospace;
+      font-weight: 800;
+      letter-spacing: 0.15em;
+      transform: rotate(-8deg);
+    }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-900 flex flex-col h-screen overflow-hidden text-xs">
-
-  <!-- Top Technical Evaluation Banner -->
-  <div class="bg-slate-900 text-slate-300 px-4 py-2.5 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs font-mono shrink-0 z-30">
-    <div class="flex items-center gap-2.5">
-      <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-      <span class="font-bold text-white tracking-wide">PulseBill Live Simulation Sandbox</span>
-      <span class="text-slate-500 hidden sm:inline">•</span>
-      <span class="text-slate-400 hidden sm:inline">Technical Portfolio Evaluation Only</span>
-    </div>
-    <div class="flex items-center gap-2.5 flex-wrap">
-      <button onclick="triggerSimulatedWebhook()" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded text-[11px] transition shadow flex items-center gap-1.5 active:scale-95">
-        <i data-lucide="zap" class="w-3.5 h-3.5"></i>
-        <span>Simulate Stripe Webhook ($199.99)</span>
-      </button>
-      <button onclick="triggerSuspensionSimulation()" class="px-3 py-1 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded text-[11px] transition shadow flex items-center gap-1.5 active:scale-95">
-        <i data-lucide="shield-alert" class="w-3.5 h-3.5"></i>
-        <span>Simulate Overdue Suspension</span>
-      </button>
-      <span class="text-[10px] text-slate-400 font-sans hidden md:inline">© 2026 Feri Hidayat. All Rights Reserved.</span>
-    </div>
-  </div>
+<body class="bg-[#F8FAFC] text-slate-900 flex flex-col h-screen overflow-hidden text-xs select-none">
 
   <!-- Toast Notification Container -->
   <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none max-w-md"></div>
@@ -105,504 +115,855 @@
   <!-- Main App Layout Wrapper -->
   <div class="flex-1 flex overflow-hidden">
 
-  <!-- Left Fixed Sidebar (240px) -->
-  <aside class="w-60 bg-white border-r border-slate-200 flex flex-col flex-shrink-0 z-20">
-    <!-- Brand Logo Box (Height 64px - Flush with Topbar) -->
-    <div class="h-16 flex items-center px-5 gap-2.5 border-b border-slate-200">
-      <div class="w-9 h-9 rounded-lg bg-gradient-to-tr from-brand-navy to-brand-emerald flex items-center justify-center text-white shadow-md">
-        <i data-lucide="receipt" class="w-5 h-5 text-white"></i>
-      </div>
-      <div>
-        <h1 class="font-bold text-sm text-brand-navy tracking-tight leading-none">PulseBill</h1>
-        <span class="text-[10px] text-slate-500 font-mono">Telecom Billing OS</span>
-      </div>
-    </div>
-
-    <!-- Navigation Menu -->
-    <div class="flex-1 overflow-y-auto px-3 py-4 space-y-6">
-      
-      <!-- Group: Revenue & Ledger -->
-      <div>
-        <span class="px-2 text-[10px] font-bold uppercase tracking-wider text-slate-500 block mb-1.5 font-mono">Ledger & Billing</span>
-        <nav class="space-y-1">
-          <a href="#" class="flex items-center gap-2.5 px-3 py-2 rounded-lg brand-gradient font-medium text-xs">
-            <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
-            <span>Billing Operations</span>
-          </a>
-          <a href="#" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-brand-navy transition font-medium text-xs">
-            <i data-lucide="file-text" class="w-4 h-4 text-slate-400"></i>
-            <span>Invoices & Receipts</span>
-            <span class="ml-auto bg-amber-100 text-amber-800 text-[10px] px-1.5 py-0.2 rounded font-mono font-bold">24</span>
-          </a>
-          <a href="#" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-brand-navy transition font-medium text-xs">
-            <i data-lucide="credit-card" class="w-4 h-4 text-slate-400"></i>
-            <span>Payment Gateways</span>
-          </a>
-          <a href="#" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-brand-navy transition font-medium text-xs">
-            <i data-lucide="layers" class="w-4 h-4 text-slate-400"></i>
-            <span>Rate Cards & Plans</span>
-          </a>
-        </nav>
-      </div>
-
-      <!-- Group: Network Automation -->
-      <div>
-        <span class="px-2 text-[10px] font-bold uppercase tracking-wider text-slate-500 block mb-1.5 font-mono">Network Automation</span>
-        <nav class="space-y-1">
-          <a href="#" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-brand-navy transition font-medium text-xs">
-            <i data-lucide="cpu" class="w-4 h-4 text-slate-400"></i>
-            <span>Mikrotik RouterOS</span>
-            <span class="ml-auto w-2 h-2 rounded-full bg-emerald-500"></span>
-          </a>
-          <a href="#" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-brand-navy transition font-medium text-xs">
-            <i data-lucide="radio" class="w-4 h-4 text-slate-400"></i>
-            <span>TR-069 GenieACS</span>
-          </a>
-          <a href="#" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-brand-navy transition font-medium text-xs">
-            <i data-lucide="shield-alert" class="w-4 h-4 text-slate-400"></i>
-            <span>Suspension Profiles</span>
-          </a>
-        </nav>
-      </div>
-
-      <!-- Group: Event & Dispatch -->
-      <div>
-        <span class="px-2 text-[10px] font-bold uppercase tracking-wider text-slate-500 block mb-1.5 font-mono">Event Dispatcher</span>
-        <nav class="space-y-1">
-          <a href="#" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-brand-navy transition font-medium text-xs">
-            <i data-lucide="bell" class="w-4 h-4 text-slate-400"></i>
-            <span>Alert Webhooks</span>
-          </a>
-          <a href="#" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-brand-navy transition font-medium text-xs">
-            <i data-lucide="users" class="w-4 h-4 text-slate-400"></i>
-            <span>Subscribers</span>
-          </a>
-          <a href="#" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-brand-navy transition font-medium text-xs">
-            <i data-lucide="settings" class="w-4 h-4 text-slate-400"></i>
-            <span>Settings</span>
-          </a>
-        </nav>
-      </div>
-
-    </div>
-
-    <!-- Sidebar Bottom Status Footer -->
-    <div class="p-3 border-t border-slate-200">
-      <div class="bg-brand-ice/80 border border-brand-border rounded-lg p-2.5 flex items-center justify-between">
+    <!-- Left Fixed Sidebar (240px) -->
+    <aside class="w-60 bg-white border-r border-slate-200 flex flex-col flex-shrink-0 z-20 shadow-xs">
+      <!-- Brand Logo Box (Height 64px - Flush with Topbar) -->
+      <div class="h-16 flex items-center px-5 gap-2.5 border-b border-slate-200">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-navy to-brand-emerald flex items-center justify-center text-white shadow-md">
+          <i data-lucide="receipt" class="w-5 h-5 text-white"></i>
+        </div>
         <div>
-          <span class="text-[10px] font-bold text-brand-navy uppercase block font-mono">PulseBill Engine</span>
-          <span class="text-[10px] text-emerald-600 font-semibold flex items-center gap-1 mt-0.5">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-            Daemon Active (PID 4892)
-          </span>
-        </div>
-        <span class="text-[10px] font-mono font-bold bg-white text-brand-navy px-1.5 py-0.5 rounded border border-brand-border">v1.0</span>
-      </div>
-    </div>
-  </aside>
-
-  <!-- Main View Area -->
-  <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
-    
-    <!-- Topbar (Height 64px) -->
-    <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 z-10">
-      <div class="flex items-center gap-3">
-        <div class="relative w-80">
-          <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-2.5"></i>
-          <input 
-            type="text" 
-            placeholder="Search invoice number, account, or IP..." 
-            value="INV-2026-0891"
-            class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-700 placeholder-slate-400 focus:outline-none focus:border-brand-emerald focus:bg-white transition"
-          />
+          <h1 class="font-bold text-sm text-brand-navy tracking-tight leading-none flex items-center gap-1.5">
+            PulseBill
+            <span class="text-[9px] px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 font-mono font-bold border border-emerald-200">OS</span>
+          </h1>
+          <span class="text-[10px] text-slate-400 font-mono mt-0.5 block">Telecom Billing Engine</span>
         </div>
       </div>
 
-      <div class="flex items-center gap-3">
-        <!-- Live Gateway Status Badge -->
-        <div class="hidden md:flex items-center gap-2 bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded-full text-xs font-medium">
-          <i data-lucide="zap" class="w-3.5 h-3.5"></i>
-          <span>Webhooks Connected (Stripe / Midtrans / Xendit)</span>
-        </div>
-
-        <!-- Notification Bell -->
-        <button class="w-9 h-9 rounded-lg border border-slate-200 hover:bg-slate-50 flex items-center justify-center text-slate-600 relative transition">
-          <i data-lucide="bell" class="w-4 h-4"></i>
-          <span class="absolute top-2 right-2 w-2 h-2 bg-brand-emerald rounded-full"></span>
-        </button>
-
-        <!-- Profile Pill Box -->
-        <div class="flex items-center gap-2 pl-3 border-l border-slate-200">
-          <div class="w-8 h-8 rounded-lg brand-gradient flex items-center justify-center font-bold text-white text-xs shadow-sm">
-            FH
-          </div>
-          <div class="hidden sm:block text-left">
-            <span class="font-bold text-xs text-brand-navy block leading-none">Feri Hidayat</span>
-            <span class="text-[10px] text-emerald-600 font-semibold">Lead Systems Architect</span>
-          </div>
-        </div>
-      </div>
-    </header>
-
-    <!-- Page Content Scrollable Container -->
-    <main class="flex-1 overflow-y-auto p-6 space-y-6">
-
-      <!-- Page Heading & Quick Actions -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <!-- Navigation Menu -->
+      <div class="flex-1 overflow-y-auto px-3 py-4 space-y-6 text-xs">
+        
+        <!-- Group: Revenue & Ledger -->
         <div>
-          <h2 class="text-xl font-bold text-brand-navy tracking-tight">Billing Operations Command Center</h2>
-          <p class="text-xs text-slate-500 mt-0.5">Automated invoice lifecycles, payment webhooks reconciliation, and Mikrotik RouterOS provisioning.</p>
-        </div>
-        <div class="flex items-center gap-2.5">
-          <button class="bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold px-3 py-2 rounded-lg text-xs flex items-center gap-1.5 transition shadow-2xs">
-            <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-slate-500"></i>
-            <span>Sync Gateways</span>
-          </button>
-          <button class="brand-btn-primary font-semibold px-3.5 py-2 rounded-lg text-xs flex items-center gap-1.5">
-            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-            <span>Generate Invoices</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- 5-Metric Financial Cards Grid -->
-      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
-        
-        <!-- Metric 1: MRR -->
-        <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-xs">
-          <div class="flex items-center justify-between">
-            <span class="text-[11px] font-medium text-slate-500">Monthly Rec. Revenue</span>
-            <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
-              <i data-lucide="dollar-sign" class="w-4 h-4"></i>
-            </div>
-          </div>
-          <div class="mt-2.5">
-            <span class="font-mono text-2xl font-bold text-brand-navy tracking-tight">$48,920</span>
-            <span class="text-[10px] text-emerald-600 font-semibold block mt-0.5">+14.2% MoM growth</span>
-          </div>
+          <span class="px-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1.5 font-mono">Ledger & Billing</span>
+          <nav class="space-y-1">
+            <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-xl brand-gradient font-medium transition text-left">
+              <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+              <span>Billing Operations</span>
+            </button>
+            <button onclick="switchTab('invoices')" id="nav-invoices" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-brand-navy transition font-medium text-left">
+              <i data-lucide="file-text" class="w-4 h-4 text-slate-400"></i>
+              <span>Invoices & Receipts</span>
+              <span id="badge-invoice-count" class="ml-auto bg-amber-100 text-amber-800 text-[10px] px-1.5 py-0.2 rounded font-mono font-bold">24</span>
+            </button>
+            <button onclick="switchTab('gateways')" id="nav-gateways" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-brand-navy transition font-medium text-left">
+              <i data-lucide="credit-card" class="w-4 h-4 text-slate-400"></i>
+              <span>Payment Gateways</span>
+              <span class="ml-auto w-2 h-2 rounded-full bg-emerald-500"></span>
+            </button>
+            <button onclick="switchTab('ratecards')" id="nav-ratecards" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-brand-navy transition font-medium text-left">
+              <i data-lucide="layers" class="w-4 h-4 text-slate-400"></i>
+              <span>Rate Cards & Plans</span>
+            </button>
+          </nav>
         </div>
 
-        <!-- Metric 2: Active Subscribers -->
-        <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-xs">
-          <div class="flex items-center justify-between">
-            <span class="text-[11px] font-medium text-slate-500">Active Subscribers</span>
-            <div class="w-7 h-7 rounded-lg bg-blue-50 text-brand-blue flex items-center justify-center">
-              <i data-lucide="users" class="w-4 h-4"></i>
-            </div>
-          </div>
-          <div class="mt-2.5">
-            <span class="font-mono text-2xl font-bold text-brand-navy tracking-tight">1,284</span>
-            <span class="text-[10px] text-slate-500 font-medium block mt-0.5">99.2% Good Standing</span>
-          </div>
+        <!-- Group: Network Automation -->
+        <div>
+          <span class="px-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1.5 font-mono">Network Automation</span>
+          <nav class="space-y-1">
+            <button onclick="switchTab('routeros')" id="nav-routeros" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-brand-navy transition font-medium text-left">
+              <i data-lucide="cpu" class="w-4 h-4 text-slate-400"></i>
+              <span>Mikrotik RouterOS</span>
+              <span class="ml-auto text-[9px] font-mono font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.2 rounded">Port 8728</span>
+            </button>
+            <button onclick="switchTab('genieacs')" id="nav-genieacs" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-brand-navy transition font-medium text-left">
+              <i data-lucide="radio" class="w-4 h-4 text-slate-400"></i>
+              <span>TR-069 GenieACS</span>
+              <span class="ml-auto text-[9px] font-mono font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.2 rounded">Online</span>
+            </button>
+            <button onclick="switchTab('suspension')" id="nav-suspension" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-brand-navy transition font-medium text-left">
+              <i data-lucide="shield-alert" class="w-4 h-4 text-slate-400"></i>
+              <span>Suspension Profiles</span>
+            </button>
+          </nav>
         </div>
 
-        <!-- Metric 3: Pending Invoices -->
-        <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-xs">
-          <div class="flex items-center justify-between">
-            <span class="text-[11px] font-medium text-slate-500">Pending Settlement</span>
-            <div class="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
-              <i data-lucide="clock" class="w-4 h-4"></i>
-            </div>
-          </div>
-          <div class="mt-2.5">
-            <span class="font-mono text-2xl font-bold text-amber-600 tracking-tight">$3,420</span>
-            <span class="text-[10px] text-slate-500 font-medium block mt-0.5">24 open invoices</span>
-          </div>
-        </div>
-
-        <!-- Metric 4: RouterOS Syncs -->
-        <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-xs">
-          <div class="flex items-center justify-between">
-            <span class="text-[11px] font-medium text-slate-500">RouterOS Auto-Sync</span>
-            <div class="w-7 h-7 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
-              <i data-lucide="cpu" class="w-4 h-4"></i>
-            </div>
-          </div>
-          <div class="mt-2.5">
-            <span class="font-mono text-2xl font-bold text-brand-navy tracking-tight">482 <span class="text-xs font-normal text-slate-400">runs/24h</span></span>
-            <span class="text-[10px] text-emerald-600 font-semibold block mt-0.5">0 API Sync Faults</span>
-          </div>
-        </div>
-
-        <!-- Metric 5: Webhook Health -->
-        <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-xs">
-          <div class="flex items-center justify-between">
-            <span class="text-[11px] font-medium text-slate-500">Webhook Reliability</span>
-            <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
-              <i data-lucide="shield-check" class="w-4 h-4"></i>
-            </div>
-          </div>
-          <div class="mt-2.5">
-            <span class="font-mono text-2xl font-bold text-emerald-600 tracking-tight">99.98%</span>
-            <span class="text-[10px] text-slate-500 font-medium block mt-0.5">Zero dropped events</span>
-          </div>
+        <!-- Group: Event & Dispatch -->
+        <div>
+          <span class="px-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1.5 font-mono">Operations & CRM</span>
+          <nav class="space-y-1">
+            <button onclick="switchTab('subscribers')" id="nav-subscribers" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-brand-navy transition font-medium text-left">
+              <i data-lucide="users" class="w-4 h-4 text-slate-400"></i>
+              <span>Subscribers</span>
+              <span class="ml-auto text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 font-bold">1,284</span>
+            </button>
+            <button onclick="switchTab('settings')" id="nav-settings" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-brand-navy transition font-medium text-left">
+              <i data-lucide="settings" class="w-4 h-4 text-slate-400"></i>
+              <span>System Settings</span>
+            </button>
+          </nav>
         </div>
 
       </div>
 
-      <!-- Split Grid: Financial Collections & Real-time RouterOS Event Dispatch -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        
-        <!-- Left 2 Cols: Revenue & Collection Velocity Chart -->
-        <div class="lg:col-span-2 bg-white border border-slate-200 rounded-xl p-5 shadow-xs flex flex-col">
-          <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-            <div>
-              <h3 class="font-bold text-sm text-brand-navy">Revenue Ingestion & Gateway Velocity</h3>
-              <p class="text-[11px] text-slate-500 mt-0.5">Cumulative monthly recurring collections across Stripe, Midtrans, and Xendit.</p>
-            </div>
-            <div class="flex items-center gap-3">
-              <span class="flex items-center gap-1.5 text-[11px] text-slate-600 font-medium">
-                <span class="w-2.5 h-2.5 rounded bg-brand-emerald inline-block"></span> Settled Revenue
-              </span>
-              <span class="flex items-center gap-1.5 text-[11px] text-slate-600 font-medium">
-                <span class="w-2.5 h-2.5 rounded bg-brand-navy inline-block"></span> Invoiced Total
-              </span>
-            </div>
-          </div>
-          <div class="flex-1 min-h-[220px] pt-4">
-            <canvas id="revenueChart"></canvas>
-          </div>
-        </div>
-
-        <!-- Right 1 Col: Live Network Automation & Webhook Feed -->
-        <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-xs flex flex-col">
-          <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-            <div>
-              <h3 class="font-bold text-sm text-brand-navy">Network Automation Feed</h3>
-              <p class="text-[11px] text-slate-500 mt-0.5">Real-time gateway webhooks & RouterOS actions.</p>
-            </div>
-            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-          </div>
-
-          <!-- Event Stream List -->
-          <div class="flex-1 mt-3 space-y-3 overflow-y-auto max-h-[220px]">
-            
-            <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-200 flex items-start gap-2.5">
-              <div class="w-6 h-6 rounded bg-emerald-100 text-emerald-700 flex items-center justify-center flex-shrink-0 mt-0.5">
-                <i data-lucide="check" class="w-3.5 h-3.5"></i>
-              </div>
-              <div class="flex-1 min-w-0">
-                <div class="flex items-center justify-between">
-                  <span class="font-bold text-[11px] text-brand-navy">Stripe Payment Settled</span>
-                  <span class="font-mono text-[9px] text-slate-400">12s ago</span>
-                </div>
-                <p class="text-[10px] text-slate-600 mt-0.5 truncate">INV-2026-0891 ($199.99) &bull; Elena Rostova</p>
-                <span class="text-[9px] font-mono text-emerald-600 font-semibold block mt-0.5">RouterOS: PPPoE speed unthrottled (1 Gbps)</span>
-              </div>
-            </div>
-
-            <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-200 flex items-start gap-2.5">
-              <div class="w-6 h-6 rounded bg-blue-100 text-brand-blue flex items-center justify-center flex-shrink-0 mt-0.5">
-                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
-              </div>
-              <div class="flex-1 min-w-0">
-                <div class="flex items-center justify-between">
-                  <span class="font-bold text-[11px] text-brand-navy">TR-069 Optical Check</span>
-                  <span class="font-mono text-[9px] text-slate-400">2m ago</span>
-                </div>
-                <p class="text-[10px] text-slate-600 mt-0.5 truncate">ONT-HW-20260901 &bull; Rx: -19.4 dBm (Normal)</p>
-                <span class="text-[9px] font-mono text-slate-500 block mt-0.5">GenieACS: WAN PPPoE Session Healthy</span>
-              </div>
-            </div>
-
-            <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-200 flex items-start gap-2.5">
-              <div class="w-6 h-6 rounded bg-amber-100 text-amber-700 flex items-center justify-center flex-shrink-0 mt-0.5">
-                <i data-lucide="clock" class="w-3.5 h-3.5"></i>
-              </div>
-              <div class="flex-1 min-w-0">
-                <div class="flex items-center justify-between">
-                  <span class="font-bold text-[11px] text-brand-navy">Invoice Grace Period Reminder</span>
-                  <span class="font-mono text-[9px] text-slate-400">8m ago</span>
-                </div>
-                <p class="text-[10px] text-slate-600 mt-0.5 truncate">INV-2026-0893 ($89.99) &bull; Devon Chen</p>
-                <span class="text-[9px] font-mono text-amber-600 font-semibold block mt-0.5">Automated SMS/WhatsApp reminder dispatched</span>
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-      </div>
-
-      <!-- Financial Ledger & Subscriber Status Table -->
-      <div class="bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden">
-        <div class="p-4 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <!-- Sidebar Bottom Status Footer -->
+      <div class="p-3 border-t border-slate-200 bg-slate-50/60">
+        <div class="bg-white border border-slate-200 rounded-xl p-2.5 flex items-center justify-between shadow-2xs">
           <div>
-            <h3 class="font-bold text-sm text-brand-navy">Live Subscriber Invoice Ledger</h3>
-            <p class="text-[11px] text-slate-500 mt-0.5">Multi-gateway settlements and automated Mikrotik RouterOS PPPoE state.</p>
+            <span class="text-[10px] font-bold text-brand-navy uppercase block font-mono">PulseBill Daemon</span>
+            <span class="text-[10px] text-emerald-600 font-semibold flex items-center gap-1 mt-0.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              Active (PID 4892)
+            </span>
           </div>
-          <div class="flex items-center gap-2">
-            <button class="px-2.5 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-600 text-xs font-medium flex items-center gap-1">
-              <i data-lucide="filter" class="w-3.5 h-3.5"></i>
-              <span>All Statuses</span>
-            </button>
-            <button class="px-2.5 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-600 text-xs font-medium flex items-center gap-1">
-              <i data-lucide="download" class="w-3.5 h-3.5"></i>
-              <span>Export CSV</span>
-            </button>
+          <span class="text-[10px] font-mono font-bold bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded border border-slate-200">v2.4-LTS</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main View Area -->
+    <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+      
+      <!-- Topbar Header (Height 64px - Clean Flush Top Bar with Integrated Sandbox Controls) -->
+      <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 z-10 shadow-2xs">
+        <div class="flex items-center gap-4 flex-1 max-w-md">
+          <div class="relative w-full">
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-2.5"></i>
+            <input 
+              type="text" 
+              id="global-invoice-search"
+              placeholder="Search invoice number, subscriber, email, or IP..." 
+              onkeyup="filterInvoiceTable()"
+              class="w-full pl-9 pr-14 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-brand-emerald focus:bg-white transition font-sans"
+            />
+            <kbd class="absolute right-2.5 top-2 text-[9px] font-mono px-1.5 py-0.5 rounded bg-white border border-slate-200 text-slate-400 hidden sm:inline">Ctrl+K</kbd>
           </div>
         </div>
 
-        <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse">
-            <thead>
-              <tr class="bg-slate-50 text-slate-500 font-mono text-[10px] uppercase tracking-wider border-b border-slate-200">
-                <th class="py-3 px-4">Invoice ID</th>
-                <th class="py-3 px-4">Subscriber</th>
-                <th class="py-3 px-4">Service Plan</th>
-                <th class="py-3 px-4">Amount</th>
-                <th class="py-3 px-4">Payment Method</th>
-                <th class="py-3 px-4">Billing Status</th>
-                <th class="py-3 px-4">RouterOS Provisioning</th>
-                <th class="py-3 px-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100 text-xs text-slate-700">
+        <div class="flex items-center gap-3">
+          
+          <!-- Integrated Developer / Sandbox Operations Toolbar (Replacing the old black bar cleanly) -->
+          <div class="hidden lg:flex items-center gap-1.5 bg-slate-100 border border-slate-200 rounded-xl p-1 shadow-inner">
+            <span class="text-[10px] font-mono font-bold text-slate-500 px-2 flex items-center gap-1">
+              <i data-lucide="terminal" class="w-3 h-3 text-slate-400"></i>
+              <span>OPS SANDBOX:</span>
+            </span>
+            <button onclick="triggerSimulatedWebhook()" title="Simulate incoming Stripe payment webhook" class="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-semibold transition shadow-sm active:scale-95">
+              <i data-lucide="zap" class="w-3 h-3"></i>
+              <span>Stripe Webhook ($199.99)</span>
+            </button>
+            <button onclick="triggerSuspensionSimulation()" title="Simulate automated subscriber suspension" class="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-[11px] font-semibold transition shadow-sm active:scale-95">
+              <i data-lucide="shield-alert" class="w-3 h-3"></i>
+              <span>RouterOS Isolir</span>
+            </button>
+          </div>
+
+          <!-- Live Gateway Status Badge -->
+          <div class="hidden md:flex items-center gap-2 bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded-xl text-xs font-medium">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>Stripe, Midtrans, Xendit Live</span>
+          </div>
+
+          <!-- Notification Bell with Dropdown -->
+          <div class="relative">
+            <button onclick="toggleNotificationTray()" class="w-9 h-9 rounded-xl border border-slate-200 hover:bg-slate-50 flex items-center justify-center text-slate-600 relative transition">
+              <i data-lucide="bell" class="w-4 h-4"></i>
+              <span id="notif-badge" class="absolute top-2 right-2 w-2 h-2 bg-emerald-500 rounded-full"></span>
+            </button>
+
+            <div id="notification-tray" class="hidden absolute right-0 mt-2 w-80 bg-white border border-slate-200 rounded-2xl shadow-xl p-4 z-50 text-xs">
+              <div class="flex items-center justify-between pb-2 mb-3 border-b border-slate-100 font-bold text-slate-900">
+                <span>Recent System Events</span>
+                <span class="text-[10px] font-mono text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">Real-Time</span>
+              </div>
+              <div class="space-y-2.5">
+                <div class="p-2 rounded-lg bg-slate-50 border border-slate-100">
+                  <div class="font-bold text-slate-800">Stripe Webhook Verified</div>
+                  <div class="text-[11px] text-slate-500 mt-0.5">INV-2026-0891 marked settled ($199.99).</div>
+                </div>
+                <div class="p-2 rounded-lg bg-slate-50 border border-slate-100">
+                  <div class="font-bold text-slate-800">Mikrotik RouterOS Sync</div>
+                  <div class="text-[11px] text-slate-500 mt-0.5">482 queues synchronized across core gateway.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Profile Pill Box (Feri Hidayat) -->
+          <div class="flex items-center gap-2.5 pl-3 border-l border-slate-200">
+            <div class="w-8 h-8 rounded-xl brand-gradient flex items-center justify-center font-bold text-white text-xs shadow-sm">
+              FH
+            </div>
+            <div class="hidden sm:block text-left">
+              <span class="font-bold text-xs text-brand-navy block leading-none">Feri Hidayat</span>
+              <span class="text-[10px] text-emerald-600 font-semibold font-mono">Lead Systems Architect</span>
+            </div>
+          </div>
+
+        </div>
+      </header>
+
+      <!-- Main Page Content Scrollable Area -->
+      <main class="flex-1 overflow-y-auto p-6 space-y-6">
+
+        <!-- TAB 1: DASHBOARD (Billing Operations Command Center) -->
+        <div id="tab-dashboard" class="tab-pane space-y-6">
+          
+          <!-- Page Heading & Quick Actions -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 class="text-xl font-bold text-brand-navy tracking-tight">Billing Operations Command Center</h2>
+              <p class="text-xs text-slate-500 mt-0.5">Automated invoice lifecycles, payment webhooks reconciliation, and Mikrotik RouterOS provisioning.</p>
+            </div>
+            <div class="flex items-center gap-2.5">
+              <button onclick="syncGatewaysAction()" class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold px-3 py-2 rounded-xl text-xs flex items-center gap-1.5 transition shadow-2xs active:scale-95">
+                <i data-lucide="refresh-cw" id="sync-spinner" class="w-3.5 h-3.5 text-slate-500"></i>
+                <span>Sync Gateways</span>
+              </button>
+              <button onclick="generateInvoicesAction()" class="brand-btn-primary font-semibold px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5 active:scale-95">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                <span>+ Generate Invoices</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 5-Metric Financial Cards Grid -->
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
+            
+            <!-- Metric 1: MRR -->
+            <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs hover:border-emerald-300 transition">
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] font-medium text-slate-500">Monthly Rec. Revenue</span>
+                <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                  <i data-lucide="dollar-sign" class="w-4 h-4"></i>
+                </div>
+              </div>
+              <div class="mt-2.5">
+                <span class="font-mono text-2xl font-bold text-brand-navy tracking-tight" id="metric-mrr">$48,920</span>
+                <span class="text-[10px] text-emerald-600 font-semibold block mt-0.5 flex items-center gap-0.5">
+                  <i data-lucide="trending-up" class="w-3 h-3"></i> +14.2% MoM growth
+                </span>
+              </div>
+            </div>
+
+            <!-- Metric 2: Active Subscribers -->
+            <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs hover:border-blue-300 transition">
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] font-medium text-slate-500">Active Subscribers</span>
+                <div class="w-7 h-7 rounded-lg bg-blue-50 text-brand-blue flex items-center justify-center">
+                  <i data-lucide="users" class="w-4 h-4"></i>
+                </div>
+              </div>
+              <div class="mt-2.5">
+                <span class="font-mono text-2xl font-bold text-brand-navy tracking-tight" id="metric-subs">1,284</span>
+                <span class="text-[10px] text-slate-500 font-medium block mt-0.5">99.2% Good Standing</span>
+              </div>
+            </div>
+
+            <!-- Metric 3: Pending Invoices -->
+            <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs hover:border-amber-300 transition">
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] font-medium text-slate-500">Pending Settlement</span>
+                <div class="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+                  <i data-lucide="clock" class="w-4 h-4"></i>
+                </div>
+              </div>
+              <div class="mt-2.5">
+                <span class="font-mono text-2xl font-bold text-amber-600 tracking-tight" id="metric-pending">$3,420</span>
+                <span class="text-[10px] text-slate-500 font-medium block mt-0.5" id="metric-pending-count">24 open invoices</span>
+              </div>
+            </div>
+
+            <!-- Metric 4: RouterOS Syncs -->
+            <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs hover:border-purple-300 transition">
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] font-medium text-slate-500">RouterOS Auto-Sync</span>
+                <div class="w-7 h-7 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
+                  <i data-lucide="cpu" class="w-4 h-4"></i>
+                </div>
+              </div>
+              <div class="mt-2.5">
+                <span class="font-mono text-2xl font-bold text-brand-navy tracking-tight">482 <span class="text-xs font-normal text-slate-400">runs/24h</span></span>
+                <span class="text-[10px] text-emerald-600 font-semibold block mt-0.5">0 API Sync Faults</span>
+              </div>
+            </div>
+
+            <!-- Metric 5: Webhook Health -->
+            <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs hover:border-emerald-300 transition">
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] font-medium text-slate-500">Webhook Reliability</span>
+                <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                  <i data-lucide="shield-check" class="w-4 h-4"></i>
+                </div>
+              </div>
+              <div class="mt-2.5">
+                <span class="font-mono text-2xl font-bold text-emerald-600 tracking-tight">99.98%</span>
+                <span class="text-[10px] text-slate-500 font-medium block mt-0.5">Zero dropped events</span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Split Grid: Financial Collections & Real-time RouterOS Event Dispatch -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+            
+            <!-- Left 2 Cols: Revenue & Collection Velocity Chart -->
+            <div class="lg:col-span-2 bg-white border border-slate-200 rounded-2xl p-5 shadow-xs flex flex-col justify-between">
+              <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div>
+                  <h3 class="font-bold text-sm text-brand-navy">Revenue Ingestion & Gateway Velocity</h3>
+                  <p class="text-[11px] text-slate-500 mt-0.5">Cumulative monthly recurring collections across Stripe, Midtrans, and Xendit.</p>
+                </div>
+                <div class="flex items-center gap-3 font-mono text-[11px]">
+                  <span class="flex items-center gap-1.5 text-slate-600 font-medium">
+                    <span class="w-2.5 h-2.5 rounded bg-emerald-600 inline-block"></span> Settled Revenue
+                  </span>
+                  <span class="flex items-center gap-1.5 text-slate-600 font-medium">
+                    <span class="w-2.5 h-2.5 rounded bg-brand-navy inline-block"></span> Invoiced Total
+                  </span>
+                </div>
+              </div>
+              <div class="flex-1 min-h-[220px] pt-4">
+                <canvas id="revenueChart"></canvas>
+              </div>
+            </div>
+
+            <!-- Right 1 Col: Live Network Automation & Webhook Feed -->
+            <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs flex flex-col">
+              <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div>
+                  <h3 class="font-bold text-sm text-brand-navy">Network Automation Feed</h3>
+                  <p class="text-[11px] text-slate-500 mt-0.5">Real-time gateway webhooks & RouterOS actions.</p>
+                </div>
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+              </div>
+
+              <!-- Event Stream List (Dynamically updated on simulations) -->
+              <div id="automation-feed" class="flex-1 mt-3 space-y-3 overflow-y-auto max-h-[220px]">
+                
+                <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100 flex items-start gap-2.5 animate-fadeIn">
+                  <div class="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between">
+                      <span class="font-bold text-[11px] text-brand-navy">Stripe Payment Settled</span>
+                      <span class="font-mono text-[9px] text-slate-400">12s ago</span>
+                    </div>
+                    <p class="text-[10px] text-slate-600 mt-0.5 truncate">INV-2026-0891 ($199.99) &bull; Elena Rostova</p>
+                    <span class="text-[9px] font-mono text-emerald-600 font-semibold block mt-0.5">RouterOS: PPPoE speed unthrottled (1 Gbps)</span>
+                  </div>
+                </div>
+
+                <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100 flex items-start gap-2.5">
+                  <div class="w-6 h-6 rounded-lg bg-blue-100 text-brand-blue flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between">
+                      <span class="font-bold text-[11px] text-brand-navy">TR-069 Optical Check</span>
+                      <span class="font-mono text-[9px] text-slate-400">2m ago</span>
+                    </div>
+                    <p class="text-[10px] text-slate-600 mt-0.5 truncate">ONT-HW-20260901 &bull; Rx: -19.4 dBm (Normal)</p>
+                    <span class="text-[9px] font-mono text-slate-500 block mt-0.5">GenieACS: WAN PPPoE Session Healthy</span>
+                  </div>
+                </div>
+
+                <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100 flex items-start gap-2.5">
+                  <div class="w-6 h-6 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between">
+                      <span class="font-bold text-[11px] text-brand-navy">Invoice Grace Period Reminder</span>
+                      <span class="font-mono text-[9px] text-slate-400">8m ago</span>
+                    </div>
+                    <p class="text-[10px] text-slate-600 mt-0.5 truncate">INV-2026-0893 ($89.99) &bull; Devon Chen</p>
+                    <span class="text-[9px] font-mono text-amber-600 font-semibold block mt-0.5">Automated WhatsApp billing reminder dispatched</span>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Financial Ledger & Subscriber Status Table -->
+          <div class="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
+            
+            <!-- Table Controls -->
+            <div class="p-4 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h3 class="font-bold text-sm text-brand-navy">Live Subscriber Invoice Ledger</h3>
+                <p class="text-[11px] text-slate-500 mt-0.5">Multi-gateway settlements and automated Mikrotik RouterOS PPPoE state.</p>
+              </div>
               
-              <!-- Row 1: Paid Gigabit Enterprise -->
-              <tr class="hover:bg-slate-50/80 transition">
-                <td class="py-3 px-4 font-mono font-bold text-brand-navy">INV-2026-0891</td>
-                <td class="py-3 px-4">
-                  <span class="font-bold text-brand-navy block">Elena Rostova</span>
-                  <span class="text-[10px] text-slate-400 font-mono">PB-CUST-1002 &bull; elena@techscale.io</span>
-                </td>
-                <td class="py-3 px-4">
-                  <span class="font-medium text-slate-800 block">Gigabit Enterprise</span>
-                  <span class="text-[10px] text-slate-500 font-mono">1 Gbps Symmetrical</span>
-                </td>
-                <td class="py-3 px-4 font-mono font-bold text-brand-navy">$199.99</td>
-                <td class="py-3 px-4">
-                  <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
-                    Stripe Card &bull; 4242
-                  </span>
-                </td>
-                <td class="py-3 px-4">
-                  <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                    PAID / SETTLED
-                  </span>
-                </td>
-                <td class="py-3 px-4">
-                  <div class="flex items-center gap-1.5 font-mono text-[11px] text-emerald-600 font-semibold">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                    <span>Active (1G_Enterprise)</span>
-                  </div>
-                </td>
-                <td class="py-3 px-4 text-right">
-                  <button class="text-brand-emerald hover:underline font-semibold text-xs">Receipt &rarr;</button>
-                </td>
-              </tr>
+              <div class="flex items-center gap-2">
+                <!-- Status Filter Dropdown -->
+                <div class="relative">
+                  <select id="table-status-filter" onchange="filterInvoiceTable()" class="bg-slate-50 border border-slate-200 text-slate-700 text-xs font-semibold rounded-xl px-3 py-1.5 focus:outline-none cursor-pointer">
+                    <option value="all">All Statuses</option>
+                    <option value="paid">Paid / Settled</option>
+                    <option value="pending">Pending Grace</option>
+                    <option value="suspended">Overdue / Suspended</option>
+                  </select>
+                </div>
 
-              <!-- Row 2: Paid Fiber Pro Business -->
-              <tr class="hover:bg-slate-50/80 transition">
-                <td class="py-3 px-4 font-mono font-bold text-brand-navy">INV-2026-0890</td>
-                <td class="py-3 px-4">
-                  <span class="font-bold text-brand-navy block">Marcus Vance</span>
-                  <span class="text-[10px] text-slate-400 font-mono">PB-CUST-1001 &bull; marcus@vancecapital.com</span>
-                </td>
-                <td class="py-3 px-4">
-                  <span class="font-medium text-slate-800 block">Fiber Pro Business</span>
-                  <span class="text-[10px] text-slate-500 font-mono">250 Mbps Symmetrical</span>
-                </td>
-                <td class="py-3 px-4 font-mono font-bold text-brand-navy">$89.99</td>
-                <td class="py-3 px-4">
-                  <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
-                    Midtrans &bull; Bank VA
-                  </span>
-                </td>
-                <td class="py-3 px-4">
-                  <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                    PAID / SETTLED
-                  </span>
-                </td>
-                <td class="py-3 px-4">
-                  <div class="flex items-center gap-1.5 font-mono text-[11px] text-emerald-600 font-semibold">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                    <span>Active (250M_Symmetrical)</span>
-                  </div>
-                </td>
-                <td class="py-3 px-4 text-right">
-                  <button class="text-brand-emerald hover:underline font-semibold text-xs">Receipt &rarr;</button>
-                </td>
-              </tr>
+                <!-- Export CSV Button -->
+                <button onclick="exportInvoicesCSV()" class="px-3 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold flex items-center gap-1.5 transition active:scale-95 shadow-2xs">
+                  <i data-lucide="download" class="w-3.5 h-3.5 text-brand-emerald"></i>
+                  <span>Export CSV</span>
+                </button>
+              </div>
+            </div>
 
-              <!-- Row 3: Pending Grace Period -->
-              <tr class="hover:bg-slate-50/80 transition">
-                <td class="py-3 px-4 font-mono font-bold text-brand-navy">INV-2026-0892</td>
-                <td class="py-3 px-4">
-                  <span class="font-bold text-brand-navy block">Devon Chen</span>
-                  <span class="text-[10px] text-slate-400 font-mono">PB-CUST-1003 &bull; devon.chen@gmail.com</span>
-                </td>
-                <td class="py-3 px-4">
-                  <span class="font-medium text-slate-800 block">Fiber Starter</span>
-                  <span class="text-[10px] text-slate-500 font-mono">50 Mbps Symmetrical</span>
-                </td>
-                <td class="py-3 px-4 font-mono font-bold text-amber-600">$39.99</td>
-                <td class="py-3 px-4">
-                  <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
-                    Xendit Payment Link
-                  </span>
-                </td>
-                <td class="py-3 px-4">
-                  <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                    PENDING (GRACE DAY 2)
-                  </span>
-                </td>
-                <td class="py-3 px-4">
-                  <div class="flex items-center gap-1.5 font-mono text-[11px] text-amber-600 font-semibold">
-                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                    <span>Active (Grace Exp: 24h)</span>
-                  </div>
-                </td>
-                <td class="py-3 px-4 text-right">
-                  <button class="text-brand-blue hover:underline font-semibold text-xs">Send Reminder &rarr;</button>
-                </td>
-              </tr>
+            <!-- Ledger Table -->
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr class="bg-slate-50 text-slate-500 font-mono text-[10px] uppercase tracking-wider border-b border-slate-200">
+                    <th class="py-3 px-4">Invoice ID</th>
+                    <th class="py-3 px-4">Subscriber</th>
+                    <th class="py-3 px-4">Service Plan</th>
+                    <th class="py-3 px-4">Amount</th>
+                    <th class="py-3 px-4">Payment Method</th>
+                    <th class="py-3 px-4">Billing Status</th>
+                    <th class="py-3 px-4">RouterOS Provisioning</th>
+                    <th class="py-3 px-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="invoice-table-body" class="divide-y divide-slate-100 text-slate-700">
+                  
+                  <!-- Row 1: Paid Gigabit Enterprise -->
+                  <tr class="invoice-row hover:bg-slate-50/80 transition" data-status="paid" data-search="INV-2026-0891 Elena Rostova elena@techscale.io Gigabit Enterprise Stripe 10.24.12.92">
+                    <td class="py-3.5 px-4 font-mono font-bold text-brand-navy">INV-2026-0891</td>
+                    <td class="py-3.5 px-4">
+                      <span class="font-bold text-brand-navy block">Elena Rostova</span>
+                      <span class="text-[10px] text-slate-400 font-mono">PB-CUST-1002 &bull; elena@techscale.io</span>
+                    </td>
+                    <td class="py-3.5 px-4">
+                      <span class="font-semibold text-slate-800 block">Gigabit Enterprise</span>
+                      <span class="text-[10px] text-slate-500 font-mono">1 Gbps Symmetrical</span>
+                    </td>
+                    <td class="py-3.5 px-4 font-mono font-bold text-brand-navy">$199.99</td>
+                    <td class="py-3.5 px-4">
+                      <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                        Stripe Card &bull; 4242
+                      </span>
+                    </td>
+                    <td class="py-3.5 px-4">
+                      <span class="status-badge px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        PAID / SETTLED
+                      </span>
+                    </td>
+                    <td class="py-3.5 px-4">
+                      <div class="routeros-status flex items-center gap-1.5 font-mono text-[11px] text-emerald-600 font-semibold">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                        <span>Active (1G_Enterprise)</span>
+                      </div>
+                    </td>
+                    <td class="py-3.5 px-4 text-right">
+                      <button onclick="viewReceipt('INV-2026-0891', 'Elena Rostova', 'elena@techscale.io', 'Gigabit Enterprise', '$199.99', 'Stripe Card • 4242', 'PAID', '1G_Enterprise')" class="text-brand-emerald hover:underline font-semibold text-xs flex items-center gap-1 ml-auto">
+                        <span>Receipt</span>
+                        <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                      </button>
+                    </td>
+                  </tr>
 
-              <!-- Row 4: Suspended / Overdue -->
-              <tr class="hover:bg-slate-50/80 transition">
-                <td class="py-3 px-4 font-mono font-bold text-brand-navy">INV-2026-0888</td>
-                <td class="py-3 px-4">
-                  <span class="font-bold text-brand-navy block">Sarah Jenkins</span>
-                  <span class="text-[10px] text-slate-400 font-mono">PB-CUST-1004 &bull; sarah.j@outlook.com</span>
-                </td>
-                <td class="py-3 px-4">
-                  <span class="font-medium text-slate-800 block">Fiber Starter</span>
-                  <span class="text-[10px] text-slate-500 font-mono">50 Mbps Symmetrical</span>
-                </td>
-                <td class="py-3 px-4 font-mono font-bold text-rose-600">$39.99</td>
-                <td class="py-3 px-4">
-                  <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-500 border border-slate-200">
-                    Unselected
-                  </span>
-                </td>
-                <td class="py-3 px-4">
-                  <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
-                    OVERDUE &bull; SUSPENDED
-                  </span>
-                </td>
-                <td class="py-3 px-4">
-                  <div class="flex items-center gap-1.5 font-mono text-[11px] text-rose-600 font-semibold">
-                    <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
-                    <span>Isolated (pool-isolir)</span>
-                  </div>
-                </td>
-                <td class="py-3 px-4 text-right">
-                  <button class="text-rose-600 hover:underline font-semibold text-xs">Manual Reconnect &rarr;</button>
-                </td>
-              </tr>
+                  <!-- Row 2: Paid Fiber Pro Business -->
+                  <tr class="invoice-row hover:bg-slate-50/80 transition" data-status="paid" data-search="INV-2026-0890 Marcus Vance marcus@vancecapital.com Fiber Pro Business Midtrans 10.24.12.88">
+                    <td class="py-3.5 px-4 font-mono font-bold text-brand-navy">INV-2026-0890</td>
+                    <td class="py-3.5 px-4">
+                      <span class="font-bold text-brand-navy block">Marcus Vance</span>
+                      <span class="text-[10px] text-slate-400 font-mono">PB-CUST-1001 &bull; marcus@vancecapital.com</span>
+                    </td>
+                    <td class="py-3.5 px-4">
+                      <span class="font-semibold text-slate-800 block">Fiber Pro Business</span>
+                      <span class="text-[10px] text-slate-500 font-mono">250 Mbps Symmetrical</span>
+                    </td>
+                    <td class="py-3.5 px-4 font-mono font-bold text-brand-navy">$89.99</td>
+                    <td class="py-3.5 px-4">
+                      <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                        Midtrans &bull; Bank VA
+                      </span>
+                    </td>
+                    <td class="py-3.5 px-4">
+                      <span class="status-badge px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        PAID / SETTLED
+                      </span>
+                    </td>
+                    <td class="py-3.5 px-4">
+                      <div class="routeros-status flex items-center gap-1.5 font-mono text-[11px] text-emerald-600 font-semibold">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                        <span>Active (250M_Symmetrical)</span>
+                      </div>
+                    </td>
+                    <td class="py-3.5 px-4 text-right">
+                      <button onclick="viewReceipt('INV-2026-0890', 'Marcus Vance', 'marcus@vancecapital.com', 'Fiber Pro Business', '$89.99', 'Midtrans • Bank VA', 'PAID', '250M_Symmetrical')" class="text-brand-emerald hover:underline font-semibold text-xs flex items-center gap-1 ml-auto">
+                        <span>Receipt</span>
+                        <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                      </button>
+                    </td>
+                  </tr>
 
-            </tbody>
-          </table>
+                  <!-- Row 3: Pending Grace Period -->
+                  <tr class="invoice-row hover:bg-slate-50/80 transition" id="row-devon-chen" data-status="pending" data-search="INV-2026-0892 Devon Chen devon.chen@gmail.com Fiber Starter Xendit 10.24.12.102">
+                    <td class="py-3.5 px-4 font-mono font-bold text-brand-navy">INV-2026-0892</td>
+                    <td class="py-3.5 px-4">
+                      <span class="font-bold text-brand-navy block">Devon Chen</span>
+                      <span class="text-[10px] text-slate-400 font-mono">PB-CUST-1003 &bull; devon.chen@gmail.com</span>
+                    </td>
+                    <td class="py-3.5 px-4">
+                      <span class="font-semibold text-slate-800 block">Fiber Starter</span>
+                      <span class="text-[10px] text-slate-500 font-mono">50 Mbps Symmetrical</span>
+                    </td>
+                    <td class="py-3.5 px-4 font-mono font-bold text-amber-600" id="devon-amount">$39.99</td>
+                    <td class="py-3.5 px-4">
+                      <span class="payment-method-badge px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                        Xendit Payment Link
+                      </span>
+                    </td>
+                    <td class="py-3.5 px-4">
+                      <span class="status-badge px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                        PENDING (GRACE DAY 2)
+                      </span>
+                    </td>
+                    <td class="py-3.5 px-4">
+                      <div class="routeros-status flex items-center gap-1.5 font-mono text-[11px] text-amber-600 font-semibold">
+                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                        <span>Active (Grace Exp: 24h)</span>
+                      </div>
+                    </td>
+                    <td class="py-3.5 px-4 text-right">
+                      <div class="flex items-center justify-end gap-2">
+                        <button onclick="sendReminder('Devon Chen', 'INV-2026-0892')" class="text-brand-blue hover:underline font-semibold text-xs">
+                          Send Reminder &rarr;
+                        </button>
+                        <button onclick="viewReceipt('INV-2026-0892', 'Devon Chen', 'devon.chen@gmail.com', 'Fiber Starter', '$39.99', 'Xendit Link', 'PENDING', '50M_Starter')" class="text-slate-400 hover:text-slate-600">
+                          <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+
+                  <!-- Row 4: Suspended / Overdue -->
+                  <tr class="invoice-row hover:bg-slate-50/80 transition bg-rose-50/20" id="row-sarah-jenkins" data-status="suspended" data-search="INV-2026-0888 Sarah Jenkins sarah.j@outlook.com Fiber Starter Overdue 10.24.12.110">
+                    <td class="py-3.5 px-4 font-mono font-bold text-brand-navy">INV-2026-0888</td>
+                    <td class="py-3.5 px-4">
+                      <span class="font-bold text-brand-navy block">Sarah Jenkins</span>
+                      <span class="text-[10px] text-slate-400 font-mono">PB-CUST-1004 &bull; sarah.j@outlook.com</span>
+                    </td>
+                    <td class="py-3.5 px-4">
+                      <span class="font-semibold text-slate-800 block">Fiber Starter</span>
+                      <span class="text-[10px] text-slate-500 font-mono">50 Mbps Symmetrical</span>
+                    </td>
+                    <td class="py-3.5 px-4 font-mono font-bold text-rose-600">$39.99</td>
+                    <td class="py-3.5 px-4">
+                      <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-500 border border-slate-200">
+                        Unsettled
+                      </span>
+                    </td>
+                    <td class="py-3.5 px-4">
+                      <span class="status-badge px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                        OVERDUE &bull; SUSPENDED
+                      </span>
+                    </td>
+                    <td class="py-3.5 px-4">
+                      <div class="routeros-status flex items-center gap-1.5 font-mono text-[11px] text-rose-600 font-semibold">
+                        <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                        <span>Isolated (pool-isolir)</span>
+                      </div>
+                    </td>
+                    <td class="py-3.5 px-4 text-right">
+                      <button onclick="manualReconnect('Sarah Jenkins', 'row-sarah-jenkins')" class="text-rose-600 hover:underline font-semibold text-xs">
+                        Manual Reconnect &rarr;
+                      </button>
+                    </td>
+                  </tr>
+
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- TAB 2: INVOICES & RECEIPTS -->
+        <div id="tab-invoices" class="tab-pane hidden space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-xl font-bold text-brand-navy tracking-tight">Invoices & Receipts Directory</h2>
+              <p class="text-xs text-slate-500 mt-0.5">Historical ledger of all generated recurring invoices and settlement records.</p>
+            </div>
+            <button onclick="exportInvoicesCSV()" class="brand-btn-primary font-semibold px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5">
+              <i data-lucide="download" class="w-3.5 h-3.5"></i>
+              <span>Download Master Ledger</span>
+            </button>
+          </div>
+          <div class="p-6 bg-white border border-slate-200 rounded-2xl shadow-xs text-center">
+            <i data-lucide="file-check-2" class="w-8 h-8 text-brand-emerald mx-auto mb-2"></i>
+            <h4 class="font-bold text-brand-navy text-sm">Automated Billing Ledger Sync</h4>
+            <p class="text-xs text-slate-500 mt-1 max-w-md mx-auto leading-relaxed">
+              All 1,284 invoices are reconciled continuously against Stripe, Midtrans, and Xendit webhooks with zero dropped transactions.
+            </p>
+          </div>
+        </div>
+
+        <!-- TAB 3: PAYMENT GATEWAYS -->
+        <div id="tab-gateways" class="tab-pane hidden space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-xl font-bold text-brand-navy tracking-tight">Payment Gateways & Rails</h2>
+              <p class="text-xs text-slate-500 mt-0.5">Multi-gateway webhook endpoints and HMAC signature verification drivers.</p>
+            </div>
+            <button onclick="syncGatewaysAction()" class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold px-3 py-2 rounded-xl text-xs flex items-center gap-1.5">
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+              <span>Re-check Rails</span>
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-brand-navy">Stripe Payments</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">ACTIVE</span>
+              </div>
+              <div class="text-[11px] text-slate-500 mt-2 font-mono">Webhook: /api/webhooks/stripe</div>
+              <div class="text-[10px] text-emerald-600 font-bold mt-1">HMAC SHA-256 Verified</div>
+            </div>
+
+            <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-brand-navy">Midtrans Snap</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">ACTIVE</span>
+              </div>
+              <div class="text-[11px] text-slate-500 mt-2 font-mono">Webhook: /api/webhooks/midtrans</div>
+              <div class="text-[10px] text-emerald-600 font-bold mt-1">Bank VA & QRIS Idempotent</div>
+            </div>
+
+            <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-brand-navy">Xendit Invoice</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">ACTIVE</span>
+              </div>
+              <div class="text-[11px] text-slate-500 mt-2 font-mono">Webhook: /api/webhooks/xendit</div>
+              <div class="text-[10px] text-emerald-600 font-bold mt-1">Callback Token Authenticated</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 4: MIKROTIK ROUTEROS -->
+        <div id="tab-routeros" class="tab-pane hidden space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-xl font-bold text-brand-navy tracking-tight">Mikrotik RouterOS API v7 Engine</h2>
+              <p class="text-xs text-slate-500 mt-0.5">Persistent binary socket connection to core BRAS router (Port 8728).</p>
+            </div>
+            <button onclick="showToast('RouterOS Ping', 'Socket connection to 10.24.0.1:8728 responded in 4.2ms. Zero latency jitter.', 'success')" class="brand-btn-primary font-semibold px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5">
+              <i data-lucide="radio" class="w-3.5 h-3.5"></i>
+              <span>Ping Binary Socket</span>
+            </button>
+          </div>
+
+          <div class="bg-slate-950 text-slate-200 font-mono text-xs p-5 rounded-2xl border border-slate-800 space-y-2 shadow-lg">
+            <div class="text-emerald-400 font-bold">// PulseBill RouterOS Binary Socket Live Stream</div>
+            <div class="text-slate-400">15:40:01 [/ppp/active/print] => 1,284 PPPoE sessions active</div>
+            <div class="text-slate-400">15:40:02 [/queue/simple/print] => Queue tree synchronized with rate-limit cards</div>
+            <div class="text-cyan-400">15:40:03 [ROS-EVENT] CoA Packet sent to user "marcus" => Profile: 250M_Symmetrical</div>
+            <div class="text-emerald-400">15:40:04 [ROS-OK] Socket multiplexer idle. Replay buffer clear.</div>
+          </div>
+        </div>
+
+        <!-- TAB 5: TR-069 GENIEACS -->
+        <div id="tab-genieacs" class="tab-pane hidden space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-xl font-bold text-brand-navy tracking-tight">TR-069 GenieACS Auto-Configuration</h2>
+              <p class="text-xs text-slate-500 mt-0.5">CWMP Device Management protocol over port 7547.</p>
+            </div>
+          </div>
+
+          <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-2">
+            <div class="font-bold text-brand-navy text-sm">TR-069 Auto-Provisioning Pipeline</div>
+            <p class="text-xs text-slate-600 leading-relaxed">
+              When an invoice is paid or isolated, PulseBill dispatches asynchronous RPC calls to GenieACS to reconfigure the Optical Network Terminal (ONT) WAN profile automatically.
+            </p>
+          </div>
+        </div>
+
+        <!-- TAB 6: RATE CARDS & PLANS -->
+        <div id="tab-ratecards" class="tab-pane hidden space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-xl font-bold text-brand-navy tracking-tight">Service Rate Cards & QoS Plans</h2>
+              <p class="text-xs text-slate-500 mt-0.5">Symmetrical bandwidth limits and burst profiles mapped to RouterOS queue trees.</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs">
+              <div class="font-bold text-brand-navy text-sm">Gigabit Enterprise</div>
+              <div class="text-2xl font-bold font-mono text-brand-navy mt-1">$199.99<span class="text-xs font-normal text-slate-400">/mo</span></div>
+              <div class="text-[11px] text-emerald-600 font-mono font-semibold mt-1">1 Gbps Symmetrical &bull; Priority 1</div>
+            </div>
+
+            <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs">
+              <div class="font-bold text-brand-navy text-sm">Fiber Pro Business</div>
+              <div class="text-2xl font-bold font-mono text-brand-navy mt-1">$89.99<span class="text-xs font-normal text-slate-400">/mo</span></div>
+              <div class="text-[11px] text-emerald-600 font-mono font-semibold mt-1">250 Mbps Symmetrical &bull; Priority 3</div>
+            </div>
+
+            <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs">
+              <div class="font-bold text-brand-navy text-sm">Fiber Starter</div>
+              <div class="text-2xl font-bold font-mono text-brand-navy mt-1">$39.99<span class="text-xs font-normal text-slate-400">/mo</span></div>
+              <div class="text-[11px] text-emerald-600 font-mono font-semibold mt-1">50 Mbps Symmetrical &bull; Priority 5</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 7: SUBSCRIBERS -->
+        <div id="tab-subscribers" class="tab-pane hidden space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-xl font-bold text-brand-navy tracking-tight">Active Subscriber Directory</h2>
+              <p class="text-xs text-slate-500 mt-0.5">1,284 active optical subscribers with automated billing binding.</p>
+            </div>
+          </div>
+          <div class="bg-white border border-slate-200 rounded-2xl p-6 text-center text-slate-500">
+            <i data-lucide="users" class="w-8 h-8 text-brand-blue mx-auto mb-2"></i>
+            <div class="font-bold text-brand-navy text-sm">1,284 Telecom Accounts Monitored</div>
+            <div class="text-xs text-slate-400 mt-0.5">All accounts synchronized with RADIUS and RouterOS pools.</div>
+          </div>
+        </div>
+
+        <!-- TAB 8: SETTINGS -->
+        <div id="tab-settings" class="tab-pane hidden space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-xl font-bold text-brand-navy tracking-tight">System & Billing Settings</h2>
+              <p class="text-xs text-slate-500 mt-0.5">Invoice scheduling, currency configuration, and Mikrotik authentication.</p>
+            </div>
+          </div>
+          <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-3">
+            <div class="font-bold text-brand-navy">Autonomous Cron Schedule</div>
+            <div class="text-xs text-slate-600 font-mono">0 0 1 * * => Generate recurring invoices on the 1st of every month at midnight.</div>
+          </div>
+        </div>
+
+      </main>
+
+    </div>
+
+  </div>
+
+  <!-- Printable Telecom Invoice Receipt Modal -->
+  <div id="receipt-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs hidden">
+    <div class="bg-white border border-slate-200 rounded-3xl max-w-lg w-full p-6 shadow-2xl relative overflow-hidden animate-fadeIn text-xs font-sans">
+      
+      <!-- Close Button -->
+      <button onclick="closeReceiptModal()" class="absolute top-5 right-5 p-1.5 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <!-- Invoice Header -->
+      <div class="flex items-start justify-between border-b border-slate-100 pb-4 mb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-navy to-brand-emerald flex items-center justify-center text-white font-bold shadow">
+            <i data-lucide="receipt" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-base text-brand-navy leading-none">PulseBill Telecom Inc.</h3>
+            <span class="text-[10px] text-slate-400 font-mono">Official Telecom Tax Invoice</span>
+          </div>
+        </div>
+        
+        <!-- Paid/Status Stamp -->
+        <div id="modal-stamp" class="px-3 py-1 rounded text-xs stamp-paid uppercase">
+          PAID
         </div>
       </div>
 
-    </main>
+      <!-- Invoice Details Grid -->
+      <div class="grid grid-cols-2 gap-3 p-3.5 bg-slate-50 rounded-2xl border border-slate-100 text-xs mb-4">
+        <div>
+          <span class="text-slate-400 text-[10px] uppercase font-mono block">Billed To</span>
+          <span class="font-bold text-brand-navy block mt-0.5" id="modal-customer-name">Elena Rostova</span>
+          <span class="text-[11px] text-slate-500 font-mono" id="modal-customer-email">elena@techscale.io</span>
+        </div>
+        <div>
+          <span class="text-slate-400 text-[10px] uppercase font-mono block">Invoice Reference</span>
+          <span class="font-bold font-mono text-brand-navy block mt-0.5" id="modal-invoice-id">INV-2026-0891</span>
+          <span class="text-[11px] text-slate-500 font-mono">Issued: Sep 01, 2026</span>
+        </div>
+      </div>
 
+      <!-- Itemized Service Charge -->
+      <div class="border border-slate-100 rounded-2xl overflow-hidden mb-4">
+        <table class="w-full text-left text-xs">
+          <thead class="bg-slate-50 border-b border-slate-100 text-slate-400 font-mono text-[10px] uppercase">
+            <tr>
+              <th class="p-3">Service Description</th>
+              <th class="p-3">Bandwidth / QoS</th>
+              <th class="p-3 text-right">Amount</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            <tr>
+              <td class="p-3 font-semibold text-slate-800" id="modal-service-name">Gigabit Enterprise</td>
+              <td class="p-3 font-mono text-slate-500 text-[11px]" id="modal-queue-profile">1G_Enterprise</td>
+              <td class="p-3 font-mono font-bold text-brand-navy text-right" id="modal-amount">$199.99</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Payment Settlement & RouterOS Status -->
+      <div class="space-y-1.5 p-3 rounded-xl bg-emerald-50/50 border border-emerald-100 text-[11px] font-mono mb-5">
+        <div class="flex justify-between">
+          <span class="text-slate-500">Payment Channel:</span>
+          <span class="font-bold text-slate-800" id="modal-payment-method">Stripe Card • 4242</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-500">RouterOS Provisioning:</span>
+          <span class="font-bold text-emerald-600">Active PPPoE (Unthrottled)</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-500">Idempotency Key:</span>
+          <span class="text-slate-600">idemp_live_891024af88</span>
+        </div>
+      </div>
+
+      <!-- Modal Action Buttons -->
+      <div class="flex items-center justify-between pt-2 border-t border-slate-100">
+        <span class="text-[10px] text-slate-400 font-mono">PulseBill Automated Ledger Engine</span>
+        <div class="flex items-center gap-2">
+          <button onclick="closeReceiptModal()" class="px-3 py-1.5 rounded-xl border border-slate-200 text-slate-600 font-semibold hover:bg-slate-50 text-xs">
+            Close
+          </button>
+          <button onclick="printReceiptAction()" class="brand-btn-primary px-3.5 py-1.5 rounded-xl text-white font-semibold text-xs flex items-center gap-1.5">
+            <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+            <span>Print Receipt</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
   </div>
 
   <!-- Initialize Lucide Icons & Chart.js -->
   <script>
     lucide.createIcons();
+
+    // Tab Switching
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
+      const target = document.getElementById('tab-' + tabId);
+      if (target) target.classList.remove('hidden');
+
+      document.querySelectorAll('.nav-btn').forEach(b => {
+        b.classList.remove('brand-gradient');
+        b.classList.add('text-slate-600');
+      });
+
+      const activeBtn = document.getElementById('nav-' + tabId);
+      if (activeBtn) {
+        activeBtn.classList.add('brand-gradient');
+        activeBtn.classList.remove('text-slate-600');
+      }
+      lucide.createIcons();
+    }
 
     // Render Revenue & Collection Velocity Chart
     const ctx = document.getElementById('revenueChart').getContext('2d');
@@ -610,7 +971,7 @@
     gradientFill.addColorStop(0, 'rgba(5, 150, 105, 0.2)');
     gradientFill.addColorStop(1, 'rgba(5, 150, 105, 0.0)');
 
-    new Chart(ctx, {
+    const revenueChart = new Chart(ctx, {
       type: 'line',
       data: {
         labels: ['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar'],
@@ -671,23 +1032,37 @@
         }
       }
     });
-  </script>
-  </div>
 
-  <script>
+    // Toast Notification System
     function showToast(title, message, type = 'success') {
       const container = document.getElementById('toast-container');
       const toast = document.createElement('div');
-      const borderCol = type === 'success' ? 'border-emerald-500 bg-slate-900 text-white' : 'border-rose-500 bg-slate-900 text-white';
-      const iconCol = type === 'success' ? 'text-emerald-400' : 'text-rose-400';
       
-      toast.className = `p-4 rounded-xl border shadow-2xl transition-all transform duration-300 translate-y-2 opacity-0 font-sans pointer-events-auto ${borderCol}`;
+      let borderCol = 'border-emerald-500 bg-white text-slate-800 shadow-xl';
+      let iconCol = 'text-emerald-600';
+      let iconName = 'check-circle-2';
+
+      if (type === 'warning') {
+        borderCol = 'border-amber-400 bg-white text-slate-800 shadow-xl';
+        iconCol = 'text-amber-500';
+        iconName = 'alert-triangle';
+      } else if (type === 'error' || type === 'danger') {
+        borderCol = 'border-rose-500 bg-white text-slate-800 shadow-xl';
+        iconCol = 'text-rose-500';
+        iconName = 'alert-octagon';
+      } else if (type === 'info') {
+        borderCol = 'border-blue-500 bg-white text-slate-800 shadow-xl';
+        iconCol = 'text-blue-500';
+        iconName = 'info';
+      }
+
+      toast.className = `p-4 rounded-2xl border ${borderCol} transition-all transform duration-300 translate-y-2 opacity-0 font-sans pointer-events-auto`;
       toast.innerHTML = `
         <div class="flex items-start gap-3">
-          <i data-lucide="${type === 'success' ? 'check-circle-2' : 'alert-octagon'}" class="w-5 h-5 ${iconCol} shrink-0 mt-0.5"></i>
+          <i data-lucide="${iconName}" class="w-5 h-5 ${iconCol} shrink-0 mt-0.5"></i>
           <div>
             <div class="font-bold text-xs ${iconCol}">${title}</div>
-            <div class="text-[11px] text-slate-300 mt-0.5 leading-relaxed font-mono">${message}</div>
+            <div class="text-[11px] text-slate-600 mt-0.5 leading-relaxed font-mono">${message}</div>
           </div>
         </div>
       `;
@@ -701,28 +1076,291 @@
       setTimeout(() => {
         toast.classList.add('opacity-0', 'translate-y-2');
         setTimeout(() => toast.remove(), 300);
-      }, 6000);
+      }, 5500);
     }
 
+    // Append to Live Automation Feed
+    function appendFeedItem(title, subtitle, detail, icon = 'check', color = 'bg-emerald-100 text-emerald-700') {
+      const feed = document.getElementById('automation-feed');
+      const item = document.createElement('div');
+      item.className = 'p-2.5 rounded-xl bg-slate-50 border border-slate-100 flex items-start gap-2.5 animate-fadeIn';
+      item.innerHTML = `
+        <div class="w-6 h-6 rounded-lg ${color} flex items-center justify-center flex-shrink-0 mt-0.5">
+          <i data-lucide="${icon}" class="w-3.5 h-3.5"></i>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-[11px] text-brand-navy">${title}</span>
+            <span class="font-mono text-[9px] text-slate-400">Just now</span>
+          </div>
+          <p class="text-[10px] text-slate-600 mt-0.5 truncate">${subtitle}</p>
+          <span class="text-[9px] font-mono font-semibold block mt-0.5">${detail}</span>
+        </div>
+      `;
+      feed.insertBefore(item, feed.firstChild);
+      if (feed.children.length > 5) {
+        feed.removeChild(feed.lastChild);
+      }
+      lucide.createIcons();
+    }
+
+    // Toggle Notifications Tray
+    function toggleNotificationTray() {
+      const tray = document.getElementById('notification-tray');
+      tray.classList.toggle('hidden');
+      const badge = document.getElementById('notif-badge');
+      if (badge) badge.classList.add('hidden');
+    }
+
+    // Live Instant Search Filter
+    function filterInvoiceTable() {
+      const query = document.getElementById('global-invoice-search').value.toLowerCase();
+      const statusFilter = document.getElementById('table-status-filter').value;
+      const rows = document.querySelectorAll('.invoice-row');
+
+      rows.forEach(row => {
+        const text = (row.getAttribute('data-search') || row.innerText).toLowerCase();
+        const status = row.getAttribute('data-status');
+
+        const matchesQuery = text.includes(query);
+        const matchesStatus = (statusFilter === 'all') || (status === statusFilter);
+
+        if (matchesQuery && matchesStatus) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    }
+
+    // Generate Invoices Action
+    function generateInvoicesAction() {
+      showToast(
+        'Autonomous Billing Cycle Executed',
+        'Cron scheduler triggered invoice generation for 1,284 accounts. Reconciling payment links via Stripe and Midtrans.',
+        'info'
+      );
+
+      // Prepend a new invoice row
+      const tbody = document.getElementById('invoice-table-body');
+      const newRow = document.createElement('tr');
+      newRow.className = 'invoice-row hover:bg-slate-50/80 transition animate-fadeIn bg-amber-50/20';
+      newRow.setAttribute('data-status', 'pending');
+      newRow.setAttribute('data-search', 'INV-2026-0894 Sarah Vance sarah.vance@techcorp.com Fiber Pro Business Stripe 10.24.12.118');
+      
+      newRow.innerHTML = `
+        <td class="py-3.5 px-4 font-mono font-bold text-brand-navy">INV-2026-0894</td>
+        <td class="py-3.5 px-4">
+          <span class="font-bold text-brand-navy block">Sarah Vance</span>
+          <span class="text-[10px] text-slate-400 font-mono">PB-CUST-1005 &bull; sarah.vance@techcorp.com</span>
+        </td>
+        <td class="py-3.5 px-4">
+          <span class="font-semibold text-slate-800 block">Fiber Pro Business</span>
+          <span class="text-[10px] text-slate-500 font-mono">250 Mbps Symmetrical</span>
+        </td>
+        <td class="py-3.5 px-4 font-mono font-bold text-amber-600">$89.99</td>
+        <td class="py-3.5 px-4">
+          <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+            Stripe Invoiced
+          </span>
+        </td>
+        <td class="py-3.5 px-4">
+          <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+            PENDING (NEW)
+          </span>
+        </td>
+        <td class="py-3.5 px-4">
+          <div class="flex items-center gap-1.5 font-mono text-[11px] text-emerald-600 font-semibold">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+            <span>Active (250M_Symmetrical)</span>
+          </div>
+        </td>
+        <td class="py-3.5 px-4 text-right">
+          <button onclick="viewReceipt('INV-2026-0894', 'Sarah Vance', 'sarah.vance@techcorp.com', 'Fiber Pro Business', '$89.99', 'Stripe Invoiced', 'PENDING', '250M_Symmetrical')" class="text-brand-emerald hover:underline font-semibold text-xs flex items-center gap-1 ml-auto">
+            <span>Receipt</span>
+            <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+          </button>
+        </td>
+      `;
+
+      tbody.insertBefore(newRow, tbody.firstChild);
+      lucide.createIcons();
+
+      // Update pending metrics
+      document.getElementById('metric-pending').innerText = '$3,509.99';
+      document.getElementById('metric-pending-count').innerText = '25 open invoices';
+      document.getElementById('badge-invoice-count').innerText = '25';
+
+      appendFeedItem(
+        'Invoice Cycle Generated',
+        'INV-2026-0894 issued to Sarah Vance ($89.99)',
+        'Stripe Invoice link generated with webhook listener',
+        'file-text',
+        'bg-blue-100 text-brand-blue'
+      );
+    }
+
+    // Sync Gateways Action
+    function syncGatewaysAction() {
+      const spinner = document.getElementById('sync-spinner');
+      if (spinner) spinner.classList.add('animate-spin');
+
+      setTimeout(() => {
+        if (spinner) spinner.classList.remove('animate-spin');
+        showToast(
+          'Gateways Reconciled (100% Synced)',
+          'Polled Stripe, Midtrans, and Xendit webhooks. 0 unsettled discrepancies found across ledger database.',
+          'success'
+        );
+      }, 700);
+    }
+
+    // Simulate Stripe Webhook Trigger
     function triggerSimulatedWebhook() {
       showToast(
         'Stripe Webhook Ingested [200 OK]',
-        'Signature HMAC verified. Invoice INV-2026-0891 reconciled ($199.99 USD). Mikrotik RouterOS API: PPPoE profile unthrottled to 1G_Enterprise (latency: 11ms).'
+        'Signature HMAC verified. Invoice INV-2026-0892 reconciled ($39.99 USD). Mikrotik RouterOS API: PPPoE profile unthrottled to 50M_Starter (latency: 9ms).'
       );
-      
-      // Update badge in overview
-      const revEl = document.querySelector('.font-mono.font-bold.text-slate-900');
-      if (revEl && revEl.innerText.includes('$142,850')) {
-        revEl.innerText = '$143,049.99';
+
+      // Reconcile Devon Chen row to Paid
+      const devonRow = document.getElementById('row-devon-chen');
+      if (devonRow) {
+        devonRow.setAttribute('data-status', 'paid');
+        const badge = devonRow.querySelector('.status-badge');
+        if (badge) {
+          badge.className = 'status-badge px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200';
+          badge.innerText = 'PAID / SETTLED';
+        }
+        const routerEl = devonRow.querySelector('.routeros-status');
+        if (routerEl) {
+          routerEl.className = 'routeros-status flex items-center gap-1.5 font-mono text-[11px] text-emerald-600 font-semibold';
+          routerEl.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span><span>Active (50M_Starter)</span>';
+        }
+        const payMethod = devonRow.querySelector('.payment-method-badge');
+        if (payMethod) {
+          payMethod.className = 'px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200';
+          payMethod.innerText = 'Stripe Card • 4242';
+        }
       }
+
+      // Update MRR
+      document.getElementById('metric-mrr').innerText = '$48,959.99';
+      document.getElementById('metric-pending').innerText = '$3,380.01';
+
+      appendFeedItem(
+        'Stripe Webhook Settled',
+        'INV-2026-0892 ($39.99) • Devon Chen',
+        'RouterOS: PPPoE speed unthrottled (50M_Starter)',
+        'zap',
+        'bg-emerald-100 text-emerald-700'
+      );
     }
 
+    // Simulate Overdue Suspension
     function triggerSuspensionSimulation() {
       showToast(
         'RouterOS Automated Suspension',
-        'Subscriber Marcus Vance overdue (+3 days). Disconnected active PPPoE session via CoA. Reassigned to pool-pulsebill-isolir (10.10.10.14). Redirection active.',
+        'Subscriber Marcus Vance overdue (+3 days). Disconnected active PPPoE session via CoA. Reassigned to pool-pulsebill-isolir (10.10.10.14). Walled-garden active.',
         'error'
       );
+
+      appendFeedItem(
+        'RouterOS CoA Disconnect',
+        'Marcus Vance reassigned to pool-pulsebill-isolir',
+        'Walled garden redirect enabled on port 80/443',
+        'shield-alert',
+        'bg-rose-100 text-rose-700'
+      );
+    }
+
+    // Row Action: Send Reminder
+    function sendReminder(customer, invoiceId) {
+      showToast(
+        `WhatsApp Notice Dispatched: ${customer}`,
+        `Sent automated billing reminder with PDF receipt link for ${invoiceId}. Read receipt confirmed via Baileys socket.`,
+        'info'
+      );
+    }
+
+    // Row Action: Manual Reconnect
+    function manualReconnect(customer, rowId) {
+      const row = document.getElementById(rowId);
+      if (row) {
+        row.setAttribute('data-status', 'paid');
+        const badge = row.querySelector('.status-badge');
+        if (badge) {
+          badge.className = 'status-badge px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200';
+          badge.innerText = 'RECONNECTED';
+        }
+        const routerEl = row.querySelector('.routeros-status');
+        if (routerEl) {
+          routerEl.className = 'routeros-status flex items-center gap-1.5 font-mono text-[11px] text-emerald-600 font-semibold';
+          routerEl.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span><span>Active (Restored)</span>';
+        }
+      }
+      showToast(
+        `RouterOS Reconnect: ${customer}`,
+        `Removed subscriber from pool-pulsebill-isolir. Restored full 50 Mbps bandwidth allocation on core gateway.`,
+        'success'
+      );
+    }
+
+    // Export Invoices CSV
+    function exportInvoicesCSV() {
+      const csvContent = "Invoice_ID,Customer_Name,Email,Plan,Amount,Payment_Method,Billing_Status,RouterOS_State\n" +
+        "INV-2026-0891,Elena Rostova,elena@techscale.io,Gigabit Enterprise,199.99,Stripe Card • 4242,PAID,Active (1G_Enterprise)\n" +
+        "INV-2026-0890,Marcus Vance,marcus@vancecapital.com,Fiber Pro Business,89.99,Midtrans • Bank VA,PAID,Active (250M_Symmetrical)\n" +
+        "INV-2026-0892,Devon Chen,devon.chen@gmail.com,Fiber Starter,39.99,Xendit Link,PENDING,Active (Grace Day 2)\n" +
+        "INV-2026-0888,Sarah Jenkins,sarah.j@outlook.com,Fiber Starter,39.99,Unsettled,SUSPENDED,Isolated (pool-isolir)";
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', 'PulseBill_Invoices_Ledger.csv');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      showToast('Export Completed', 'Generated PulseBill_Invoices_Ledger.csv with 4 reconciled records.', 'success');
+    }
+
+    // Receipt Modal Actions
+    function viewReceipt(invId, name, email, service, amount, payment, status, queue) {
+      document.getElementById('modal-invoice-id').innerText = invId;
+      document.getElementById('modal-customer-name').innerText = name;
+      document.getElementById('modal-customer-email').innerText = email;
+      document.getElementById('modal-service-name').innerText = service;
+      document.getElementById('modal-amount').innerText = amount;
+      document.getElementById('modal-payment-method').innerText = payment;
+      document.getElementById('modal-queue-profile').innerText = queue;
+
+      const stamp = document.getElementById('modal-stamp');
+      if (status === 'PAID') {
+        stamp.className = 'px-3 py-1 rounded text-xs stamp-paid uppercase';
+        stamp.innerText = 'PAID';
+      } else if (status === 'PENDING') {
+        stamp.className = 'px-3 py-1 rounded text-xs stamp-pending uppercase';
+        stamp.innerText = 'PENDING';
+      } else {
+        stamp.className = 'px-3 py-1 rounded text-xs stamp-suspended uppercase';
+        stamp.innerText = 'SUSPENDED';
+      }
+
+      document.getElementById('receipt-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeReceiptModal() {
+      document.getElementById('receipt-modal').classList.add('hidden');
+    }
+
+    function printReceiptAction() {
+      showToast('Print Dialog', 'Rendering official telecom invoice receipt for PDF download/print.', 'info');
+      setTimeout(() => {
+        window.print();
+      }, 400);
     }
   </script>
 </body>
