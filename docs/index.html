@@ -53,7 +53,7 @@
     .font-mono {
       font-family: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
     }
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 999px; }
     ::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
@@ -112,7 +112,7 @@
       to { opacity: 1; transform: translateY(0); }
     }
     .animate-fadeIn {
-      animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
 
     @media print {
@@ -136,86 +136,86 @@
       
       <!-- Brand Logo Box (Height 64px - Flush with Topbar) -->
       <div class="h-16 flex items-center px-5 gap-2.5 border-b border-slate-200 cursor-pointer" onclick="switchTab('dashboard')">
-        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-navy to-brand-emerald flex items-center justify-center text-white shadow-md">
-          <i data-lucide="receipt" class="w-5 h-5 text-white"></i>
+        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-brand-navy to-brand-emerald flex items-center justify-center text-white shadow-md">
+          <i data-lucide="receipt" class="w-4 h-4 text-white"></i>
         </div>
         <div>
           <h1 class="font-bold text-sm text-brand-navy tracking-tight leading-none flex items-center gap-1.5">
             PulseBill
             <span class="text-[9px] px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 font-mono font-bold border border-emerald-200">OS</span>
           </h1>
-          <span class="text-[10px] text-slate-400 font-mono mt-0.5 block">Telecom Billing Engine</span>
+          <span class="text-[10px] text-slate-400 font-mono mt-0.5 block">Telecom Billing</span>
         </div>
       </div>
 
       <!-- Navigation Menu -->
-      <div class="flex-1 overflow-y-auto px-3 py-4 space-y-6 text-xs">
+      <div class="flex-1 overflow-y-auto px-3 py-4 space-y-5 text-xs">
         
-        <!-- Group: Core Operations -->
+        <!-- Group: Core -->
         <div>
-          <span class="px-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1.5 font-mono">Operations & CRM</span>
+          <span class="px-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1.5 font-mono">Operations</span>
           <nav class="space-y-1">
             <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-xl brand-gradient font-medium transition text-left">
               <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
-              <span>Billing Operations</span>
+              <span>Dashboard</span>
             </button>
             <button onclick="switchTab('subscribers')" id="nav-subscribers" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-brand-navy transition font-medium text-left">
               <i data-lucide="users" class="w-4 h-4 text-slate-400"></i>
-              <span>Pelanggan (Subscribers)</span>
+              <span>Subscribers</span>
               <span id="badge-sub-count" class="ml-auto bg-slate-100 text-slate-600 text-[10px] px-1.5 py-0.2 rounded font-mono font-bold">16</span>
             </button>
             <button onclick="switchTab('packages')" id="nav-packages" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-brand-navy transition font-medium text-left">
               <i data-lucide="layers" class="w-4 h-4 text-slate-400"></i>
-              <span>Paket Internet (Plans)</span>
+              <span>Plans & Rates</span>
               <span id="badge-pkg-count" class="ml-auto bg-slate-100 text-slate-600 text-[10px] px-1.5 py-0.2 rounded font-mono font-bold">6</span>
             </button>
             <button onclick="switchTab('invoices')" id="nav-invoices" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-brand-navy transition font-medium text-left">
               <i data-lucide="file-text" class="w-4 h-4 text-slate-400"></i>
-              <span>Invoices & Kwitansi</span>
+              <span>Invoices & Receipts</span>
               <span id="badge-invoice-count" class="ml-auto bg-amber-100 text-amber-800 text-[10px] px-1.5 py-0.2 rounded font-mono font-bold">16</span>
             </button>
           </nav>
         </div>
 
-        <!-- Group: Network Infrastructure -->
+        <!-- Group: Network -->
         <div>
-          <span class="px-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1.5 font-mono">Network Infrastructure</span>
+          <span class="px-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1.5 font-mono">Infrastructure</span>
           <nav class="space-y-1">
             <button onclick="switchTab('routers')" id="nav-routers" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-brand-navy transition font-medium text-left">
               <i data-lucide="server" class="w-4 h-4 text-slate-400"></i>
-              <span>Mikrotik Routers / NAS</span>
+              <span>Mikrotik Routers</span>
               <span class="ml-auto text-[9px] font-mono font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">3 Online</span>
             </button>
             <button onclick="switchTab('suspension')" id="nav-suspension" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-brand-navy transition font-medium text-left">
               <i data-lucide="shield-alert" class="w-4 h-4 text-slate-400"></i>
-              <span>Pusat Isolir (Suspension)</span>
+              <span>Suspension Center</span>
               <span id="badge-susp-count" class="ml-auto bg-rose-100 text-rose-800 text-[10px] px-1.5 py-0.2 rounded font-mono font-bold">4</span>
             </button>
             <button onclick="switchTab('genieacs')" id="nav-genieacs" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-brand-navy transition font-medium text-left">
               <i data-lucide="radio" class="w-4 h-4 text-slate-400"></i>
               <span>TR-069 GenieACS</span>
-              <span class="ml-auto text-[9px] font-mono font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.2 rounded">CWMP Active</span>
+              <span class="ml-auto text-[9px] font-mono font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.2 rounded">CWMP</span>
             </button>
           </nav>
         </div>
 
-        <!-- Group: Gateways & Automation -->
+        <!-- Group: Gateways & Settings -->
         <div>
-          <span class="px-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1.5 font-mono">Gateways & Bot</span>
+          <span class="px-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1.5 font-mono">Platform</span>
           <nav class="space-y-1">
             <button onclick="switchTab('gateways')" id="nav-gateways" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-brand-navy transition font-medium text-left">
               <i data-lucide="credit-card" class="w-4 h-4 text-slate-400"></i>
-              <span>Gateways & Ledger</span>
-              <span class="ml-auto text-[9px] font-mono font-bold text-blue-600 bg-blue-50 px-1.5 py-0.2 rounded">Stripe/Midtrans</span>
+              <span>Payment Gateways</span>
+              <span class="ml-auto text-[9px] font-mono font-bold text-blue-600 bg-blue-50 px-1.5 py-0.2 rounded">Live</span>
             </button>
             <button onclick="switchTab('whatsapp')" id="nav-whatsapp" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-brand-navy transition font-medium text-left">
               <i data-lucide="message-square" class="w-4 h-4 text-slate-400"></i>
-              <span>WhatsApp Center</span>
-              <span class="ml-auto text-[9px] font-mono font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.2 rounded">Baileys Bot</span>
+              <span>WhatsApp Alerts</span>
+              <span class="ml-auto text-[9px] font-mono font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.2 rounded">Bot</span>
             </button>
             <button onclick="switchTab('settings')" id="nav-settings" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-brand-navy transition font-medium text-left">
               <i data-lucide="settings" class="w-4 h-4 text-slate-400"></i>
-              <span>System Settings</span>
+              <span>Settings</span>
             </button>
           </nav>
         </div>
@@ -232,7 +232,7 @@
               Active (PID 4892)
             </span>
           </div>
-          <span class="text-[10px] font-mono font-bold bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded border border-slate-200">v2.4-LTS</span>
+          <span class="text-[10px] font-mono font-bold bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded border border-slate-200">v2.4</span>
         </div>
       </div>
     </aside>
@@ -240,7 +240,7 @@
     <!-- Main View Area -->
     <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
       
-      <!-- Topbar Header (Height 64px - Clean Flush Top Bar with Integrated Sandbox Controls) -->
+      <!-- Topbar Header (Height 64px - Flush, Clean, Professional) -->
       <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 z-10 shadow-2xs">
         <div class="flex items-center gap-4 flex-1 max-w-md">
           <div class="relative w-full">
@@ -248,7 +248,7 @@
             <input 
               type="text" 
               id="global-search-input"
-              placeholder="Search subscribers, PPPoE secrets, IP, or invoice #..." 
+              placeholder="Quick search (Ctrl+K)..." 
               onkeyup="handleGlobalSearch(this.value)"
               class="w-full pl-9 pr-14 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-brand-emerald focus:bg-white transition font-sans"
             />
@@ -258,58 +258,54 @@
 
         <div class="flex items-center gap-3">
           
-          <!-- Integrated Developer / Sandbox Operations Toolbar -->
-          <div class="hidden lg:flex items-center gap-1.5 bg-slate-100 border border-slate-200 rounded-xl p-1 shadow-inner">
-            <span class="text-[10px] font-mono font-bold text-slate-500 px-2 flex items-center gap-1">
-              <i data-lucide="terminal" class="w-3 h-3 text-slate-400"></i>
-              <span>OPS SANDBOX:</span>
-            </span>
-            <button onclick="triggerSimulatedWebhook()" title="Simulate incoming Stripe payment webhook" class="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-semibold transition shadow-sm active:scale-95">
+          <!-- Integrated Sandbox Action Group -->
+          <div class="hidden lg:flex items-center gap-1 bg-slate-100 border border-slate-200 rounded-xl p-1 shadow-inner">
+            <button onclick="triggerSimulatedWebhook()" title="Simulate incoming Stripe payment webhook" class="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-semibold transition active:scale-95 shadow-2xs">
               <i data-lucide="zap" class="w-3 h-3"></i>
-              <span>Stripe Webhook ($199.99)</span>
+              <span>Stripe Webhook</span>
             </button>
-            <button onclick="triggerSuspensionSimulation()" title="Simulate automated subscriber suspension" class="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-[11px] font-semibold transition shadow-sm active:scale-95">
+            <button onclick="triggerSuspensionSimulation()" title="Simulate automated subscriber suspension" class="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-[11px] font-semibold transition active:scale-95 shadow-2xs">
               <i data-lucide="shield-alert" class="w-3 h-3"></i>
               <span>RouterOS Isolir</span>
             </button>
-            <button onclick="generateMonthlyInvoices()" title="Trigger autonomous billing cycle run" class="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-brand-navy hover:bg-brand-navyHover text-white text-[11px] font-semibold transition shadow-sm active:scale-95">
+            <button onclick="generateMonthlyInvoices()" title="Trigger autonomous billing cycle run" class="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-brand-navy hover:bg-brand-navyHover text-white text-[11px] font-semibold transition active:scale-95 shadow-2xs">
               <i data-lucide="plus-circle" class="w-3 h-3"></i>
-              <span>+ Generate Invoices</span>
+              <span>+ Invoices</span>
             </button>
           </div>
 
-          <!-- Live Gateway Status Badge -->
-          <div class="hidden md:flex items-center gap-2 bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded-xl text-xs font-medium">
-            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span>Stripe, Midtrans, Xendit Live</span>
+          <!-- Live Gateway Status Pill -->
+          <div class="hidden md:flex items-center gap-2 bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-xl text-xs font-medium">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>Gateways Live</span>
           </div>
 
-          <!-- Notification Bell with Dropdown -->
+          <!-- Notification Bell -->
           <div class="relative">
             <button onclick="toggleNotificationTray()" class="w-9 h-9 rounded-xl border border-slate-200 hover:bg-slate-50 flex items-center justify-center text-slate-600 relative transition">
               <i data-lucide="bell" class="w-4 h-4"></i>
               <span id="notif-badge" class="absolute top-2 right-2 w-2 h-2 bg-emerald-500 rounded-full"></span>
             </button>
 
-            <div id="notification-tray" class="hidden absolute right-0 mt-2 w-80 bg-white border border-slate-200 rounded-2xl shadow-xl p-4 z-50 text-xs">
+            <div id="notification-tray" class="hidden absolute right-0 mt-2 w-80 bg-white border border-slate-200 rounded-2xl shadow-xl p-4 z-50 text-xs animate-fadeIn">
               <div class="flex items-center justify-between pb-2 mb-3 border-b border-slate-100 font-bold text-slate-900">
-                <span>Recent System Events</span>
-                <span class="text-[10px] font-mono text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">Real-Time</span>
+                <span>System Events</span>
+                <span class="text-[10px] font-mono text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">Live</span>
               </div>
-              <div id="notification-items" class="space-y-2.5 max-h-60 overflow-y-auto">
+              <div id="notification-items" class="space-y-2 max-h-60 overflow-y-auto">
                 <!-- Injected via JS -->
               </div>
             </div>
           </div>
 
-          <!-- Profile Pill Box (Feri Hidayat) -->
-          <div class="flex items-center gap-2.5 pl-3 border-l border-slate-200">
+          <!-- Profile Pill Box (Interactive Modal on Click) -->
+          <div onclick="openOperatorModal()" class="flex items-center gap-2.5 pl-3 border-l border-slate-200 cursor-pointer hover:opacity-85 transition">
             <div class="w-8 h-8 rounded-xl brand-gradient flex items-center justify-center font-bold text-white text-xs shadow-sm">
               FH
             </div>
             <div class="hidden sm:block text-left">
               <span class="font-bold text-xs text-brand-navy block leading-none">Feri Hidayat</span>
-              <span class="text-[10px] text-emerald-600 font-semibold font-mono">Lead Systems Architect</span>
+              <span class="text-[10px] text-emerald-600 font-semibold font-mono">Lead Architect</span>
             </div>
           </div>
 
@@ -322,75 +318,63 @@
         <!-- ========================================================================= -->
         <!-- TAB 1: DASHBOARD (Billing Operations)                                     -->
         <!-- ========================================================================= -->
-        <div id="tab-dashboard" class="tab-pane space-y-6 animate-fadeIn">
+        <div id="tab-dashboard" class="tab-pane space-y-5 animate-fadeIn">
           
           <!-- Top Row KPI Metric Cards (5 Cards) -->
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             
-            <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs hover:border-slate-300 transition">
+            <div onclick="switchTab('invoices')" class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs hover:border-slate-300 cursor-pointer transition">
               <div class="flex items-center justify-between">
-                <span class="text-[11px] font-medium text-slate-500">Monthly Recurring Revenue</span>
-                <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                  <i data-lucide="trending-up" class="w-4 h-4"></i>
-                </div>
+                <span class="text-[11px] font-medium text-slate-500">Monthly Revenue</span>
+                <i data-lucide="trending-up" class="w-4 h-4 text-emerald-600"></i>
               </div>
-              <div class="mt-2.5">
-                <span id="metric-mrr" class="font-mono text-2xl font-bold text-brand-navy tracking-tight">$48,920</span>
-                <span class="text-[10px] text-emerald-600 font-medium block mt-0.5">
-                  <i data-lucide="arrow-up-right" class="w-3 h-3 inline"></i> +8.4% vs last billing cycle
-                </span>
+              <div class="mt-2">
+                <span id="metric-mrr" class="font-mono text-2xl font-bold text-brand-navy">$48,920</span>
+                <span class="text-[10px] text-emerald-600 font-medium block mt-0.5">+8.4% this cycle</span>
               </div>
             </div>
 
-            <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs hover:border-slate-300 transition">
+            <div onclick="switchTab('subscribers')" class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs hover:border-slate-300 cursor-pointer transition">
               <div class="flex items-center justify-between">
                 <span class="text-[11px] font-medium text-slate-500">Active Subscribers</span>
-                <div class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
-                  <i data-lucide="users" class="w-4 h-4"></i>
-                </div>
+                <i data-lucide="users" class="w-4 h-4 text-blue-600"></i>
               </div>
-              <div class="mt-2.5">
-                <span id="metric-subs-count" class="font-mono text-2xl font-bold text-brand-navy tracking-tight">1,428</span>
-                <span class="text-[10px] text-slate-500 font-medium block mt-0.5">98.2% on-time settlement</span>
+              <div class="mt-2">
+                <span id="metric-subs-count" class="font-mono text-2xl font-bold text-brand-navy">1,428</span>
+                <span class="text-[10px] text-slate-500 font-medium block mt-0.5">98.2% on-time</span>
               </div>
             </div>
 
-            <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs hover:border-amber-300 transition">
+            <div onclick="switchTab('invoices')" class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs hover:border-amber-300 cursor-pointer transition">
               <div class="flex items-center justify-between">
-                <span class="text-[11px] font-medium text-slate-500">Uncollected Receivables</span>
-                <div class="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
-                  <i data-lucide="clock" class="w-4 h-4"></i>
-                </div>
+                <span class="text-[11px] font-medium text-slate-500">Pending Invoices</span>
+                <i data-lucide="clock" class="w-4 h-4 text-amber-600"></i>
               </div>
-              <div class="mt-2.5">
-                <span id="metric-uncollected" class="font-mono text-2xl font-bold text-amber-600 tracking-tight">$3,840</span>
-                <span id="metric-uncollected-count" class="text-[10px] text-slate-500 font-medium block mt-0.5">16 invoices pending grace</span>
+              <div class="mt-2">
+                <span id="metric-uncollected" class="font-mono text-2xl font-bold text-amber-600">$3,840</span>
+                <span id="metric-uncollected-count" class="text-[10px] text-slate-500 font-medium block mt-0.5">16 pending</span>
               </div>
             </div>
 
-            <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs hover:border-rose-300 transition">
+            <div onclick="switchTab('suspension')" class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs hover:border-rose-300 cursor-pointer transition">
               <div class="flex items-center justify-between">
                 <span class="text-[11px] font-medium text-slate-500">Suspended / Isolir</span>
-                <div class="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center">
-                  <i data-lucide="shield-alert" class="w-4 h-4"></i>
-                </div>
+                <i data-lucide="shield-alert" class="w-4 h-4 text-rose-600"></i>
               </div>
-              <div class="mt-2.5">
-                <span id="metric-suspended" class="font-mono text-2xl font-bold text-rose-600 tracking-tight">4</span>
-                <span class="text-[10px] text-slate-500 font-medium block mt-0.5">PPPoE throttled to 256k</span>
+              <div class="mt-2">
+                <span id="metric-suspended" class="font-mono text-2xl font-bold text-rose-600">4</span>
+                <span class="text-[10px] text-slate-500 font-medium block mt-0.5">Throttled (256k)</span>
               </div>
             </div>
 
-            <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs hover:border-emerald-300 transition">
+            <div onclick="switchTab('routers')" class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs hover:border-emerald-300 cursor-pointer transition">
               <div class="flex items-center justify-between">
-                <span class="text-[11px] font-medium text-slate-500">RouterOS API Socket</span>
-                <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                  <i data-lucide="cpu" class="w-4 h-4"></i>
-                </div>
+                <span class="text-[11px] font-medium text-slate-500">RouterOS Latency</span>
+                <i data-lucide="cpu" class="w-4 h-4 text-emerald-600"></i>
               </div>
-              <div class="mt-2.5">
-                <span class="font-mono text-2xl font-bold text-emerald-600 tracking-tight">3.2 ms</span>
-                <span class="text-[10px] text-slate-500 font-medium block mt-0.5">3 Core NAS Online</span>
+              <div class="mt-2">
+                <span class="font-mono text-2xl font-bold text-emerald-600">3.2 ms</span>
+                <span class="text-[10px] text-slate-500 font-medium block mt-0.5">3 Core NAS</span>
               </div>
             </div>
 
@@ -399,19 +383,16 @@
           <!-- Split Grid: Financial Collections & Real-time RouterOS Event Dispatch -->
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
             
-            <!-- Left 2 Cols: Revenue & Collection Velocity Chart -->
+            <!-- Left 2 Cols: Revenue Chart -->
             <div class="lg:col-span-2 bg-white border border-slate-200 rounded-2xl p-5 shadow-xs flex flex-col justify-between">
               <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-                <div>
-                  <h3 class="font-bold text-sm text-brand-navy">Revenue Ingestion & Gateway Velocity</h3>
-                  <p class="text-[11px] text-slate-500 mt-0.5">Cumulative monthly recurring collections across Stripe, Midtrans, and Xendit.</p>
-                </div>
+                <h3 class="font-bold text-sm text-brand-navy">Revenue Velocity</h3>
                 <div class="flex items-center gap-3 font-mono text-[11px]">
                   <span class="flex items-center gap-1.5 text-slate-600 font-medium">
-                    <span class="w-2.5 h-2.5 rounded bg-emerald-600 inline-block"></span> Settled Revenue
+                    <span class="w-2 h-2 rounded bg-emerald-600 inline-block"></span> Settled
                   </span>
                   <span class="flex items-center gap-1.5 text-slate-600 font-medium">
-                    <span class="w-2.5 h-2.5 rounded bg-brand-navy inline-block"></span> Invoiced Total
+                    <span class="w-2 h-2 rounded bg-brand-navy inline-block"></span> Invoiced
                   </span>
                 </div>
               </div>
@@ -423,98 +404,89 @@
             <!-- Right 1 Col: Live Network Automation & Webhook Feed -->
             <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs flex flex-col">
               <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-                <div>
-                  <h3 class="font-bold text-sm text-brand-navy">Network Automation Feed</h3>
-                  <p class="text-[11px] text-slate-500 mt-0.5">Real-time gateway webhooks & RouterOS actions.</p>
-                </div>
+                <h3 class="font-bold text-sm text-brand-navy">Live Network Events</h3>
                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
               </div>
 
-              <!-- Event Stream List (Dynamically updated on simulations) -->
-              <div id="automation-feed" class="flex-1 mt-3 space-y-3 overflow-y-auto max-h-[220px]">
+              <!-- Event Stream List -->
+              <div id="automation-feed" class="flex-1 mt-3 space-y-2.5 overflow-y-auto max-h-[220px]">
                 <!-- Populated via JS -->
               </div>
             </div>
 
           </div>
 
-          <!-- Quick Navigation Cards to Other Modules -->
+          <!-- Quick Navigation Cards -->
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div onclick="switchTab('subscribers')" class="bg-white border border-slate-200 hover:border-emerald-500 rounded-2xl p-4 cursor-pointer transition shadow-2xs group">
-              <div class="flex items-center justify-between">
-                <span class="font-bold text-brand-navy group-hover:text-emerald-600 transition">Kelola Pelanggan (Subscribers) &rarr;</span>
-                <i data-lucide="users" class="w-4 h-4 text-slate-400 group-hover:text-emerald-500 transition"></i>
+            <div onclick="switchTab('subscribers')" class="bg-white border border-slate-200 hover:border-emerald-500 rounded-2xl p-4 cursor-pointer transition shadow-2xs group flex items-center justify-between">
+              <div>
+                <span class="font-bold text-xs text-brand-navy group-hover:text-emerald-600 transition block">Subscribers Directory &rarr;</span>
+                <span class="text-[11px] text-slate-400 font-mono">16 accounts registered</span>
               </div>
-              <p class="text-[11px] text-slate-500 mt-1">16 subscriber terdata, kontrol PPPoE secret & bandwidth.</p>
+              <i data-lucide="users" class="w-4 h-4 text-slate-400 group-hover:text-emerald-500 transition"></i>
             </div>
-            <div onclick="switchTab('packages')" class="bg-white border border-slate-200 hover:border-emerald-500 rounded-2xl p-4 cursor-pointer transition shadow-2xs group">
-              <div class="flex items-center justify-between">
-                <span class="font-bold text-brand-navy group-hover:text-emerald-600 transition">Paket Layanan Internet &rarr;</span>
-                <i data-lucide="layers" class="w-4 h-4 text-slate-400 group-hover:text-emerald-500 transition"></i>
+            <div onclick="switchTab('packages')" class="bg-white border border-slate-200 hover:border-emerald-500 rounded-2xl p-4 cursor-pointer transition shadow-2xs group flex items-center justify-between">
+              <div>
+                <span class="font-bold text-xs text-brand-navy group-hover:text-emerald-600 transition block">Internet Rate Cards &rarr;</span>
+                <span class="text-[11px] text-slate-400 font-mono">6 bandwidth tiers active</span>
               </div>
-              <p class="text-[11px] text-slate-500 mt-1">6 tier paket bandwidth dari 20M s/d 1 Gbps.</p>
+              <i data-lucide="layers" class="w-4 h-4 text-slate-400 group-hover:text-emerald-500 transition"></i>
             </div>
-            <div onclick="switchTab('suspension')" class="bg-white border border-slate-200 hover:border-rose-500 rounded-2xl p-4 cursor-pointer transition shadow-2xs group">
-              <div class="flex items-center justify-between">
-                <span class="font-bold text-brand-navy group-hover:text-rose-600 transition">Pusat Isolir Pelanggan &rarr;</span>
-                <i data-lucide="shield-alert" class="w-4 h-4 text-slate-400 group-hover:text-rose-500 transition"></i>
+            <div onclick="switchTab('suspension')" class="bg-white border border-slate-200 hover:border-rose-500 rounded-2xl p-4 cursor-pointer transition shadow-2xs group flex items-center justify-between">
+              <div>
+                <span class="font-bold text-xs text-brand-navy group-hover:text-rose-600 transition block">Suspension Center &rarr;</span>
+                <span class="text-[11px] text-slate-400 font-mono">4 accounts throttled</span>
               </div>
-              <p class="text-[11px] text-slate-500 mt-1">Buka isolir instan atau jalankan eksekusi pemutusan otomatis.</p>
+              <i data-lucide="shield-alert" class="w-4 h-4 text-slate-400 group-hover:text-rose-500 transition"></i>
             </div>
           </div>
 
         </div>
 
         <!-- ========================================================================= -->
-        <!-- TAB 2: SUBSCRIBERS (Pelanggan)                                           -->
+        <!-- TAB 2: SUBSCRIBERS                                                        -->
         <!-- ========================================================================= -->
-        <div id="tab-subscribers" class="tab-pane hidden space-y-5 animate-fadeIn">
+        <div id="tab-subscribers" class="tab-pane hidden space-y-4 animate-fadeIn">
           
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs">
-            <div>
-              <h2 class="text-base font-bold text-brand-navy">Pelanggan & PPPoE Credentials Directory</h2>
-              <p class="text-[11px] text-slate-500 mt-0.5">Database pelanggan aktif, binding NAS Mikrotik, status isolir, dan IP address.</p>
-            </div>
-            <div class="flex items-center gap-2">
-              <button onclick="openAddSubscriberModal()" class="brand-btn-primary px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm">
-                <i data-lucide="user-plus" class="w-4 h-4"></i>
-                <span>+ Tambah Pelanggan Baru</span>
-              </button>
-            </div>
+          <div class="flex items-center justify-between">
+            <h2 class="text-base font-bold text-brand-navy">Subscribers Directory</h2>
+            <button onclick="openAddSubscriberModal()" class="brand-btn-primary px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm">
+              <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
+              <span>+ Add Subscriber</span>
+            </button>
           </div>
 
           <!-- Search & Filter Bar -->
-          <div class="flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs">
+          <div class="flex flex-wrap items-center justify-between gap-3 bg-white p-3.5 rounded-2xl border border-slate-200 shadow-2xs">
             <div class="flex items-center gap-2 flex-1 max-w-sm">
               <i data-lucide="search" class="w-4 h-4 text-slate-400"></i>
               <input 
                 type="text" 
                 id="search-subscribers" 
-                placeholder="Cari nama, WhatsApp, username PPPoE, atau IP..." 
+                placeholder="Filter subscribers by name, IP, or PPPoE..." 
                 onkeyup="filterSubscribersTable()"
                 class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-brand-emerald focus:bg-white transition"
               />
             </div>
             <div class="flex items-center gap-1.5">
-              <span class="text-slate-400 font-mono text-[11px] mr-1">Status:</span>
-              <button onclick="setSubFilter('ALL')" id="sub-filter-all" class="sub-filter-btn px-2.5 py-1 rounded-lg bg-brand-navy text-white text-[11px] font-semibold">Semua (16)</button>
-              <button onclick="setSubFilter('ACTIVE')" id="sub-filter-active" class="sub-filter-btn px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 text-[11px] font-semibold">Aktif (12)</button>
-              <button onclick="setSubFilter('SUSPENDED')" id="sub-filter-suspended" class="sub-filter-btn px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 text-[11px] font-semibold">Terisolir (4)</button>
+              <button onclick="setSubFilter('ALL')" id="sub-filter-all" class="sub-filter-btn px-2.5 py-1 rounded-lg bg-brand-navy text-white text-[11px] font-semibold">All (16)</button>
+              <button onclick="setSubFilter('ACTIVE')" id="sub-filter-active" class="sub-filter-btn px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 text-[11px] font-semibold">Active</button>
+              <button onclick="setSubFilter('SUSPENDED')" id="sub-filter-suspended" class="sub-filter-btn px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 text-[11px] font-semibold">Suspended</button>
             </div>
           </div>
 
-          <!-- Subscribers Data Table -->
+          <!-- Subscribers Table -->
           <div class="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
             <div class="overflow-x-auto">
               <table class="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr class="bg-slate-50/80 border-b border-slate-200 font-mono text-slate-500 text-[11px]">
-                    <th class="py-3 px-4 font-semibold">ID & NAMA PELANGGAN</th>
-                    <th class="py-3 px-4 font-semibold">PPPOE USERNAME / IP</th>
-                    <th class="py-3 px-4 font-semibold">PAKET LAYANAN</th>
-                    <th class="py-3 px-4 font-semibold">ROUTER GATEWAY</th>
-                    <th class="py-3 px-4 font-semibold">STATUS JARINGAN</th>
-                    <th class="py-3 px-4 font-semibold text-right">AKSI CEPAT</th>
+                    <th class="py-2.5 px-4 font-semibold">SUBSCRIBER</th>
+                    <th class="py-2.5 px-4 font-semibold">PPPOE / IP</th>
+                    <th class="py-2.5 px-4 font-semibold">SERVICE PLAN</th>
+                    <th class="py-2.5 px-4 font-semibold">GATEWAY</th>
+                    <th class="py-2.5 px-4 font-semibold">STATUS</th>
+                    <th class="py-2.5 px-4 font-semibold text-right">ACTIONS</th>
                   </tr>
                 </thead>
                 <tbody id="subscribers-table-body" class="divide-y divide-slate-100">
@@ -527,75 +499,68 @@
         </div>
 
         <!-- ========================================================================= -->
-        <!-- TAB 3: PACKAGES (Paket Layanan)                                           -->
+        <!-- TAB 3: PACKAGES                                                           -->
         <!-- ========================================================================= -->
-        <div id="tab-packages" class="tab-pane hidden space-y-5 animate-fadeIn">
+        <div id="tab-packages" class="tab-pane hidden space-y-4 animate-fadeIn">
           
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs">
-            <div>
-              <h2 class="text-base font-bold text-brand-navy">Paket Layanan Internet & Rate Limiting</h2>
-              <p class="text-[11px] text-slate-500 mt-0.5">Daftar tarif langganan, profil PPPoE Mikrotik, batas kecepatan (UP/DOWN), dan subscriber aktif.</p>
-            </div>
+          <div class="flex items-center justify-between">
+            <h2 class="text-base font-bold text-brand-navy">Service Plans & Bandwidth Tiers</h2>
             <div class="flex items-center gap-2">
-              <button onclick="syncMikrotikProfiles()" class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 flex items-center gap-1.5 transition">
-                <i data-lucide="refresh-cw" class="w-4 h-4"></i>
-                <span>Sync Mikrotik Profiles</span>
+              <button onclick="syncMikrotikProfiles()" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 flex items-center gap-1.5 transition">
+                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                <span>Sync Profiles</span>
               </button>
-              <button onclick="openAddPackageModal()" class="brand-btn-primary px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm">
-                <i data-lucide="plus" class="w-4 h-4"></i>
-                <span>+ Buat Paket Baru</span>
+              <button onclick="openAddPackageModal()" class="brand-btn-primary px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                <span>+ New Plan</span>
               </button>
             </div>
           </div>
 
           <!-- Packages Grid -->
-          <div id="packages-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div id="packages-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <!-- Populated via JS -->
           </div>
 
         </div>
 
         <!-- ========================================================================= -->
-        <!-- TAB 4: INVOICES & KWITANSI                                               -->
+        <!-- TAB 4: INVOICES                                                           -->
         <!-- ========================================================================= -->
-        <div id="tab-invoices" class="tab-pane hidden space-y-5 animate-fadeIn">
+        <div id="tab-invoices" class="tab-pane hidden space-y-4 animate-fadeIn">
           
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs">
-            <div>
-              <h2 class="text-base font-bold text-brand-navy">Ledger Invoices & Kwitansi Tagihan</h2>
-              <p class="text-[11px] text-slate-500 mt-0.5">Faktur tagihan bulanan pelanggan, status pembayaran gateway, dan kwitansi resmi telecom.</p>
-            </div>
+          <div class="flex items-center justify-between">
+            <h2 class="text-base font-bold text-brand-navy">Invoices & Receipts</h2>
             <div class="flex items-center gap-2">
-              <button onclick="exportInvoicesCSV()" class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 flex items-center gap-1.5 transition">
-                <i data-lucide="download" class="w-4 h-4"></i>
+              <button onclick="exportInvoicesCSV()" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 flex items-center gap-1.5 transition">
+                <i data-lucide="download" class="w-3.5 h-3.5"></i>
                 <span>Export CSV</span>
               </button>
-              <button onclick="generateMonthlyInvoices()" class="brand-btn-primary px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm">
-                <i data-lucide="plus-circle" class="w-4 h-4"></i>
-                <span>+ Generate Monthly Invoices</span>
+              <button onclick="generateMonthlyInvoices()" class="brand-btn-primary px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm">
+                <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+                <span>+ Generate Invoices</span>
               </button>
             </div>
           </div>
 
           <!-- Filter & Search Toolbar -->
-          <div class="flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs">
+          <div class="flex flex-wrap items-center justify-between gap-3 bg-white p-3.5 rounded-2xl border border-slate-200 shadow-2xs">
             <div class="flex items-center gap-2 flex-1 max-w-sm">
               <i data-lucide="search" class="w-4 h-4 text-slate-400"></i>
               <input 
                 type="text" 
                 id="search-invoices" 
-                placeholder="Cari nomor invoice, nama pelanggan, atau nominal..." 
+                placeholder="Search invoice number or customer..." 
                 onkeyup="filterInvoiceTable()"
                 class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-brand-emerald focus:bg-white transition"
               />
             </div>
             <div class="flex items-center gap-2">
-              <span class="text-slate-400 font-mono text-[11px]">Status:</span>
               <select id="invoice-status-select" onchange="filterInvoiceTable()" class="bg-slate-50 border border-slate-200 text-slate-700 text-xs rounded-xl px-3 py-1.5 focus:outline-none focus:border-brand-emerald">
-                <option value="ALL">Semua Status (All)</option>
-                <option value="PAID">Lunas (Paid / Settled)</option>
-                <option value="PENDING">Menunggu Pembayaran (Pending)</option>
-                <option value="OVERDUE">Nunggak / Isolir (Overdue)</option>
+                <option value="ALL">All Statuses</option>
+                <option value="PAID">Paid / Settled</option>
+                <option value="PENDING">Pending</option>
+                <option value="OVERDUE">Suspended / Overdue</option>
               </select>
             </div>
           </div>
@@ -606,13 +571,13 @@
               <table class="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr class="bg-slate-50/80 border-b border-slate-200 font-mono text-slate-500 text-[11px]">
-                    <th class="py-3 px-4 font-semibold">NO. INVOICE</th>
-                    <th class="py-3 px-4 font-semibold">PELANGGAN / PERIODE</th>
-                    <th class="py-3 px-4 font-semibold">PAKET INTERNET</th>
-                    <th class="py-3 px-4 font-semibold">TOTAL TAGIHAN</th>
-                    <th class="py-3 px-4 font-semibold">JATUH TEMPO</th>
-                    <th class="py-3 px-4 font-semibold">STATUS</th>
-                    <th class="py-3 px-4 font-semibold text-right">AKSI</th>
+                    <th class="py-2.5 px-4 font-semibold">INVOICE ID</th>
+                    <th class="py-2.5 px-4 font-semibold">SUBSCRIBER</th>
+                    <th class="py-2.5 px-4 font-semibold">PLAN</th>
+                    <th class="py-2.5 px-4 font-semibold">AMOUNT</th>
+                    <th class="py-2.5 px-4 font-semibold">DUE DATE</th>
+                    <th class="py-2.5 px-4 font-semibold">STATUS</th>
+                    <th class="py-2.5 px-4 font-semibold text-right">ACTIONS</th>
                   </tr>
                 </thead>
                 <tbody id="invoices-table-body" class="divide-y divide-slate-100">
@@ -625,63 +590,46 @@
         </div>
 
         <!-- ========================================================================= -->
-        <!-- TAB 5: MIKROTIK ROUTERS / NAS                                             -->
+        <!-- TAB 5: MIKROTIK ROUTERS                                                   -->
         <!-- ========================================================================= -->
-        <div id="tab-routers" class="tab-pane hidden space-y-5 animate-fadeIn">
+        <div id="tab-routers" class="tab-pane hidden space-y-4 animate-fadeIn">
           
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs">
-            <div>
-              <h2 class="text-base font-bold text-brand-navy">Manajemen Router Mikrotik & NAS</h2>
-              <p class="text-[11px] text-slate-500 mt-0.5">Koneksi RouterOS Binary API (Port 8728), monitor sesi PPPoE, dan sinkronisasi dynamic queue.</p>
-            </div>
-            <div class="flex items-center gap-2">
-              <button onclick="openAddRouterModal()" class="brand-btn-primary px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm">
-                <i data-lucide="plus" class="w-4 h-4"></i>
-                <span>+ Daftarkan Router NAS</span>
-              </button>
-            </div>
+          <div class="flex items-center justify-between">
+            <h2 class="text-base font-bold text-brand-navy">Mikrotik Routers & NAS</h2>
+            <button onclick="openAddRouterModal()" class="brand-btn-primary px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+              <span>+ Add Router</span>
+            </button>
           </div>
 
           <!-- Router Cards Grid -->
-          <div id="routers-grid" class="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div id="routers-grid" class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <!-- Populated via JS -->
           </div>
 
-          <!-- Active Queues & Interface Monitor -->
-          <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs">
+          <!-- Live RouterOS Queue Stream -->
+          <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs">
             <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-              <div>
-                <h3 class="font-bold text-sm text-brand-navy">Live RouterOS Queue Stream</h3>
-                <p class="text-[11px] text-slate-500 mt-0.5">Top 3 subscriber bandwidth consumption across core interfaces.</p>
-              </div>
-              <span class="text-[10px] font-mono text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Auto-Refresh (1s)</span>
+              <h3 class="font-bold text-xs text-brand-navy uppercase tracking-wider font-mono">Live Core Queue Stream</h3>
+              <span class="text-[10px] font-mono text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">1s telemetry</span>
             </div>
-            <div class="mt-4 space-y-3">
+            <div class="mt-3 space-y-2.5">
               <div>
                 <div class="flex justify-between text-xs font-mono mb-1">
                   <span>Elena Rostova &bull; 1 Gbps Ultra</span>
-                  <span class="font-bold text-emerald-600">842 Mbps / 1000 Mbps (84.2%)</span>
+                  <span class="font-bold text-emerald-600">842 Mbps / 1000 Mbps</span>
                 </div>
-                <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
                   <div class="bg-emerald-500 h-full rounded-full" style="width: 84.2%"></div>
                 </div>
               </div>
               <div>
                 <div class="flex justify-between text-xs font-mono mb-1">
                   <span>Ahmad Fauzi &bull; 50 Mbps Fast</span>
-                  <span class="font-bold text-blue-600">46.5 Mbps / 50 Mbps (93.0%)</span>
+                  <span class="font-bold text-blue-600">46.5 Mbps / 50 Mbps</span>
                 </div>
-                <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
                   <div class="bg-blue-500 h-full rounded-full" style="width: 93.0%"></div>
-                </div>
-              </div>
-              <div>
-                <div class="flex justify-between text-xs font-mono mb-1">
-                  <span>Marcus Vance &bull; 200 Mbps Dedicated</span>
-                  <span class="font-bold text-emerald-600">142 Mbps / 200 Mbps (71.0%)</span>
-                </div>
-                <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                  <div class="bg-emerald-500 h-full rounded-full" style="width: 71.0%"></div>
                 </div>
               </div>
             </div>
@@ -690,36 +638,26 @@
         </div>
 
         <!-- ========================================================================= -->
-        <!-- TAB 6: PUSAT ISOLIR (Service Suspension Engine)                           -->
+        <!-- TAB 6: SUSPENSION CENTER                                                  -->
         <!-- ========================================================================= -->
-        <div id="tab-suspension" class="tab-pane hidden space-y-5 animate-fadeIn">
+        <div id="tab-suspension" class="tab-pane hidden space-y-4 animate-fadeIn">
           
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs">
-            <div>
-              <h2 class="text-base font-bold text-brand-navy">Pusat Isolir Otomatis (Service Suspension Engine)</h2>
-              <p class="text-[11px] text-slate-500 mt-0.5">Otomatisasi pemutusan bandwidth bagi pelanggan yang menunggak lewat masa tenggang (Grace Period).</p>
-            </div>
-            <div class="flex items-center gap-2">
-              <button onclick="runBatchIsolate()" class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-rose-600 hover:bg-rose-500 text-white flex items-center gap-1.5 transition shadow-sm">
-                <i data-lucide="shield-alert" class="w-4 h-4"></i>
-                <span>Jalankan Isolir Massal Sekarang</span>
-              </button>
-            </div>
+          <div class="flex items-center justify-between">
+            <h2 class="text-base font-bold text-brand-navy">Service Suspension Center</h2>
+            <button onclick="runBatchIsolate()" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-rose-600 hover:bg-rose-500 text-white flex items-center gap-1.5 transition shadow-sm">
+              <i data-lucide="shield-alert" class="w-3.5 h-3.5"></i>
+              <span>Run Batch Isolation</span>
+            </button>
           </div>
 
-          <!-- Policy & Configuration Banner -->
-          <div class="bg-rose-50/70 border border-rose-200 rounded-2xl p-4 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center flex-shrink-0">
-                <i data-lucide="lock" class="w-5 h-5"></i>
-              </div>
-              <div>
-                <span class="font-bold text-rose-900 text-xs block">Kebijakan Isolir: H+3 Jatuh Tempo</span>
-                <span class="text-[11px] text-rose-700">Pelanggan terisolir dialihkan ke Mikrotik IP Pool: <code class="font-mono font-bold">10.99.0.0/24</code> dengan bandwidth 256k & halaman redirect tagihan.</span>
-              </div>
+          <!-- Policy Banner -->
+          <div class="bg-rose-50/60 border border-rose-200 rounded-2xl p-3.5 flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <i data-lucide="lock" class="w-4 h-4 text-rose-600"></i>
+              <span class="text-xs text-rose-800">Auto-isolate H+3 overdue accounts to subnet <code class="font-mono font-bold">10.99.0.0/24</code>.</span>
             </div>
-            <span class="font-mono text-xs font-bold text-rose-800 bg-white border border-rose-200 px-3 py-1 rounded-xl shadow-2xs">
-              4 Akun Sedang Terisolir
+            <span class="font-mono text-xs font-bold text-rose-800 bg-white border border-rose-200 px-2.5 py-0.5 rounded-lg shadow-2xs">
+              4 Suspended
             </span>
           </div>
 
@@ -729,12 +667,11 @@
               <table class="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr class="bg-slate-50/80 border-b border-slate-200 font-mono text-slate-500 text-[11px]">
-                    <th class="py-3 px-4 font-semibold">PELANGGAN TERISOLIR</th>
-                    <th class="py-3 px-4 font-semibold">PPPOE SECRET</th>
-                    <th class="py-3 px-4 font-semibold">TUNGGAKAN</th>
-                    <th class="py-3 px-4 font-semibold">TANGGAL ISOLIR</th>
-                    <th class="py-3 px-4 font-semibold">IP ISOLIR</th>
-                    <th class="py-3 px-4 font-semibold text-right">AKSI PEMULIHAN</th>
+                    <th class="py-2.5 px-4 font-semibold">SUBSCRIBER</th>
+                    <th class="py-2.5 px-4 font-semibold">PPPOE SECRET</th>
+                    <th class="py-2.5 px-4 font-semibold">UNPAID AMOUNT</th>
+                    <th class="py-2.5 px-4 font-semibold">ISOLATION IP</th>
+                    <th class="py-2.5 px-4 font-semibold text-right">RESTORE</th>
                   </tr>
                 </thead>
                 <tbody id="suspension-table-body" class="divide-y divide-slate-100">
@@ -749,86 +686,66 @@
         <!-- ========================================================================= -->
         <!-- TAB 7: TR-069 GENIEACS                                                    -->
         <!-- ========================================================================= -->
-        <div id="tab-genieacs" class="tab-pane hidden space-y-5 animate-fadeIn">
+        <div id="tab-genieacs" class="tab-pane hidden space-y-4 animate-fadeIn">
           
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs">
-            <div>
-              <h2 class="text-base font-bold text-brand-navy">TR-069 GenieACS Optical Provisioning Server</h2>
-              <p class="text-[11px] text-slate-500 mt-0.5">CWMP auto-provisioning ONT/modem pelanggan dan monitoring optical power attenuation.</p>
-            </div>
-            <button onclick="triggerOpticalScan()" class="brand-btn-primary px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm">
-              <i data-lucide="scan-line" class="w-4 h-4"></i>
-              <span>Trigger CWMP Inform Scan</span>
+          <div class="flex items-center justify-between">
+            <h2 class="text-base font-bold text-brand-navy">TR-069 GenieACS Telemetry</h2>
+            <button onclick="triggerOpticalScan()" class="brand-btn-primary px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm">
+              <i data-lucide="scan-line" class="w-3.5 h-3.5"></i>
+              <span>Inform Scan</span>
             </button>
           </div>
 
           <!-- Optical Health KPI -->
-          <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
-            <div class="bg-white border border-slate-200 p-4 rounded-2xl shadow-xs">
-              <span class="text-slate-400 font-medium text-[11px]">Total Managed ONT</span>
-              <span class="font-mono text-xl font-bold text-brand-navy block mt-1">1,428 Devices</span>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div class="bg-white border border-slate-200 p-3.5 rounded-2xl shadow-xs">
+              <span class="text-slate-400 font-medium text-[10px] block">Managed ONT</span>
+              <span class="font-mono text-lg font-bold text-brand-navy">1,428</span>
             </div>
-            <div class="bg-white border border-slate-200 p-4 rounded-2xl shadow-xs">
-              <span class="text-slate-400 font-medium text-[11px]">Normal Attenuation (-15 to -24 dBm)</span>
-              <span class="font-mono text-xl font-bold text-emerald-600 block mt-1">1,394 (97.6%)</span>
+            <div class="bg-white border border-slate-200 p-3.5 rounded-2xl shadow-xs">
+              <span class="text-slate-400 font-medium text-[10px] block">Optimal (-15 to -24 dBm)</span>
+              <span class="font-mono text-lg font-bold text-emerald-600">1,394 (97.6%)</span>
             </div>
-            <div class="bg-white border border-slate-200 p-4 rounded-2xl shadow-xs">
-              <span class="text-slate-400 font-medium text-[11px]">High Loss Warning (-25 to -27 dBm)</span>
-              <span class="font-mono text-xl font-bold text-amber-600 block mt-1">28 (2.0%)</span>
+            <div class="bg-white border border-slate-200 p-3.5 rounded-2xl shadow-xs">
+              <span class="text-slate-400 font-medium text-[10px] block">Warning (-25 to -27 dBm)</span>
+              <span class="font-mono text-lg font-bold text-amber-600">28 (2.0%)</span>
             </div>
-            <div class="bg-white border border-slate-200 p-4 rounded-2xl shadow-xs">
-              <span class="text-slate-400 font-medium text-[11px]">Critical Attenuation (> -28 dBm)</span>
-              <span class="font-mono text-xl font-bold text-rose-600 block mt-1">6 (0.4%)</span>
+            <div class="bg-white border border-slate-200 p-3.5 rounded-2xl shadow-xs">
+              <span class="text-slate-400 font-medium text-[10px] block">Critical (> -28 dBm)</span>
+              <span class="font-mono text-lg font-bold text-rose-600">6 (0.4%)</span>
             </div>
           </div>
 
           <!-- ONT Table -->
           <div class="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
-            <div class="p-4 border-b border-slate-100 flex items-center justify-between">
-              <h3 class="font-bold text-sm text-brand-navy">Sample Customer ONT Optical Telemetry</h3>
-              <span class="font-mono text-[11px] text-slate-500">Preset: Last Inform &lt; 5m ago</span>
-            </div>
             <div class="overflow-x-auto">
               <table class="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr class="bg-slate-50/80 border-b border-slate-200 font-mono text-slate-500 text-[11px]">
-                    <th class="py-3 px-4 font-semibold">PELANGGAN</th>
-                    <th class="py-3 px-4 font-semibold">MODEL ONT & SERIAL</th>
-                    <th class="py-3 px-4 font-semibold">OPTICAL RX POWER</th>
-                    <th class="py-3 px-4 font-semibold">CWMP IP ADDRESS</th>
-                    <th class="py-3 px-4 font-semibold">LAST INFORM</th>
-                    <th class="py-3 px-4 font-semibold text-right">DIAGNOSTIK</th>
+                    <th class="py-2.5 px-4 font-semibold">CUSTOMER</th>
+                    <th class="py-2.5 px-4 font-semibold">ONT MODEL</th>
+                    <th class="py-2.5 px-4 font-semibold">RX POWER</th>
+                    <th class="py-2.5 px-4 font-semibold">CWMP IP</th>
+                    <th class="py-2.5 px-4 font-semibold text-right">ACTION</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                   <tr class="hover:bg-slate-50/80 transition">
-                    <td class="py-3 px-4 font-bold text-slate-800">Elena Rostova</td>
-                    <td class="py-3 px-4 font-mono text-slate-600">ZTE-F670L (SN: ZTEG0482910)</td>
-                    <td class="py-3 px-4 font-mono font-bold text-emerald-600">-18.42 dBm (Excellent)</td>
-                    <td class="py-3 px-4 font-mono text-slate-500">10.20.1.92</td>
-                    <td class="py-3 px-4 text-slate-500 font-mono">18s ago</td>
-                    <td class="py-3 px-4 text-right">
-                      <button onclick="showToast('ONT Diagnostic', 'Reboot signal dispatched via TR-069 RPC', 'info')" class="text-brand-navy font-semibold hover:underline">Reboot ONT</button>
+                    <td class="py-2.5 px-4 font-bold text-slate-800">Elena Rostova</td>
+                    <td class="py-2.5 px-4 font-mono text-slate-600">ZTE-F670L</td>
+                    <td class="py-2.5 px-4 font-mono font-bold text-emerald-600">-18.42 dBm</td>
+                    <td class="py-2.5 px-4 font-mono text-slate-500">10.20.1.92</td>
+                    <td class="py-2.5 px-4 text-right">
+                      <button onclick="showToast('Reboot Dispatched', 'TR-069 RPC sent to ZTE-F670L', 'info')" class="text-brand-navy font-semibold hover:underline">Reboot ONT</button>
                     </td>
                   </tr>
                   <tr class="hover:bg-slate-50/80 transition">
-                    <td class="py-3 px-4 font-bold text-slate-800">Ahmad Fauzi</td>
-                    <td class="py-3 px-4 font-mono text-slate-600">Huawei HG8245H5 (SN: 48575443)</td>
-                    <td class="py-3 px-4 font-mono font-bold text-emerald-600">-21.15 dBm (Good)</td>
-                    <td class="py-3 px-4 font-mono text-slate-500">10.20.1.45</td>
-                    <td class="py-3 px-4 text-slate-500 font-mono">42s ago</td>
-                    <td class="py-3 px-4 text-right">
-                      <button onclick="showToast('ONT Diagnostic', 'Reboot signal dispatched via TR-069 RPC', 'info')" class="text-brand-navy font-semibold hover:underline">Reboot ONT</button>
-                    </td>
-                  </tr>
-                  <tr class="hover:bg-slate-50/80 transition">
-                    <td class="py-3 px-4 font-bold text-slate-800">Dewi Sartika</td>
-                    <td class="py-3 px-4 font-mono text-slate-600">FiberHome AN5506 (SN: FHTT8932)</td>
-                    <td class="py-3 px-4 font-mono font-bold text-amber-600">-26.80 dBm (Degraded)</td>
-                    <td class="py-3 px-4 font-mono text-slate-500">10.20.1.77</td>
-                    <td class="py-3 px-4 text-slate-500 font-mono">2m ago</td>
-                    <td class="py-3 px-4 text-right">
-                      <button onclick="showToast('Optical Warning', 'Dispatched technician ticket for fiber bending check', 'warning')" class="text-amber-600 font-semibold hover:underline">Dispatch Check</button>
+                    <td class="py-2.5 px-4 font-bold text-slate-800">Ahmad Fauzi</td>
+                    <td class="py-2.5 px-4 font-mono text-slate-600">Huawei HG8245H5</td>
+                    <td class="py-2.5 px-4 font-mono font-bold text-emerald-600">-21.15 dBm</td>
+                    <td class="py-2.5 px-4 font-mono text-slate-500">10.20.1.45</td>
+                    <td class="py-2.5 px-4 text-right">
+                      <button onclick="showToast('Reboot Dispatched', 'TR-069 RPC sent to HG8245H5', 'info')" class="text-brand-navy font-semibold hover:underline">Reboot ONT</button>
                     </td>
                   </tr>
                 </tbody>
@@ -839,92 +756,55 @@
         </div>
 
         <!-- ========================================================================= -->
-        <!-- TAB 8: GATEWAYS & LEDGER                                                  -->
+        <!-- TAB 8: GATEWAYS                                                           -->
         <!-- ========================================================================= -->
-        <div id="tab-gateways" class="tab-pane hidden space-y-5 animate-fadeIn">
+        <div id="tab-gateways" class="tab-pane hidden space-y-4 animate-fadeIn">
           
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs">
-            <div>
-              <h2 class="text-base font-bold text-brand-navy">Payment Gateways & Transaction Ledger</h2>
-              <p class="text-[11px] text-slate-500 mt-0.5">Integrasi mutasi otomatis Stripe, Midtrans (QRIS & Virtual Account), dan Xendit.</p>
-            </div>
-            <button onclick="triggerSimulatedWebhook()" class="brand-btn-primary px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm">
-              <i data-lucide="zap" class="w-4 h-4"></i>
+          <div class="flex items-center justify-between">
+            <h2 class="text-base font-bold text-brand-navy">Gateways & Settlements</h2>
+            <button onclick="triggerSimulatedWebhook()" class="brand-btn-primary px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm">
+              <i data-lucide="zap" class="w-3.5 h-3.5"></i>
               <span>Test Webhook ($199.99)</span>
             </button>
           </div>
 
           <!-- Gateway Cards -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-            <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                  <div class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">S</div>
-                  <div>
-                    <h4 class="font-bold text-slate-800">Stripe Billing</h4>
-                    <span class="text-[10px] text-slate-400 font-mono">Credit Card, Apple Pay</span>
-                  </div>
-                </div>
-                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs flex items-center justify-between">
+              <div>
+                <h4 class="font-bold text-slate-800">Stripe Billing</h4>
+                <span class="text-[10px] text-slate-400 font-mono">Credit Card, Apple Pay</span>
               </div>
-              <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between text-[11px] font-mono">
-                <span class="text-slate-500">Status: <strong class="text-emerald-600">Active</strong></span>
-                <span class="text-slate-500">Fee: <strong>2.9% + 30¢</strong></span>
-              </div>
+              <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
             </div>
-
-            <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                  <div class="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">M</div>
-                  <div>
-                    <h4 class="font-bold text-slate-800">Midtrans Snap</h4>
-                    <span class="text-[10px] text-slate-400 font-mono">QRIS, BCA VA, Mandiri</span>
-                  </div>
-                </div>
-                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs flex items-center justify-between">
+              <div>
+                <h4 class="font-bold text-slate-800">Midtrans Snap</h4>
+                <span class="text-[10px] text-slate-400 font-mono">QRIS, BCA VA, Mandiri</span>
               </div>
-              <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between text-[11px] font-mono">
-                <span class="text-slate-500">Status: <strong class="text-emerald-600">Active</strong></span>
-                <span class="text-slate-500">Fee: <strong>Rp 4.000 / VA</strong></span>
-              </div>
+              <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
             </div>
-
-            <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                  <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">X</div>
-                  <div>
-                    <h4 class="font-bold text-slate-800">Xendit Invoicing</h4>
-                    <span class="text-[10px] text-slate-400 font-mono">OVO, DANA, Alfamart</span>
-                  </div>
-                </div>
-                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs flex items-center justify-between">
+              <div>
+                <h4 class="font-bold text-slate-800">Xendit Invoicing</h4>
+                <span class="text-[10px] text-slate-400 font-mono">OVO, DANA, Retail</span>
               </div>
-              <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between text-[11px] font-mono">
-                <span class="text-slate-500">Status: <strong class="text-emerald-600">Active</strong></span>
-                <span class="text-slate-500">Fee: <strong>1.5% e-Wallet</strong></span>
-              </div>
+              <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
             </div>
           </div>
 
           <!-- Transaction Ledger Table -->
           <div class="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
-            <div class="p-4 border-b border-slate-100 flex items-center justify-between">
-              <h3 class="font-bold text-sm text-brand-navy">Recent Payment Gateway Settlements</h3>
-              <span class="font-mono text-[11px] text-slate-500">HMAC SHA-256 Signature Verified</span>
-            </div>
             <div class="overflow-x-auto">
               <table class="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr class="bg-slate-50/80 border-b border-slate-200 font-mono text-slate-500 text-[11px]">
-                    <th class="py-3 px-4 font-semibold">TRANSACTION ID</th>
-                    <th class="py-3 px-4 font-semibold">GATEWAY</th>
-                    <th class="py-3 px-4 font-semibold">PELANGGAN</th>
-                    <th class="py-3 px-4 font-semibold">NOMINAL NET</th>
-                    <th class="py-3 px-4 font-semibold">WAKTU SETTLED</th>
-                    <th class="py-3 px-4 font-semibold">STATUS</th>
-                    <th class="py-3 px-4 font-semibold text-right">PAYLOAD</th>
+                    <th class="py-2.5 px-4 font-semibold">TRANSACTION ID</th>
+                    <th class="py-2.5 px-4 font-semibold">GATEWAY</th>
+                    <th class="py-2.5 px-4 font-semibold">CUSTOMER</th>
+                    <th class="py-2.5 px-4 font-semibold">NET AMOUNT</th>
+                    <th class="py-2.5 px-4 font-semibold">STATUS</th>
+                    <th class="py-2.5 px-4 font-semibold text-right">PAYLOAD</th>
                   </tr>
                 </thead>
                 <tbody id="gateways-table-body" class="divide-y divide-slate-100">
@@ -937,117 +817,46 @@
         </div>
 
         <!-- ========================================================================= -->
-        <!-- TAB 9: WHATSAPP NOTIFICATION CENTER                                      -->
+        <!-- TAB 9: WHATSAPP ALERTS                                                    -->
         <!-- ========================================================================= -->
-        <div id="tab-whatsapp" class="tab-pane hidden space-y-5 animate-fadeIn">
+        <div id="tab-whatsapp" class="tab-pane hidden space-y-4 animate-fadeIn">
           
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs">
-            <div>
-              <h2 class="text-base font-bold text-brand-navy">WhatsApp Notification Engine & Baileys Gateway</h2>
-              <p class="text-[11px] text-slate-500 mt-0.5">Pengiriman otomatis tagihan H-3, peringatan isolir, dan kwitansi PDF lunas ke WhatsApp pelanggan.</p>
-            </div>
-            <div class="flex items-center gap-2">
-              <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                Baileys Daemon: +62 812-3456-7890 (Connected)
-              </span>
-            </div>
+          <div class="flex items-center justify-between">
+            <h2 class="text-base font-bold text-brand-navy">WhatsApp Alerts & Baileys Bot</h2>
+            <span class="text-xs font-mono text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-xl">
+              Baileys Daemon Connected
+            </span>
           </div>
 
           <!-- Broadcast Templates Grid -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             
-            <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs flex flex-col justify-between">
+            <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs flex flex-col justify-between">
               <div>
-                <div class="flex items-center justify-between pb-2 border-b border-slate-100">
-                  <h4 class="font-bold text-brand-navy flex items-center gap-1.5">
-                    <i data-lucide="bell" class="w-4 h-4 text-blue-500"></i>
-                    Template: Pengingat Tagihan (H-3)
-                  </h4>
-                  <span class="text-[10px] font-mono text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">Otomatis Aktif</span>
-                </div>
-                <div class="mt-3 p-3 rounded-xl bg-slate-50 border border-slate-200 font-mono text-[11px] text-slate-700 whitespace-pre-line leading-relaxed">
-                  Halo *{{nama}}*, tagihan internet paket *{{paket}}* sebesar *{{nominal}}* akan jatuh tempo pada *{{jatuh_tempo}}*.
-                  
-                  Bayar mudah melalui link resmi:
-                  {{link_bayar}}
-                </div>
+                <h4 class="font-bold text-brand-navy pb-1 border-b border-slate-100">H-3 Billing Reminder</h4>
+                <p class="mt-2 text-slate-600 font-mono text-[11px]">
+                  Halo *{{nama}}*, tagihan *{{paket}}* (Rp 275.000) jatuh tempo pada *15-10-2026*. Link bayar: https://billing.pulsebill.io/pay
+                </p>
               </div>
-              <div class="mt-4 pt-3 border-t border-slate-100 flex justify-end">
+              <div class="mt-4 pt-2 border-t border-slate-100 flex justify-end">
                 <button onclick="openWhatsAppSimulator('H-3 Reminder')" class="brand-btn-primary px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1">
                   <i data-lucide="send" class="w-3.5 h-3.5"></i>
-                  <span>Test Kirim WA</span>
+                  <span>Test Send</span>
                 </button>
               </div>
             </div>
 
-            <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs flex flex-col justify-between">
+            <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs flex flex-col justify-between">
               <div>
-                <div class="flex items-center justify-between pb-2 border-b border-slate-100">
-                  <h4 class="font-bold text-brand-navy flex items-center gap-1.5">
-                    <i data-lucide="check-circle" class="w-4 h-4 text-emerald-500"></i>
-                    Template: Kwitansi Pembayaran Lunas
-                  </h4>
-                  <span class="text-[10px] font-mono text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">Otomatis Aktif</span>
-                </div>
-                <div class="mt-3 p-3 rounded-xl bg-slate-50 border border-slate-200 font-mono text-[11px] text-slate-700 whitespace-pre-line leading-relaxed">
-                  Terima kasih *{{nama}}*! Pembayaran invoice *{{no_invoice}}* sebesar *{{nominal}}* telah kami terima.
-                  
-                  Status layanan Anda: *AKTIF NORMAL*.
-                  Unduh kwitansi resmi: {{link_struk}}
-                </div>
+                <h4 class="font-bold text-brand-navy pb-1 border-b border-slate-100">Settled Receipt Confirmation</h4>
+                <p class="mt-2 text-slate-600 font-mono text-[11px]">
+                  Terima kasih *{{nama}}*! Pembayaran *{{no_invoice}}* telah diterima. Status: *AKTIF NORMAL*. Unduh struk: https://billing.pulsebill.io/receipt
+                </p>
               </div>
-              <div class="mt-4 pt-3 border-t border-slate-100 flex justify-end">
+              <div class="mt-4 pt-2 border-t border-slate-100 flex justify-end">
                 <button onclick="openWhatsAppSimulator('Paid Receipt')" class="brand-btn-primary px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1">
                   <i data-lucide="send" class="w-3.5 h-3.5"></i>
-                  <span>Test Kirim WA</span>
-                </button>
-              </div>
-            </div>
-
-            <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs flex flex-col justify-between">
-              <div>
-                <div class="flex items-center justify-between pb-2 border-b border-slate-100">
-                  <h4 class="font-bold text-brand-navy flex items-center gap-1.5">
-                    <i data-lucide="shield-alert" class="w-4 h-4 text-rose-500"></i>
-                    Template: Notifikasi Pemutusan Isolir
-                  </h4>
-                  <span class="text-[10px] font-mono text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">Otomatis Aktif</span>
-                </div>
-                <div class="mt-3 p-3 rounded-xl bg-slate-50 border border-slate-200 font-mono text-[11px] text-slate-700 whitespace-pre-line leading-relaxed">
-                  Pemberitahuan: Layanan internet Anda *{{username}}* telah dihentikan sementara (*TERISOLIR*) karena melewati batas jatuh tempo.
-                  
-                  Segera lunasi tagihan Anda untuk membuka isolir otomatis secara instan:
-                  {{link_bayar}}
-                </div>
-              </div>
-              <div class="mt-4 pt-3 border-t border-slate-100 flex justify-end">
-                <button onclick="openWhatsAppSimulator('Suspension Notice')" class="brand-btn-primary px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1">
-                  <i data-lucide="send" class="w-3.5 h-3.5"></i>
-                  <span>Test Kirim WA</span>
-                </button>
-              </div>
-            </div>
-
-            <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs flex flex-col justify-between">
-              <div>
-                <div class="flex items-center justify-between pb-2 border-b border-slate-100">
-                  <h4 class="font-bold text-brand-navy flex items-center gap-1.5">
-                    <i data-lucide="file-plus" class="w-4 h-4 text-indigo-500"></i>
-                    Template: Tagihan Baru Diterbitkan
-                  </h4>
-                  <span class="text-[10px] font-mono text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">Otomatis Aktif</span>
-                </div>
-                <div class="mt-3 p-3 rounded-xl bg-slate-50 border border-slate-200 font-mono text-[11px] text-slate-700 whitespace-pre-line leading-relaxed">
-                  Tagihan internet periode baru *{{periode}}* telah diterbitkan untuk ID *{{id_pelanggan}}*.
-                  Nominal: *{{nominal}}*.
-                  Jatuh tempo: *{{jatuh_tempo}}*.
-                </div>
-              </div>
-              <div class="mt-4 pt-3 border-t border-slate-100 flex justify-end">
-                <button onclick="openWhatsAppSimulator('New Invoice')" class="brand-btn-primary px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1">
-                  <i data-lucide="send" class="w-3.5 h-3.5"></i>
-                  <span>Test Kirim WA</span>
+                  <span>Test Send</span>
                 </button>
               </div>
             </div>
@@ -1057,78 +866,37 @@
         </div>
 
         <!-- ========================================================================= -->
-        <!-- TAB 10: SYSTEM SETTINGS                                                   -->
+        <!-- TAB 10: SETTINGS                                                          -->
         <!-- ========================================================================= -->
-        <div id="tab-settings" class="tab-pane hidden space-y-5 animate-fadeIn">
+        <div id="tab-settings" class="tab-pane hidden space-y-4 animate-fadeIn">
           
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs">
-            <div>
-              <h2 class="text-base font-bold text-brand-navy">System & ISP Configuration</h2>
-              <p class="text-[11px] text-slate-500 mt-0.5">Konfigurasi profil ISP, kebijakan tagihan, mata uang, dan IP pool isolir Mikrotik.</p>
-            </div>
-            <button onclick="saveSystemSettings()" class="brand-btn-primary px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm">
-              <i data-lucide="save" class="w-4 h-4"></i>
-              <span>Simpan Perubahan</span>
+          <div class="flex items-center justify-between">
+            <h2 class="text-base font-bold text-brand-navy">System Settings</h2>
+            <button onclick="saveSystemSettings()" class="brand-btn-primary px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm">
+              <i data-lucide="save" class="w-3.5 h-3.5"></i>
+              <span>Save Settings</span>
             </button>
           </div>
 
-          <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs space-y-6 max-w-4xl">
-            
-            <div>
-              <h4 class="font-bold text-sm text-brand-navy pb-2 border-b border-slate-100">Profil Perusahaan ISP</h4>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-                <div>
-                  <label class="block text-[11px] font-semibold text-slate-600 mb-1">Nama Provider ISP / BSS</label>
-                  <input type="text" id="setting-isp-name" value="PulseBill Telecom Solutions Inc." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-brand-emerald">
-                </div>
-                <div>
-                  <label class="block text-[11px] font-semibold text-slate-600 mb-1">Nomor Kontak WhatsApp Support</label>
-                  <input type="text" id="setting-isp-phone" value="+62 812-3456-7890" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-brand-emerald">
-                </div>
+          <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-4 max-w-3xl">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Company Name</label>
+                <input type="text" id="setting-isp-name" value="PulseBill Telecom Inc." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:border-brand-emerald">
+              </div>
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Grace Period (Days)</label>
+                <input type="number" id="setting-grace-period" value="3" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:border-brand-emerald">
+              </div>
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Tax Rate (PPN %)</label>
+                <input type="number" id="setting-tax-rate" value="11" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:border-brand-emerald">
+              </div>
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Mikrotik Isolir Pool</label>
+                <input type="text" id="setting-isolir-pool" value="10.99.0.0/24" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-mono focus:outline-none focus:border-brand-emerald">
               </div>
             </div>
-
-            <div>
-              <h4 class="font-bold text-sm text-brand-navy pb-2 border-b border-slate-100">Kebijakan Billing & Mikrotik</h4>
-              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
-                <div>
-                  <label class="block text-[11px] font-semibold text-slate-600 mb-1">Masa Tenggang (Grace Period)</label>
-                  <input type="number" id="setting-grace-period" value="3" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-brand-emerald">
-                  <span class="text-[10px] text-slate-400 mt-1 block">Hari setelah jatuh tempo sebelum isolir</span>
-                </div>
-                <div>
-                  <label class="block text-[11px] font-semibold text-slate-600 mb-1">Tarif Pajak PPN (%)</label>
-                  <input type="number" id="setting-tax-rate" value="11" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-brand-emerald">
-                  <span class="text-[10px] text-slate-400 mt-1 block">Standar PPN Telecom Indonesia</span>
-                </div>
-                <div>
-                  <label class="block text-[11px] font-semibold text-slate-600 mb-1">Mikrotik Isolir IP Pool</label>
-                  <input type="text" id="setting-isolir-pool" value="10.99.0.0/24" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono focus:outline-none focus:border-brand-emerald">
-                  <span class="text-[10px] text-slate-400 mt-1 block">Subnet dialihkan ke firewall drop</span>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <h4 class="font-bold text-sm text-brand-navy pb-2 border-b border-slate-100">Daemon Cron Scheduler</h4>
-              <div class="space-y-3 mt-4 text-xs">
-                <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
-                  <div>
-                    <span class="font-bold text-slate-800 block">Generate Invoices Massal</span>
-                    <span class="text-[11px] text-slate-500">Berjalan setiap tanggal 1 pukul 00:01 WIB</span>
-                  </div>
-                  <span class="font-mono font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">0 0 1 * *</span>
-                </div>
-                <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
-                  <div>
-                    <span class="font-bold text-slate-800 block">Cron Isolir Pelanggan Nunggak</span>
-                    <span class="text-[11px] text-slate-500">Berjalan setiap hari pukul 00:05 WIB</span>
-                  </div>
-                  <span class="font-mono font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded">5 0 * * *</span>
-                </div>
-              </div>
-            </div>
-
           </div>
 
         </div>
@@ -1140,231 +908,169 @@
   </div>
 
   <!-- ========================================================================= -->
-  <!-- MODAL: PRINTABLE RECEIPT / KWITANSI RESMI TELECOM                         -->
+  <!-- MODAL: PRINTABLE RECEIPT                                                  -->
   <!-- ========================================================================= -->
   <div id="receipt-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white border border-slate-200 rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden flex flex-col max-h-[90vh] animate-fadeIn">
       
-      <!-- Receipt Header Toolbar -->
-      <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between shrink-0 no-print">
+      <div class="px-5 py-3.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between no-print">
+        <span class="font-bold text-slate-800 text-sm">Official Invoice Receipt</span>
         <div class="flex items-center gap-2">
-          <div class="w-7 h-7 rounded-lg brand-gradient flex items-center justify-center text-white">
-            <i data-lucide="receipt" class="w-4 h-4"></i>
-          </div>
-          <span class="font-bold text-slate-800 text-sm">Official Telecom Invoice Receipt</span>
-        </div>
-        <div class="flex items-center gap-2">
-          <button onclick="window.print()" class="px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-xs flex items-center gap-1 shadow-2xs transition">
-            <i data-lucide="printer" class="w-3.5 h-3.5 text-slate-500"></i>
+          <button onclick="window.print()" class="px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-xs flex items-center gap-1 shadow-2xs">
+            <i data-lucide="printer" class="w-3.5 h-3.5"></i>
             <span>Print</span>
           </button>
-          <button onclick="closeReceiptModal()" class="w-7 h-7 rounded-lg hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition">
+          <button onclick="closeReceiptModal()" class="w-7 h-7 rounded-lg hover:bg-slate-200 text-slate-500 flex items-center justify-center">
             <i data-lucide="x" class="w-4 h-4"></i>
           </button>
         </div>
       </div>
 
-      <!-- Printable Document Body -->
-      <div id="printable-receipt-card" class="p-6 overflow-y-auto space-y-6 text-xs bg-white text-slate-900">
-        
-        <!-- Header Info -->
-        <div class="flex items-start justify-between border-b border-slate-200 pb-5">
+      <div id="printable-receipt-card" class="p-6 overflow-y-auto space-y-5 text-xs bg-white text-slate-900">
+        <div class="flex items-start justify-between border-b border-slate-200 pb-4">
           <div>
-            <div class="flex items-center gap-2 font-bold text-base text-brand-navy">
-              <span>PulseBill Telecom Solutions</span>
-            </div>
-            <p class="text-[11px] text-slate-500 mt-1">Autonomous Telecom Infrastructure & Billing</p>
-            <p class="text-[10px] text-slate-400 font-mono">Tax ID: ID-894-9218204-TEL</p>
+            <span class="font-bold text-base text-brand-navy">PulseBill Telecom Solutions</span>
+            <p class="text-[10px] text-slate-400 font-mono mt-0.5">Tax ID: ID-894-9218204-TEL</p>
           </div>
           <div class="text-right">
-            <div id="receipt-status-stamp" class="inline-block px-3 py-1 rounded-lg text-xs stamp-paid">
-              PAID
-            </div>
-            <span id="receipt-invoice-id" class="block font-mono font-bold text-xs text-slate-700 mt-2">INV-2026-0891</span>
-            <span id="receipt-date" class="block font-mono text-[10px] text-slate-400">Issued: Sep 12, 2026</span>
+            <div id="receipt-status-stamp" class="inline-block px-3 py-1 rounded-lg text-xs stamp-paid">PAID</div>
+            <span id="receipt-invoice-id" class="block font-mono font-bold text-xs text-slate-700 mt-1">INV-2026-0891</span>
           </div>
         </div>
 
-        <!-- Subscriber Information Grid -->
-        <div class="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
+        <div class="grid grid-cols-2 gap-3 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
           <div>
-            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block font-mono">Billed To:</span>
-            <h4 id="receipt-customer-name" class="font-bold text-slate-800 text-xs mt-0.5">Elena Rostova</h4>
-            <span id="receipt-customer-phone" class="text-[11px] text-slate-500 block">+62 812-9842-1092</span>
-            <span id="receipt-customer-address" class="text-[10px] text-slate-500 block mt-0.5">Kebayoran Baru, Jakarta Selatan</span>
+            <span class="text-[10px] font-bold text-slate-400 uppercase font-mono">Billed To:</span>
+            <h4 id="receipt-customer-name" class="font-bold text-slate-800 mt-0.5">Elena Rostova</h4>
+            <span id="receipt-customer-phone" class="text-slate-500 block">+62 812-9842-1092</span>
           </div>
           <div class="text-right">
-            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block font-mono">Connection Profile:</span>
-            <span id="receipt-pppoe" class="font-mono text-[11px] text-slate-700 block mt-0.5">elena.rostova@isp</span>
+            <span class="text-[10px] font-bold text-slate-400 uppercase font-mono">Connection:</span>
+            <span id="receipt-pppoe" class="font-mono text-slate-700 block mt-0.5">elena.rostova@isp</span>
             <span id="receipt-ip" class="font-mono text-[10px] text-emerald-600 block">IP: 10.20.1.92</span>
-            <span id="receipt-router" class="font-mono text-[10px] text-slate-400 block">Core: CCR2004-CORE-01</span>
           </div>
         </div>
 
-        <!-- Itemized Table -->
         <table class="w-full text-left border-collapse">
           <thead>
             <tr class="border-b border-slate-200 font-mono text-[10px] text-slate-400">
-              <th class="py-2">ITEM DESCRIPTION</th>
+              <th class="py-2">DESCRIPTION</th>
               <th class="py-2 text-center">SPEED</th>
-              <th class="py-2 text-right">AMOUNT</th>
+              <th class="py-2 text-right">TOTAL</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100">
             <tr>
-              <td class="py-3">
-                <span id="receipt-item-plan" class="font-bold text-slate-800 block">FTTH Gigabit Enterprise Tier</span>
-                <span class="text-[10px] text-slate-400">Service Period: Current Month Recurring</span>
-              </td>
-              <td id="receipt-item-speed" class="py-3 text-center font-mono text-slate-600">1000M / 1000M</td>
-              <td id="receipt-item-amount" class="py-3 text-right font-mono font-bold text-slate-900">$179.99</td>
-            </tr>
-            <tr>
-              <td class="py-2 text-slate-500">Standard Telecom Infrastructure Tax (PPN 11%)</td>
-              <td class="py-2 text-center font-mono text-slate-400">11%</td>
-              <td id="receipt-item-tax" class="py-2 text-right font-mono text-slate-700">$20.00</td>
+              <td id="receipt-item-plan" class="py-2.5 font-bold text-slate-800">Ultra Gigabit 1 Gbps</td>
+              <td id="receipt-item-speed" class="py-2.5 text-center font-mono text-slate-600">1000M / 1000M</td>
+              <td id="receipt-item-amount" class="py-2.5 text-right font-mono font-bold text-slate-900">$199.99</td>
             </tr>
           </tbody>
-          <tfoot>
-            <tr class="border-t border-slate-200">
-              <th colspan="2" class="py-3 text-right font-bold text-slate-800">Total Settled:</th>
-              <th id="receipt-total-amount" class="py-3 text-right font-mono text-sm font-bold text-brand-navy">$199.99</th>
-            </tr>
-          </tfoot>
         </table>
 
-        <!-- Security & Audit Footnote -->
-        <div class="pt-4 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-400 font-mono">
-          <div>
-            <span>Idempotency Hash: </span>
-            <code id="receipt-idempotency" class="text-slate-600">e3b0c44298fc1c14...</code>
-          </div>
-          <span class="text-emerald-600 font-semibold flex items-center gap-1">
-            <i data-lucide="check" class="w-3 h-3"></i> Authenticated
-          </span>
+        <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-400 font-mono">
+          <span>Idempotency: <code id="receipt-idempotency" class="text-slate-600">idem_0891</code></span>
+          <span class="text-emerald-600 font-semibold flex items-center gap-1"><i data-lucide="check" class="w-3 h-3"></i> Verified</span>
         </div>
-
       </div>
 
-      <!-- Modal Footer -->
-      <div class="px-6 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between shrink-0 no-print">
-        <span class="text-[10px] text-slate-400 font-mono">PulseBill Automated BSS/OSS Engine</span>
-        <button onclick="closeReceiptModal()" class="px-4 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold text-xs transition">
+      <div class="px-5 py-3 bg-slate-50 border-t border-slate-200 flex justify-end no-print">
+        <button onclick="closeReceiptModal()" class="px-4 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold text-xs">
           Close
         </button>
       </div>
-
     </div>
   </div>
 
   <!-- ========================================================================= -->
-  <!-- MODAL: SUBSCRIBER DETAIL (PPPoE Credentials & Session Telemetry)          -->
+  <!-- MODAL: SUBSCRIBER DETAIL                                                  -->
   <!-- ========================================================================= -->
   <div id="sub-detail-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white border border-slate-200 rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden flex flex-col max-h-[90vh] animate-fadeIn">
-      <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <div class="w-7 h-7 rounded-lg brand-gradient flex items-center justify-center text-white font-bold">
-            <i data-lucide="user" class="w-4 h-4"></i>
-          </div>
-          <div>
-            <h3 id="modal-sub-name" class="font-bold text-brand-navy text-sm">Subscriber Profile</h3>
-            <span id="modal-sub-id" class="text-[10px] text-slate-400 font-mono">PB-SUB-1001</span>
-          </div>
+    <div class="bg-white border border-slate-200 rounded-3xl shadow-2xl max-w-md w-full overflow-hidden flex flex-col max-h-[90vh] animate-fadeIn">
+      <div class="px-5 py-3.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+        <div>
+          <h3 id="modal-sub-name" class="font-bold text-brand-navy text-sm">Subscriber Details</h3>
+          <span id="modal-sub-id" class="text-[10px] text-slate-400 font-mono">PB-SUB-1001</span>
         </div>
         <button onclick="closeSubDetailModal()" class="w-7 h-7 rounded-lg hover:bg-slate-200 text-slate-500 flex items-center justify-center">
           <i data-lucide="x" class="w-4 h-4"></i>
         </button>
       </div>
 
-      <div class="p-6 space-y-5 overflow-y-auto text-xs">
-        
-        <!-- Status & Quick Action -->
+      <div class="p-5 space-y-4 overflow-y-auto text-xs">
         <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-200">
           <div>
-            <span class="text-[10px] text-slate-400 uppercase font-mono block">Current Network Status</span>
+            <span class="text-[10px] text-slate-400 uppercase font-mono block">Status</span>
             <span id="modal-sub-status-badge" class="font-bold text-emerald-600 flex items-center gap-1.5 mt-0.5">
-              <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Active & Online
+              Active & Online
             </span>
           </div>
           <button id="modal-sub-toggle-btn" onclick="handleModalSubToggle()" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 transition">
-            Isolir Pelanggan Ini
+            Isolate Account
           </button>
         </div>
 
-        <!-- PPPoE Credentials -->
-        <div>
-          <h4 class="font-bold text-slate-800 pb-1 border-b border-slate-100 font-mono text-[11px]">PPPoE Credentials & Gateway Binding</h4>
-          <div class="grid grid-cols-2 gap-3 mt-2 font-mono">
-            <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-100">
-              <span class="text-[10px] text-slate-400 block">PPPoE Username</span>
-              <span id="modal-sub-pppoe" class="font-bold text-slate-800 text-xs">ahmad.fauzi@isp</span>
-            </div>
-            <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-100">
-              <span class="text-[10px] text-slate-400 block">Assigned IP Address</span>
-              <span id="modal-sub-ip" class="font-bold text-emerald-600 text-xs">10.20.1.45</span>
-            </div>
-            <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-100">
-              <span class="text-[10px] text-slate-400 block">Core Router Gateway</span>
-              <span id="modal-sub-router" class="font-bold text-slate-800 text-xs">CORE-ROUTER-01</span>
-            </div>
-            <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-100">
-              <span class="text-[10px] text-slate-400 block">Bandwidth Rate Profile</span>
-              <span id="modal-sub-speed" class="font-bold text-blue-600 text-xs">50M / 50M</span>
-            </div>
+        <div class="grid grid-cols-2 gap-2.5 font-mono text-xs">
+          <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-100">
+            <span class="text-[10px] text-slate-400 block">Username</span>
+            <span id="modal-sub-pppoe" class="font-bold text-slate-800">ahmad.fauzi@isp</span>
+          </div>
+          <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-100">
+            <span class="text-[10px] text-slate-400 block">IP Address</span>
+            <span id="modal-sub-ip" class="font-bold text-emerald-600">10.20.1.45</span>
+          </div>
+          <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-100">
+            <span class="text-[10px] text-slate-400 block">Core Gateway</span>
+            <span id="modal-sub-router" class="font-bold text-slate-800">CORE-ROUTER-01</span>
+          </div>
+          <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-100">
+            <span class="text-[10px] text-slate-400 block">Rate Profile</span>
+            <span id="modal-sub-speed" class="font-bold text-blue-600">50M / 50M</span>
           </div>
         </div>
 
-        <!-- Contact & Location -->
-        <div>
-          <h4 class="font-bold text-slate-800 pb-1 border-b border-slate-100 font-mono text-[11px]">Contact & Installation Address</h4>
-          <div class="mt-2 space-y-1.5 text-slate-600">
-            <div><strong>WhatsApp:</strong> <span id="modal-sub-phone">+62 812-3456-7890</span></div>
-            <div><strong>Alamat Pasang:</strong> <span id="modal-sub-address">Jl. Margonda Raya No. 42, Depok</span></div>
-          </div>
+        <div class="text-slate-600 space-y-1">
+          <div><strong>WhatsApp:</strong> <span id="modal-sub-phone">+62 812-3456-7890</span></div>
+          <div><strong>Address:</strong> <span id="modal-sub-address">Kebayoran Baru, Jakarta</span></div>
         </div>
-
       </div>
 
-      <div class="px-6 py-3 bg-slate-50 border-t border-slate-200 flex justify-end">
+      <div class="px-5 py-3 bg-slate-50 border-t border-slate-200 flex justify-end">
         <button onclick="closeSubDetailModal()" class="px-4 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold text-xs">
-          Tutup
+          Close
         </button>
       </div>
     </div>
   </div>
 
   <!-- ========================================================================= -->
-  <!-- MODAL: TAMBAH PELANGGAN BARU                                              -->
+  <!-- MODAL: ADD SUBSCRIBER                                                     -->
   <!-- ========================================================================= -->
   <div id="add-sub-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white border border-slate-200 rounded-3xl shadow-2xl max-w-md w-full overflow-hidden flex flex-col max-h-[90vh] animate-fadeIn">
-      <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-        <h3 class="font-bold text-brand-navy text-sm flex items-center gap-2">
-          <i data-lucide="user-plus" class="w-4 h-4 text-emerald-600"></i>
-          Daftarkan Pelanggan Baru
-        </h3>
+      <div class="px-5 py-3.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+        <h3 class="font-bold text-brand-navy text-sm">Add New Subscriber</h3>
         <button onclick="closeAddSubModal()" class="w-7 h-7 rounded-lg hover:bg-slate-200 text-slate-500 flex items-center justify-center">
           <i data-lucide="x" class="w-4 h-4"></i>
         </button>
       </div>
 
-      <form onsubmit="submitNewSubscriber(event)" class="p-6 space-y-4 overflow-y-auto text-xs">
+      <form onsubmit="submitNewSubscriber(event)" class="p-5 space-y-3.5 text-xs">
         <div>
-          <label class="block text-slate-600 font-semibold mb-1">Nama Lengkap Pelanggan</label>
-          <input type="text" id="new-sub-name" required placeholder="Contoh: Rian Pratama" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-brand-emerald">
+          <label class="block text-slate-600 font-semibold mb-1">Customer Full Name</label>
+          <input type="text" id="new-sub-name" required placeholder="e.g. Kevin Tan" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-brand-emerald">
         </div>
         <div>
-          <label class="block text-slate-600 font-semibold mb-1">Nomor WhatsApp</label>
-          <input type="text" id="new-sub-phone" required placeholder="+62 813-xxxx-xxxx" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono focus:outline-none focus:border-brand-emerald">
+          <label class="block text-slate-600 font-semibold mb-1">WhatsApp Phone</label>
+          <input type="text" id="new-sub-phone" required placeholder="+62 812-xxxx-xxxx" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono focus:outline-none focus:border-brand-emerald">
         </div>
         <div>
-          <label class="block text-slate-600 font-semibold mb-1">Username PPPoE (Secret)</label>
-          <input type="text" id="new-sub-pppoe" required placeholder="rian.pratama@isp" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono focus:outline-none focus:border-brand-emerald">
+          <label class="block text-slate-600 font-semibold mb-1">PPPoE Username</label>
+          <input type="text" id="new-sub-pppoe" required placeholder="kevin.tan@isp" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono focus:outline-none focus:border-brand-emerald">
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-slate-600 font-semibold mb-1">Paket Layanan</label>
+            <label class="block text-slate-600 font-semibold mb-1">Plan</label>
             <select id="new-sub-plan" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-brand-emerald">
               <option value="Home Fast 50 Mbps">Home Fast 50 Mbps</option>
               <option value="Home Lite 20 Mbps">Home Lite 20 Mbps</option>
@@ -1374,7 +1080,7 @@
             </select>
           </div>
           <div>
-            <label class="block text-slate-600 font-semibold mb-1">Router NAS</label>
+            <label class="block text-slate-600 font-semibold mb-1">Router</label>
             <select id="new-sub-router" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-brand-emerald">
               <option value="CORE-ROUTER-01">CORE-ROUTER-01</option>
               <option value="DIST-ROUTER-02">DIST-ROUTER-02</option>
@@ -1382,71 +1088,200 @@
           </div>
         </div>
         <div>
-          <label class="block text-slate-600 font-semibold mb-1">Alamat Pemasangan</label>
-          <input type="text" id="new-sub-address" required placeholder="Jl. Kemang Raya No. 12, Jakarta" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-brand-emerald">
+          <label class="block text-slate-600 font-semibold mb-1">Address</label>
+          <input type="text" id="new-sub-address" required placeholder="e.g. Sudirman Central, Jakarta" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-brand-emerald">
         </div>
 
         <div class="pt-3 border-t border-slate-100 flex justify-end gap-2">
-          <button type="button" onclick="closeAddSubModal()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold text-xs">
-            Batal
-          </button>
-          <button type="submit" class="brand-btn-primary px-4 py-2 rounded-xl font-semibold text-xs">
-            Simpan Pelanggan
-          </button>
+          <button type="button" onclick="closeAddSubModal()" class="px-4 py-1.5 rounded-xl bg-slate-100 text-slate-600 font-semibold text-xs">Cancel</button>
+          <button type="submit" class="brand-btn-primary px-4 py-1.5 rounded-xl font-semibold text-xs">Save Subscriber</button>
         </div>
       </form>
     </div>
   </div>
 
   <!-- ========================================================================= -->
-  <!-- MODAL: WHATSAPP CHAT SIMULATOR (Live Phone Preview)                       -->
+  <!-- MODAL: ADD PACKAGE                                                        -->
+  <!-- ========================================================================= -->
+  <div id="add-pkg-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white border border-slate-200 rounded-3xl shadow-2xl max-w-md w-full overflow-hidden flex flex-col animate-fadeIn">
+      <div class="px-5 py-3.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+        <h3 class="font-bold text-brand-navy text-sm">Create New Bandwidth Tier</h3>
+        <button onclick="closeAddPackageModal()" class="w-7 h-7 rounded-lg hover:bg-slate-200 text-slate-500 flex items-center justify-center">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <form onsubmit="submitNewPackage(event)" class="p-5 space-y-3.5 text-xs">
+        <div>
+          <label class="block text-slate-600 font-semibold mb-1">Plan Name</label>
+          <input type="text" id="new-pkg-name" required placeholder="e.g. Pro Stream 300 Mbps" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-brand-emerald">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-600 font-semibold mb-1">Rate Limit (UP/DOWN)</label>
+            <input type="text" id="new-pkg-speed" required placeholder="300M / 300M" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono focus:outline-none focus:border-brand-emerald">
+          </div>
+          <div>
+            <label class="block text-slate-600 font-semibold mb-1">Monthly Price ($)</label>
+            <input type="text" id="new-pkg-price" required placeholder="$45.00" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono focus:outline-none focus:border-brand-emerald">
+          </div>
+        </div>
+        <div>
+          <label class="block text-slate-600 font-semibold mb-1">Mikrotik Profile Name</label>
+          <input type="text" id="new-pkg-profile" required placeholder="pppoe-300M-pro" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono focus:outline-none focus:border-brand-emerald">
+        </div>
+
+        <div class="pt-3 border-t border-slate-100 flex justify-end gap-2">
+          <button type="button" onclick="closeAddPackageModal()" class="px-4 py-1.5 rounded-xl bg-slate-100 text-slate-600 font-semibold text-xs">Cancel</button>
+          <button type="submit" class="brand-btn-primary px-4 py-1.5 rounded-xl font-semibold text-xs">Add Plan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: ADD ROUTER                                                         -->
+  <!-- ========================================================================= -->
+  <div id="add-router-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white border border-slate-200 rounded-3xl shadow-2xl max-w-md w-full overflow-hidden flex flex-col animate-fadeIn">
+      <div class="px-5 py-3.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+        <h3 class="font-bold text-brand-navy text-sm">Register Mikrotik NAS</h3>
+        <button onclick="closeAddRouterModal()" class="w-7 h-7 rounded-lg hover:bg-slate-200 text-slate-500 flex items-center justify-center">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <form onsubmit="submitNewRouter(event)" class="p-5 space-y-3.5 text-xs">
+        <div>
+          <label class="block text-slate-600 font-semibold mb-1">Router Identifier</label>
+          <input type="text" id="new-router-name" required placeholder="e.g. EDGE-ROUTER-03" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono focus:outline-none focus:border-brand-emerald">
+        </div>
+        <div>
+          <label class="block text-slate-600 font-semibold mb-1">Hardware Model</label>
+          <input type="text" id="new-router-model" required placeholder="e.g. Mikrotik CCR2116-12G-4S+" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-brand-emerald">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-600 font-semibold mb-1">NAS IP</label>
+            <input type="text" id="new-router-ip" required placeholder="192.168.91.1" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono focus:outline-none focus:border-brand-emerald">
+          </div>
+          <div>
+            <label class="block text-slate-600 font-semibold mb-1">API Port</label>
+            <input type="number" id="new-router-port" value="8728" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono focus:outline-none focus:border-brand-emerald">
+          </div>
+        </div>
+
+        <div class="pt-3 border-t border-slate-100 flex justify-end gap-2">
+          <button type="button" onclick="closeAddRouterModal()" class="px-4 py-1.5 rounded-xl bg-slate-100 text-slate-600 font-semibold text-xs">Cancel</button>
+          <button type="submit" class="brand-btn-primary px-4 py-1.5 rounded-xl font-semibold text-xs">Register Router</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: WEBHOOK JSON INSPECTOR                                             -->
+  <!-- ========================================================================= -->
+  <div id="webhook-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white border border-slate-200 rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden flex flex-col animate-fadeIn">
+      <div class="px-5 py-3.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          <h3 id="modal-webhook-title" class="font-bold text-brand-navy text-xs font-mono">Webhook Payload: TX-ST-98214</h3>
+        </div>
+        <button onclick="closeWebhookModal()" class="w-7 h-7 rounded-lg hover:bg-slate-200 text-slate-500 flex items-center justify-center">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="p-5">
+        <div class="p-3 rounded-xl bg-slate-900 text-emerald-400 font-mono text-[11px] overflow-x-auto max-h-72">
+          <pre id="modal-webhook-json">{
+  "event": "payment_intent.succeeded",
+  "gateway": "stripe",
+  "idempotency_key": "idem_894921",
+  "signature_sha256": "3a8f9c1b...verified",
+  "amount_received": 19999,
+  "currency": "usd",
+  "customer": "Elena Rostova",
+  "router_action": "unthrottle_queue"
+}</pre>
+        </div>
+      </div>
+
+      <div class="px-5 py-3 bg-slate-50 border-t border-slate-200 flex justify-between items-center">
+        <span class="text-[10px] font-mono text-slate-400">HMAC-SHA256 Valid</span>
+        <button onclick="copyWebhookPayload()" class="brand-btn-primary px-3 py-1.5 rounded-xl font-semibold text-xs flex items-center gap-1">
+          <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+          <span>Copy Payload</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: OPERATOR PROFILE                                                   -->
+  <!-- ========================================================================= -->
+  <div id="operator-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white border border-slate-200 rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden flex flex-col animate-fadeIn">
+      <div class="p-5 text-center border-b border-slate-100">
+        <div class="w-16 h-16 rounded-2xl brand-gradient flex items-center justify-center text-white text-xl font-bold mx-auto shadow-md">
+          FH
+        </div>
+        <h3 class="font-bold text-base text-brand-navy mt-3">Feri Hidayat</h3>
+        <span class="text-[11px] text-emerald-600 font-mono font-semibold">Lead Systems Architect</span>
+        <span class="text-[11px] text-slate-400 block mt-0.5">ferihidayat95@gmail.com</span>
+      </div>
+      <div class="p-4 space-y-2 text-xs">
+        <div class="flex justify-between py-1 border-b border-slate-100">
+          <span class="text-slate-400">Role:</span>
+          <span class="font-bold text-slate-800">Superadmin (All Privileges)</span>
+        </div>
+        <div class="flex justify-between py-1 border-b border-slate-100">
+          <span class="text-slate-400">Environment:</span>
+          <span class="font-mono font-bold text-emerald-600">Production Sandbox</span>
+        </div>
+        <div class="flex justify-between py-1">
+          <span class="text-slate-400">Active Session:</span>
+          <span class="font-mono text-slate-700">2h 14m</span>
+        </div>
+      </div>
+      <div class="p-4 bg-slate-50 border-t border-slate-200 flex justify-end">
+        <button onclick="closeOperatorModal()" class="px-4 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold text-xs">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: WHATSAPP CHAT SIMULATOR                                            -->
   <!-- ========================================================================= -->
   <div id="wa-preview-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white border border-slate-200 rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden flex flex-col animate-fadeIn">
-      
-      <!-- Phone Top Status Bar -->
       <div class="bg-[#075E54] text-white px-4 py-3 flex items-center justify-between">
-        <div class="flex items-center gap-2.5">
-          <button onclick="closeWhatsAppModal()" class="hover:opacity-80">
-            <i data-lucide="arrow-left" class="w-4 h-4"></i>
-          </button>
-          <div class="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center font-bold text-xs">
-            PB
-          </div>
+        <div class="flex items-center gap-2">
+          <button onclick="closeWhatsAppModal()"><i data-lucide="arrow-left" class="w-4 h-4"></i></button>
           <div>
-            <span class="font-bold text-xs block leading-none">PulseBill ISP Bot</span>
-            <span class="text-[9px] text-emerald-200 block">online &bull; Official Gateway</span>
+            <span class="font-bold text-xs block leading-none">PulseBill Bot</span>
+            <span class="text-[9px] text-emerald-200">Online &bull; Gateway</span>
           </div>
         </div>
         <i data-lucide="more-vertical" class="w-4 h-4 text-white/80"></i>
       </div>
 
-      <!-- Chat Canvas -->
-      <div class="bg-[#EFEAE2] p-4 min-h-[300px] flex flex-col justify-end text-xs space-y-3">
+      <div class="bg-[#EFEAE2] p-4 min-h-[220px] flex flex-col justify-end text-xs space-y-3">
         <div class="bg-white p-3 rounded-2xl rounded-tl-xs shadow-sm max-w-[90%] self-start text-slate-800 whitespace-pre-line leading-relaxed border border-slate-200">
-          <span id="wa-chat-content">
-            Halo *Ahmad Fauzi*, tagihan internet paket *Home Fast 50 Mbps* sebesar *Rp 275.000* akan jatuh tempo pada *15-10-2026*.
-            
-            Bayar mudah melalui link resmi:
-            https://billing.pulsebill.io/pay/INV-2026-0892
-          </span>
-          <span class="text-[9px] text-slate-400 font-mono block text-right mt-1.5 flex items-center justify-end gap-1">
-            <span>10:45 AM</span>
-            <i data-lucide="check-check" class="w-3 h-3 text-blue-500"></i>
-          </span>
+          <span id="wa-chat-content">Preview message...</span>
         </div>
       </div>
 
-      <!-- Input Bar Simulation -->
-      <div class="p-3 bg-[#F0F2F5] border-t border-slate-200 flex items-center gap-2 text-slate-400">
-        <div class="flex-1 bg-white rounded-full px-3 py-1.5 text-[11px] text-slate-400 border border-slate-200">
-          Terkirim otomatis via Baileys API...
-        </div>
-        <button onclick="closeWhatsAppModal()" class="px-3 py-1.5 rounded-full bg-[#075E54] text-white font-semibold text-xs">
-          OK
+      <div class="p-3 bg-[#F0F2F5] border-t border-slate-200 flex justify-end">
+        <button onclick="closeWhatsAppModal()" class="px-4 py-1 rounded-full bg-[#075E54] text-white font-semibold text-xs">
+          Dismiss
         </button>
       </div>
-
     </div>
   </div>
 
@@ -1454,9 +1289,6 @@
   <!-- JAVASCRIPT STATE ENGINE & INTERACTIVE LOGIC                              -->
   <!-- ========================================================================= -->
   <script>
-    // ---------------------------------------------------------------------------
-    // 1. Central Reactive Application State (Realistic ISP Dummy Data)
-    // ---------------------------------------------------------------------------
     const AppState = {
       activeTab: 'dashboard',
       subFilter: 'ALL',
@@ -1482,80 +1314,66 @@
       ],
 
       packages: [
-        { id: 'PKG-01', name: 'Home Lite 20 Mbps', speed: '20M / 20M', priceIdr: 'Rp 175.000', priceUsd: '$12.00', profile: 'pppoe-20M-rate', users: 420, fup: 'Unlimited' },
-        { id: 'PKG-02', name: 'Home Fast 50 Mbps', speed: '50M / 50M', priceIdr: 'Rp 275.000', priceUsd: '$18.50', profile: 'pppoe-50M-rate', users: 580, fup: 'Unlimited' },
-        { id: 'PKG-03', name: 'GigaStream 100 Mbps', speed: '100M / 100M', priceIdr: 'Rp 450.000', priceUsd: '$30.00', profile: 'pppoe-100M-rate', users: 290, fup: 'Unlimited' },
-        { id: 'PKG-04', name: 'Dedicated Biz 200 Mbps', speed: '200M / 200M', priceIdr: 'Rp 950.000', priceUsd: '$65.00', profile: 'pppoe-200M-dedicated', users: 94, fup: '1:1 CIR SLA' },
-        { id: 'PKG-05', name: 'Ultra Gigabit 1 Gbps', speed: '1000M / 1000M', priceIdr: 'Rp 2.950.000', priceUsd: '$199.99', profile: 'pppoe-1G-symmetrical', users: 32, fup: '1:1 Direct Peering' },
-        { id: 'PKG-06', name: 'Hotspot Voucher Unlimited', speed: '5M / 5M', priceIdr: 'Rp 50.000', priceUsd: '$3.50', profile: 'hotspot-5M-voucher', users: 112, fup: '30 Days Validity' }
+        { id: 'PKG-01', name: 'Home Lite 20 Mbps', speed: '20M / 20M', priceUsd: '$12.00', profile: 'pppoe-20M-rate', users: 420 },
+        { id: 'PKG-02', name: 'Home Fast 50 Mbps', speed: '50M / 50M', priceUsd: '$18.50', profile: 'pppoe-50M-rate', users: 580 },
+        { id: 'PKG-03', name: 'GigaStream 100 Mbps', speed: '100M / 100M', priceUsd: '$30.00', profile: 'pppoe-100M-rate', users: 290 },
+        { id: 'PKG-04', name: 'Dedicated Biz 200 Mbps', speed: '200M / 200M', priceUsd: '$65.00', profile: 'pppoe-200M-dedicated', users: 94 },
+        { id: 'PKG-05', name: 'Ultra Gigabit 1 Gbps', speed: '1000M / 1000M', priceUsd: '$199.99', profile: 'pppoe-1G-symmetrical', users: 32 },
+        { id: 'PKG-06', name: 'Hotspot Voucher Unlimited', speed: '5M / 5M', priceUsd: '$3.50', profile: 'hotspot-5M-voucher', users: 112 }
       ],
 
       invoices: [
-        { id: 'INV-2026-0891', subId: 'PB-SUB-1002', name: 'Elena Rostova', plan: 'Ultra Gigabit 1 Gbps', period: 'Sep 2026', amount: '$199.99', amountNum: 199.99, due: '2026-09-15', status: 'PAID', gateway: 'Stripe' },
-        { id: 'INV-2026-0892', subId: 'PB-SUB-1001', name: 'Ahmad Fauzi', plan: 'Home Fast 50 Mbps', period: 'Sep 2026', amount: '$18.50', amountNum: 18.50, due: '2026-09-15', status: 'PAID', gateway: 'Midtrans QRIS' },
-        { id: 'INV-2026-0893', subId: 'PB-SUB-1003', name: 'Budi Santoso', plan: 'Home Lite 20 Mbps', period: 'Sep 2026', amount: '$12.00', amountNum: 12.00, due: '2026-09-10', status: 'OVERDUE', gateway: 'Pending' },
-        { id: 'INV-2026-0894', subId: 'PB-SUB-1004', name: 'Marcus Vance', plan: 'Dedicated Biz 200 Mbps', period: 'Sep 2026', amount: '$65.00', amountNum: 65.00, due: '2026-09-18', status: 'PENDING', gateway: 'BCA VA' },
-        { id: 'INV-2026-0895', subId: 'PB-SUB-1005', name: 'Siti Rahmawati', plan: 'GigaStream 100 Mbps', period: 'Sep 2026', amount: '$30.00', amountNum: 30.00, due: '2026-09-15', status: 'PAID', gateway: 'Xendit OVO' },
-        { id: 'INV-2026-0896', subId: 'PB-SUB-1006', name: 'Hendra Gunawan', plan: 'Home Fast 50 Mbps', period: 'Sep 2026', amount: '$18.50', amountNum: 18.50, due: '2026-09-08', status: 'OVERDUE', gateway: 'Pending' },
-        { id: 'INV-2026-0897', subId: 'PB-SUB-1007', name: 'Dewi Sartika', plan: 'Home Lite 20 Mbps', period: 'Sep 2026', amount: '$12.00', amountNum: 12.00, due: '2026-09-15', status: 'PAID', gateway: 'Mandiri VA' },
-        { id: 'INV-2026-0898', subId: 'PB-SUB-1008', name: 'Reza Pratama', plan: 'Home Fast 50 Mbps', period: 'Sep 2026', amount: '$18.50', amountNum: 18.50, due: '2026-09-15', status: 'PAID', gateway: 'Midtrans QRIS' },
-        { id: 'INV-2026-0899', subId: 'PB-SUB-1009', name: 'Maya Indah', plan: 'GigaStream 100 Mbps', period: 'Sep 2026', amount: '$30.00', amountNum: 30.00, due: '2026-09-09', status: 'OVERDUE', gateway: 'Pending' },
-        { id: 'INV-2026-0900', subId: 'PB-SUB-1010', name: 'Fajar Nugraha', plan: 'Home Lite 20 Mbps', period: 'Sep 2026', amount: '$12.00', amountNum: 12.00, due: '2026-09-19', status: 'PENDING', gateway: 'DANA' },
-        { id: 'INV-2026-0901', subId: 'PB-SUB-1011', name: 'Jessica Tan', plan: 'Ultra Gigabit 1 Gbps', period: 'Sep 2026', amount: '$199.99', amountNum: 199.99, due: '2026-09-15', status: 'PAID', gateway: 'Stripe' },
-        { id: 'INV-2026-0902', subId: 'PB-SUB-1012', name: 'Agus Setiawan', plan: 'Home Lite 20 Mbps', period: 'Sep 2026', amount: '$12.00', amountNum: 12.00, due: '2026-09-07', status: 'OVERDUE', gateway: 'Pending' },
-        { id: 'INV-2026-0903', subId: 'PB-SUB-1013', name: 'Nadia Putri', plan: 'Home Fast 50 Mbps', period: 'Sep 2026', amount: '$18.50', amountNum: 18.50, due: '2026-09-15', status: 'PAID', gateway: 'Midtrans QRIS' },
-        { id: 'INV-2026-0904', subId: 'PB-SUB-1014', name: 'Daniel Lim', plan: 'Dedicated Biz 200 Mbps', period: 'Sep 2026', amount: '$65.00', amountNum: 65.00, due: '2026-09-15', status: 'PAID', gateway: 'BCA VA' },
-        { id: 'INV-2026-0905', subId: 'PB-SUB-1015', name: 'Rina Kusuma', plan: 'Home Lite 20 Mbps', period: 'Sep 2026', amount: '$12.00', amountNum: 12.00, due: '2026-09-20', status: 'PENDING', gateway: 'Pending' },
-        { id: 'INV-2026-0906', subId: 'PB-SUB-1016', name: 'Irfan Hakim', plan: 'Home Fast 50 Mbps', period: 'Sep 2026', amount: '$18.50', amountNum: 18.50, due: '2026-09-15', status: 'PAID', gateway: 'Midtrans QRIS' }
+        { id: 'INV-2026-0891', subId: 'PB-SUB-1002', name: 'Elena Rostova', plan: 'Ultra Gigabit 1 Gbps', period: 'Sep 2026', amount: '$199.99', due: '2026-09-15', status: 'PAID', gateway: 'Stripe' },
+        { id: 'INV-2026-0892', subId: 'PB-SUB-1001', name: 'Ahmad Fauzi', plan: 'Home Fast 50 Mbps', period: 'Sep 2026', amount: '$18.50', due: '2026-09-15', status: 'PAID', gateway: 'Midtrans' },
+        { id: 'INV-2026-0893', subId: 'PB-SUB-1003', name: 'Budi Santoso', plan: 'Home Lite 20 Mbps', period: 'Sep 2026', amount: '$12.00', due: '2026-09-10', status: 'OVERDUE', gateway: 'Pending' },
+        { id: 'INV-2026-0894', subId: 'PB-SUB-1004', name: 'Marcus Vance', plan: 'Dedicated Biz 200 Mbps', period: 'Sep 2026', amount: '$65.00', due: '2026-09-18', status: 'PENDING', gateway: 'BCA VA' },
+        { id: 'INV-2026-0895', subId: 'PB-SUB-1005', name: 'Siti Rahmawati', plan: 'GigaStream 100 Mbps', period: 'Sep 2026', amount: '$30.00', due: '2026-09-15', status: 'PAID', gateway: 'Xendit' },
+        { id: 'INV-2026-0896', subId: 'PB-SUB-1006', name: 'Hendra Gunawan', plan: 'Home Fast 50 Mbps', period: 'Sep 2026', amount: '$18.50', due: '2026-09-08', status: 'OVERDUE', gateway: 'Pending' },
+        { id: 'INV-2026-0897', subId: 'PB-SUB-1007', name: 'Dewi Sartika', plan: 'Home Lite 20 Mbps', period: 'Sep 2026', amount: '$12.00', due: '2026-09-15', status: 'PAID', gateway: 'Mandiri VA' },
+        { id: 'INV-2026-0898', subId: 'PB-SUB-1008', name: 'Reza Pratama', plan: 'Home Fast 50 Mbps', period: 'Sep 2026', amount: '$18.50', due: '2026-09-15', status: 'PAID', gateway: 'Midtrans' },
+        { id: 'INV-2026-0899', subId: 'PB-SUB-1009', name: 'Maya Indah', plan: 'GigaStream 100 Mbps', period: 'Sep 2026', amount: '$30.00', due: '2026-09-09', status: 'OVERDUE', gateway: 'Pending' },
+        { id: 'INV-2026-0900', subId: 'PB-SUB-1010', name: 'Fajar Nugraha', plan: 'Home Lite 20 Mbps', period: 'Sep 2026', amount: '$12.00', due: '2026-09-19', status: 'PENDING', gateway: 'Pending' },
+        { id: 'INV-2026-0901', subId: 'PB-SUB-1011', name: 'Jessica Tan', plan: 'Ultra Gigabit 1 Gbps', period: 'Sep 2026', amount: '$199.99', due: '2026-09-15', status: 'PAID', gateway: 'Stripe' },
+        { id: 'INV-2026-0902', subId: 'PB-SUB-1012', name: 'Agus Setiawan', plan: 'Home Lite 20 Mbps', period: 'Sep 2026', amount: '$12.00', due: '2026-09-07', status: 'OVERDUE', gateway: 'Pending' },
+        { id: 'INV-2026-0903', subId: 'PB-SUB-1013', name: 'Nadia Putri', plan: 'Home Fast 50 Mbps', period: 'Sep 2026', amount: '$18.50', due: '2026-09-15', status: 'PAID', gateway: 'Midtrans' },
+        { id: 'INV-2026-0904', subId: 'PB-SUB-1014', name: 'Daniel Lim', plan: 'Dedicated Biz 200 Mbps', period: 'Sep 2026', amount: '$65.00', due: '2026-09-15', status: 'PAID', gateway: 'BCA VA' },
+        { id: 'INV-2026-0905', subId: 'PB-SUB-1015', name: 'Rina Kusuma', plan: 'Home Lite 20 Mbps', period: 'Sep 2026', amount: '$12.00', due: '2026-09-20', status: 'PENDING', gateway: 'Pending' },
+        { id: 'INV-2026-0906', subId: 'PB-SUB-1016', name: 'Irfan Hakim', plan: 'Home Fast 50 Mbps', period: 'Sep 2026', amount: '$18.50', due: '2026-09-15', status: 'PAID', gateway: 'Midtrans' }
       ],
 
       routers: [
-        { id: 'CORE-ROUTER-01', model: 'Mikrotik CCR2004-16G-2S+', ip: '192.168.88.1', port: 8728, cpu: '18%', sessions: 1124, uptime: '48d 12h', status: 'ONLINE', ping: '3.2 ms' },
-        { id: 'DIST-ROUTER-02', model: 'Mikrotik RB4011iGS+', ip: '192.168.89.1', port: 8728, cpu: '24%', sessions: 342, uptime: '19d 04h', status: 'ONLINE', ping: '4.1 ms' },
-        { id: 'HOTSPOT-GW-01', model: 'Mikrotik CCR1009-7G-1C-1S+', ip: '192.168.90.1', port: 8728, cpu: '12%', sessions: 89, uptime: '62d 18h', status: 'ONLINE', ping: '2.8 ms' }
+        { id: 'CORE-ROUTER-01', model: 'Mikrotik CCR2004-16G-2S+', ip: '192.168.88.1', port: 8728, cpu: '18%', sessions: 1124, uptime: '48d', ping: '3.2 ms' },
+        { id: 'DIST-ROUTER-02', model: 'Mikrotik RB4011iGS+', ip: '192.168.89.1', port: 8728, cpu: '24%', sessions: 342, uptime: '19d', ping: '4.1 ms' },
+        { id: 'HOTSPOT-GW-01', model: 'Mikrotik CCR1009-7G-1C-1S+', ip: '192.168.90.1', port: 8728, cpu: '12%', sessions: 89, uptime: '62d', ping: '2.8 ms' }
       ],
 
       transactions: [
-        { id: 'TX-ST-98214', gateway: 'Stripe', customer: 'Elena Rostova', amount: '$199.99', fee: '$6.10', net: '$193.89', time: '12s ago', status: 'SETTLED' },
-        { id: 'TX-MD-48201', gateway: 'Midtrans QRIS', customer: 'Ahmad Fauzi', amount: 'Rp 275.000', fee: 'Rp 1.925', net: 'Rp 273.075', time: '3m ago', status: 'SETTLED' },
-        { id: 'TX-XD-19402', gateway: 'Xendit OVO', customer: 'Siti Rahmawati', amount: 'Rp 450.000', fee: 'Rp 6.750', net: 'Rp 443.250', time: '15m ago', status: 'SETTLED' },
-        { id: 'TX-MD-48190', gateway: 'BCA VA', customer: 'Daniel Lim', amount: 'Rp 950.000', fee: 'Rp 4.000', net: 'Rp 946.000', time: '1h ago', status: 'SETTLED' },
-        { id: 'TX-ST-98192', gateway: 'Stripe', customer: 'Jessica Tan', amount: '$199.99', fee: '$6.10', net: '$193.89', time: '2h ago', status: 'SETTLED' },
-        { id: 'TX-MD-48110', gateway: 'Midtrans QRIS', customer: 'Reza Pratama', amount: 'Rp 275.000', fee: 'Rp 1.925', net: 'Rp 273.075', time: '4h ago', status: 'SETTLED' }
+        { id: 'TX-ST-98214', gateway: 'Stripe', customer: 'Elena Rostova', amount: '$199.99', fee: '$6.10', net: '$193.89', status: 'SETTLED' },
+        { id: 'TX-MD-48201', gateway: 'Midtrans QRIS', customer: 'Ahmad Fauzi', amount: '$18.50', fee: '$0.15', net: '$18.35', status: 'SETTLED' },
+        { id: 'TX-XD-19402', gateway: 'Xendit OVO', customer: 'Siti Rahmawati', amount: '$30.00', fee: '$0.45', net: '$29.55', status: 'SETTLED' },
+        { id: 'TX-MD-48190', gateway: 'BCA VA', customer: 'Daniel Lim', amount: '$65.00', fee: '$0.30', net: '$64.70', status: 'SETTLED' }
       ],
 
       feed: [
-        { id: 1, title: 'Stripe Webhook Settled', desc: 'INV-2026-0891 ($199.99) &bull; Elena Rostova', note: 'RouterOS: Speed unthrottled (1 Gbps)', time: '12s ago', type: 'success' },
-        { id: 2, title: 'Mikrotik RouterOS Sync', desc: '482 queues synchronized across core gateway', note: 'API Socket: 3.2ms latency', time: '4m ago', type: 'info' },
-        { id: 3, title: 'Suspension Daemon Executed', desc: 'INV-2026-0893 overdue grace &bull; Budi Santoso', note: 'Profile assigned: pool-pulsebill-isolir', time: '18m ago', type: 'danger' },
-        { id: 4, title: 'Midtrans QRIS Webhook', desc: 'INV-2026-0892 ($18.50) &bull; Ahmad Fauzi', note: 'Settlement confirmed via GoPay / BCA', time: '25m ago', type: 'success' }
+        { id: 1, title: 'Stripe Webhook Settled', desc: 'INV-2026-0891 ($199.99) &bull; Elena Rostova', time: '12s ago', type: 'success' },
+        { id: 2, title: 'Mikrotik Queue Sync', desc: '482 dynamic queues verified on CORE-ROUTER-01', time: '4m ago', type: 'info' },
+        { id: 3, title: 'Suspension Daemon Triggered', desc: 'INV-2026-0893 overdue &bull; Budi Santoso isolated', time: '18m ago', type: 'danger' }
       ],
 
       notifications: [
         { title: 'Stripe Webhook Verified', desc: 'INV-2026-0891 marked settled ($199.99).' },
-        { title: 'Mikrotik Core Sync', desc: '1,466 queues synchronized across CCR2004.' },
-        { title: 'Baileys Daemon Heartbeat', desc: 'WhatsApp bot active, 42 receipts queued.' }
+        { title: 'Mikrotik Core Sync', desc: '1,466 queues synchronized.' },
+        { title: 'Baileys Daemon OK', desc: 'Bot active, socket connected.' }
       ]
     };
 
-    // ---------------------------------------------------------------------------
-    // 2. Tab Navigation Switcher
-    // ---------------------------------------------------------------------------
+    // Tab Switcher
     function switchTab(tabId) {
       AppState.activeTab = tabId;
-
-      // Hide all tabs
-      document.querySelectorAll('.tab-pane').forEach(el => {
-        el.classList.add('hidden');
-      });
-
-      // Show target tab
+      document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
       const target = document.getElementById('tab-' + tabId);
-      if (target) {
-        target.classList.remove('hidden');
-      }
+      if (target) target.classList.remove('hidden');
 
-      // Update sidebar nav styling
       document.querySelectorAll('.nav-btn').forEach(btn => {
         btn.classList.remove('brand-gradient', 'text-white');
         btn.classList.add('text-slate-600');
@@ -1571,13 +1389,10 @@
         if (icon) icon.classList.add('text-white');
       }
 
-      // Refresh icons
       lucide.createIcons();
     }
 
-    // ---------------------------------------------------------------------------
-    // 3. Render Functions
-    // ---------------------------------------------------------------------------
+    // Render Master
     function renderAll() {
       renderSubscribers();
       renderPackages();
@@ -1587,7 +1402,7 @@
       renderGateways();
       renderFeed();
       renderNotifications();
-      updateBadgesAndMetrics();
+      updateBadges();
       lucide.createIcons();
     }
 
@@ -1602,37 +1417,34 @@
 
       tbody.innerHTML = list.map(sub => {
         const isSuspended = sub.status === 'SUSPENDED';
-        const statusBadge = isSuspended 
-          ? `<span class="inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 font-bold border border-rose-200"><span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>Terisolir (Isolate)</span>`
-          : `<span class="inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-bold border border-emerald-200"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Aktif (PPPoE Up)</span>`;
+        const badge = isSuspended 
+          ? `<span class="inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 font-bold border border-rose-200">Suspended</span>`
+          : `<span class="inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-bold border border-emerald-200">Active</span>`;
 
         return `
           <tr class="hover:bg-slate-50/80 transition">
-            <td class="py-3 px-4">
+            <td class="py-2.5 px-4">
               <div class="font-bold text-slate-800">${sub.name}</div>
-              <div class="text-[10px] text-slate-400 font-mono">${sub.id} &bull; ${sub.phone}</div>
+              <div class="text-[10px] text-slate-400 font-mono">${sub.id}</div>
             </td>
-            <td class="py-3 px-4 font-mono">
+            <td class="py-2.5 px-4 font-mono">
               <div class="font-semibold text-slate-700">${sub.pppoe}</div>
               <div class="text-[10px] text-emerald-600">${sub.ip}</div>
             </td>
-            <td class="py-3 px-4">
+            <td class="py-2.5 px-4">
               <span class="font-medium text-slate-800">${sub.plan}</span>
-              <span class="text-[10px] text-slate-400 font-mono block">${sub.speed}</span>
             </td>
-            <td class="py-3 px-4 font-mono text-slate-600">
-              <span class="px-2 py-0.5 rounded bg-slate-100 border border-slate-200 text-[10px]">${sub.router}</span>
+            <td class="py-2.5 px-4 font-mono text-slate-500 text-[10px]">
+              ${sub.router}
             </td>
-            <td class="py-3 px-4">
-              ${statusBadge}
-            </td>
-            <td class="py-3 px-4 text-right">
-              <div class="flex items-center justify-end gap-1.5">
-                <button onclick="openSubDetail('${sub.id}')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-[11px] transition">
+            <td class="py-2.5 px-4">${badge}</td>
+            <td class="py-2.5 px-4 text-right">
+              <div class="flex items-center justify-end gap-1">
+                <button onclick="openSubDetail('${sub.id}')" class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-[11px] transition">
                   Detail
                 </button>
-                <button onclick="toggleIsolir('${sub.id}')" class="px-2.5 py-1 rounded-lg ${isSuspended ? 'bg-emerald-600 hover:bg-emerald-500 text-white' : 'bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200'} font-semibold text-[11px] transition">
-                  ${isSuspended ? 'Buka Isolir' : 'Isolir'}
+                <button onclick="toggleIsolir('${sub.id}')" class="px-2 py-1 rounded-lg ${isSuspended ? 'bg-emerald-600 hover:bg-emerald-500 text-white' : 'bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200'} font-semibold text-[11px] transition">
+                  ${isSuspended ? 'Restore' : 'Isolate'}
                 </button>
               </div>
             </td>
@@ -1646,40 +1458,27 @@
       if (!grid) return;
 
       grid.innerHTML = AppState.packages.map(pkg => `
-        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs hover:border-slate-300 transition flex flex-col justify-between">
+        <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs flex flex-col justify-between hover:border-slate-300 transition">
           <div>
-            <div class="flex items-start justify-between pb-3 border-b border-slate-100">
-              <div>
-                <h3 class="font-bold text-sm text-brand-navy">${pkg.name}</h3>
-                <span class="text-[10px] font-mono text-slate-400">ID: ${pkg.id} &bull; Mikrotik: ${pkg.profile}</span>
-              </div>
+            <div class="flex items-start justify-between pb-2 border-b border-slate-100">
+              <h3 class="font-bold text-sm text-brand-navy">${pkg.name}</h3>
               <span class="font-mono text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-lg">
                 ${pkg.speed}
               </span>
             </div>
-            
-            <div class="mt-4 space-y-2 text-xs">
-              <div class="flex justify-between">
-                <span class="text-slate-500">Tarif Bulanan (IDR):</span>
-                <span class="font-bold text-slate-800 font-mono">${pkg.priceIdr}</span>
-              </div>
-              <div class="flex justify-between">
-                <span class="text-slate-500">Tarif Internasional (USD):</span>
-                <span class="font-bold text-brand-navy font-mono">${pkg.priceUsd}</span>
-              </div>
-              <div class="flex justify-between">
-                <span class="text-slate-500">Kebijakan FUP / SLA:</span>
-                <span class="font-medium text-emerald-600 font-mono text-[11px]">${pkg.fup}</span>
-              </div>
+            <div class="mt-3 flex justify-between font-mono text-xs">
+              <span class="text-slate-400">Monthly Rate:</span>
+              <span class="font-bold text-brand-navy">${pkg.priceUsd}</span>
+            </div>
+            <div class="mt-1 flex justify-between font-mono text-xs">
+              <span class="text-slate-400">Profile:</span>
+              <span class="text-slate-600">${pkg.profile}</span>
             </div>
           </div>
-
-          <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between">
-            <span class="text-[11px] font-mono text-slate-500 font-semibold">
-              <i data-lucide="users" class="w-3.5 h-3.5 inline text-slate-400"></i> ${pkg.users} Pelanggan Aktif
-            </span>
-            <button onclick="showToast('Mikrotik Profile Sync', 'Profile ${pkg.profile} verified on core router', 'info')" class="text-brand-navy hover:text-brand-emerald font-semibold text-[11px] flex items-center gap-1">
-              <span>Sync Router</span> &rarr;
+          <div class="mt-4 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px] font-mono">
+            <span class="text-slate-400">${pkg.users} Subscribers</span>
+            <button onclick="showToast('Profile Verified', '${pkg.profile} synced with NAS.', 'info')" class="text-brand-navy font-semibold hover:underline">
+              Sync &rarr;
             </button>
           </div>
         </div>
@@ -1693,42 +1492,29 @@
       tbody.innerHTML = AppState.invoices.map(inv => {
         let badge = '';
         if (inv.status === 'PAID') {
-          badge = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-50 text-emerald-700 border border-emerald-200"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>LUNAS (${inv.gateway})</span>`;
+          badge = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">Paid (${inv.gateway})</span>`;
         } else if (inv.status === 'PENDING') {
-          badge = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-50 text-amber-700 border border-amber-200"><span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>MENUNGGU</span>`;
+          badge = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-50 text-amber-700 border border-amber-200">Pending</span>`;
         } else {
-          badge = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-rose-50 text-rose-700 border border-rose-200"><span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>ISOLIR / OVERDUE</span>`;
+          badge = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-rose-50 text-rose-700 border border-rose-200">Suspended</span>`;
         }
 
         return `
-          <tr class="hover:bg-slate-50/80 transition" id="row-${inv.id}">
-            <td class="py-3 px-4 font-mono font-bold text-slate-800">
-              ${inv.id}
-            </td>
-            <td class="py-3 px-4">
-              <div class="font-bold text-slate-800">${inv.name}</div>
-              <div class="text-[10px] text-slate-400 font-mono">Periode: ${inv.period}</div>
-            </td>
-            <td class="py-3 px-4 font-medium text-slate-700">
-              ${inv.plan}
-            </td>
-            <td class="py-3 px-4 font-mono font-bold text-brand-navy">
-              ${inv.amount}
-            </td>
-            <td class="py-3 px-4 font-mono text-slate-500">
-              ${inv.due}
-            </td>
-            <td class="py-3 px-4">
-              ${badge}
-            </td>
-            <td class="py-3 px-4 text-right">
+          <tr class="hover:bg-slate-50/80 transition">
+            <td class="py-2.5 px-4 font-mono font-bold text-slate-800">${inv.id}</td>
+            <td class="py-2.5 px-4 font-bold text-slate-800">${inv.name}</td>
+            <td class="py-2.5 px-4 text-slate-600">${inv.plan}</td>
+            <td class="py-2.5 px-4 font-mono font-bold text-brand-navy">${inv.amount}</td>
+            <td class="py-2.5 px-4 font-mono text-slate-500">${inv.due}</td>
+            <td class="py-2.5 px-4">${badge}</td>
+            <td class="py-2.5 px-4 text-right">
               <div class="flex items-center justify-end gap-1.5">
-                <button onclick="openReceiptModal('${inv.id}')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-[11px] transition flex items-center gap-1">
-                  <span>Receipt</span> &rarr;
+                <button onclick="openReceiptModal('${inv.id}')" class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-[11px] transition">
+                  Receipt
                 </button>
                 ${inv.status !== 'PAID' ? `
-                  <button onclick="markInvoicePaid('${inv.id}')" class="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-[11px] transition active:scale-95 shadow-2xs">
-                    Bayar
+                  <button onclick="markInvoicePaid('${inv.id}')" class="px-2 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-[11px] transition">
+                    Settle
                   </button>
                 ` : ''}
               </div>
@@ -1743,46 +1529,26 @@
       if (!grid) return;
 
       grid.innerHTML = AppState.routers.map(router => `
-        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs flex flex-col justify-between">
+        <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs flex flex-col justify-between">
           <div>
-            <div class="flex items-start justify-between pb-3 border-b border-slate-100">
-              <div>
-                <h3 class="font-bold text-sm text-brand-navy">${router.id}</h3>
-                <span class="text-[10px] font-mono text-slate-400">${router.model}</span>
-              </div>
-              <span class="flex items-center gap-1 text-[10px] font-mono font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-lg">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                API OK (${router.ping})
+            <div class="flex items-start justify-between pb-2 border-b border-slate-100">
+              <h3 class="font-bold text-xs font-mono text-brand-navy">${router.id}</h3>
+              <span class="text-[10px] font-mono text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                ${router.ping}
               </span>
             </div>
-
-            <div class="mt-4 space-y-2 text-xs font-mono">
-              <div class="flex justify-between">
-                <span class="text-slate-500">NAS IP & Port:</span>
-                <span class="font-bold text-slate-800">${router.ip}:${router.port}</span>
-              </div>
-              <div class="flex justify-between">
-                <span class="text-slate-500">CPU Load:</span>
-                <span class="font-bold text-emerald-600">${router.cpu}</span>
-              </div>
-              <div class="flex justify-between">
-                <span class="text-slate-500">Active PPPoE Sessions:</span>
-                <span class="font-bold text-brand-navy">${router.sessions} users</span>
-              </div>
-              <div class="flex justify-between">
-                <span class="text-slate-500">System Uptime:</span>
-                <span class="text-slate-600">${router.uptime}</span>
-              </div>
+            <div class="mt-2.5 space-y-1 text-xs font-mono">
+              <div class="flex justify-between"><span class="text-slate-400">IP:Port:</span><span>${router.ip}:${router.port}</span></div>
+              <div class="flex justify-between"><span class="text-slate-400">CPU:</span><span class="text-emerald-600 font-bold">${router.cpu}</span></div>
+              <div class="flex justify-between"><span class="text-slate-400">Sessions:</span><span class="font-bold">${router.sessions}</span></div>
             </div>
           </div>
-
-          <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between">
-            <button onclick="testRouterSocket('${router.id}')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-[11px] transition flex items-center gap-1">
-              <i data-lucide="radio" class="w-3.5 h-3.5 text-slate-500"></i>
-              <span>Test API Socket</span>
+          <div class="mt-4 pt-2.5 border-t border-slate-100 flex justify-between gap-1">
+            <button onclick="testRouterSocket('${router.id}')" class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-semibold transition">
+              Ping API
             </button>
-            <button onclick="syncQueues('${router.id}')" class="px-2.5 py-1 rounded-lg brand-gradient text-white font-semibold text-[11px] transition shadow-2xs">
-              Sync Dynamic Queues
+            <button onclick="syncQueues('${router.id}')" class="px-2 py-1 rounded-lg brand-gradient text-white text-[11px] font-semibold transition">
+              Sync Queue
             </button>
           </div>
         </div>
@@ -1793,28 +1559,16 @@
       const tbody = document.getElementById('suspension-table-body');
       if (!tbody) return;
 
-      const suspendedSubs = AppState.subscribers.filter(s => s.status === 'SUSPENDED');
-      tbody.innerHTML = suspendedSubs.map(sub => `
+      const list = AppState.subscribers.filter(s => s.status === 'SUSPENDED');
+      tbody.innerHTML = list.map(sub => `
         <tr class="hover:bg-slate-50/80 transition">
-          <td class="py-3 px-4">
-            <div class="font-bold text-slate-800">${sub.name}</div>
-            <div class="text-[10px] text-slate-400 font-mono">${sub.id} &bull; ${sub.phone}</div>
-          </td>
-          <td class="py-3 px-4 font-mono text-slate-700 font-semibold">
-            ${sub.pppoe}
-          </td>
-          <td class="py-3 px-4 font-mono font-bold text-rose-600">
-            Rp ${sub.price.toLocaleString('id-ID')}
-          </td>
-          <td class="py-3 px-4 font-mono text-slate-500">
-            Sep 10, 2026 (Overdue 7d)
-          </td>
-          <td class="py-3 px-4 font-mono text-rose-600">
-            ${sub.ip} (Isolir Pool)
-          </td>
-          <td class="py-3 px-4 text-right">
-            <button onclick="unIsolateAccount('${sub.id}')" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition shadow-2xs active:scale-95">
-              Buka Isolir Instan &rarr;
+          <td class="py-2.5 px-4 font-bold text-slate-800">${sub.name}</td>
+          <td class="py-2.5 px-4 font-mono text-slate-600">${sub.pppoe}</td>
+          <td class="py-2.5 px-4 font-mono font-bold text-rose-600">Rp ${sub.price.toLocaleString('id-ID')}</td>
+          <td class="py-2.5 px-4 font-mono text-rose-600">${sub.ip}</td>
+          <td class="py-2.5 px-4 text-right">
+            <button onclick="unIsolateAccount('${sub.id}')" class="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition">
+              Restore Profile
             </button>
           </td>
         </tr>
@@ -1827,19 +1581,16 @@
 
       tbody.innerHTML = AppState.transactions.map(tx => `
         <tr class="hover:bg-slate-50/80 transition">
-          <td class="py-3 px-4 font-mono font-bold text-slate-800">${tx.id}</td>
-          <td class="py-3 px-4 font-medium text-slate-700">${tx.gateway}</td>
-          <td class="py-3 px-4 font-bold text-slate-800">${tx.customer}</td>
-          <td class="py-3 px-4 font-mono font-bold text-emerald-600">${tx.net}</td>
-          <td class="py-3 px-4 font-mono text-slate-500">${tx.time}</td>
-          <td class="py-3 px-4">
-            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>${tx.status}
-            </span>
+          <td class="py-2.5 px-4 font-mono font-bold text-slate-800">${tx.id}</td>
+          <td class="py-2.5 px-4 text-slate-600">${tx.gateway}</td>
+          <td class="py-2.5 px-4 font-bold text-slate-800">${tx.customer}</td>
+          <td class="py-2.5 px-4 font-mono font-bold text-emerald-600">${tx.net}</td>
+          <td class="py-2.5 px-4">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">${tx.status}</span>
           </td>
-          <td class="py-3 px-4 text-right">
-            <button onclick="showToast('Webhook Payload', 'HMAC SHA-256 signature verified for ${tx.id}', 'info')" class="text-brand-navy font-semibold text-[11px] hover:underline font-mono">
-              View JSON &rarr;
+          <td class="py-2.5 px-4 text-right">
+            <button onclick="openWebhookInspector('${tx.id}')" class="text-brand-navy font-semibold hover:underline font-mono text-[11px]">
+              Inspect JSON
             </button>
           </td>
         </tr>
@@ -1851,17 +1602,14 @@
       if (!container) return;
 
       container.innerHTML = AppState.feed.map(item => `
-        <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100 flex items-start gap-2.5 animate-fadeIn">
-          <div class="w-6 h-6 rounded-lg ${item.type === 'danger' ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'} flex items-center justify-center flex-shrink-0 mt-0.5">
-            <i data-lucide="${item.type === 'danger' ? 'shield-alert' : 'check'}" class="w-3.5 h-3.5"></i>
-          </div>
+        <div class="p-2 rounded-xl bg-slate-50 border border-slate-100 flex items-start gap-2 text-xs">
+          <span class="w-1.5 h-1.5 rounded-full ${item.type === 'danger' ? 'bg-rose-500' : 'bg-emerald-500'} mt-1.5 shrink-0"></span>
           <div class="flex-1 min-w-0">
             <div class="flex items-center justify-between">
-              <span class="font-bold text-[11px] text-brand-navy">${item.title}</span>
-              <span class="font-mono text-[9px] text-slate-400">${item.time}</span>
+              <span class="font-bold text-[11px] text-slate-800">${item.title}</span>
+              <span class="text-[9px] font-mono text-slate-400">${item.time}</span>
             </div>
-            <p class="text-[10px] text-slate-600 mt-0.5 truncate">${item.desc}</p>
-            <span class="text-[9px] font-mono ${item.type === 'danger' ? 'text-rose-600' : 'text-emerald-600'} font-semibold block mt-0.5">${item.note}</span>
+            <p class="text-[10px] text-slate-500 truncate">${item.desc}</p>
           </div>
         </div>
       `).join('');
@@ -1873,89 +1621,67 @@
 
       container.innerHTML = AppState.notifications.map(n => `
         <div class="p-2 rounded-lg bg-slate-50 border border-slate-100">
-          <div class="font-bold text-slate-800">${n.title}</div>
+          <div class="font-bold text-slate-800 text-xs">${n.title}</div>
           <div class="text-[11px] text-slate-500 mt-0.5">${n.desc}</div>
         </div>
       `).join('');
     }
 
-    function updateBadgesAndMetrics() {
+    function updateBadges() {
       const subCount = AppState.subscribers.length;
       const invCount = AppState.invoices.length;
+      const pkgCount = AppState.packages.length;
       const suspCount = AppState.subscribers.filter(s => s.status === 'SUSPENDED').length;
 
       document.getElementById('badge-sub-count').textContent = subCount;
       document.getElementById('badge-invoice-count').textContent = invCount;
+      document.getElementById('badge-pkg-count').textContent = pkgCount;
       document.getElementById('badge-susp-count').textContent = suspCount;
-
       document.getElementById('metric-suspended').textContent = suspCount;
     }
 
-    // ---------------------------------------------------------------------------
-    // 4. Interactive Simulation & Operations Logic
-    // ---------------------------------------------------------------------------
+    // Interactive Actions
     function triggerSimulatedWebhook() {
-      // Find an overdue or pending invoice
       const targetInvoice = AppState.invoices.find(inv => inv.status !== 'PAID') || AppState.invoices[0];
-      
       targetInvoice.status = 'PAID';
       targetInvoice.gateway = 'Stripe';
 
-      // Also un-isolate subscriber if suspended
       const sub = AppState.subscribers.find(s => s.id === targetInvoice.subId);
       if (sub && sub.status === 'SUSPENDED') {
         sub.status = 'ACTIVE';
         sub.ip = '10.20.1.' + Math.floor(Math.random() * 80 + 20);
       }
 
-      // Add to feed
       AppState.feed.unshift({
         id: Date.now(),
-        title: 'Stripe Webhook Verified ($199.99)',
-        desc: `${targetInvoice.id} &bull; ${targetInvoice.name}`,
-        note: 'RouterOS: Queue unthrottled & Isolir removed',
+        title: 'Stripe Webhook Settled',
+        desc: `${targetInvoice.id} (${targetInvoice.amount}) verified &bull; ${targetInvoice.name}`,
         time: 'Just now',
         type: 'success'
       });
 
-      // Add to transactions
-      AppState.transactions.unshift({
-        id: 'TX-ST-' + Math.floor(Math.random() * 90000 + 10000),
-        gateway: 'Stripe',
-        customer: targetInvoice.name,
-        amount: targetInvoice.amount,
-        fee: '$6.10',
-        net: '$193.89',
-        time: 'Just now',
-        status: 'SETTLED'
-      });
-
       renderAll();
-      showToast('Stripe Webhook Processed', `Payment settled for ${targetInvoice.name} (${targetInvoice.amount}). RouterOS updated.`, 'success');
+      showToast('Stripe Webhook Verified', `Settled ${targetInvoice.amount} for ${targetInvoice.name}.`, 'success');
     }
 
     function triggerSuspensionSimulation() {
-      // Find active subscriber and isolate them
       const targetSub = AppState.subscribers.find(s => s.status === 'ACTIVE' && s.name !== 'Elena Rostova') || AppState.subscribers[0];
       targetSub.status = 'SUSPENDED';
       targetSub.ip = '10.99.0.' + Math.floor(Math.random() * 80 + 20);
 
-      // Find invoice
       const inv = AppState.invoices.find(i => i.subId === targetSub.id);
       if (inv) inv.status = 'OVERDUE';
 
-      // Add to feed
       AppState.feed.unshift({
         id: Date.now(),
         title: 'RouterOS Isolir Executed',
-        desc: `${targetSub.id} &bull; ${targetSub.name}`,
-        note: `Profile switched to pool-pulsebill-isolir (${targetSub.ip})`,
+        desc: `${targetSub.id} moved to pool-pulsebill-isolir`,
         time: 'Just now',
         type: 'danger'
       });
 
       renderAll();
-      showToast('Subscriber Isolated', `${targetSub.name} has been moved to isolation pool (256k rate limit).`, 'warning');
+      showToast('Account Suspended', `${targetSub.name} moved to isolation pool.`, 'warning');
     }
 
     function generateMonthlyInvoices() {
@@ -1969,7 +1695,6 @@
         plan: randomSub.plan,
         period: 'Oct 2026',
         amount: '$' + (randomSub.price / 15000).toFixed(2),
-        amountNum: +(randomSub.price / 15000).toFixed(2),
         due: '2026-10-15',
         status: 'PENDING',
         gateway: 'Pending'
@@ -1977,15 +1702,14 @@
 
       AppState.feed.unshift({
         id: Date.now(),
-        title: 'Batch Invoicing Completed',
-        desc: `Generated invoice ${newInvId} for ${randomSub.name}`,
-        note: 'WhatsApp notification queued for dispatch',
+        title: 'Batch Billing Cycle',
+        desc: `Generated ${newInvId} for ${randomSub.name}`,
         time: 'Just now',
         type: 'info'
       });
 
       renderAll();
-      showToast('Billing Cycle Generated', `Invoice ${newInvId} created for ${randomSub.name}. Notifications queued.`, 'info');
+      showToast('Invoices Generated', `Batch run created ${newInvId}.`, 'info');
     }
 
     function markInvoicePaid(invId) {
@@ -1993,7 +1717,7 @@
       if (!inv) return;
 
       inv.status = 'PAID';
-      inv.gateway = 'Manual / Gateway';
+      inv.gateway = 'Settled';
 
       const sub = AppState.subscribers.find(s => s.id === inv.subId);
       if (sub && sub.status === 'SUSPENDED') {
@@ -2002,7 +1726,7 @@
       }
 
       renderAll();
-      showToast('Invoice Paid', `${inv.id} marked as PAID. Router queue restored.`, 'success');
+      showToast('Invoice Paid', `${inv.id} marked as settled.`, 'success');
     }
 
     function unIsolateAccount(subId) {
@@ -2013,22 +1737,10 @@
       sub.ip = '10.20.1.' + Math.floor(Math.random() * 80 + 20);
 
       const inv = AppState.invoices.find(i => i.subId === subId);
-      if (inv) {
-        inv.status = 'PAID';
-        inv.gateway = 'Settled';
-      }
-
-      AppState.feed.unshift({
-        id: Date.now(),
-        title: 'Isolir Lifted (Un-isolated)',
-        desc: `${sub.id} &bull; ${sub.name}`,
-        note: 'Restored to full speed profile on CORE-ROUTER-01',
-        time: 'Just now',
-        type: 'success'
-      });
+      if (inv) inv.status = 'PAID';
 
       renderAll();
-      showToast('Isolir Berhasil Dibuka', `Layanan ${sub.name} kembali aktif normal. Profil bandwidth dipulihkan.`, 'success');
+      showToast('Service Restored', `${sub.name} restored to active bandwidth profile.`, 'success');
     }
 
     function toggleIsolir(subId) {
@@ -2042,24 +1754,12 @@
         sub.ip = '10.99.0.' + Math.floor(Math.random() * 80 + 20);
         const inv = AppState.invoices.find(i => i.subId === subId);
         if (inv) inv.status = 'OVERDUE';
-        
-        AppState.feed.unshift({
-          id: Date.now(),
-          title: 'Manual Isolir Triggered',
-          desc: `${sub.id} &bull; ${sub.name}`,
-          note: 'Operator moved subscriber to isolation pool',
-          time: 'Just now',
-          type: 'danger'
-        });
-
         renderAll();
-        showToast('Pelanggan Terisolir', `Layanan ${sub.name} berhasil di-isolir ke pool 10.99.0.x`, 'warning');
+        showToast('Account Isolated', `${sub.name} throttled to 256k.`, 'warning');
       }
     }
 
-    // ---------------------------------------------------------------------------
-    // 5. Modals & Detail Handlers
-    // ---------------------------------------------------------------------------
+    // Modal Handlers
     function openReceiptModal(invoiceId) {
       const inv = AppState.invoices.find(i => i.id === invoiceId) || AppState.invoices[0];
       const sub = AppState.subscribers.find(s => s.id === inv.subId) || AppState.subscribers[0];
@@ -2067,20 +1767,17 @@
       document.getElementById('receipt-invoice-id').textContent = inv.id;
       document.getElementById('receipt-customer-name').textContent = sub.name;
       document.getElementById('receipt-customer-phone').textContent = sub.phone;
-      document.getElementById('receipt-customer-address').textContent = sub.address;
       document.getElementById('receipt-pppoe').textContent = sub.pppoe;
       document.getElementById('receipt-ip').textContent = 'IP: ' + sub.ip;
-      document.getElementById('receipt-router').textContent = 'Core: ' + sub.router;
       document.getElementById('receipt-item-plan').textContent = sub.plan;
       document.getElementById('receipt-item-speed').textContent = sub.speed;
       document.getElementById('receipt-item-amount').textContent = inv.amount;
-      document.getElementById('receipt-total-amount').textContent = inv.amount;
-      document.getElementById('receipt-idempotency').textContent = 'idem_' + Math.random().toString(36).substring(2, 14);
+      document.getElementById('receipt-idempotency').textContent = 'idem_' + Math.random().toString(36).substring(2, 8);
 
       const stamp = document.getElementById('receipt-status-stamp');
       if (inv.status === 'PAID') {
         stamp.className = 'inline-block px-3 py-1 rounded-lg text-xs stamp-paid';
-        stamp.textContent = 'PAID / LUNAS';
+        stamp.textContent = 'PAID';
       } else if (inv.status === 'PENDING') {
         stamp.className = 'inline-block px-3 py-1 rounded-lg text-xs stamp-pending';
         stamp.textContent = 'PENDING';
@@ -2115,15 +1812,15 @@
       const toggleBtn = document.getElementById('modal-sub-toggle-btn');
 
       if (sub.status === 'SUSPENDED') {
-        badge.className = 'font-bold text-rose-600 flex items-center gap-1.5 mt-0.5';
-        badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-rose-500"></span> Terisolir (Suspended)';
+        badge.className = 'font-bold text-rose-600';
+        badge.textContent = 'Suspended (Throttled)';
+        toggleBtn.textContent = 'Restore Service';
         toggleBtn.className = 'px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-500 transition';
-        toggleBtn.textContent = 'Buka Isolir Sekarang';
       } else {
-        badge.className = 'font-bold text-emerald-600 flex items-center gap-1.5 mt-0.5';
-        badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-500"></span> Aktif & Online';
+        badge.className = 'font-bold text-emerald-600';
+        badge.textContent = 'Active & Online';
+        toggleBtn.textContent = 'Isolate Account';
         toggleBtn.className = 'px-3 py-1.5 rounded-xl text-xs font-semibold bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 transition';
-        toggleBtn.textContent = 'Isolir Pelanggan Ini';
       }
 
       document.getElementById('sub-detail-modal').classList.remove('hidden');
@@ -2160,39 +1857,138 @@
       const address = document.getElementById('new-sub-address').value;
 
       const newId = 'PB-SUB-' + (AppState.subscribers.length + 1001);
-      const newSub = {
+      AppState.subscribers.unshift({
         id: newId,
         name: name,
         phone: phone,
         pppoe: pppoe,
         ip: '10.20.1.' + Math.floor(Math.random() * 80 + 20),
         plan: plan,
-        speed: plan.includes('1 Gbps') ? '1000M / 1000M' : plan.includes('200') ? '200M / 200M' : plan.includes('100') ? '100M / 100M' : '50M / 50M',
-        price: plan.includes('1 Gbps') ? 2950000 : plan.includes('200') ? 950000 : 275000,
+        speed: '50M / 50M',
+        price: 275000,
         router: router,
         status: 'ACTIVE',
         address: address
-      };
+      });
 
-      AppState.subscribers.unshift(newSub);
       closeAddSubModal();
       renderAll();
-      showToast('Pelanggan Terdaftar', `${name} (${newId}) berhasil didaftarkan ke Mikrotik ${router}.`, 'success');
+      showToast('Subscriber Created', `${name} registered on ${router}.`, 'success');
     }
 
-    function openWhatsAppSimulator(templateType) {
+    // Add Package Modal
+    function openAddPackageModal() {
+      document.getElementById('add-pkg-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeAddPackageModal() {
+      document.getElementById('add-pkg-modal').classList.add('hidden');
+    }
+
+    function submitNewPackage(e) {
+      e.preventDefault();
+      const name = document.getElementById('new-pkg-name').value;
+      const speed = document.getElementById('new-pkg-speed').value;
+      const price = document.getElementById('new-pkg-price').value;
+      const profile = document.getElementById('new-pkg-profile').value;
+
+      AppState.packages.push({
+        id: 'PKG-0' + (AppState.packages.length + 1),
+        name: name,
+        speed: speed,
+        priceUsd: price,
+        profile: profile,
+        users: 0
+      });
+
+      closeAddPackageModal();
+      renderAll();
+      showToast('Plan Created', `New tier ${name} configured.`, 'success');
+    }
+
+    // Add Router Modal
+    function openAddRouterModal() {
+      document.getElementById('add-router-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeAddRouterModal() {
+      document.getElementById('add-router-modal').classList.add('hidden');
+    }
+
+    function submitNewRouter(e) {
+      e.preventDefault();
+      const name = document.getElementById('new-router-name').value;
+      const model = document.getElementById('new-router-model').value;
+      const ip = document.getElementById('new-router-ip').value;
+      const port = document.getElementById('new-router-port').value;
+
+      AppState.routers.push({
+        id: name,
+        model: model,
+        ip: ip,
+        port: port,
+        cpu: '14%',
+        sessions: 0,
+        uptime: '1d',
+        ping: '2.5 ms'
+      });
+
+      closeAddRouterModal();
+      renderAll();
+      showToast('Router Registered', `${name} added to NAS topology.`, 'success');
+    }
+
+    // Webhook Inspector Modal
+    function openWebhookInspector(txId) {
+      const tx = AppState.transactions.find(t => t.id === txId) || AppState.transactions[0];
+      document.getElementById('modal-webhook-title').textContent = 'Webhook Payload: ' + tx.id;
+      document.getElementById('modal-webhook-json').textContent = JSON.stringify({
+        event: 'payment_intent.succeeded',
+        transaction_id: tx.id,
+        gateway: tx.gateway.toLowerCase(),
+        customer: tx.customer,
+        net_amount: tx.net,
+        fee: tx.fee,
+        signature: 'sha256_verified_' + Math.random().toString(36).slice(2, 10),
+        status: 'SETTLED'
+      }, null, 2);
+
+      document.getElementById('webhook-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeWebhookModal() {
+      document.getElementById('webhook-modal').classList.add('hidden');
+    }
+
+    function copyWebhookPayload() {
+      const text = document.getElementById('modal-webhook-json').textContent;
+      navigator.clipboard.writeText(text);
+      showToast('Copied', 'JSON copied to clipboard.', 'info');
+    }
+
+    // Operator Profile Modal
+    function openOperatorModal() {
+      document.getElementById('operator-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeOperatorModal() {
+      document.getElementById('operator-modal').classList.add('hidden');
+    }
+
+    // WhatsApp Simulator
+    function openWhatsAppSimulator(type) {
       const modal = document.getElementById('wa-preview-modal');
       const content = document.getElementById('wa-chat-content');
-      
       const sample = AppState.subscribers[0];
-      if (templateType === 'H-3 Reminder') {
-        content.textContent = `Halo *${sample.name}*, tagihan internet paket *${sample.plan}* sebesar *Rp ${sample.price.toLocaleString('id-ID')}* akan jatuh tempo pada *15-10-2026*.\n\nBayar mudah melalui link resmi:\nhttps://billing.pulsebill.io/pay/INV-2026-0892`;
-      } else if (templateType === 'Paid Receipt') {
-        content.textContent = `Terima kasih *${sample.name}*! Pembayaran tagihan *${sample.plan}* telah kami terima.\n\nStatus layanan: *AKTIF NORMAL*\nUnduh struk resmi: https://billing.pulsebill.io/receipt/INV-2026-0892`;
-      } else if (templateType === 'Suspension Notice') {
-        content.textContent = `Pemberitahuan: Layanan internet akun *${sample.pppoe}* telah dihentikan sementara (*TERISOLIR*) karena melewati batas jatuh tempo.\n\nSegera lakukan pembayaran untuk membuka isolir otomatis: https://billing.pulsebill.io/pay`;
+
+      if (type === 'H-3 Reminder') {
+        content.textContent = `Halo *${sample.name}*, tagihan internet *${sample.plan}* ($18.50) akan jatuh tempo pada *15-10-2026*.\n\nLink pembayaran:\nhttps://billing.pulsebill.io/pay/INV-0892`;
       } else {
-        content.textContent = `Tagihan internet periode baru *Oktober 2026* telah diterbitkan untuk ID *${sample.id}*.\nNominal: *Rp ${sample.price.toLocaleString('id-ID')}*.\nJatuh tempo: *15-10-2026*.`;
+        content.textContent = `Terima kasih *${sample.name}*! Pembayaran *${sample.plan}* telah kami terima.\n\nStatus: *AKTIF NORMAL*\nUnduh kwitansi: https://billing.pulsebill.io/receipt`;
       }
 
       modal.classList.remove('hidden');
@@ -2203,53 +1999,70 @@
       document.getElementById('wa-preview-modal').classList.add('hidden');
     }
 
-    // ---------------------------------------------------------------------------
-    // 6. Router & Network Actions
-    // ---------------------------------------------------------------------------
+    // Network Actions
     function testRouterSocket(routerId) {
-      showToast('RouterOS API Ping', `Testing binary API socket on ${routerId} (port 8728)...`, 'info');
+      showToast('API Ping', `Testing socket ${routerId}:8728...`, 'info');
       setTimeout(() => {
-        showToast('API Socket OK', `${routerId} responded in 3.4ms with zero packet loss.`, 'success');
-      }, 600);
+        showToast('API Socket OK', `${routerId} responded in 3.1ms.`, 'success');
+      }, 500);
     }
 
     function syncQueues(routerId) {
-      showToast('Queue Syncing', `Synchronizing 1,466 dynamic simple queues on ${routerId}...`, 'info');
+      showToast('Queue Sync', `Syncing queues on ${routerId}...`, 'info');
       setTimeout(() => {
-        showToast('Sync Succeeded', `All dynamic bandwidth limits verified on ${routerId}.`, 'success');
-      }, 750);
-    }
-
-    function syncMikrotikProfiles() {
-      showToast('Profile Synchronizer', 'Synchronizing PPPoE profiles across all 3 Mikrotik NAS...', 'info');
-      setTimeout(() => {
-        showToast('Profiles Up-To-Date', '6 rate limit profiles matched with database tier rules.', 'success');
+        showToast('Sync Complete', `1,466 queues verified.`, 'success');
       }, 600);
     }
 
-    function triggerOpticalScan() {
-      showToast('CWMP TR-069 Inform', 'Broadcasting periodic inform poll to 1,428 ONT devices...', 'info');
+    function syncMikrotikProfiles() {
+      showToast('Profile Sync', 'Syncing rate profiles with NAS...', 'info');
       setTimeout(() => {
-        showToast('CWMP Scan Complete', 'All ONT telemetry and optical power levels refreshed.', 'success');
-      }, 800);
+        showToast('Profiles Matched', 'All rate tiers updated on core NAS.', 'success');
+      }, 500);
+    }
+
+    function triggerOpticalScan() {
+      showToast('CWMP Inform', 'Polling 1,428 ONT devices...', 'info');
+      setTimeout(() => {
+        showToast('Scan Completed', 'Optical attenuation refreshed.', 'success');
+      }, 600);
     }
 
     function runBatchIsolate() {
-      const suspendedCount = AppState.subscribers.filter(s => s.status === 'SUSPENDED').length;
-      showToast('Isolir Massal Selesai', `Daemon berhasil mengecek semua akun. ${suspendedCount} pelanggan nunggak terisolir.`, 'warning');
+      const count = AppState.subscribers.filter(s => s.status === 'SUSPENDED').length;
+      showToast('Batch Run Complete', `${count} overdue accounts confirmed in isolation pool.`, 'warning');
     }
 
     function saveSystemSettings() {
-      showToast('Pengaturan Tersimpan', 'Konfigurasi BSS/OSS dan Mikrotik pool berhasil diperbarui.', 'success');
+      showToast('Settings Saved', 'System configurations updated.', 'success');
     }
 
+    // Real CSV Downloader
     function exportInvoicesCSV() {
-      showToast('Export CSV', 'File ledger-invoices-september-2026.csv berhasil diunduh.', 'success');
+      const headers = ['Invoice ID', 'Subscriber ID', 'Customer Name', 'Plan', 'Period', 'Amount', 'Due Date', 'Status', 'Gateway'];
+      const rows = AppState.invoices.map(i => [
+        i.id,
+        i.subId,
+        `"${i.name}"`,
+        `"${i.plan}"`,
+        i.period,
+        i.amount,
+        i.due,
+        i.status,
+        i.gateway
+      ]);
+      const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement('a');
+      link.setAttribute('href', encodedUri);
+      link.setAttribute('download', `pulsebill_invoices_${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast('Export Successful', 'Downloaded invoice ledger CSV.', 'success');
     }
 
-    // ---------------------------------------------------------------------------
-    // 7. Filtering & Global Search
-    // ---------------------------------------------------------------------------
+    // Filters & Search
     function setSubFilter(filter) {
       AppState.subFilter = filter;
       document.querySelectorAll('.sub-filter-btn').forEach(btn => {
@@ -2267,43 +2080,32 @@
 
     function filterSubscribersTable() {
       const query = (document.getElementById('search-subscribers').value || '').toLowerCase();
-      const rows = document.querySelectorAll('#subscribers-table-body tr');
-      rows.forEach(row => {
-        const text = row.textContent.toLowerCase();
-        row.style.display = text.includes(query) ? '' : 'none';
+      document.querySelectorAll('#subscribers-table-body tr').forEach(row => {
+        row.style.display = row.textContent.toLowerCase().includes(query) ? '' : 'none';
       });
     }
 
     function filterInvoiceTable() {
       const query = (document.getElementById('search-invoices').value || '').toLowerCase();
-      const statusFilter = document.getElementById('invoice-status-select').value;
-      const rows = document.querySelectorAll('#invoices-table-body tr');
-
-      rows.forEach(row => {
-        const text = row.textContent.toLowerCase();
-        let matchesStatus = true;
-        if (statusFilter !== 'ALL') {
-          matchesStatus = text.includes(statusFilter.toLowerCase());
-        }
-        row.style.display = (text.includes(query) && matchesStatus) ? '' : 'none';
+      const status = document.getElementById('invoice-status-select').value;
+      document.querySelectorAll('#invoices-table-body tr').forEach(row => {
+        const matchText = row.textContent.toLowerCase().includes(query);
+        const matchStatus = (status === 'ALL') || row.textContent.toLowerCase().includes(status.toLowerCase());
+        row.style.display = (matchText && matchStatus) ? '' : 'none';
       });
     }
 
     function handleGlobalSearch(query) {
       if (!query) return;
       query = query.toLowerCase();
-
-      // If user is searching and matches subscriber, switch to subscribers tab
       if (AppState.activeTab !== 'subscribers' && AppState.activeTab !== 'invoices') {
         switchTab('subscribers');
       }
-
       const subInput = document.getElementById('search-subscribers');
       if (subInput) {
         subInput.value = query;
         filterSubscribersTable();
       }
-
       const invInput = document.getElementById('search-invoices');
       if (invInput) {
         invInput.value = query;
@@ -2312,13 +2114,10 @@
     }
 
     function toggleNotificationTray() {
-      const tray = document.getElementById('notification-tray');
-      tray.classList.toggle('hidden');
+      document.getElementById('notification-tray').classList.toggle('hidden');
     }
 
-    // ---------------------------------------------------------------------------
-    // 8. Toast Notification Utility
-    // ---------------------------------------------------------------------------
+    // Toast Engine
     function showToast(title, message, type = 'success') {
       const container = document.getElementById('toast-container');
       if (!container) return;
@@ -2328,9 +2127,9 @@
       const icon = type === 'danger' ? 'shield-alert' : type === 'warning' ? 'alert-triangle' : type === 'info' ? 'info' : 'check-circle-2';
       const iconColor = type === 'danger' ? 'text-rose-600' : type === 'warning' ? 'text-amber-600' : type === 'info' ? 'text-blue-600' : 'text-emerald-600';
 
-      toast.className = `p-3.5 rounded-2xl border-l-4 shadow-xl text-xs flex items-start gap-2.5 transition-all duration-300 animate-fadeIn pointer-events-auto ${borderClass}`;
+      toast.className = `p-3 rounded-2xl border-l-4 shadow-xl text-xs flex items-start gap-2.5 transition-all duration-300 animate-fadeIn pointer-events-auto ${borderClass}`;
       toast.innerHTML = `
-        <i data-lucide="${icon}" class="w-4 h-4 ${iconColor} flex-shrink-0 mt-0.5"></i>
+        <i data-lucide="${icon}" class="w-4 h-4 ${iconColor} shrink-0 mt-0.5"></i>
         <div class="flex-1 pr-2">
           <div class="font-bold text-slate-900">${title}</div>
           <div class="text-slate-500 text-[11px] mt-0.5">${message}</div>
@@ -2342,37 +2141,33 @@
 
       setTimeout(() => {
         toast.style.opacity = '0';
-        toast.style.transform = 'translateY(10px)';
-        setTimeout(() => toast.remove(), 300);
-      }, 4000);
+        toast.style.transform = 'translateY(8px)';
+        setTimeout(() => toast.remove(), 250);
+      }, 3500);
     }
 
-    // ---------------------------------------------------------------------------
-    // 9. Revenue Chart Initialization (Chart.js)
-    // ---------------------------------------------------------------------------
-    let revenueChartInstance = null;
+    // Chart.js
     function initRevenueChart() {
       const ctx = document.getElementById('revenueChart');
       if (!ctx) return;
 
-      revenueChartInstance = new Chart(ctx, {
+      new Chart(ctx, {
         type: 'line',
         data: {
-          labels: ['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep (Current)'],
+          labels: ['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
           datasets: [
             {
-              label: 'Settled Revenue ($)',
+              label: 'Settled ($)',
               data: [36200, 39400, 41800, 44200, 46100, 48920],
               borderColor: '#059669',
               backgroundColor: 'rgba(5, 150, 105, 0.08)',
               fill: true,
               tension: 0.35,
-              borderWidth: 2.5,
-              pointBackgroundColor: '#059669',
-              pointRadius: 4,
+              borderWidth: 2,
+              pointRadius: 3,
             },
             {
-              label: 'Invoiced Target ($)',
+              label: 'Invoiced ($)',
               data: [38000, 41000, 43500, 46000, 48000, 52760],
               borderColor: '#152C4A',
               borderDash: [4, 4],
@@ -2386,43 +2181,21 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              callbacks: {
-                label: function(context) {
-                  return ' ' + context.dataset.label + ': $' + context.raw.toLocaleString();
-                }
-              }
-            }
-          },
+          plugins: { legend: { display: false } },
           scales: {
-            x: {
-              grid: { display: false },
-              ticks: { font: { family: 'SF Mono', size: 10 }, color: '#94A3B8' }
-            },
-            y: {
-              grid: { color: '#F1F5F9' },
-              ticks: {
-                font: { family: 'SF Mono', size: 10 },
-                color: '#94A3B8',
-                callback: function(val) { return '$' + (val / 1000) + 'k'; }
-              }
-            }
+            x: { grid: { display: false }, ticks: { font: { family: 'SF Mono', size: 10 }, color: '#94A3B8' } },
+            y: { grid: { color: '#F1F5F9' }, ticks: { font: { family: 'SF Mono', size: 10 }, color: '#94A3B8', callback: v => '$' + (v/1000) + 'k' } }
           }
         }
       });
     }
 
-    // ---------------------------------------------------------------------------
-    // 10. Bootstrap on Page Load
-    // ---------------------------------------------------------------------------
+    // Bootstrap
     window.addEventListener('DOMContentLoaded', () => {
       renderAll();
       initRevenueChart();
       lucide.createIcons();
 
-      // Keyboard Shortcut (Ctrl+K)
       document.addEventListener('keydown', (e) => {
         if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
           e.preventDefault();
@@ -2433,6 +2206,10 @@
           closeReceiptModal();
           closeSubDetailModal();
           closeAddSubModal();
+          closeAddPackageModal();
+          closeAddRouterModal();
+          closeWebhookModal();
+          closeOperatorModal();
           closeWhatsAppModal();
           document.getElementById('notification-tray').classList.add('hidden');
         }
